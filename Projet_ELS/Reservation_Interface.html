@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Livraison pharmacie à domicile et EHPAD pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol. Service de tournée officinale.">
+  <meta name="keywords" content="livraison pharmacie, service de tournée officinale, pharmaciens, préparateurs, infirmiers, EHPAD, Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol, Bandol">
+  <link rel="canonical" href="<?= appUrl ?>">
+  <meta property="og:title" content="<?= nomService ?> | Livraison Pharmacie Tamaris, Mar Vivo, Six-Fours">
+  <meta property="og:description" content="Réservez vos tournées de livraison de pharmacie à domicile pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours, Sanary, Portissol et Bandol. Service de tournée officinale.">
+  <meta property="og:url" content="<?= appUrl ?>">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="<?= nomService ?> | Livraison Pharmacie Tamaris, Mar Vivo, Six-Fours">
+  <meta name="twitter:description" content="Réservez vos tournées de livraison de pharmacie à domicile pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours, Sanary, Portissol et Bandol. Service de tournée officinale.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "LocalBusiness",
+        "@id": "<?= appUrl ?>#business",
+        "name": "<?= nomService ?>",
+        "description": "Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.",
+        "url": "<?= appUrl ?>",
+        "email": "<?= EMAIL_ENTREPRISE ?>",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Six-Fours-les-Plages",
+          "addressCountry": "FR"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 43.0842,
+          "longitude": 5.8009
+        },
+        "areaServed": [
+          { "@type": "Place", "name": "Tamaris" },
+          { "@type": "Place", "name": "Mar Vivo" },
+          { "@type": "Place", "name": "Six-Fours-les-Plages" },
+          { "@type": "Place", "name": "Sanary" },
+          { "@type": "Place", "name": "Portissol" },
+          { "@type": "Place", "name": "Bandol" }
+        ]
+      },
+      {
+        "@type": "Service",
+        "@id": "<?= appUrl ?>#service",
+        "serviceType": "Livraison de pharmacie",
+        "provider": { "@id": "<?= appUrl ?>#business" },
+        "areaServed": [
+          { "@type": "Place", "name": "Tamaris" },
+          { "@type": "Place", "name": "Mar Vivo" },
+          { "@type": "Place", "name": "Six-Fours-les-Plages" },
+          { "@type": "Place", "name": "Sanary" },
+          { "@type": "Place", "name": "Portissol" },
+          { "@type": "Place", "name": "Bandol" }
+        ]
+      }
+    ]
+  }
+  </script>
+  <title><?= nomService ?> | Réservation de Livraison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <?!= include('ThemeCapsule') ?>
+  <style id="theme-style"></style>
+  <?!= include('Reservation_CSS'); ?>
+  <?!= include('charte'); ?>
+  <?!= include('GoogleChartsStub'); ?>
+  <? var brandLogoUrl = (logoPublicUrl && logoPublicUrl.length) ? logoPublicUrl : (logoDataUrl || ''); ?>
+  <script>
+    window.ELS_BRAND = Object.assign({}, window.ELS_BRAND || {}, {
+      name: <?= JSON.stringify(nomService) ?>,
+      homeUrl: <?= JSON.stringify(appUrl) ?>,
+      logoUrl: <?= JSON.stringify(logoPublicUrl || '') ?>,
+      logoDataUrl: <?= JSON.stringify(logoDataUrl || '') ?>
+    });
+  </script>
+</head>
+<body class="page" data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>" data-brand-logo="<?= brandLogoUrl ?>">
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('ELS_THEME_CHOICE') === 'ultra') {
+          document.body.classList.add('theme-ultra');
+        }
+      } catch (_err) {
+        // ignore storage access errors (navigation privée, etc.)
+      }
+    })();
+  </script>
+  <div id="code-postal-overlay" class="code-postal-overlay" role="dialog" aria-modal="true" aria-hidden="false" aria-labelledby="code-postal-overlay-titre">
+    <div class="code-postal-overlay__card">
+      <h2 id="code-postal-overlay-titre">Accès réservé aux officines desservies</h2>
+      <p class="muted">Indiquez le code postal de votre officine pour vérifier que nous couvrons votre secteur.</p>
+      <form id="formulaire-code-postal" class="code-postal-overlay__form">
+        <label for="code-postal-saisie">Code postal officine</label>
+        <input type="text" id="code-postal-saisie" class="champ-formulaire" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="postal-code" required>
+        <button type="submit" class="btn btn-primaire">Continuer</button>
+      </form>
+      <p id="code-postal-erreur" class="code-postal-overlay__message hidden" role="alert"></p>
+    </div>
+  </div>
+  <h1 class="sr-only">Réserver une tournée pharmaceutique</h1>
+  <svg width="0" height="0" class="sr-sprite-holder" aria-hidden="true">
+    <?!= include('icons_sprite'); ?>
+  </svg>
+
+  <script type="application/json" id="conf-tarifs"><?!= TARIFS_JSON ?></script>
+  <script type="application/json" id="conf-pricing-rules-v2"><?!= PRICING_RULES_V2_JSON ?></script>
+  <script type="application/json" id="conf-pricing-matrix"><?!= PRICING_MATRIX_JSON ?></script>
+ 
+  <script>
+    // Objet de configuration injecté par le serveur
+    const configServeur = {
+      appUrl: <?= JSON.stringify(appUrl) ?>,
+      nomService: <?= JSON.stringify(nomService) ?>,
+      logoUrl: <?= JSON.stringify(brandLogoUrl) ?>,
+      TARIFS: (function(){ try { return JSON.parse(document.getElementById('conf-tarifs').textContent); } catch(e){ return {}; } })(),
+      PRICING_RULES_V2: (function(){ try { return JSON.parse(document.getElementById('conf-pricing-rules-v2').textContent); } catch(e){ return {}; } })(),
+      PRICING_MATRIX: (function(){ try { return JSON.parse(document.getElementById('conf-pricing-matrix').textContent); } catch(e){ return {}; } })(),
+      DUREE_BASE: <?= DUREE_BASE ?>,
+      DUREE_ARRET_SUP: <?= DUREE_ARRET_SUP ?>,
+      KM_BASE: <?= KM_BASE ?>,
+      KM_ARRET_SUP: <?= KM_ARRET_SUP ?>,
+      URGENT_THRESHOLD_MINUTES: <?= URGENT_THRESHOLD_MINUTES || 45 ?>,
+      dateDuJour: "<?= dateDuJour ?>",
+      PRICING_RULES_V2_ENABLED: <?= PRICING_RULES_V2_ENABLED ? 'true' : 'false' ?>,
+      RETURN_IMPACTS_ESTIMATES_ENABLED: <?= RETURN_IMPACTS_ESTIMATES_ENABLED ? 'true' : 'false' ?>,
+      // Nouveaux drapeaux & constantes tarifs détaillés / forfait résident
+      TARIFS_DETAILLE_ENABLED: <?= TARIFS_DETAILLE_ENABLED ? 'true' : 'false' ?>,
+      FORFAIT_RESIDENT_ENABLED: <?= FORFAIT_RESIDENT_ENABLED ? 'true' : 'false' ?>,
+      FORFAIT_RESIDENT_STANDARD: <?= FORFAIT_RESIDENT.STANDARD_PRICE ?>,
+      FORFAIT_RESIDENT_URGENCE: <?= FORFAIT_RESIDENT.URGENCE_PRICE ?>,
+      FORFAIT_RESIDENT_DURATION: <?= FORFAIT_RESIDENT.DURATION_HOURS ?>
+      ,RESIDENT_AFFILIATION_REQUIRED: <?= RESIDENT_AFFILIATION_REQUIRED ? 'true' : 'false' ?>
+    };
+  </script>
+
+  <div id="indicateur-chargement" class="indicateur-chargement-overlay hidden" role="status" aria-live="polite">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="livreur-cta" role="complementary" aria-label="Acces livreur ELS">
+    <span class="livreur-cta__label">Vous &ecirc;tes livreur ELS&nbsp;?</span>
+      <a
+        class="btn btn-primaire btn-sm livreur-cta__button"
+        href="<?= livreurAppUrl ?>">
+        Acc&eacute;der &agrave; l'appli livreur
+      </a>
+  </div>
+
+  
+  
+
+  <main id="layout" class="container layout-two-cols layout-els">
+    <section id="col-center" class="col col--calendar els-center-grid" aria-label="Sélection de créneau">
+      <div id="calendar-panel" class="card" aria-label="Calendrier de réservation" role="region" data-component="calendar">
+        <div id="app-conteneur" role="main" aria-label="Contenu principal de la page de réservation">
+          <div id="vue-calendrier" role="application" aria-roledescription="calendrier interactif" class="carte">
+            <div class="carte-en-tete">
+              <button id="btn-mois-precedent" class="btn-icone" aria-label="Mois précédent">&#9664;</button>
+              <h2 id="titre-calendrier" aria-live="polite"></h2>
+              <button id="btn-mois-suivant" class="btn-icone" aria-label="Mois suivant">&#9654;</button>
+            </div>
+            <div class="calendrier-jours-semaine" aria-hidden="true">
+              <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
+            </div>
+            <div id="grille-calendrier" class="grille-calendrier" role="grid"></div>
+          </div>
+        </div>
+        </div>
+
+      <section id="els-demandes" class="els-card" role="region" aria-labelledby="els-demandes-title">
+        <header class="els-card__head">
+          <h3 id="els-demandes-title">Demande d’intégration à une tournée (EHPAD / Résidence / Foyer)</h3>
+        </header>
+        <form id="demandeForm" class="els-grid" autocomplete="off" novalidate>
+          <select id="etabType" required>
+            <option value="EHPAD">EHPAD</option>
+            <option value="Résidence">Résidence</option>
+            <option value="Foyer">Foyer</option>
+          </select>
+          <input id="etabNom" placeholder="Nom de l’établissement" required>
+          <input id="email" type="email" placeholder="Email de contact" required>
+          <input id="tel" type="tel" placeholder="Téléphone (optionnel)">
+          <input id="adresse" placeholder="Adresse complète">
+          <input id="jours" placeholder="Jours souhaités (ex: Lun, Mer, Ven)">
+          <input id="plage" placeholder="Plage horaire (ex: 10h–12h)">
+          <textarea id="details" placeholder="Précisions (ordonnances, volume, contraintes…)" maxlength="1500"></textarea>
+          <button type="submit" class="els-btn">Envoyer la demande</button>
+        </form>
+        <p id="demandeOk" class="visually-hidden" role="status">Merci, votre demande est bien envoyée. Réponse sous 24–72h ouvrées.</p>
+      </section>
+      <? if (PROOF_SOCIAL_ENABLED) { ?>
+      <section id="proof-card" class="card" aria-labelledby="preuves-sociales-titre" role="region">
+        <h2 id="preuves-sociales-titre">Ils nous font confiance</h2>
+        <ul class="avis-list">
+          <li><strong>Pharmacie de Tamaris</strong> : &laquo;Service rapide et sécurisé&raquo;</li>
+          <li><strong>EHPAD Les Amandiers</strong> : &laquo;Livraisons fiables pour nos résidents&raquo;</li>
+        </ul>
+      </section>
+      <? } ?>
+      <div id="conteneur-finalisation" class="carte card hidden">
+        <h3>Finaliser la réservation</h3>
+        <form id="formulaire-reservation">
+          <h4>Informations Client</h4>
+          <p class="muted">Pour créer votre accès client, validez votre réservation et complétez les champs indiqués comme obligatoires. Les autres informations pourront être ajoutées depuis l'espace client.</p>
+          <div class="groupe-formulaire">
+            <label for="client-email">Email (obligatoire)</label>
+            <input type="email" id="client-email" required>
+            <small id="client-email-helper" class="muted">Cette adresse email est requise pour recevoir votre identifiant d'acc&egrave;s client.</small>
+          </div>
+          <div class="groupe-formulaire">
+            <label for="client-code-postal">Code postal de l'officine (obligatoire)</label>
+            <div class="code-postal-input-row">
+              <input type="text" id="client-code-postal" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="postal-code" required readonly>
+              <button type="button" id="btn-modifier-code-postal" class="btn btn-secondaire btn-sm">Modifier</button>
+            </div>
+            <small class="muted">L'accès est limité aux codes postaux desservis par ELS.</small>
+          </div>
+          <div class="groupe-formulaire">
+            <label for="client-nom">Raison Sociale (obligatoire)</label>
+            <input type="text" id="client-nom" required>
+          </div>
+          <div class="groupe-formulaire">
+            <label for="client-telephone">Téléphone (obligatoire)</label>
+            <input type="tel" id="client-telephone" inputmode="tel" autocomplete="tel" required>
+            <small class="muted">Ce numéro nous permet de vous joindre en cas d'ajustement logistique.</small>
+          </div>
+          <div class="groupe-formulaire">
+            <label for="client-adresse">Adresse de retrait (obligatoire)</label>
+            <div class="adresse-autocomplete">
+              <input type="text" id="client-adresse" autocomplete="street-address" required>
+              <div id="client-adresse-suggestions" class="adresse-suggestions hidden" role="listbox" aria-label="Suggestions d'adresse"></div>
+            </div>
+          </div>
+          <div class="groupe-formulaire"><label for="client-siret">SIRET</label><input type="text" id="client-siret"></div>
+          <div class="groupe-formulaire">
+            <label class="checkbox-inline">
+              <input type="checkbox" id="client-resident">
+              <span>Course résident (forfait dédié)</span>
+            </label>
+          </div>
+          <div class="carte carte--notice hidden" id="client-resident-details">
+            <h5>Forfait résident</h5>
+            <p class="muted">Ce mode bloque la place pour un résident d'EHPAD ou d'une structure de soins. La tarification est forfaitaire&nbsp;: choisissez l'option adaptée.</p>
+            <div class="resident-forfait-options">
+              <label class="radio-inline">
+                <input type="radio" name="resident-mode" id="resident-mode-standard" value="standard" checked>
+                <span>
+                  Pré-collecte veille + livraison lendemain<br>
+                  <strong id="resident-mode-standard-prix">Forfait standard</strong>
+                </span>
+              </label>
+              <label class="radio-inline">
+                <input type="radio" name="resident-mode" id="resident-mode-urgence" value="urgence">
+                <span>
+                  Retrait &amp; livraison sous 4&nbsp;h<br>
+                  <strong id="resident-mode-urgence-prix">Forfait urgence</strong>
+                </span>
+              </label>
+            </div>
+            <p class="muted">Vous pouvez indiquer l'email de votre structure pour recevoir un récapitulatif, sinon nous enregistrons simplement la course.</p>
+          </div>
+          <div class="groupe-formulaire"><label for="note-reservation">Note (optionnel)</label><textarea id="note-reservation"></textarea></div>
+          <div class="modale-pied-de-page">
+            <button type="button" id="btn-annuler-reservation" class="btn btn-secondaire">Annuler</button>
+            <button type="submit" class="btn btn-primaire">Confirmer la réservation</button>
+          </div>
+        </form>
+      </div>
+    </section>
+    <section id="basket-section" class="col col--content els-client-col" aria-label="Panier de réservation">
+      <div id="cart-card" class="card">
+        <aside id="vue-panier" aria-labelledby="panier-titre" class="carte">
+          <div class="panier-entete">
+            <div class="panier-identite">
+              <img
+                src="data:image/png;base64,<?!= include('PanierLogo_b64'); ?>"
+                alt="Logo Espace Livraison Sante"
+                class="panier-logo"
+                decoding="async"
+                loading="lazy">
+              <h3 id="panier-titre">Panier de réservation</h3>
+            </div>
+            <div id="banniere-client-reconnu" class="panier-greeting hidden" aria-live="polite">
+              Content de vous revoir, <strong id="nom-client-reconnu"></strong> !
+              <button id="btn-changer-client" class="btn btn-sm">Changer de client</button>
+            </div>
+          </div>
+          <? if (CLIENT_PORTAL_ENABLED) { ?>
+          <button id="btn-connecter-client" class="btn btn-secondaire btn-sm" type="button">Se connecter</button>
+          <? } ?>
+          <a
+            id="btn-espace-client"
+            href="<?= appUrl ?>?page=gestion"
+            class="btn btn-secondaire btn-sm hidden"
+            aria-hidden="true"
+            tabindex="-1">Mon Espace Client</a>
+          <ul id="liste-panier">
+            <li class="panier-vide" aria-live="polite">Votre panier est vide.</li>
+          </ul>
+          <div id="panier-pied-de-page" class="hidden">
+            <div class="panier-total">
+              <span>Total estimé</span>
+              <strong id="panier-total-valeur">0 €</strong>
+            </div>
+            <div class="panier-actions-groupe">
+              <button id="btn-vider-panier" class="btn btn-secondaire" aria-label="Vider le panier">Vider le panier</button>
+              <button id="btn-envoyer-devis" class="btn btn-secondaire">Recevoir un devis</button>
+              <button id="btn-telecharger-devis" class="btn btn-secondaire">Télécharger le devis (PDF)</button>
+              <button id="btn-valider-panier" class="btn btn-primaire">Valider le panier</button>
+            </div>
+            <p class="muted">
+              En validant le panier, vous acceptez nos
+              <a href="<?= appUrl ?>?page=cgv">CGV</a>.
+            </p>
+          </div>
+        </aside>
+      </div>
+      <? if (CLIENT_PORTAL_ENABLED) { ?>
+      <div id="client-espace-inline" class="card client-espace-inline hidden" aria-live="polite">
+        <div class="client-espace-inline__header">
+          <div>
+            <h3>Mon Espace Client</h3>
+            <p id="client-espace-inline-caption" class="muted">Suivez vos tournées, factures et messages sans quitter cette page.</p>
+          </div>
+          <button type="button" class="btn btn-secondaire btn-sm hidden" id="btn-recharger-espace-client">Actualiser</button>
+        </div>
+        <div id="client-espace-inline-status" class="client-espace-inline__status">
+          Validez votre première réservation puis utilisez &laquo;&nbsp;Se connecter&nbsp;&raquo; pour activer votre espace client.
+        </div>
+        <div id="client-espace-inline-frame-wrapper" class="client-espace-inline__frame-wrapper hidden">
+          <iframe
+            id="client-espace-inline-frame"
+            title="Mon Espace Client"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowtransparency="true"></iframe>
+        </div>
+      </div>
+      <? } ?>
+    </section>
+  </main>
+  <section id="tarifs-full" class="section section--tarifs-full">
+    <!-- Bouton WhatsApp ELS au-dessus des tarifs -->
+    <div class="cta-whatsapp-wrapper">
+      <a class="cta-whatsapp" href="https://wa.me/33768591888" target="_blank" rel="noopener noreferrer">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" width="22" height="22">
+        Discuter sur WhatsApp
+      </a>
+    </div>
+    <div id="tarifs-card" class="carte card">
+      <h2 id="titre-tarifs-detaille">Tarifs détaillés</h2>
+      <div class="tarifs-grid">
+        <article class="tarif-carte" data-tarif="tournees">
+          <h3>Tournées</h3>
+          <ul class="tarif-liste">
+            <li class="tarif-ligne tarif-action" data-tarif-action="tournee" data-tarif-variant="normal" role="button" tabindex="0" aria-label="Choisir le tarif normal">
+              <span class="tarif-libelle">Normal</span>
+              <span class="tarif-valeur" id="tarif-normal-base">-</span>
+              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison" data-meta-separator=" + "></span>
+            </li>
+            <li class="tarif-ligne tarif-action" data-tarif-action="tournee" data-tarif-variant="samedi" role="button" tabindex="0" aria-label="Choisir le tarif samedi">
+              <span class="tarif-libelle">Samedi</span>
+              <span class="tarif-valeur" id="tarif-samedi-base">-</span>
+              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison" data-meta-separator=" + "></span>
+            </li>
+            <li class="tarif-ligne tarif-action" data-tarif-action="tournee" data-tarif-variant="urgent" role="button" tabindex="0" aria-label="Choisir le tarif urgent">
+              <span class="tarif-libelle">Urgent</span>
+              <span class="tarif-valeur" id="tarif-urgent-base">-</span>
+              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison" data-meta-separator=" + "></span>
+            </li>
+            <li class="tarif-ligne tarif-ligne--wrap tarif-action" data-tarif-action="tournee" data-tarif-variant="supplements" role="button" tabindex="0" aria-label="Voir les suppléments par arrêt">
+              <span class="tarif-libelle">Suppléments par arrêt</span>
+              <span class="tarif-valeur" id="tarif-supplements">-</span>
+              <span class="tarif-description js-meta-supp" data-meta-prefix="Par arrêt supplémentaire" data-meta-separator=" + "></span>
+            </li>
+          </ul>
+        </article>
+        <article class="tarif-carte" data-tarif="forfait-resident">
+          <h3>Forfait résident</h3>
+          <ul class="tarif-liste">
+            <li class="tarif-ligne tarif-action" data-tarif-action="resident" data-tarif-variant="standard" role="button" tabindex="0" aria-label="Choisir le forfait résident standard">
+              <span class="tarif-libelle">Pré-collecte veille + livraison lendemain</span>
+              <span class="tarif-valeur" id="forfait-resident-standard">-</span>
+              <span class="tarif-description">1 retrait documents sur site résident + 1 démarche &amp; retrait PUI Sainte Musse + 1 livraison sur site résident le lendemain.</span>
+            </li>
+            <li class="tarif-ligne tarif-action" data-tarif-action="resident" data-tarif-variant="urgence" role="button" tabindex="0" aria-label="Choisir le forfait résident urgence">
+              <span class="tarif-libelle">Retrait &amp; livraison en URGENCE </span>
+              <span class="tarif-valeur" id="forfait-resident-urgence">-</span>
+              <span class="tarif-description">1 retrait documents sur site résident + 1 démarche & retrait PUI Sainte Musse + 1 livraison sur site résident dans les délais les plus rapides possibles.</span>
+            </li>
+          </ul>
+        </article>
+      </div>
+      <p class="hero-footnote">TVA: <?= TVA_APPLICABLE ? 'Applicable' : 'Non applicable (art. 293B du CGI)' ?>.</p>
+    </div>
+  </section>
+  <!-- MODALE 1: Configuration de la tournée (VERSION COMPLÈTE) -->
+  <div id="modale-config-tournee" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-config-titre">
+    <div class="modale-contenu">
+      <button id="btn-fermer-config-tournee" class="btn-fermer" aria-label="Fermer la fenêtre de configuration">&times;</button>
+      <div class="app-logo-container" data-logo-slot>
+        <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+      </div>
+      <h3 id="modale-config-titre"></h3>
+      <p class="modale-intro">Choisissez simplement le nombre d'arrêts (départ inclus) et précisez si la tournée doit revenir à l'officine. Nous adaptons automatiquement la durée et le tarif estimés.</p>
+      <form id="formulaire-config-tournee">
+        <div class="groupe-formulaire">
+            <label>Arrêts prévus (départ inclus)</label>
+            <div class="champ-compteur">
+                <button type="button" id="btn-retirer-arret" class="btn-compteur" aria-label="Retirer un arrêt">-</button>
+                <span id="valeur-arrets-sup" class="valeur-compteur">1</span>
+                <button type="button" id="btn-ajouter-arret" class="btn-compteur" aria-label="Ajouter un arrêt">+</button>
+            </div>
+        </div>
+        <div class="groupe-formulaire conteneur-interrupteur">
+            <label for="interrupteur-retour">Retour à la pharmacie</label>
+            <label class="interrupteur"><input type="checkbox" id="interrupteur-retour"><span class="glissiere"></span></label>
+        </div>
+        <div id="resume-config-tournee" class="modale-resume"></div>
+        <div class="modale-pied-de-page">
+            <button type="submit" class="btn btn-primaire">Voir les créneaux</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE 2: Sélection du créneau (VERSION COMPLÈTE) -->
+  <div id="modale-selection-creneau" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-selection-titre">
+      <div class="modale-contenu">
+          <button id="btn-fermer-selection-creneau" class="btn-fermer" aria-label="Fermer la fenêtre de sélection">&times;</button>
+          <div class="app-logo-container" data-logo-slot>
+            <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+          </div>
+          <h3 id="modale-selection-titre">Sélectionner un créneau</h3>
+          <div id="grille-selection-creneau" class="grille-selection-creneau"></div>
+          <div class="groupe-formulaire conteneur-interrupteur u-mt-16">
+              <label for="interrupteur-recurrence">Réserver pour tous les [jour de la semaine] de ce mois</label>
+              <label class="interrupteur"><input type="checkbox" id="interrupteur-recurrence"><span class="glissiere"></span></label>
+          </div>
+          <div class="modale-resume u-mt-16">
+              <div id="recap-creneau-heure">--:--</div>
+              <div id="recap-creneau-tarif">--</div>
+              <strong id="recap-creneau-prix">--.-- €</strong>
+          </div>
+          <div class="notice-resident hidden" id="notice-resident-creneau">
+            <p>Forfait r&eacute;sident activ&eacute; : le tarif affich&eacute; sera remplac&eacute; par le forfait choisi lors de la confirmation.</p>
+          </div>
+          <div class="modale-pied-de-page">
+              <button type="button" id="btn-modifier-tournee" class="btn btn-secondaire">Modifier la tournée</button>
+              <button type="button" id="btn-ajouter-au-panier" class="btn btn-primaire" disabled>Ajouter au panier</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODALE 3: Confirmation de la récurrence (VERSION COMPLÈTE) -->
+  <div id="modale-confirmation-recurrence" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-recurrence-titre">
+      <div class="modale-contenu">
+          <button id="btn-fermer-confirmation-recurrence" class="btn-fermer" aria-label="Fermer">&times;</button>
+          <div class="app-logo-container" data-logo-slot>
+            <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+          </div>
+          <h3 id="modale-recurrence-titre">Confirmer les dates récurrentes</h3>
+          <p>Veuillez vérifier les créneaux pour votre réservation récurrente. Les conflits ont été ajustés au plus proche.</p>
+          <ul id="liste-recurrence-details" class="liste-recurrence"></ul>
+          <div class="modale-pied-de-page">
+              <button type="button" id="btn-annuler-recurrence" class="btn btn-secondaire">Annuler</button>
+              <button type="button" id="btn-confirmer-recurrence" class="btn btn-primaire">Confirmer et Ajouter</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODALE 4: Email pour le devis (VERSION COMPLÈTE) -->
+  <div id="modale-email-devis" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-devis-titre">
+      <div class="modale-contenu">
+          <button id="btn-fermer-email-devis" class="btn-fermer" aria-label="Fermer">&times;</button>
+          <div class="app-logo-container" data-logo-slot>
+            <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+          </div>
+          <h3 id="modale-devis-titre">Recevoir votre devis</h3>
+          <p>Les directeurs d’EHPAD peuvent envoyer le devis directement à la famille du résident.</p>
+          <form id="formulaire-email-devis">
+              <div class="groupe-formulaire">
+                  <label for="email-pour-devis">Adresse e-mail (famille du résident si souhaité)</label>
+                  <input type="email" id="email-pour-devis" required>
+                  <small class="muted">Nous n’utilisons cet e-mail que pour l’envoi du devis.</small>
+              </div>
+              <div class="modale-pied-de-page">
+                  <button type="submit" class="btn btn-primaire">Envoyer le devis</button>
+              </div>
+          </form>
+      </div>
+  </div>
+
+  <!-- MODALE: Connexion espace client -->
+  <div id="modale-connexion-client" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-connexion-titre">
+      <div class="modale-contenu">
+          <button id="btn-fermer-connexion-client" class="btn-fermer" aria-label="Fermer">&times;</button>
+          <div class="app-logo-container" data-logo-slot>
+            <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+          </div>
+          <h3 id="modale-connexion-titre">Connexion &agrave; l'espace client</h3>
+          <p class="modale-intro">Saisissez l'adresse e-mail utilisée pour vos réservations. Nous vous envoyons un lien sécurisé pour créer ou mettre &agrave; jour votre mot de passe.</p>
+          <form id="formulaire-connexion-reservation">
+              <div class="groupe-formulaire">
+                  <label for="email-connexion-reservation">Adresse e-mail</label>
+                  <input type="email" id="email-connexion-reservation" class="champ-formulaire" required autocomplete="email">
+              </div>
+              <div class="modale-pied-de-page">
+                  <button type="button" id="btn-annuler-connexion-client" class="btn btn-secondaire">Annuler</button>
+                  <button type="submit" class="btn btn-primaire">Recevoir le lien</button>
+              </div>
+          </form>
+      </div>
+  </div>
+
+  <div id="conteneur-notifications" role="status" aria-live="polite"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.theme-selector, #btn-theme, #menu-theme').forEach(el => el && el.remove());
+    });
+  </script>
+  
+  <? if (THEME_V2_ENABLED) { ?>
+  <?!= include('Render_JS'); ?>
+  <?!= include('Pricing_JS'); ?>
+  <?!= include('Reservation_JS_UI_Elements'); ?>
+  <?!= include('Reservation_JS_Calendrier'); ?>
+  <?!= include('Reservation_JS_Principal'); ?>
+  <?!= include('Reservation_JS_Devis'); ?>
+  <?!= include('Reservation_JS_Panier'); ?>
+  <?!= include('Reservation_JS_Client'); ?>
+  <?!= include('Reservation_JS_Tournee'); ?>
+  <? } ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const FALLBACK_TEXT = '—';
+      const NBSP = '\u00A0';
+      const tariffs = configServeur?.TARIFS || {};
+      const currencyFormatter = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const minutesFormatter = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      const distanceFormatter = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+
+      const toNumber = (value) => {
+        if (value === null || value === undefined) return null;
+        if (typeof value === 'number') {
+          return Number.isFinite(value) ? value : null;
+        }
+        if (typeof value === 'string') {
+          const normalized = value
+            .trim()
+            .replace(/\u202f/g, ' ')
+            .replace(/\s+/g, '')
+            .replace(',', '.');
+          if (!normalized) return null;
+          const parsed = Number(normalized);
+          return Number.isFinite(parsed) ? parsed : null;
+        }
+        const coerced = Number(value);
+        return Number.isFinite(coerced) ? coerced : null;
+      };
+
+      const setFallback = (element) => {
+        if (!element) return;
+        element.textContent = FALLBACK_TEXT;
+        element.classList.add('is-na');
+      };
+
+      const setCurrency = (element, rawValue) => {
+        if (!element) return;
+        const numericValue = toNumber(rawValue);
+        if (numericValue === null) {
+          setFallback(element);
+          return;
+        }
+        element.textContent = `${currencyFormatter.format(numericValue)}${NBSP}€`;
+        element.classList.remove('is-na');
+      };
+
+      const formatMinutes = (rawValue, unit = 'mn') => {
+        const numericValue = toNumber(rawValue);
+        if (numericValue === null) return null;
+        return `${minutesFormatter.format(numericValue)}${NBSP}${unit}`;
+      };
+
+      const formatKilometres = (rawValue, unit = 'km') => {
+        const numericValue = toNumber(rawValue);
+        if (numericValue === null) return null;
+        return `${distanceFormatter.format(numericValue)}${NBSP}${unit}`;
+      };
+
+      const setMetaGroup = (selector, minutesValue, kilometresValue) => {
+        const elements = document.querySelectorAll(selector);
+        if (!elements.length) return;
+        elements.forEach(element => {
+          const separator = element.getAttribute('data-meta-separator') || ' • ';
+          const minuteUnit = element.getAttribute('data-meta-minutes-unit') || 'mn';
+          const kilometreUnit = element.getAttribute('data-meta-kilometres-unit') || 'km';
+          const minutesPrefix = element.getAttribute('data-meta-minutes-prefix') || '';
+          const kilometresPrefix = element.getAttribute('data-meta-kilometres-prefix') || '';
+          const prefix = element.getAttribute('data-meta-prefix') || '';
+          const suffix = element.getAttribute('data-meta-suffix') || '';
+
+          const parts = [];
+          if (prefix) parts.push(prefix);
+
+          const durationText = formatMinutes(minutesValue, minuteUnit);
+          if (durationText) {
+            parts.push(minutesPrefix ? `${minutesPrefix}${durationText}` : durationText);
+          }
+
+          const distanceText = formatKilometres(kilometresValue, kilometreUnit);
+          if (distanceText) {
+            parts.push(kilometresPrefix ? `${kilometresPrefix}${distanceText}` : distanceText);
+          }
+
+          if (suffix) parts.push(suffix);
+
+          if (!parts.length) {
+            setFallback(element);
+            return;
+          }
+
+          element.textContent = parts.join(separator);
+          element.classList.remove('is-na');
+        });
+      };
+
+      const renderSupplements = () => {
+        const supplementsElement = document.getElementById('tarif-supplements');
+        if (!supplementsElement) return;
+        supplementsElement.innerHTML = '';
+
+        const supplements = Array.isArray(tariffs?.Normal?.arrets) ? tariffs.Normal.arrets : [];
+        const chips = supplements
+          .map((value, index, array) => {
+            const amount = toNumber(value);
+            if (amount === null) return null;
+            const stopNumber = index + 2;
+            const label = index === array.length - 1 ? `Arrêt ${stopNumber}+` : `Arrêt ${stopNumber}`;
+            const chip = document.createElement('span');
+            chip.className = 'tarif-supplement-chip';
+            chip.textContent = `${label} : ${currencyFormatter.format(amount)}${NBSP}€`;
+            return chip;
+          })
+          .filter(Boolean);
+
+        if (chips.length === 0) {
+          setFallback(supplementsElement);
+          return;
+        }
+
+        supplementsElement.classList.remove('is-na');
+        chips.forEach(chip => supplementsElement.appendChild(chip));
+      };
+
+      try {
+        setCurrency(document.getElementById('tarif-normal-base'), tariffs?.Normal?.base);
+        setCurrency(document.getElementById('tarif-samedi-base'), tariffs?.Samedi?.base);
+        setCurrency(document.getElementById('tarif-urgent-base'), tariffs?.Urgent?.base);
+        renderSupplements();
+        setCurrency(document.getElementById('forfait-resident-standard'), configServeur?.FORFAIT_RESIDENT_STANDARD);
+        setCurrency(document.getElementById('forfait-resident-urgence'), configServeur?.FORFAIT_RESIDENT_URGENCE);
+        setMetaGroup('.js-meta-base', configServeur?.DUREE_BASE, configServeur?.KM_BASE);
+        setMetaGroup('.js-meta-supp', configServeur?.DUREE_ARRET_SUP, configServeur?.KM_ARRET_SUP);
+      } catch (e) { /* no-op */ }
+
+      const bloc = document.getElementById('tarifs-detaille');
+      const wrapper = document.getElementById('tarifs-card');
+      const hideTarifs = !configServeur?.TARIFS_DETAILLE_ENABLED;
+      if (bloc) {
+        bloc.classList.toggle('hidden', hideTarifs);
+      }
+      if (wrapper) {
+        wrapper.classList.toggle('hidden', hideTarifs);
+      }
+      if (!configServeur?.FORFAIT_RESIDENT_ENABLED) {
+        const fr = document.querySelector('[data-tarif="forfait-resident"]');
+        if (fr) fr.remove();
+      }
+    });
+  </script>
+  <script>
+    (function() {
+      var assetNode = document.getElementById('hero-assets');
+      if (!assetNode) {
+        return;
+      }
+      var payload;
+      try {
+        payload = JSON.parse(assetNode.textContent || '{}');
+      } catch (err) {
+        console.error('Hero assets parse error', err);
+        return;
+      }
+      if (typeof assetNode.remove === 'function') {
+        assetNode.remove();
+      } else if (assetNode.parentNode) {
+        assetNode.parentNode.removeChild(assetNode);
+      }
+      var assign = function(key, dataUrl) {
+        if (!dataUrl) return;
+        var nodes = document.querySelectorAll('[data-asset="' + key + '"]');
+        Array.prototype.forEach.call(nodes, function(node) {
+          if (node && node.tagName === 'IMG') {
+            node.src = dataUrl;
+            node.removeAttribute('data-asset');
+          }
+        });
+      };
+      if (payload && typeof payload === 'object') {
+        if (payload.logo) {
+          assign('logo', payload.logo);
+        }
+        if (payload.hero && typeof payload.hero === 'object') {
+          Object.keys(payload.hero).forEach(function(key) {
+            assign('hero-' + key, payload.hero[key]);
+          });
+        }
+      }
+    })();
+  </script>
+  <? if (PRIVACY_LINK_ENABLED || LEGAL_NOTICE_LINK_ENABLED) { ?>
+  <footer class="els-footer">
+    <nav aria-label="Informations légales">
+      <? if (LEGAL_NOTICE_LINK_ENABLED) { ?>
+      <a href="<?= appUrl ?>?page=mentions">Mentions légales</a>
+      <? } ?>
+      <? if (PRIVACY_LINK_ENABLED) { ?>
+      <a href="<?= appUrl ?>?page=infos">Infos &amp; confidentialité</a>
+      <? } ?>
+      <a href="<?= appUrl ?>?page=cgv">CGV</a>
+    </nav>
+    <p>&copy; <?= new Date().getFullYear() ?> <?= nomService ?>. Tous droits réservés.</p>
+  </footer>
+  <? } ?>
+  <?!= include('ElsLogo_Script'); ?>
+  <?!= include('whatsapp_js'); ?>
+  <?!= include('Piluleur_Index'); ?>
+</body>
+</html>
+

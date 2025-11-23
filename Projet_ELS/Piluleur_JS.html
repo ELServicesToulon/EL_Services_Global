@@ -1,0 +1,124 @@
+<script>
+  (function() {
+    const fab = document.getElementById('piluleur-fab');
+    const windowEl = document.getElementById('piluleur-window');
+    const closeBtn = document.getElementById('piluleur-close');
+    const inputEl = document.getElementById('piluleur-input');
+    const sendBtn = document.getElementById('piluleur-send');
+    const messagesContainer = document.getElementById('piluleur-messages');
+
+    // État local
+    let isWindowOpen = false;
+    let currentSessionData = { step: 'ACCUEIL' }; // Initial state
+
+    // Gestion Ouverture/Fermeture
+    function toggleWindow() {
+      isWindowOpen = !isWindowOpen;
+      if (isWindowOpen) {
+        windowEl.classList.remove('hidden');
+        inputEl.focus();
+        // Message d'accueil automatique si conversation vide
+        if (messagesContainer.children.length === 0) {
+            // On peut déclencher un "Bonjour" automatique ou attendre l'user.
+            // Pour l'instant on attend l'user ou on affiche un message local.
+            // appendMessage("Bonjour ! Je suis Piluleur.", false);
+        }
+      } else {
+        windowEl.classList.add('hidden');
+      }
+    }
+
+    fab.addEventListener('click', toggleWindow);
+    closeBtn.addEventListener('click', toggleWindow);
+
+    // Affichage message
+    function appendMessage(text, isUser) {
+      const bubble = document.createElement('div');
+      bubble.classList.add('message-bubble');
+      bubble.classList.add(isUser ? 'message-user' : 'message-piluleur');
+      bubble.innerHTML = text; // innerHTML pour permettre gras/italique si besoin
+      messagesContainer.appendChild(bubble);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Affichage Options (Boutons)
+    function appendOptions(options) {
+      if (!options || !Array.isArray(options) || options.length === 0) return;
+
+      const optionsContainer = document.createElement('div');
+      optionsContainer.classList.add('piluleur-options');
+      optionsContainer.style.display = 'flex';
+      optionsContainer.style.gap = '8px';
+      optionsContainer.style.marginTop = '8px';
+      optionsContainer.style.flexWrap = 'wrap';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.style.padding = '6px 12px';
+        btn.style.border = '1px solid #007bff';
+        btn.style.borderRadius = '15px';
+        btn.style.backgroundColor = 'white';
+        btn.style.color = '#007bff';
+        btn.style.cursor = 'pointer';
+        btn.onclick = () => {
+            inputEl.value = opt;
+            sendMessage();
+        };
+        optionsContainer.appendChild(btn);
+      });
+
+      // Ajouter à la dernière bulle ou au container
+      messagesContainer.appendChild(optionsContainer);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Envoi message
+    function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      appendMessage(text, true);
+      inputEl.value = '';
+
+      // Désactiver input pendant le chargement
+      inputEl.disabled = true;
+      sendBtn.disabled = true;
+
+      // Retirer les anciennes options si présentes (optionnel, pour nettoyage)
+      const oldOptions = messagesContainer.querySelectorAll('.piluleur-options');
+      oldOptions.forEach(el => el.style.display = 'none');
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+           inputEl.disabled = false;
+           sendBtn.disabled = false;
+           inputEl.focus();
+
+           if (response.sessionData) {
+             currentSessionData = response.sessionData;
+           }
+
+           if (response.texte) {
+             appendMessage(response.texte, false);
+           }
+
+           if (response.options && response.options.length > 0) {
+             appendOptions(response.options);
+           }
+        })
+        .withFailureHandler(function(err) {
+           inputEl.disabled = false;
+           sendBtn.disabled = false;
+           appendMessage("Erreur: " + err, false);
+        })
+        .traiterMessagePiluleur(text, currentSessionData);
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    inputEl.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+  })();
+</script>

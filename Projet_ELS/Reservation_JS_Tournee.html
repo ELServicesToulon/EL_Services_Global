@@ -1,0 +1,449 @@
+<script>
+/**
+ * =================================================================
+ * MODULE JAVASCRIPT - GESTION DE LA TOURNÉE
+ * =================================================================
+ */
+
+/**
+ * Copie client de la logique de tarification.
+ */
+function calculerInfosTourneeClient(totalStops, returnToPharmacy, dateString, startTime) {
+  const DUREE_BASE_NUM = parseInt(configServeur.DUREE_BASE, 10);
+  const DUREE_ARRET_SUP_NUM = parseInt(configServeur.DUREE_ARRET_SUP, 10);
+  const KM_BASE_NUM = parseInt(configServeur.KM_BASE, 10);
+  const KM_ARRET_SUP_NUM = parseInt(configServeur.KM_ARRET_SUP, 10);
+  const extraStops = Math.max(0, totalStops - 1);
+  const extraRetour = returnToPharmacy ? 1 : 0;
+  const totalSegments = extraStops + extraRetour;
+  let duree = DUREE_BASE_NUM + (totalSegments * DUREE_ARRET_SUP_NUM);
+  let km = KM_BASE_NUM + (totalSegments * KM_ARRET_SUP_NUM);
+  const heureNormalisee = startTime.replace('h', ':');
+  const dateCourse = new Date(`${dateString}T${heureNormalisee}`);
+  const maintenant = new Date();
+  let urgent = false;
+  let samedi = false;
+  if (dateCourse.getDay() === 6) {
+    samedi = true;
+  } else if ((dateCourse.getTime() - maintenant.getTime()) / 60000 < configServeur.URGENT_THRESHOLD_MINUTES) {
+    urgent = true;
+  }
+  const tarif = computeCoursePrice({ totalStops, retour: returnToPharmacy, urgent, samedi });
+  const typeCourse = samedi ? 'Samedi' : urgent ? 'Urgent' : 'Normal';
+  const details = formatCourseLabel(duree, totalStops, returnToPharmacy);
+  const prix = Number(tarif?.total) || 0;
+  const prixFormate = typeof tarif?.formattedTotal === 'string' && tarif.formattedTotal.length
+    ? tarif.formattedTotal
+    : `${prix.toFixed(2)} €`;
+  return {
+    prix: prix,
+    prixFormate: prixFormate,
+    duree: duree,
+    km: km,
+    details: details,
+    typeCourse: typeCourse,
+    tarif: tarif
+  };
+}
+
+/**
+ * Ouvre la modale pour configurer une nouvelle tournée.
+ */
+function ouvrirConfigurationTournee(dateString) {
+  const { ui } = window;
+  const date = new Date(dateString + 'T00:00:00');
+  const dateFormatee = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  window.etat.tourneeEnCours = { date: dateString, totalStops: 1, returnToPharmacy: false };
+  ui.titreModaleConfig.textContent = `Configurer la tournée du ${dateFormatee}`;
+  ui.valeurArretsSup.textContent = '1';
+  ui.interrupteurRetour.checked = false;
+  mettreAJourResumeTournee();
+  ui.modaleConfigTournee.classList.remove('hidden');
+}
+
+/**
+ * Met à jour le résumé (prix, durée, km) dans la modale de configuration.
+ */
+function mettreAJourResumeTournee() {
+  const { ui } = window;
+  const totalStops = parseInt(ui.valeurArretsSup.textContent, 10);
+  const returnToPharmacy = ui.interrupteurRetour.checked;
+  window.etat.tourneeEnCours.totalStops = totalStops;
+  window.etat.tourneeEnCours.returnToPharmacy = returnToPharmacy;
+  const estimation = calculerInfosTourneeClient(totalStops, returnToPharmacy, window.etat.tourneeEnCours.date, '12h00');
+  ui.resumeConfigTournee.textContent = '';
+  const divDuree = document.createElement('div');
+  const spanDuree = document.createElement('span');
+  spanDuree.textContent = 'Durée estimée';
+  const strongDuree = document.createElement('strong');
+  strongDuree.textContent = `${estimation.duree} min`;
+  divDuree.appendChild(spanDuree);
+  divDuree.appendChild(strongDuree);
+
+  const divPrix = document.createElement('div');
+  const spanPrix = document.createElement('span');
+  spanPrix.textContent = 'Prix estimé';
+  const strongPrix = document.createElement('strong');
+  strongPrix.textContent = `~ ${estimation.prixFormate}`;
+  divPrix.appendChild(spanPrix);
+  divPrix.appendChild(strongPrix);
+  // Normalisation de l'affichage du prix (euro, fallback)
+  (function(){
+    try {
+      const prixStrong = divPrix.querySelector('strong');
+      const prixNumber = Number(estimation.prix);
+      if (prixStrong) {
+        prixStrong.textContent = Number.isFinite(prixNumber) ? `~ ${estimation.prixFormate.replace('€', '\u20AC')}` : '—';
+      }
+    } catch(e) {}
+  })();
+
+  const divKm = document.createElement('div');
+  const spanKm = document.createElement('span');
+  spanKm.textContent = 'Distance';
+  const strongKm = document.createElement('strong');
+  strongKm.textContent = `~ ${estimation.km} km`;
+  divKm.appendChild(spanKm);
+  divKm.appendChild(strongKm);
+
+  ui.resumeConfigTournee.appendChild(divDuree);
+  ui.resumeConfigTournee.appendChild(divPrix);
+  ui.resumeConfigTournee.appendChild(divKm);
+
+  mettreAJourRecapSelectionResident();
+}
+
+function mettreAJourBoutonsResident() {
+  const { ui } = window;
+  const residentActif = estForfaitResidentActif();
+  const mode = obtenirModeResident();
+  const prixResident = obtenirPrixResident(mode);
+  const libelle = obtenirLibelleResident(mode);
+  ui.grilleSelectionCreneau?.querySelectorAll('.slot-btn').forEach(btn => {
+    const spanRate = btn.querySelector('.slot-rate-label');
+    if (!spanRate) return;
+    if (residentActif) {
+      btn.dataset.residentMode = mode;
+      btn.dataset.residentPrix = Number.isFinite(prixResident) ? String(prixResident) : '';
+      btn.dataset.residentLibelle = libelle;
+      spanRate.textContent = libelle;
+    } else {
+      spanRate.textContent = btn.dataset.tarifOriginal || btn.dataset.tarif || spanRate.textContent;
+      delete btn.dataset.residentMode;
+      delete btn.dataset.residentPrix;
+      delete btn.dataset.residentLibelle;
+    }
+  });
+}
+
+function mettreAJourRecapSelectionResident() {
+  const { ui } = window;
+  const residentActif = estForfaitResidentActif();
+  const selectedBtn = ui.grilleSelectionCreneau?.querySelector('.slot-btn.selected');
+  const mode = obtenirModeResident();
+  const prix = obtenirPrixResident(mode);
+  const libelle = obtenirLibelleResident(mode);
+
+  ui.residentNoticeCreneau?.classList.toggle('hidden', !residentActif);
+
+  if (residentActif) {
+    if (selectedBtn) {
+      selectedBtn.dataset.residentMode = mode;
+      selectedBtn.dataset.residentPrix = Number.isFinite(prix) ? String(prix) : '';
+      selectedBtn.dataset.residentLibelle = libelle;
+    }
+    if (ui.recapCreneauTarif) ui.recapCreneauTarif.textContent = libelle;
+    if (ui.recapCreneauPrix && Number.isFinite(prix)) {
+      ui.recapCreneauPrix.textContent = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(prix) + ' €';
+    }
+  } else if (!residentActif && selectedBtn) {
+    if (ui.recapCreneauTarif && selectedBtn.dataset.tarifOriginal) {
+      ui.recapCreneauTarif.textContent = selectedBtn.dataset.tarifOriginal;
+    }
+    if (ui.recapCreneauPrix) {
+      const prixFormatte = selectedBtn.dataset.prixFormateOriginal;
+      const prixOriginal = selectedBtn.dataset.prixOriginal;
+      if (prixFormatte) {
+        ui.recapCreneauPrix.textContent = prixFormatte;
+      } else if (prixOriginal) {
+        ui.recapCreneauPrix.textContent = `${Number(prixOriginal).toFixed(2)} €`;
+      }
+    }
+  }
+  mettreAJourBoutonsResident();
+}
+
+/**
+ * Gère la demande de créneaux après configuration.
+ */
+function gererDemandeCreneaux(e) {
+  e.preventDefault();
+  basculerIndicateurChargement(true);
+  const { tourneeEnCours } = window.etat;
+  const infosTournee = calculerInfosTourneeClient(tourneeEnCours.totalStops, tourneeEnCours.returnToPharmacy, tourneeEnCours.date, '12h00');
+  tourneeEnCours.duree = infosTournee.duree;
+  const autresCoursesPanier = window.etat.panier
+    .filter(item => item.date === tourneeEnCours.date)
+    .map(item => ({ startTime: item.startTime, duree: item.duree }));
+  const run = google.script.run
+    .withSuccessHandler(creneaux => {
+      basculerIndicateurChargement(false);
+      afficherSelectionCreneaux(creneaux);
+    })
+    .withFailureHandler(afficherErreur);
+  if (window.etat.flags && window.etat.flags.reservationShowTakenSlotsEnabled) {
+    run.obtenirEtatCreneauxPourDate(tourneeEnCours.date, tourneeEnCours.duree, null, null, autresCoursesPanier);
+  } else {
+    run.obtenirCreneauxDisponiblesPourDate(tourneeEnCours.date, tourneeEnCours.duree, null, null, autresCoursesPanier);
+  }
+}
+
+/**
+ * Affiche la modale de sélection des créneaux.
+ */
+function afficherSelectionCreneaux(creneaux) {
+  const { ui } = window;
+  const { tourneeEnCours } = window.etat;
+  ui.modaleConfigTournee.classList.add('hidden');
+  ui.titreModaleSelection.textContent = `Créneaux pour le ${new Date(tourneeEnCours.date + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}`;
+  if (!creneaux || creneaux.length === 0) {
+    ui.grilleSelectionCreneau.textContent = '';
+    const p = document.createElement('p');
+    p.className = 'panier-vide';
+    p.textContent = 'Aucun créneau disponible pour cette configuration.';
+    ui.grilleSelectionCreneau.appendChild(p);
+  } else {
+    ui.grilleSelectionCreneau.textContent = '';
+    creneaux.forEach(creneau => {
+      const slot = (creneau && typeof creneau === 'object') ? creneau : { time: String(creneau), status: 'open', taken: false, inPast: false };
+      if (slot.inPast) return;
+      const slotTime = slot.time || String(creneau);
+      const estimation = calculerInfosTourneeClient(tourneeEnCours.totalStops, tourneeEnCours.returnToPharmacy, tourneeEnCours.date, slotTime);
+      const estUrgent = estimation.typeCourse === 'Urgent';
+      const btn = document.createElement('button');
+      btn.className = `slot-btn ${estUrgent ? 'urgent' : 'standard'}`;
+
+      if (slot.taken) {
+        btn.classList.add('taken', 'disabled');
+        btn.setAttribute('disabled', '');
+        btn.setAttribute('aria-label', 'Créneau réservé');
+      } else if (slot.status === 'closed') {
+        btn.classList.add('indispo', 'disabled');
+        btn.setAttribute('disabled', '');
+      }
+
+      btn.dataset.creneau = slotTime;
+      btn.dataset.prix = estimation.prix;
+      btn.dataset.prixFormate = estimation.prixFormate;
+      btn.dataset.tarif = estimation.typeCourse;
+
+      const spanTime = document.createElement('span');
+      spanTime.className = 'slot-time';
+      spanTime.textContent = slotTime;
+      const spanRate = document.createElement('span');
+      spanRate.className = 'slot-rate-label';
+      spanRate.textContent = estimation.typeCourse;
+      btn.appendChild(spanTime);
+      btn.appendChild(spanRate);
+      btn.dataset.prixOriginal = estimation.prix;
+      btn.dataset.prixFormateOriginal = estimation.prixFormate;
+      btn.dataset.tarifOriginal = estimation.typeCourse;
+
+      ui.grilleSelectionCreneau.appendChild(btn);
+    });
+  }
+  mettreAJourBoutonsResident();
+  reinitialiserRecapCreneau();
+  if(ui.btnAjouterAuPanier) ui.btnAjouterAuPanier.disabled = true;
+  ui.modaleSelectionCreneau.classList.remove('hidden');
+  ui.grilleSelectionCreneau.onclick = function(e) {
+    const target = e.target.closest('.slot-btn');
+    if (target && !target.disabled && !target.classList.contains('indispo')) {
+      if (ui.grilleSelectionCreneau) {
+        ui.grilleSelectionCreneau.querySelectorAll('.slot-btn').forEach(btn => btn.classList.remove('selected'));
+      }
+      target.classList.add('selected');
+      if (ui.recapCreneauHeure) ui.recapCreneauHeure.textContent = target.dataset.creneau;
+      if (ui.recapCreneauTarif) ui.recapCreneauTarif.textContent = target.dataset.tarif;
+      if (ui.recapCreneauPrix) {
+        const prixFormate = target.dataset.prixFormate;
+        ui.recapCreneauPrix.textContent = prixFormate || `${parseFloat(target.dataset.prix || '0').toFixed(2)} €`;
+      }
+      if (ui.btnAjouterAuPanier) ui.btnAjouterAuPanier.disabled = false;
+      mettreAJourRecapSelectionResident();
+    }
+  };
+}
+
+/**
+ * Réinitialise l'affichage du récapitulatif dans la modale de sélection.
+ */
+function reinitialiserRecapCreneau() {
+    const { ui } = window;
+    if (ui.recapCreneauHeure) ui.recapCreneauHeure.textContent = '--:--';
+    if (ui.recapCreneauTarif) ui.recapCreneauTarif.textContent = '--';
+    if (ui.recapCreneauPrix) ui.recapCreneauPrix.textContent = '--.-- €';
+    mettreAJourRecapSelectionResident();
+}
+
+/**
+ * Gère le retour à la modale de configuration.
+ */
+function retourVersConfiguration() {
+    const { ui } = window;
+    ui.modaleSelectionCreneau.classList.add('hidden');
+    ui.modaleConfigTournee.classList.remove('hidden');
+}
+
+/**
+ * Gère le clic sur "Ajouter au panier".
+ */
+function gererAjoutAuPanier() {
+  const { ui } = window;
+  const creneauSelectionneBtn = ui.grilleSelectionCreneau.querySelector('.slot-btn.selected');
+  const estRecurrent = document.getElementById('interrupteur-recurrence').checked;
+  if (!creneauSelectionneBtn) {
+    afficherNotification("Veuillez sélectionner un créneau.", "erreur");
+    return;
+  }
+  if (estRecurrent) {
+    verifierEtAfficherConfirmationRecurrence();
+  } else {
+    ajouterTourneeAuPanier(false);
+  }
+}
+
+/**
+ * Appelle le serveur pour vérifier les conflits et affiche la modale de confirmation.
+ */
+function verifierEtAfficherConfirmationRecurrence() {
+  basculerIndicateurChargement(true);
+  const { tourneeEnCours } = window.etat;
+  const creneauSelectionneBtn = document.querySelector('#grille-selection-creneau .slot-btn.selected');
+  const itemDeBase = {
+    date: tourneeEnCours.date,
+    startTime: creneauSelectionneBtn.dataset.creneau,
+    duree: tourneeEnCours.duree
+  };
+  google.script.run
+    .withSuccessHandler(resultats => {
+      basculerIndicateurChargement(false);
+      if (resultats && resultats.length > 0) {
+        afficherModaleConfirmationRecurrence(resultats);
+      } else {
+        afficherErreur("Aucune date future n'a été trouvée pour cette récurrence.");
+      }
+    })
+    .withFailureHandler(afficherErreur)
+    .verifierDisponibiliteRecurrence(itemDeBase);
+}
+
+/**
+ * Affiche la 3ème modale avec le résumé des dates et des conflits.
+ */
+function afficherModaleConfirmationRecurrence(resultats) {
+  const modale = document.getElementById('modale-confirmation-recurrence');
+  const listeUI = document.getElementById('liste-recurrence-details');
+  modale.dataset.recurrenceData = JSON.stringify(resultats);
+  listeUI.textContent = '';
+  resultats.forEach(res => {
+    const li = document.createElement('li');
+    if (res.status !== 'OK') li.classList.add('conflit');
+
+    const strongDate = document.createElement('strong');
+    strongDate.textContent = res.dateFormatee;
+    li.appendChild(strongDate);
+
+    if (res.status === 'OK') {
+      li.appendChild(document.createTextNode(` à ${res.creneau} `));
+      const spanOk = document.createElement('span');
+      spanOk.className = 'status-ok';
+      spanOk.textContent = '✔ Disponible';
+      li.appendChild(spanOk);
+    } else {
+      li.appendChild(document.createTextNode(' - '));
+      const spanConflict = document.createElement('span');
+      spanConflict.className = 'status-conflict';
+      spanConflict.textContent = '⚠ Conflit';
+      li.appendChild(spanConflict);
+      li.appendChild(document.createElement('br'));
+      li.appendChild(document.createTextNode(`Créneau initial ${res.original} indisponible. Alternative proposée : `));
+      const strongAlt = document.createElement('strong');
+      strongAlt.textContent = res.creneau || 'Aucune';
+      li.appendChild(strongAlt);
+    }
+
+    listeUI.appendChild(li);
+  });
+  modale.classList.remove('hidden');
+}
+
+/**
+ * Ajoute les tournées récurrentes au panier après confirmation.
+ */
+function confirmerEtAjouterRecurrenceAuPanier() {
+    const modale = document.getElementById('modale-confirmation-recurrence');
+    const resultats = JSON.parse(modale.dataset.recurrenceData || '[]');
+    resultats.forEach(res => {
+        if (res.creneau) {
+            ajouterTourneeAuPanier(true, res);
+        }
+    });
+    modale.classList.add('hidden');
+    afficherNotification("Tournées récurrentes ajoutées au panier.", "succes");
+}
+
+/**
+ * Ajoute une tournée au panier.
+ */
+function ajouterTourneeAuPanier(isRecurrentItem = false, recurrenceData = null) {
+  const { tourneeEnCours } = window.etat;
+  const creneauSelectionneBtn = document.querySelector('#grille-selection-creneau .slot-btn.selected');
+  let date, startTime, prix;
+  if (isRecurrentItem && recurrenceData) {
+    date = recurrenceData.dateISO;
+    startTime = recurrenceData.creneau;
+    const infos = calculerInfosTourneeClient(tourneeEnCours.totalStops, tourneeEnCours.returnToPharmacy, date, startTime);
+    prix = infos.prix;
+  } else {
+    date = tourneeEnCours.date;
+    startTime = creneauSelectionneBtn.dataset.creneau;
+    prix = parseFloat(creneauSelectionneBtn.dataset.prix);
+  }
+  const residentActif = estForfaitResidentActif();
+  const residentMode = residentActif ? (creneauSelectionneBtn.dataset.residentMode || obtenirModeResident()) : null;
+  const residentPrix = residentActif ? Number(creneauSelectionneBtn.dataset.residentPrix || obtenirPrixResident(residentMode)) : null;
+  const residentLibelle = residentActif ? (creneauSelectionneBtn.dataset.residentLibelle || obtenirLibelleResident(residentMode)) : '';
+
+  const nouvelleTournee = {
+    id: 'tournee-' + Date.now() + Math.random(),
+    date: date,
+    startTime: startTime,
+    totalStops: tourneeEnCours.totalStops,
+    returnToPharmacy: tourneeEnCours.returnToPharmacy,
+    prix: prix,
+    duree: tourneeEnCours.duree,
+    details: formatCourseLabel(tourneeEnCours.duree, tourneeEnCours.totalStops, tourneeEnCours.returnToPharmacy),
+    isRecurrent: isRecurrentItem,
+    resident: residentActif,
+    residentMode: residentMode,
+    residentPrix: Number.isFinite(residentPrix) ? residentPrix : null,
+    residentLibelle: residentLibelle
+  };
+  window.etat.panier.push(nouvelleTournee);
+  afficherPanier();
+  sauvegarderPanierDansLocalStorage();
+  // Mise a jour rapide de l'UI calendrier (barre de dispo)
+  if (typeof ajusterDisponibiliteJour === 'function') {
+    try { ajusterDisponibiliteJour(date, -1); } catch (e) {}
+  }
+  if (!isRecurrentItem) {
+      document.getElementById('modale-selection-creneau').classList.add('hidden');
+      afficherNotification("Tournée ajoutée au panier !", "succes");
+  }
+}
+</script>
+
+
+
+

@@ -1,0 +1,30 @@
+<!-- Conteneur principal du widget (flottant) -->
+<div id="piluleur-widget" class="piluleur-widget">
+
+  <!-- Bouton flottant (fab) -->
+  <button id="piluleur-fab" class="piluleur-fab" aria-label="Ouvrir l'assistant">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </button>
+
+  <!-- Fenêtre de chat -->
+  <div id="piluleur-window" class="piluleur-window hidden">
+    <div class="piluleur-header">
+      <div class="piluleur-title">Piluleur</div>
+      <button id="piluleur-close" class="piluleur-close" aria-label="Fermer">&times;</button>
+    </div>
+
+    <div id="piluleur-messages" class="piluleur-messages">
+      <!-- Les messages s'afficheront ici -->
+    </div>
+
+    <div class="piluleur-input-area">
+      <input type="text" id="piluleur-input" placeholder="Écrivez votre message..." autocomplete="off">
+      <button id="piluleur-send">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<?!= include('Piluleur_CSS'); ?>
+<?!= include('Piluleur_JS'); ?>
