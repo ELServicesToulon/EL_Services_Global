@@ -4,12 +4,12 @@
     "enabledAdvancedServices": [
       {
         "userSymbol": "Drive",
-        "serviceId": "Drive",
+        "serviceId": "drive",
         "version": "v2"
       },
       {
         "userSymbol": "Sheets",
-        "serviceId": "Sheets",
+        "serviceId": "sheets",
         "version": "v4"
       }
     ]
