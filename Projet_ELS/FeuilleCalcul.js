@@ -24,16 +24,25 @@ function calculerIdentifiantClient(email) {
 }
 
 function enregistrerOuMajClient(donneesClient) {
+  // Helper to sanitize inputs and avoid "undefined" string persistence
+  const cleanInput = (val) => {
+    if (val == null) return '';
+    const s = String(val).trim();
+    return (s === 'undefined' || s === 'null') ? '' : s;
+  };
+
   try {
     if (!donneesClient || !donneesClient.email) {
       return { isNew: false, clientId: '' };
     }
-    const emailNormalise = String(donneesClient.email || '').trim();
+    const emailNormalise = cleanInput(donneesClient.email);
     if (!emailNormalise) {
       return { isNew: false, clientId: '' };
     }
     donneesClient.email = emailNormalise;
-    const telephoneNormalise = String(donneesClient.telephone || '').replace(/\s+/g, ' ').trim();
+
+    // Fix telephone normalization to use cleanInput
+    const telephoneNormalise = cleanInput(donneesClient.telephone).replace(/\s+/g, ' ').trim();
     donneesClient.telephone = telephoneNormalise;
 
     const feuilleClients = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_CLIENTS);
@@ -64,12 +73,12 @@ function enregistrerOuMajClient(donneesClient) {
       const idExistant = String(ligneAjour[indices[COLONNE_ID_CLIENT]] || '').trim();
       const clientId = idExistant || calculerIdentifiantClient(emailNormalise);
       ligneAjour[indices["Email"]] = emailNormalise;
-      ligneAjour[indices["Raison Sociale"]] = donneesClient.nom || '';
-      ligneAjour[indices["Adresse"]] = donneesClient.adresse || '';
-      ligneAjour[indices[COLONNE_TELEPHONE_CLIENT]] = donneesClient.telephone || '';
-      ligneAjour[indices["SIRET"]] = donneesClient.siret || '';
-      ligneAjour[indices[COLONNE_CODE_POSTAL_CLIENT]] = donneesClient.codePostal || '';
-      ligneAjour[indices[COLONNE_TYPE_REMISE_CLIENT]] = donneesClient.typeRemise || '';
+      ligneAjour[indices["Raison Sociale"]] = cleanInput(donneesClient.nom);
+      ligneAjour[indices["Adresse"]] = cleanInput(donneesClient.adresse);
+      ligneAjour[indices[COLONNE_TELEPHONE_CLIENT]] = donneesClient.telephone; // Already cleaned above
+      ligneAjour[indices["SIRET"]] = cleanInput(donneesClient.siret);
+      ligneAjour[indices[COLONNE_CODE_POSTAL_CLIENT]] = cleanInput(donneesClient.codePostal);
+      ligneAjour[indices[COLONNE_TYPE_REMISE_CLIENT]] = cleanInput(donneesClient.typeRemise);
       ligneAjour[indices[COLONNE_VALEUR_REMISE_CLIENT]] = donneesClient.valeurRemise !== undefined ? donneesClient.valeurRemise : 0;
       ligneAjour[indices[COLONNE_NB_TOURNEES_OFFERTES]] = donneesClient.nbTourneesOffertes !== undefined ? donneesClient.nbTourneesOffertes : 0;
       ligneAjour[indices[COLONNE_RESIDENT_CLIENT]] = donneesClient.resident === true;
@@ -81,12 +90,12 @@ function enregistrerOuMajClient(donneesClient) {
       const clientId = calculerIdentifiantClient(emailNormalise);
       const nouvelleLigne = new Array(feuilleClients.getLastColumn()).fill('');
       nouvelleLigne[indices["Email"]] = emailNormalise;
-      nouvelleLigne[indices["Raison Sociale"]] = donneesClient.nom || '';
-      nouvelleLigne[indices["Adresse"]] = donneesClient.adresse || '';
-      nouvelleLigne[indices[COLONNE_TELEPHONE_CLIENT]] = donneesClient.telephone || '';
-      nouvelleLigne[indices["SIRET"]] = donneesClient.siret || '';
-      nouvelleLigne[indices[COLONNE_CODE_POSTAL_CLIENT]] = donneesClient.codePostal || '';
-      nouvelleLigne[indices[COLONNE_TYPE_REMISE_CLIENT]] = donneesClient.typeRemise || '';
+      nouvelleLigne[indices["Raison Sociale"]] = cleanInput(donneesClient.nom);
+      nouvelleLigne[indices["Adresse"]] = cleanInput(donneesClient.adresse);
+      nouvelleLigne[indices[COLONNE_TELEPHONE_CLIENT]] = donneesClient.telephone; // Already cleaned above
+      nouvelleLigne[indices["SIRET"]] = cleanInput(donneesClient.siret);
+      nouvelleLigne[indices[COLONNE_CODE_POSTAL_CLIENT]] = cleanInput(donneesClient.codePostal);
+      nouvelleLigne[indices[COLONNE_TYPE_REMISE_CLIENT]] = cleanInput(donneesClient.typeRemise);
       nouvelleLigne[indices[COLONNE_VALEUR_REMISE_CLIENT]] = donneesClient.valeurRemise !== undefined ? donneesClient.valeurRemise : 0;
       nouvelleLigne[indices[COLONNE_NB_TOURNEES_OFFERTES]] = donneesClient.nbTourneesOffertes !== undefined ? donneesClient.nbTourneesOffertes : 0;
       nouvelleLigne[indices[COLONNE_RESIDENT_CLIENT]] = donneesClient.resident === true;
