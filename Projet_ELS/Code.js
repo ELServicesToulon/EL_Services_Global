@@ -9,24 +9,25 @@
  */
 function doGet(e) {
   try {
-    // 1. Création du template à partir du fichier HTML principal
+    // 1. Vérification critique: L'objet de config doit exister.
+    if (typeof ELS_CONFIG === 'undefined') {
+      throw new Error("L'objet de configuration ELS_CONFIG n'a pas été chargé. Vérifiez la présence et l'ordre des fichiers.");
+    }
+
+    // 2. Création du template à partir du fichier HTML principal
     var template = HtmlService.createTemplateFromFile('Index');
 
-    // 2. INJECTION DES VARIABLES DE CONFIGURATION (INDISPENSABLE)
-    // Cela permet au HTML d'utiliser <?= VARIABLE ?> sans erreur.
-    
-    // Identité
-    template.NOM_ENTREPRISE   = typeof NOM_ENTREPRISE !== 'undefined' ? NOM_ENTREPRISE : 'EL Services';
-    template.EMAIL_ENTREPRISE = typeof EMAIL_ENTREPRISE !== 'undefined' ? EMAIL_ENTREPRISE : 'Contact';
-    template.TEL_ENTREPRISE   = typeof TEL_ENTREPRISE !== 'undefined' ? TEL_ENTREPRISE : '';
-    
-    // Assets graphiques (FIX: Injection de la variable manquante)
-    template.BRANDING_LOGO_PUBLIC_URL = typeof BRANDING_LOGO_PUBLIC_URL !== 'undefined' ? BRANDING_LOGO_PUBLIC_URL : '';
+    // 3. INJECTION DES VARIABLES DE CONFIGURATION DANS LE TEMPLATE
+    // On accède aux propriétés de l'objet ELS_CONFIG de manière sécurisée.
+    template.NOM_ENTREPRISE   = ELS_CONFIG.NOM_ENTREPRISE || 'EL Services';
+    template.EMAIL_ENTREPRISE = ELS_CONFIG.EMAIL_ENTREPRISE || 'Contact';
+    template.TEL_ENTREPRISE   = ELS_CONFIG.TEL_ENTREPRISE || '';
+    template.BRANDING_LOGO_PUBLIC_URL = ELS_CONFIG.BRANDING_LOGO_PUBLIC_URL || '';
 
-    // 3. Passage des paramètres d'URL (ex: ?page=facturation)
+    // 4. Passage des paramètres d'URL (ex: ?page=facturation)
     template.urlParams = e ? e.parameter : {};
 
-    // 4. Évaluation et rendu de la page
+    // 5. Évaluation et rendu de la page
     var output = template.evaluate()
       .setTitle(template.NOM_ENTREPRISE + " - Gestion")
       .addMetaTag('viewport', 'width=device-width, initial-scale=1')
