@@ -305,7 +305,10 @@ function doGet(e) {
           break;
 
         case 'piluleur':
-          return renderPiluleurInterface();
+          // Extraction des paramètres pour le module Piluleur Visuel
+          var imageId = (e && e.parameter) ? e.parameter.imageId : null;
+          var imageUrl = (e && e.parameter) ? e.parameter.imageUrl : null;
+          return openPiluleurInterface(imageId, imageUrl);
 
         case 'cgv':
           // Conditions Générales de Vente
