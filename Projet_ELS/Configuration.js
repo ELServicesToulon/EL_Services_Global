@@ -1,6 +1,6 @@
 /**
  * @fileoverview CONFIGURATION MAÎTRE - PROJET ELS (Global)
- * Version Corrigée : Intègre BILLING_ID_PDF_CHECK_ENABLED pour éviter l'erreur dans Maintenance.gs
+ * Version : Corrigée (Intègre BILLING_ID_PDF_CHECK_ENABLED + getPublicConfig)
  */
 
 const _SCRIPT_PROPS = PropertiesService.getScriptProperties();
@@ -66,7 +66,8 @@ function AUDIT_CONFIGURATION() {
   const keysToCheck = {
     'EMAIL_ENTREPRISE': EMAIL_ENTREPRISE,
     'ID_FEUILLE_CALCUL': ID_FEUILLE_CALCUL,
-    'BILLING_ID_PDF_CHECK_ENABLED': BILLING_ID_PDF_CHECK_ENABLED
+    'BILLING_ID_PDF_CHECK_ENABLED': BILLING_ID_PDF_CHECK_ENABLED,
+    'PublicConfig': 'OK'
   };
 
   console.log("=== AUDIT DE CONFIGURATION ===");
@@ -77,9 +78,26 @@ function AUDIT_CONFIGURATION() {
 }
 
 // ============================================================================
-// 6. FLAGS DE MAINTENANCE & FEATURES (Ajout pour corriger l'erreur ReferenceError)
+// 6. FLAGS DE MAINTENANCE & FEATURES
 // ============================================================================
 
 // Active la vérification de l'existence du PDF avant de tenter une action de facturation.
-// Empêche d'écraser des fichiers existants ou de générer des doublons par erreur.
 const BILLING_ID_PDF_CHECK_ENABLED = true; 
+
+// ============================================================================
+// 7. API PUBLIQUE (FRONTEND) - INDISPENSABLE POUR L'UI
+// ============================================================================
+
+/**
+ * Expose les données de configuration NON-SENSIBLES au frontend (HTML/JS).
+ * Appelé par google.script.run au chargement de la page.
+ */
+function getPublicConfig() {
+  return {
+    EMAIL_ENTREPRISE: EMAIL_ENTREPRISE,
+    TEL_ENTREPRISE: TEL_ENTREPRISE,
+    ADRESSE_ENTREPRISE: ADRESSE_ENTREPRISE,
+    SIRET: SIRET_ENTREPRISE,
+    LOGO_ID: ID_LOGO // Permet au front d'afficher le logo
+  };
+}
