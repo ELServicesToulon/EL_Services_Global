@@ -125,8 +125,15 @@ function reserverPanier(donneesReservation) {
 
     Logger.log(`[reserverPanier] Résultat: Success=${hasSuccess}, Failures=${hasFailures}, EmailEnabled=${RESERVATION_CONFIRMATION_EMAILS_ENABLED}`);
 
-    if (hasSuccess && !hasFailures && RESERVATION_CONFIRMATION_EMAILS_ENABLED) {
-      Logger.log('[reserverPanier] Envoi de la confirmation de réservation...');
+    // Notification ADMIN (envoi systématique pour toute réservation réussie)
+    if (hasSuccess) {
+      Logger.log('[reserverPanier] Envoi de la notification ADMIN...');
+      notifierAdminNouvelleReservation(client, successfulReservations);
+    }
+
+    // Notification CLIENT (envoi pour les réservations réussies, même s'il y a des échecs partiels)
+    if (hasSuccess && RESERVATION_CONFIRMATION_EMAILS_ENABLED) {
+      Logger.log('[reserverPanier] Envoi de la confirmation de réservation CLIENT...');
       notifierClientConfirmation(client.email, client.nom, successfulReservations);
       confirmationEmailSent = true;
     }
@@ -538,6 +545,74 @@ function notifierClientConfirmation(email, nom, reservations) {
     } catch (e) {
         Logger.log(`Erreur lors de l'envoi de l'email de confirmation à ${email}: ${e.toString()}`);
     }
+}
+
+/**
+ * Envoie une notification détaillée à l'administrateur pour toute nouvelle réservation.
+ * @param {Object} client Les informations du client.
+ * @param {Array} reservations La liste des réservations réussies.
+ */
+function notifierAdminNouvelleReservation(client, reservations) {
+  try {
+    const adminEmail = getSecret('ADMIN_EMAIL');
+    if (!adminEmail) {
+      Logger.log("Avertissement: ADMIN_EMAIL non défini, impossible d'envoyer la notification admin.");
+      return;
+    }
+
+    if (!reservations || reservations.length === 0) return;
+
+    let totalMontant = 0;
+    const lignesReservations = reservations.map(r => {
+      totalMontant += (Number(r.price) || 0);
+      return `<li>
+        <strong>${r.date} à ${r.time}</strong><br>
+        ID: ${r.reservationId || 'N/A'}<br>
+        Montant: ${r.price.toFixed(2)} €
+      </li>`;
+    }).join('');
+
+    const sujet = `[Nouvelle Réservation] ${client.nom} - ${reservations.length} tournée(s)`;
+    const corpsHtml = `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Nouvelle réservation reçue</h2>
+        <p>Un client vient de valider une commande.</p>
+
+        <h3>Informations Client</h3>
+        <p>
+          <strong>Nom :</strong> ${client.nom}<br>
+          <strong>Email :</strong> ${client.email}<br>
+          <strong>Téléphone :</strong> ${client.telephone || 'Non renseigné'}<br>
+          <strong>Adresse :</strong> ${client.adresse || 'Non renseignée'}<br>
+          <strong>Code Postal :</strong> ${client.codePostal}<br>
+          <strong>Note client :</strong> ${client.note || 'Aucune'}
+        </p>
+
+        <h3>Détails de la commande</h3>
+        <ul>
+          ${lignesReservations}
+        </ul>
+        <p><strong>Total estimé : ${totalMontant.toFixed(2)} €</strong></p>
+
+        <hr>
+        <p><small>Cet e-mail est généré automatiquement par le système ELS.</small></p>
+      </div>
+    `;
+
+    const subjectEncoded = encodeMailSubjectUtf8(sujet) || sujet;
+
+    safeSendEmail(
+      adminEmail,
+      subjectEncoded,
+      'Nouvelle réservation reçue. Voir détails dans la version HTML.',
+      {
+        htmlBody: corpsHtml
+      }
+    );
+    Logger.log(`Notification admin envoyée à ${adminEmail}`);
+  } catch (e) {
+    Logger.log(`Erreur lors de l'envoi de la notification admin: ${e.toString()}`);
+  }
 }
 
 /**
