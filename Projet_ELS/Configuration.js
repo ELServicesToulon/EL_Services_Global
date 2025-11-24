@@ -1,6 +1,6 @@
 /**
  * @fileoverview CONFIGURATION MAÎTRE - PROJET ELS (Global)
- * Version : Corrigée (Intègre BILLING_ID_PDF_CHECK_ENABLED + getPublicConfig)
+ * Version : Corrigée (Intègre BRANDING_LOGO_PUBLIC_URL + Fix ReferenceError)
  */
 
 const _SCRIPT_PROPS = PropertiesService.getScriptProperties();
@@ -8,7 +8,7 @@ const _SCRIPT_PROPS = PropertiesService.getScriptProperties();
 /**
  * Récupère une config avec fallback pour assurer la rétrocompatibilité.
  * @param {string} key - La clé dans les Propriétés du Script.
- * @param {string} defaultValue - La valeur en dur (copiée de l'ancien fichier).
+ * @param {string} defaultValue - La valeur en dur.
  * @return {string} La valeur à utiliser.
  */
 function getConf(key, defaultValue) {
@@ -22,6 +22,7 @@ function getConf(key, defaultValue) {
 // ============================================================================
 // 1. IDENTITÉ ET CONTACTS
 // ============================================================================
+const NOM_ENTREPRISE     = getConf('NOM_ENTREPRISE', 'EL Services');
 const EMAIL_ENTREPRISE   = getConf('EMAIL_ENTREPRISE', 'elservicestoulon@gmail.com');
 const ADMIN_EMAIL        = getConf('ADMIN_EMAIL', 'elservicestoulon@gmail.com');
 const ADRESSE_ENTREPRISE = getConf('ADRESSE_ENTREPRISE', '255 Bis Avenue Marcel Castie, 83000 Toulon');
@@ -47,6 +48,12 @@ const ID_DOSSIER_TEMPORAIRE = getConf('ID_DOSSIER_TEMPORAIRE', '');
 const ID_DOCUMENT_CGV = getConf('ID_DOCUMENT_CGV', '');
 const ID_LOGO         = getConf('ID_LOGO', ''); 
 
+// URL Publique du Logo (Pour affichage dans les emails/HTML)
+// Construit une URL Drive si ID_LOGO est présent, sinon vide.
+const BRANDING_LOGO_PUBLIC_URL = getConf('BRANDING_LOGO_PUBLIC_URL', 
+  ID_LOGO ? 'https://drive.google.com/uc?export=view&id=' + ID_LOGO : ''
+);
+
 // ============================================================================
 // 3. PARAMÈTRES MÉTIER
 // ============================================================================
@@ -59,13 +66,22 @@ const DELAI_PAIEMENT_DEFAUT = 30; // Jours
 const ELS_SHARED_SECRET = getConf('ELS_SHARED_SECRET', 'SharedSecret_ELS_2024_Secure'); 
 
 // ============================================================================
-// 5. FONCTIONS UTILITAIRES DE DEBUG
+// 5. FLAGS DE MAINTENANCE & FEATURES
+// ============================================================================
+
+// Active la vérification de l'existence du PDF avant de tenter une action de facturation.
+const BILLING_ID_PDF_CHECK_ENABLED = true; 
+
+// ============================================================================
+// 6. FONCTIONS UTILITAIRES DE DEBUG & AUDIT
 // ============================================================================
 
 function AUDIT_CONFIGURATION() {
   const keysToCheck = {
+    'NOM_ENTREPRISE': NOM_ENTREPRISE,
     'EMAIL_ENTREPRISE': EMAIL_ENTREPRISE,
     'ID_FEUILLE_CALCUL': ID_FEUILLE_CALCUL,
+    'BRANDING_LOGO_PUBLIC_URL': BRANDING_LOGO_PUBLIC_URL,
     'BILLING_ID_PDF_CHECK_ENABLED': BILLING_ID_PDF_CHECK_ENABLED,
     'PublicConfig': 'OK'
   };
@@ -78,13 +94,6 @@ function AUDIT_CONFIGURATION() {
 }
 
 // ============================================================================
-// 6. FLAGS DE MAINTENANCE & FEATURES
-// ============================================================================
-
-// Active la vérification de l'existence du PDF avant de tenter une action de facturation.
-const BILLING_ID_PDF_CHECK_ENABLED = true; 
-
-// ============================================================================
 // 7. API PUBLIQUE (FRONTEND) - INDISPENSABLE POUR L'UI
 // ============================================================================
 
@@ -94,10 +103,12 @@ const BILLING_ID_PDF_CHECK_ENABLED = true;
  */
 function getPublicConfig() {
   return {
+    NOM_ENTREPRISE: NOM_ENTREPRISE,
     EMAIL_ENTREPRISE: EMAIL_ENTREPRISE,
     TEL_ENTREPRISE: TEL_ENTREPRISE,
     ADRESSE_ENTREPRISE: ADRESSE_ENTREPRISE,
     SIRET: SIRET_ENTREPRISE,
-    LOGO_ID: ID_LOGO // Permet au front d'afficher le logo
+    LOGO_ID: ID_LOGO,
+    BRANDING_LOGO_PUBLIC_URL: BRANDING_LOGO_PUBLIC_URL
   };
 }

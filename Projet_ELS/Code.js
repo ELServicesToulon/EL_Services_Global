@@ -13,11 +13,16 @@ function doGet(e) {
     var template = HtmlService.createTemplateFromFile('Index');
 
     // 2. INJECTION DES VARIABLES DE CONFIGURATION (INDISPENSABLE)
-    // Cela permet au HTML d'utiliser <?= NOM_ENTREPRISE ?> sans erreur.
+    // Cela permet au HTML d'utiliser <?= VARIABLE ?> sans erreur.
+    
+    // Identité
     template.NOM_ENTREPRISE   = typeof NOM_ENTREPRISE !== 'undefined' ? NOM_ENTREPRISE : 'EL Services';
     template.EMAIL_ENTREPRISE = typeof EMAIL_ENTREPRISE !== 'undefined' ? EMAIL_ENTREPRISE : 'Contact';
     template.TEL_ENTREPRISE   = typeof TEL_ENTREPRISE !== 'undefined' ? TEL_ENTREPRISE : '';
     
+    // Assets graphiques (FIX: Injection de la variable manquante)
+    template.BRANDING_LOGO_PUBLIC_URL = typeof BRANDING_LOGO_PUBLIC_URL !== 'undefined' ? BRANDING_LOGO_PUBLIC_URL : '';
+
     // 3. Passage des paramètres d'URL (ex: ?page=facturation)
     template.urlParams = e ? e.parameter : {};
 
@@ -31,13 +36,13 @@ function doGet(e) {
     return output;
 
   } catch (error) {
-    // Gestion d'erreur critique au démarrage (ex: Config manquante)
+    // Gestion d'erreur critique au démarrage
     console.error("ERREUR CRITIQUE DOGET : " + error.toString());
     return HtmlService.createHtmlOutput(
-      '<div style="font-family:sans-serif; padding:20px; color:#D32F2F;">' +
-      '<h2>Erreur de démarrage</h2>' +
-      '<p>L\'application n\'a pas pu charger la configuration.</p>' +
-      '<pre style="background:#eee; padding:10px;">' + error.toString() + '</pre>' +
+      '<div style="font-family:sans-serif; padding:20px; color:#D32F2F;">'
+      '<h2>Erreur de démarrage</h2>'
+      '<p>L\'application n\'a pas pu charger la configuration ou le template.</p>'
+      '<pre style="background:#eee; padding:10px;">" + error.toString() + "</pre>'
       '</div>'
     );
   }
