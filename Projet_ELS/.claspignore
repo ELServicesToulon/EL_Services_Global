@@ -1,0 +1,2 @@
+# Ignorer le module Livraison (géré dans le sous-projet Apps Script /livraison)
+livraison/**
