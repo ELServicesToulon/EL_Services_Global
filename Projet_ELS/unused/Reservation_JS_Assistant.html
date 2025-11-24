@@ -1,0 +1,608 @@
+<script>
+(function() {
+  'use strict';
+
+  const SESSION_ID_KEY = 'ELS_ASSISTANT_SESSION_ID';
+  const THREAD_ID_KEY = 'ELS_ASSISTANT_THREAD_ID';
+  const THREAD_CODE_KEY = 'ELS_ASSISTANT_THREAD_CODE';
+  const STATUS_DEFAULT = 'Posez votre question et nous vous répondons rapidement.';
+
+  const state = {
+    sessionId: '',
+    threadId: '',
+    conversation: [],
+    pendingMessageId: null,
+    isSending: false,
+    initialized: false
+  };
+
+  const getGoogleRunner = () => (window.google && google.script && google.script.run) || null;
+
+  const renderMessageContent = (container, text) => {
+    const safeText = typeof text === 'string' ? text : '';
+    const lines = safeText.split(/\r?\n/);
+    lines.forEach((line, index) => {
+      if (index > 0) {
+        container.appendChild(document.createElement('br'));
+      }
+      container.appendChild(document.createTextNode(line));
+    });
+  };
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) {
+      return '';
+    }
+    try {
+      const date = new Date(Number(timestamp));
+      if (Number.isNaN(date.getTime())) {
+        return '';
+      }
+      return date.toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    } catch (_err) {
+      return '';
+    }
+  };
+
+  const generateOpaqueId = (length) => {
+    const size = Number(length) > 0 ? Number(length) : 16;
+    try {
+      if (window.crypto && window.crypto.getRandomValues) {
+        const bytes = new Uint8Array(size);
+        window.crypto.getRandomValues(bytes);
+        return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, size * 2);
+      }
+    } catch (_err) {
+      // Ignore et passe au fallback.
+    }
+    return (Math.random().toString(16).slice(2) + Date.now().toString(16)).substring(0, size * 2);
+  };
+
+  const persistThreadId = (threadId) => {
+    const canonical = typeof threadId === 'string' ? threadId.trim().toUpperCase() : '';
+    if (!canonical) {
+      return '';
+    }
+    try {
+      sessionStorage.setItem(THREAD_ID_KEY, canonical);
+    } catch (_err) {
+      window.__elsAssistantThreadId = canonical;
+    }
+    if (canonical.startsWith('THR_PHC_')) {
+      const code = computePharmacyCodeFromThread(canonical);
+      if (code) {
+        try {
+          sessionStorage.setItem(THREAD_CODE_KEY, code);
+        } catch (_err2) {
+          window.__elsAssistantThreadCode = code;
+        }
+      }
+    }
+    return canonical;
+  };
+
+  const getStoredThreadId = () => {
+    let stored = '';
+    try {
+      stored = sessionStorage.getItem(THREAD_ID_KEY) || '';
+    } catch (_err) {
+      stored = window.__elsAssistantThreadId || '';
+    }
+    const normalized = String(stored || '').toUpperCase();
+    if (/^THR_(?:CLIENT|PHC)_[A-Z0-9]{4,64}$/.test(normalized)) {
+      return normalized.substring(0, 64);
+    }
+    return '';
+  };
+
+  const ensureFallbackCode = () => {
+    let stored = '';
+    try {
+      stored = sessionStorage.getItem(THREAD_CODE_KEY) || '';
+    } catch (_err) {
+      stored = window.__elsAssistantThreadCode || '';
+    }
+    let normalized = String(stored || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (normalized.length >= 4 && normalized.length <= 8) {
+      return normalized;
+    }
+    const sessionSeed = ensureSessionId().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const base = (sessionSeed + 'ELSCHAT').substring(0, 8);
+    normalized = base.length >= 4 ? base : (base + 'XXXX').substring(0, 4);
+    try {
+      sessionStorage.setItem(THREAD_CODE_KEY, normalized);
+    } catch (_err2) {
+      window.__elsAssistantThreadCode = normalized;
+    }
+    return normalized;
+  };
+
+  const buildThreadIdForClient = (client) => {
+    if (!client || !client.clientId) {
+      return '';
+    }
+    const raw = String(client.clientId || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (!raw) {
+      return '';
+    }
+    return `THR_CLIENT_${raw.substring(0, 32)}`;
+  };
+
+  const ensureSessionId = () => {
+    if (state.sessionId) {
+      return state.sessionId;
+    }
+    let stored = '';
+    try {
+      stored = sessionStorage.getItem(SESSION_ID_KEY) || '';
+    } catch (_err) {
+      stored = window.__elsAssistantSessionId || '';
+    }
+    if (!stored || stored.length < 12) {
+      stored = generateOpaqueId(16);
+      try {
+        sessionStorage.setItem(SESSION_ID_KEY, stored);
+      } catch (_err) {
+        window.__elsAssistantSessionId = stored;
+      }
+    }
+    state.sessionId = stored;
+    return stored;
+  };
+
+  const ensureSessionThreadId = () => {
+    const stored = getStoredThreadId();
+    if (stored) {
+      return persistThreadId(stored);
+    }
+    const fallbackCode = ensureFallbackCode();
+    const threadId = `THR_PHC_${fallbackCode}`;
+    return persistThreadId(threadId);
+  };
+
+  const resolveClientThreadId = () => {
+    const client = window?.etat?.clientReconnu;
+    if (client && client.clientId) {
+      const clientThread = buildThreadIdForClient(client);
+      if (clientThread) {
+        return persistThreadId(clientThread);
+      }
+    }
+    const stored = getStoredThreadId();
+    if (stored && stored.startsWith('THR_PHC_')) {
+      return persistThreadId(stored);
+    }
+    return ensureSessionThreadId();
+  };
+
+  const computePharmacyCodeFromThread = (threadId) => {
+    const match = /^THR_PHC_([A-Z0-9]{4,8})$/.exec(String(threadId || '').toUpperCase());
+    if (match && match[1]) {
+      return match[1];
+    }
+    return ensureFallbackCode();
+  };
+
+  const buildConversationMessage = (entry) => {
+    const type = String(entry.authorType || '').toLowerCase() === 'assistant' ? 'assistant' : 'client';
+    return {
+      id: entry.id || `${type}-${entry.timestamp || Date.now()}`,
+      authorType: type,
+      content: entry.content || '',
+      pseudo: entry.pseudo || (type === 'assistant' ? 'Assistant' : 'Vous'),
+      timestamp: entry.timestamp || Date.now(),
+      pending: entry.pending === true
+    };
+  };
+
+  const renderConversation = (streamEl) => {
+    if (!streamEl) {
+      return;
+    }
+    streamEl.innerHTML = '';
+    state.conversation.forEach(message => {
+      const article = document.createElement('article');
+      article.className = 'els-assistant__message ' + (message.authorType === 'assistant' ? 'els-assistant__message--assistant' : 'els-assistant__message--client');
+      if (message.pending) {
+        article.classList.add('els-assistant__message--pending');
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'els-assistant__meta';
+      const timeLabel = formatTimestamp(message.timestamp);
+      meta.textContent = timeLabel ? `${message.pseudo} • ${timeLabel}` : message.pseudo;
+
+      const body = document.createElement('div');
+      body.className = 'els-assistant__body';
+      renderMessageContent(body, message.content || '');
+
+      article.appendChild(meta);
+      article.appendChild(body);
+      streamEl.appendChild(article);
+    });
+    streamEl.scrollTop = streamEl.scrollHeight;
+  };
+
+  const setStatus = (statusEl, text, isError) => {
+    if (!statusEl) {
+      return;
+    }
+    statusEl.textContent = text || '';
+    statusEl.classList.toggle('els-assistant__status--error', Boolean(text && isError));
+  };
+
+  const updateThreadId = (statusEl, shouldReload) => {
+    const current = state.threadId;
+    const next = resolveClientThreadId();
+    state.threadId = next;
+    if (shouldReload && current !== next) {
+      loadHistory(statusEl);
+    }
+  };
+
+  const mergeHistory = (messages, streamEl, statusEl) => {
+    const list = Array.isArray(messages) ? messages : [];
+    const normalized = list
+      .filter(item => {
+        if (!item) {
+          return false;
+        }
+        if (!state.threadId) {
+          return true;
+        }
+        return String(item.threadId || '').toUpperCase() === state.threadId;
+      })
+      .map(item => {
+        const rawType = String(item.authorType || '').toLowerCase();
+        const type = rawType === 'assistant' ? 'assistant' : 'client';
+        const pseudo = item.authorPseudo || (type === 'assistant' ? 'Assistant' : 'Vous');
+        return buildConversationMessage({
+          id: `${state.threadId || 'thread'}-${item.timestamp || Date.now()}`,
+          authorType: type,
+          content: item.message || '',
+          pseudo: pseudo,
+          timestamp: item.timestamp
+        });
+      })
+      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+    state.conversation = normalized;
+    renderConversation(streamEl);
+    if (!normalized.length) {
+      setStatus(statusEl, STATUS_DEFAULT, false);
+    } else {
+      setStatus(statusEl, '', false);
+    }
+  };
+
+  const loadHistory = (statusEl) => {
+    const runner = getGoogleRunner();
+    const streamEl = document.getElementById('assistantStream');
+    if (!runner || !streamEl) {
+      setStatus(statusEl, 'Assistant indisponible pour le moment.', true);
+      return;
+    }
+    if (!state.threadId) {
+      setStatus(statusEl, 'Identifiant de conversation manquant.', true);
+      return;
+    }
+    setStatus(statusEl, 'Chargement des derniers échanges…', false);
+    runner
+      .withSuccessHandler(response => {
+        if (!response || response.ok !== true) {
+          const reason = response && response.reason;
+          let message = 'Assistant indisponible pour le moment.';
+          if (reason === 'UNCONFIGURED') {
+            message = 'Assistant désactivé actuellement.';
+          } else if (reason === 'INVALID_THREAD') {
+            message = 'Identifiant de conversation inconnu.';
+          }
+          setStatus(statusEl, message, true);
+          mergeHistory([], streamEl, statusEl);
+          return;
+        }
+        mergeHistory(response.messages, streamEl, statusEl);
+      })
+      .withFailureHandler(err => {
+        console.warn('[ELS] Assistant: impossible de charger l\'historique', err);
+        setStatus(statusEl, 'Impossible de charger l’historique pour le moment.', true);
+      })
+      .chatGetMessages({ threadId: state.threadId, limit: 200 });
+  };
+
+  const updateLocalQuestion = (questionId, sanitizedQuestion, streamEl, timestamp) => {
+    const index = state.conversation.findIndex(message => message.id === questionId);
+    if (index >= 0) {
+      state.conversation[index] = buildConversationMessage({
+        id: state.conversation[index].id,
+        authorType: 'client',
+        content: sanitizedQuestion,
+        pseudo: 'Vous',
+        timestamp: timestamp || state.conversation[index].timestamp
+      });
+      renderConversation(streamEl);
+    }
+  };
+
+  const updatePendingAnswer = (pendingId, answerText, streamEl) => {
+    const index = state.conversation.findIndex(message => message.id === pendingId);
+    if (index >= 0) {
+      state.conversation[index] = buildConversationMessage({
+        id: pendingId,
+        authorType: 'assistant',
+        content: answerText,
+        pseudo: 'Assistant',
+        timestamp: Date.now()
+      });
+      renderConversation(streamEl);
+    }
+  };
+
+  const removeConversationEntry = (entryId, streamEl) => {
+    const index = state.conversation.findIndex(message => message.id === entryId);
+    if (index >= 0) {
+      state.conversation.splice(index, 1);
+      renderConversation(streamEl);
+    }
+  };
+
+  const removePendingAnswer = (pendingId, streamEl) => {
+    const index = state.conversation.findIndex(message => message.id === pendingId);
+    if (index >= 0) {
+      state.conversation.splice(index, 1);
+      renderConversation(streamEl);
+    }
+  };
+
+  const handlePostError = (reason, ui, questionId, pendingId) => {
+    const { streamEl, statusEl, submitEl, cardEl } = ui;
+    state.isSending = false;
+    state.pendingMessageId = null;
+    if (submitEl) {
+      submitEl.disabled = false;
+    }
+    if (cardEl) {
+      cardEl.classList.remove('els-assistant--loading');
+    }
+    let message = 'Assistant indisponible pour le moment.';
+    if (reason === 'RATE_LIMIT') {
+      message = 'Trop de requêtes successives. Patientez quelques instants.';
+    } else if (reason === 'EMPTY_MESSAGE') {
+      message = 'Le message transmis est vide.';
+    } else if (reason === 'CLIENT_NOT_FOUND') {
+      message = 'Connectez-vous à votre compte officine pour interroger l’assistant.';
+    } else if (reason === 'INVALID_CODE') {
+      message = 'Identifiant officine invalide pour ce fil.';
+    } else if (reason === 'UNCONFIGURED') {
+      message = 'Assistant désactivé actuellement.';
+    } else if (reason === 'UNAUTHORIZED') {
+      message = 'Action non autorisée.';
+    } else if (reason === 'INVALID_THREAD') {
+      message = 'Identifiant de conversation inconnu.';
+    }
+    setStatus(statusEl, message, true);
+    removePendingAnswer(pendingId, streamEl);
+    removeConversationEntry(questionId, streamEl);
+  };
+
+  const handleClientPostResponse = (response, context) => {
+    const { streamEl, statusEl, questionId, pendingId, postPayload, question, promptEl, submitEl, cardEl } = context;
+    if (!response || response.ok !== true) {
+      const reason = response && response.reason;
+      handlePostError(reason, { streamEl, statusEl, submitEl, cardEl }, questionId, pendingId);
+      return;
+    }
+
+    const sanitizedMessage = response.message || question;
+    const timestamp = response.timestamp;
+    const canonicalThread = persistThreadId(response.threadId || postPayload.threadId || state.threadId);
+    state.threadId = canonicalThread;
+    updateLocalQuestion(questionId, sanitizedMessage, streamEl, timestamp);
+
+    const assistantRunner = getGoogleRunner();
+    if (!assistantRunner) {
+      handlePostError('ERROR', { streamEl, statusEl, submitEl, cardEl }, questionId, pendingId);
+      return;
+    }
+
+    const assistantPayload = {
+      threadId: state.threadId,
+      question: sanitizedMessage,
+      sessionId: postPayload.sessionId,
+      clientId: postPayload.clientId,
+      clientEmail: postPayload.clientEmail,
+      pharmacyCode: state.threadId && state.threadId.startsWith('THR_PHC_') ? computePharmacyCodeFromThread(state.threadId) : undefined,
+      skipUserPost: true
+    };
+
+    assistantRunner
+      .withSuccessHandler(response => handleAssistantResponse(response, { streamEl, statusEl, promptEl, submitEl, cardEl }, questionId, pendingId))
+      .withFailureHandler(err => {
+        console.error('[ELS] Assistant: erreur lors de la réponse IA', err);
+        state.isSending = false;
+        state.pendingMessageId = null;
+        if (submitEl) {
+          submitEl.disabled = false;
+        }
+        if (cardEl) {
+          cardEl.classList.remove('els-assistant--loading');
+        }
+        setStatus(statusEl, 'Impossible d’obtenir une réponse pour le moment.', true);
+        removePendingAnswer(pendingId, streamEl);
+      })
+      .askAssistantOnThread(assistantPayload);
+  };
+
+  const handleAssistantResponse = (response, ui, originalQuestionId, pendingId) => {
+    const { streamEl, statusEl, promptEl, submitEl, cardEl } = ui;
+    state.isSending = false;
+    state.pendingMessageId = null;
+    if (submitEl) {
+      submitEl.disabled = false;
+    }
+    if (cardEl) {
+      cardEl.classList.remove('els-assistant--loading');
+    }
+
+    if (!response || response.ok !== true) {
+      const reason = response && response.reason;
+      let message = 'Assistant indisponible pour le moment.';
+      if (reason === 'RATE_LIMIT') {
+        message = 'Trop de requêtes successives. Patientez quelques instants.';
+      } else if (reason === 'EMPTY_MESSAGE') {
+        message = 'Le message transmis est vide.';
+      } else if (reason === 'CLIENT_NOT_FOUND') {
+        message = 'Connectez-vous à votre compte officine pour interroger l’assistant.';
+      } else if (reason === 'UNCONFIGURED') {
+        message = 'Assistant désactivé actuellement.';
+      } else if (reason === 'BUDGET_EXCEEDED') {
+        message = 'Le quota mensuel de l’assistant est atteint.';
+      } else if (reason === 'INVALID_THREAD') {
+        message = 'Identifiant de conversation inconnu.';
+      }
+      setStatus(statusEl, message, true);
+      removePendingAnswer(pendingId, streamEl);
+      return;
+    }
+
+    if (promptEl) {
+      promptEl.value = '';
+    }
+
+    const sanitizedQuestion = response.question || '';
+    const answer = response.answer || '';
+    updateLocalQuestion(originalQuestionId, sanitizedQuestion, streamEl);
+    updatePendingAnswer(pendingId, answer, streamEl);
+
+    if (Array.isArray(response.history) && response.history.length) {
+      mergeHistory(response.history, streamEl, statusEl);
+    } else {
+      setStatus(statusEl, '', false);
+    }
+  };
+
+  const submitQuestion = (event) => {
+    event.preventDefault();
+    const runner = getGoogleRunner();
+    const statusEl = document.getElementById('assistantStatus');
+    const streamEl = document.getElementById('assistantStream');
+    const promptEl = document.getElementById('assistantPrompt');
+    const submitEl = document.getElementById('assistantSubmit');
+    const cardEl = document.getElementById('els-assistant');
+
+    if (!runner || !promptEl || !streamEl) {
+      setStatus(statusEl, 'Assistant indisponible pour le moment.', true);
+      return;
+    }
+
+    const question = (promptEl.value || '').trim();
+    if (!question.length) {
+      setStatus(statusEl, 'Merci de formuler une question avant envoi.', true);
+      return;
+    }
+
+    updateThreadId(statusEl, false);
+    const threadId = state.threadId;
+    const sessionId = ensureSessionId();
+    const client = window?.etat?.clientReconnu;
+
+    if (!threadId) {
+      setStatus(statusEl, 'Identifiant de conversation manquant.', true);
+      return;
+    }
+
+    const questionId = `client-${Date.now()}`;
+    const pendingId = `assistant-${Date.now()}`;
+    state.conversation.push(buildConversationMessage({
+      id: questionId,
+      authorType: 'client',
+      content: question,
+      pseudo: 'Vous',
+      timestamp: Date.now()
+    }));
+    state.conversation.push(buildConversationMessage({
+      id: pendingId,
+      authorType: 'assistant',
+      content: 'Assistant en cours de rédaction…',
+      pseudo: 'Assistant',
+      timestamp: Date.now(),
+      pending: true
+    }));
+    renderConversation(streamEl);
+
+    if (submitEl) {
+      submitEl.disabled = true;
+    }
+    if (cardEl) {
+      cardEl.classList.add('els-assistant--loading');
+    }
+    setStatus(statusEl, 'Assistant en cours de rédaction…', false);
+    state.isSending = true;
+    state.pendingMessageId = pendingId;
+
+    const postPayload = {
+      authorType: 'pharmacy',
+      message: question,
+      threadId: threadId,
+      sessionId: sessionId
+    };
+
+    if (client && client.clientId) {
+      postPayload.clientId = String(client.clientId || '').trim();
+      postPayload.clientEmail = String(client.email || client.contactEmail || '').trim();
+    } else {
+      postPayload.pharmacyCode = computePharmacyCodeFromThread(threadId);
+    }
+
+    runner
+      .withSuccessHandler(response => handleClientPostResponse(response, {
+        streamEl,
+        statusEl,
+        questionId,
+        pendingId,
+        postPayload,
+        question,
+        promptEl,
+        submitEl,
+        cardEl
+      }))
+      .withFailureHandler(err => {
+        console.error('[ELS] Assistant: enregistrement du message impossible', err);
+        handlePostError('ERROR', { streamEl, statusEl, submitEl, cardEl }, questionId, pendingId);
+      })
+      .chatPostMessage(postPayload);
+  };
+
+  const initializeAssistant = () => {
+    if (state.initialized) {
+      return;
+    }
+    const cardEl = document.getElementById('els-assistant');
+    const statusEl = document.getElementById('assistantStatus');
+    const formEl = document.getElementById('assistantForm');
+    const config = window.configServeur || {};
+
+    if (!cardEl || !formEl || !config.CFG_ENABLE_ASSISTANT) {
+      return;
+    }
+
+    ensureSessionId();
+    updateThreadId(statusEl, false);
+    loadHistory(statusEl);
+
+    formEl.addEventListener('submit', submitQuestion);
+
+    document.addEventListener('els-client-recognized', () => {
+      updateThreadId(statusEl, true);
+    });
+    document.addEventListener('els-client-cleared', () => {
+      updateThreadId(statusEl, true);
+    });
+
+    state.initialized = true;
+    setStatus(statusEl, STATUS_DEFAULT, false);
+  };
+
+  document.addEventListener('DOMContentLoaded', initializeAssistant);
+})();
+</script>
