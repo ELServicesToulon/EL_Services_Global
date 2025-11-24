@@ -39,10 +39,10 @@ function doGet(e) {
     // Gestion d'erreur critique au démarrage
     console.error("ERREUR CRITIQUE DOGET : " + error.toString());
     return HtmlService.createHtmlOutput(
-      '<div style="font-family:sans-serif; padding:20px; color:#D32F2F;">'
-      '<h2>Erreur de démarrage</h2>'
-      '<p>L\'application n\'a pas pu charger la configuration ou le template.</p>'
-      '<pre style="background:#eee; padding:10px;">" + error.toString() + "</pre>'
+      '<div style="font-family:sans-serif; padding:20px; color:#D32F2F;">' +
+      '<h2>Erreur de démarrage</h2>' +
+      '<p>L\'application n\'a pas pu charger la configuration ou le template.</p>' +
+      '<pre style="background:#eee; padding:10px;">' + error.toString() + '</pre>' +
       '</div>'
     );
   }
