@@ -563,3 +563,125 @@ function getConfigCached() {
   return config;
 }
 
+
+/**
+ * EL SERVICES - MODULE DE CONFIGURATION CENTRALISÉE
+ * * Ce fichier gère l'accès aux propriétés du script (ScriptProperties).
+ * Il interdit les valeurs en dur pour la sécurité et la maintenabilité.
+ * * @author Dev EL Services
+ */
+
+var Config = (function() {
+
+  // Cache pour éviter de rappeler PropertiesService à chaque fois
+  var _cache = null;
+
+  /**
+   * Charge toutes les propriétés du script une seule fois.
+   * @return {Object} Un objet contenant toutes les clés/valeurs.
+   */
+  function loadProperties() {
+    if (_cache) return _cache;
+    try {
+      _cache = PropertiesService.getScriptProperties().getProperties();
+      console.log("Config chargée avec succès. Clés disponibles : " + Object.keys(_cache).join(', '));
+    } catch (e) {
+      console.error("ERREUR CRITIQUE : Impossible de charger les propriétés du script.", e);
+      // Fallback minimal pour éviter le crash total, mais l'app ne fonctionnera pas correctement
+      _cache = {};
+    }
+    return _cache;
+  }
+
+  /**
+   * Récupère une valeur de configuration spécifique.
+   * @param {string} key - La clé de la propriété (ex: 'ADMIN_EMAIL').
+   * @param {string} [defaultValue] - Valeur par défaut si la clé n'existe pas.
+   * @return {string} La valeur de la propriété.
+   */
+  function get(key, defaultValue) {
+    var props = loadProperties();
+    var val = props[key];
+
+    if (val === undefined || val === null || val === "") {
+      if (defaultValue !== undefined) {
+        console.warn("Config: Clé '" + key + "' manquante, utilisation de la valeur par défaut.");
+        return defaultValue;
+      } else {
+        console.warn("Config: ATTENTION - Clé '" + key + "' introuvable et aucune valeur par défaut fournie.");
+        return ""; // Retourne une chaîne vide pour éviter 'undefined' dans l'UI
+      }
+    }
+    return val;
+  }
+
+  /**
+   * Définit ou met à jour une propriété (Utiliser avec précaution via l'admin).
+   * @param {string} key
+   * @param {string} value
+   */
+  function set(key, value) {
+    try {
+      PropertiesService.getScriptProperties().setProperty(key, value);
+      // Mettre à jour le cache local
+      if (_cache) _cache[key] = value;
+      console.log("Config: Mise à jour de '" + key + "' effectuée.");
+    } catch (e) {
+      console.error("Config: Erreur lors de la mise à jour de '" + key + "'", e);
+      throw e;
+    }
+  }
+
+  // --- API PUBLIQUE DU MODULE ---
+  return {
+    // Méthodes génériques
+    get: get,
+    set: set,
+
+    // Accesseurs rapides pour les constantes métier (Légal & Admin)
+    get ADMIN_EMAIL() { return get('ADMIN_EMAIL', 'elservicestoulon@gmail.com'); },
+    get APP_NAME() { return "EL Services Gestion"; },
+
+    // INFOS LÉGALES (Mises à jour selon KBIS 2025)
+    get SOCIETE_NOM() { return get('SOCIETE_NOM', 'EL Services'); },
+    get SOCIETE_DIRIGEANT() { return get('SOCIETE_DIRIGEANT', 'Emmanuel Lecourt'); },
+    get SOCIETE_ADRESSE() { return get('ADRESSE_ENTREPRISE', '255 Bis Avenue Marcel Castie, 83000 Toulon'); },
+    get SOCIETE_SIRET() { return get('SIRET', '480 913 060 00020'); },
+    get SOCIETE_TVA() { return get('TVA_INTRA', 'FR26480913060'); }, // A vérifier si applicable
+    get SOCIETE_RCS() { return get('RCS', 'R.C.S. Toulon'); },
+
+    // COORDONNÉES BANCAIRES (Nouveau)
+    get SOCIETE_BANQUE() { return get('BANQUE_NOM', 'Banque Populaire Méditerranée'); },
+    get SOCIETE_IBAN() { return get('IBAN', 'FR76 XXXX XXXX XXXX XXXX XXXX XXX (À CONFIGURER)'); },
+    get SOCIETE_BIC() { return get('BIC', 'XXXXXXXX'); },
+
+    // IDS DES DOSSIERS DRIVE & FICHIERS CLÉS
+    get ID_DOSSIER_FACTURES() { return get('ID_DOSSIER_FACTURES'); },
+    get ID_DOSSIER_ARCHIVES() { return get('ID_DOSSIER_ARCHIVES'); },
+    get ID_MODELE_FACTURE() { return get('ID_MODELE_FACTURE'); }, // ID du GDoc Modèle (Si utilisé)
+    get ID_LOGO_URL() { return get('ID_LOGO_URL'); }, // URL publique ou ID Drive
+
+    // EMAIL CONFIG
+    get EMAIL_CONTACT() { return get('EMAIL_ENTREPRISE', 'elservicestoulon@gmail.com'); },
+
+    // FONCTIONNALITÉS
+    get IS_DEBUG() { return get('DEBUG_MODE', 'false') === 'true'; }
+  };
+
+})();
+
+/**
+ * Fonction utilitaire pour tester la configuration.
+ */
+function TEST_Configuration() {
+  console.log("--- TEST CONFIGURATION ---");
+  console.log("Société: " + Config.SOCIETE_NOM);
+  console.log("SIRET: " + Config.SOCIETE_SIRET);
+  console.log("IBAN: " + Config.SOCIETE_IBAN);
+
+  if (Config.SOCIETE_IBAN.includes("À CONFIGURER")) {
+    console.warn("ATTENTION : L'IBAN n'est pas configuré dans les ScriptProperties.");
+  } else {
+    console.log("SUCCÈS : Configuration chargée.");
+  }
+}
