@@ -23,6 +23,7 @@ function doGet(e) {
     template.EMAIL_ENTREPRISE = ELS_CONFIG.EMAIL_ENTREPRISE || 'Contact';
     template.TEL_ENTREPRISE   = ELS_CONFIG.TEL_ENTREPRISE || '';
     template.BRANDING_LOGO_PUBLIC_URL = ELS_CONFIG.BRANDING_LOGO_PUBLIC_URL || '';
+    template.TVA_APPLICABLE = ELS_CONFIG.TVA_DEFAUT > 0;
 
     // 4. Passage des paramètres d'URL (ex: ?page=facturation)
     template.urlParams = e ? e.parameter : {};
