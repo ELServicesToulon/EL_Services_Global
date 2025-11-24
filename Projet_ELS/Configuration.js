@@ -1,6 +1,6 @@
 /**
  * @fileoverview CONFIGURATION MAÎTRE - PROJET ELS (Global)
- * Version : Corrigée (Intègre BRANDING_LOGO_PUBLIC_URL + Fix ReferenceError)
+ * Version : Robuste (Wrapped in ELS_CONFIG object to prevent ReferenceError)
  */
 
 const _SCRIPT_PROPS = PropertiesService.getScriptProperties();
@@ -20,57 +20,42 @@ function getConf(key, defaultValue) {
 }
 
 // ============================================================================
-// 1. IDENTITÉ ET CONTACTS
+// ELS_CONFIG: OBJET DE CONFIGURATION UNIQUE ET GLOBAL
 // ============================================================================
-const NOM_ENTREPRISE     = getConf('NOM_ENTREPRISE', 'EL Services');
-const EMAIL_ENTREPRISE   = getConf('EMAIL_ENTREPRISE', 'elservicestoulon@gmail.com');
-const ADMIN_EMAIL        = getConf('ADMIN_EMAIL', 'elservicestoulon@gmail.com');
-const ADRESSE_ENTREPRISE = getConf('ADRESSE_ENTREPRISE', '255 Bis Avenue Marcel Castie, 83000 Toulon');
-const SIRET_ENTREPRISE   = getConf('SIRET', '480913060');
-const TEL_ENTREPRISE     = getConf('TEL_ENTREPRISE', '0650417110');
+const ELS_CONFIG = {
+    // 1. IDENTITÉ ET CONTACTS
+    NOM_ENTREPRISE: getConf('NOM_ENTREPRISE', 'EL Services'),
+    EMAIL_ENTREPRISE: getConf('EMAIL_ENTREPRISE', 'elservicestoulon@gmail.com'),
+    ADMIN_EMAIL: getConf('ADMIN_EMAIL', 'elservicestoulon@gmail.com'),
+    ADRESSE_ENTREPRISE: getConf('ADRESSE_ENTREPRISE', '255 Bis Avenue Marcel Castie, 83000 Toulon'),
+    SIRET_ENTREPRISE: getConf('SIRET', '480913060'),
+    TEL_ENTREPRISE: getConf('TEL_ENTREPRISE', '0650417110'),
 
-// ============================================================================
-// 2. INFRASTRUCTURE GOOGLE DRIVE & SHEETS (IDs Critiques)
-// ============================================================================
+    // 2. INFRASTRUCTURE
+    ID_FEUILLE_CALCUL: getConf('ID_FEUILLE_CALCUL', '1hRea4xVBO3hoNjqV2tD9mnAENr6UhEJ9of7BlbrJuRygMUHkNmbiX93q'),
+    ID_CALENDRIER: getConf('ID_CALENDRIER', 'elservicestoulon@gmail.com'),
+    ID_DOSSIER_FACTURES: getConf('ID_DOSSIER_FACTURES', ''),
+    ID_DOSSIER_ARCHIVES: getConf('ID_DOSSIER_ARCHIVES', ''),
+    ID_DOSSIER_TEMPORAIRE: getConf('ID_DOSSIER_TEMPORAIRE', ''),
+    ID_DOCUMENT_CGV: getConf('ID_DOCUMENT_CGV', ''),
+    ID_LOGO: getConf('ID_LOGO', ''),
 
-// ID de la Spreadsheet Principale
-const ID_FEUILLE_CALCUL = getConf('ID_FEUILLE_CALCUL', '1hRea4xVBO3hoNjqV2tD9mnAENr6UhEJ9of7BlbrJuRygMUHkNmbiX93q'); 
+    // 3. PARAMÈTRES MÉTIER
+    TVA_DEFAUT: 0.0,
+    DELAI_PAIEMENT_DEFAUT: 30,
 
-// ID du Calendrier Google
-const ID_CALENDRIER = getConf('ID_CALENDRIER', 'elservicestoulon@gmail.com'); 
+    // 4. SÉCURITÉ & API
+    ELS_SHARED_SECRET: getConf('ELS_SHARED_SECRET', 'SharedSecret_ELS_2024_Secure'),
 
-// Dossiers de stockage
-const ID_DOSSIER_FACTURES   = getConf('ID_DOSSIER_FACTURES', '');   
-const ID_DOSSIER_ARCHIVES   = getConf('ID_DOSSIER_ARCHIVES', '');
-const ID_DOSSIER_TEMPORAIRE = getConf('ID_DOSSIER_TEMPORAIRE', '');
+    // 5. FLAGS DE MAINTENANCE
+    BILLING_ID_PDF_CHECK_ENABLED: true
+};
 
-// Documents Modèles & Assets
-const ID_DOCUMENT_CGV = getConf('ID_DOCUMENT_CGV', '');
-const ID_LOGO         = getConf('ID_LOGO', ''); 
-
-// URL Publique du Logo (Pour affichage dans les emails/HTML)
-// Construit une URL Drive si ID_LOGO est présent, sinon vide.
-const BRANDING_LOGO_PUBLIC_URL = getConf('BRANDING_LOGO_PUBLIC_URL', 
-  ID_LOGO ? 'https://drive.google.com/uc?export=view&id=' + ID_LOGO : ''
+// Propriétés dérivées (qui dépendent d'autres clés de l'objet)
+ELS_CONFIG.BRANDING_LOGO_PUBLIC_URL = getConf('BRANDING_LOGO_PUBLIC_URL',
+    ELS_CONFIG.ID_LOGO ? 'https://drive.google.com/uc?export=view&id=' + ELS_CONFIG.ID_LOGO : ''
 );
 
-// ============================================================================
-// 3. PARAMÈTRES MÉTIER
-// ============================================================================
-const TVA_DEFAUT = 0.0; // Franchise en base
-const DELAI_PAIEMENT_DEFAUT = 30; // Jours
-
-// ============================================================================
-// 4. SÉCURITÉ & API
-// ============================================================================
-const ELS_SHARED_SECRET = getConf('ELS_SHARED_SECRET', 'SharedSecret_ELS_2024_Secure'); 
-
-// ============================================================================
-// 5. FLAGS DE MAINTENANCE & FEATURES
-// ============================================================================
-
-// Active la vérification de l'existence du PDF avant de tenter une action de facturation.
-const BILLING_ID_PDF_CHECK_ENABLED = true; 
 
 // ============================================================================
 // 6. FONCTIONS UTILITAIRES DE DEBUG & AUDIT
@@ -78,11 +63,11 @@ const BILLING_ID_PDF_CHECK_ENABLED = true;
 
 function AUDIT_CONFIGURATION() {
   const keysToCheck = {
-    'NOM_ENTREPRISE': NOM_ENTREPRISE,
-    'EMAIL_ENTREPRISE': EMAIL_ENTREPRISE,
-    'ID_FEUILLE_CALCUL': ID_FEUILLE_CALCUL,
-    'BRANDING_LOGO_PUBLIC_URL': BRANDING_LOGO_PUBLIC_URL,
-    'BILLING_ID_PDF_CHECK_ENABLED': BILLING_ID_PDF_CHECK_ENABLED,
+    'NOM_ENTREPRISE': ELS_CONFIG.NOM_ENTREPRISE,
+    'EMAIL_ENTREPRISE': ELS_CONFIG.EMAIL_ENTREPRISE,
+    'ID_FEUILLE_CALCUL': ELS_CONFIG.ID_FEUILLE_CALCUL,
+    'BRANDING_LOGO_PUBLIC_URL': ELS_CONFIG.BRANDING_LOGO_PUBLIC_URL,
+    'BILLING_ID_PDF_CHECK_ENABLED': ELS_CONFIG.BILLING_ID_PDF_CHECK_ENABLED,
     'PublicConfig': 'OK'
   };
 
@@ -97,18 +82,14 @@ function AUDIT_CONFIGURATION() {
 // 7. API PUBLIQUE (FRONTEND) - INDISPENSABLE POUR L'UI
 // ============================================================================
 
-/**
- * Expose les données de configuration NON-SENSIBLES au frontend (HTML/JS).
- * Appelé par google.script.run au chargement de la page.
- */
 function getPublicConfig() {
   return {
-    NOM_ENTREPRISE: NOM_ENTREPRISE,
-    EMAIL_ENTREPRISE: EMAIL_ENTREPRISE,
-    TEL_ENTREPRISE: TEL_ENTREPRISE,
-    ADRESSE_ENTREPRISE: ADRESSE_ENTREPRISE,
-    SIRET: SIRET_ENTREPRISE,
-    LOGO_ID: ID_LOGO,
-    BRANDING_LOGO_PUBLIC_URL: BRANDING_LOGO_PUBLIC_URL
+    NOM_ENTREPRISE: ELS_CONFIG.NOM_ENTREPRISE,
+    EMAIL_ENTREPRISE: ELS_CONFIG.EMAIL_ENTREPRISE,
+    TEL_ENTREPRISE: ELS_CONFIG.TEL_ENTREPRISE,
+    ADRESSE_ENTREPRISE: ELS_CONFIG.ADRESSE_ENTREPRISE,
+    SIRET: ELS_CONFIG.SIRET_ENTREPRISE,
+    LOGO_ID: ELS_CONFIG.ID_LOGO,
+    BRANDING_LOGO_PUBLIC_URL: ELS_CONFIG.BRANDING_LOGO_PUBLIC_URL
   };
 }
