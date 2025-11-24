@@ -213,7 +213,7 @@ function askAssistant(row) {
 
 /**
  * Fournit une réponse assistant pour un thread spécifique côté WebApp.
- * @param {{threadId?:string, question?:string, sessionId?:string, clientId?:string, clientEmail?:string, pharmacyCode?:string}}
+ * @param {{threadId?:string, question?:string, sessionId?:string, clientId?:string, clientEmail?:string, pharmacyCode?:string}} rawInput
  * @returns {{ok:boolean, reason?:string, answer?:string, question?:string, threadId?:string, history?:Array<Object>}}
  */
 function askAssistantOnThread(rawInput) {
