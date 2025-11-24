@@ -1,9 +1,6 @@
 /**
  * @fileoverview CONFIGURATION MAÎTRE - PROJET ELS (Global)
- * Fusionne l'ancienne méthode (variables en dur) et la nouvelle (ScriptProperties).
- * * PRINCIPE : 
- * 1. On tente de lire dans PropertiesService (Sécurisé).
- * 2. Si vide, on prend la valeur par défaut (Hardcoded - Compatibilité v113).
+ * Version Corrigée : Intègre BILLING_ID_PDF_CHECK_ENABLED pour éviter l'erreur dans Maintenance.gs
  */
 
 const _SCRIPT_PROPS = PropertiesService.getScriptProperties();
@@ -19,7 +16,6 @@ function getConf(key, defaultValue) {
   if (val && val.trim() !== "") {
     return val;
   }
-  // Si pas de propriété définie, on utilise la valeur par défaut pour ne pas casser la prod
   return defaultValue; 
 }
 
@@ -30,27 +26,26 @@ const EMAIL_ENTREPRISE   = getConf('EMAIL_ENTREPRISE', 'elservicestoulon@gmail.c
 const ADMIN_EMAIL        = getConf('ADMIN_EMAIL', 'elservicestoulon@gmail.com');
 const ADRESSE_ENTREPRISE = getConf('ADRESSE_ENTREPRISE', '255 Bis Avenue Marcel Castie, 83000 Toulon');
 const SIRET_ENTREPRISE   = getConf('SIRET', '480913060');
-const TEL_ENTREPRISE     = getConf('TEL_ENTREPRISE', '0650417110'); // Ajouté par sécurité
+const TEL_ENTREPRISE     = getConf('TEL_ENTREPRISE', '0650417110');
 
 // ============================================================================
 // 2. INFRASTRUCTURE GOOGLE DRIVE & SHEETS (IDs Critiques)
 // ============================================================================
 
-// ID de la Spreadsheet Principale (Cœur du système)
-// Note : Si vide ici, le script risque d'échouer. Assurez-vous que l'ID est correct.
+// ID de la Spreadsheet Principale
 const ID_FEUILLE_CALCUL = getConf('ID_FEUILLE_CALCUL', '1hRea4xVBO3hoNjqV2tD9mnAENr6UhEJ9of7BlbrJuRygMUHkNmbiX93q'); 
 
 // ID du Calendrier Google
 const ID_CALENDRIER = getConf('ID_CALENDRIER', 'elservicestoulon@gmail.com'); 
 
 // Dossiers de stockage
-const ID_DOSSIER_FACTURES   = getConf('ID_DOSSIER_FACTURES', '');   // Insérer ID si connu, sinon laisser vide (le code devra gérer)
+const ID_DOSSIER_FACTURES   = getConf('ID_DOSSIER_FACTURES', '');   
 const ID_DOSSIER_ARCHIVES   = getConf('ID_DOSSIER_ARCHIVES', '');
 const ID_DOSSIER_TEMPORAIRE = getConf('ID_DOSSIER_TEMPORAIRE', '');
 
 // Documents Modèles & Assets
 const ID_DOCUMENT_CGV = getConf('ID_DOCUMENT_CGV', '');
-const ID_LOGO         = getConf('ID_LOGO', ''); // ID de l'image du logo sur Drive
+const ID_LOGO         = getConf('ID_LOGO', ''); 
 
 // ============================================================================
 // 3. PARAMÈTRES MÉTIER
@@ -67,22 +62,24 @@ const ELS_SHARED_SECRET = getConf('ELS_SHARED_SECRET', 'SharedSecret_ELS_2024_Se
 // 5. FONCTIONS UTILITAIRES DE DEBUG
 // ============================================================================
 
-/**
- * Lancez cette fonction manuellement pour voir quelles valeurs sont utilisées.
- * Utile pour vérifier si le script utilise le code en dur ou les ScriptProperties.
- */
 function AUDIT_CONFIGURATION() {
   const keysToCheck = {
     'EMAIL_ENTREPRISE': EMAIL_ENTREPRISE,
     'ID_FEUILLE_CALCUL': ID_FEUILLE_CALCUL,
-    'ID_CALENDRIER': ID_CALENDRIER,
-    'SIRET': SIRET_ENTREPRISE
+    'BILLING_ID_PDF_CHECK_ENABLED': BILLING_ID_PDF_CHECK_ENABLED
   };
 
   console.log("=== AUDIT DE CONFIGURATION ===");
   for (let [k, v] of Object.entries(keysToCheck)) {
-    const source = _SCRIPT_PROPS.getProperty(k) ? "[SCRIPT_PROPERTY]" : "[HARDCODED/DEFAUT]";
-    console.log(`${k} : ${v} (${source})`);
+    console.log(`${k} : ${v}`);
   }
   console.log("==============================");
 }
+
+// ============================================================================
+// 6. FLAGS DE MAINTENANCE & FEATURES (Ajout pour corriger l'erreur ReferenceError)
+// ============================================================================
+
+// Active la vérification de l'existence du PDF avant de tenter une action de facturation.
+// Empêche d'écraser des fichiers existants ou de générer des doublons par erreur.
+const BILLING_ID_PDF_CHECK_ENABLED = true; 
