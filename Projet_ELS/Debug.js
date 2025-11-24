@@ -19,7 +19,7 @@ const TEST_CLIENT = {
   nbTourneesOffertes: 2
 };
 
-const ADMIN_TEST_EMAIL = ELS_CONFIG.ADMIN_EMAIL; // Utilise l'email admin de la configuration
+const ADMIN_TEST_EMAIL = ADMIN_EMAIL; // Utilise l'email admin de la configuration
 
 /**
  * Fonction principale pour exécuter tous les tests séquentiellement.
