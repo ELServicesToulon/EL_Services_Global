@@ -984,7 +984,7 @@ function genererFactures() {
           });
         });
 
-        const tva = TVA_APPLICABLE ? totalMontant * TAUX_TVA : 0;
+        const tva = totalMontant * ELS_CONFIG.TVA_DEFAUT;
         const totalTTC = totalMontant + tva;
         if (totalAvantRemises === 0) {
           totalAvantRemises = totalMontant;
