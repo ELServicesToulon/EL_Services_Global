@@ -318,9 +318,7 @@ function menuAskAssistant() {
     }
     const rowIndex = activeRange.getRow();
     const answer = askAssistant(rowIndex);
-    ui.alert('Assistant Chat', 'Reponse envoyee dans le fil: 
-
-' + answer, ui.ButtonSet.OK);
+    ui.alert('Assistant Chat', 'Reponse envoyee dans le fil:\n\n' + answer, ui.ButtonSet.OK);
   } catch (err) {
     ui.alert('Assistant Chat', err.message || String(err), ui.ButtonSet.OK);
   }
