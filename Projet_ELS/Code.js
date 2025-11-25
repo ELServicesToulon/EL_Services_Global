@@ -13,30 +13,33 @@
  * Déclenché à l'ouverture du Google Sheet pour installer les menus.
  * @param {Object} e - Événement d'ouverture Apps Script.
  */
+
 function onOpen(e) {
   const ui = SpreadsheetApp.getUi();
 
-  const menuPrincipal = ui.createMenu('ELS')
-    .addItem('Générer les factures sélectionnées', 'genererFactures')
-    .addItem('Envoyer les factures contrôlées', 'envoyerFacturesControlees')
-    .addItem('Générer lien Espace Client', 'menuGenererLienClient')
+  const menuPrincipal = ui.createMenu('ELS');
+
+  menuPrincipal
+    .addItem('Generer les factures selectionnees', 'genererFactures')
+    .addItem('Envoyer les factures controlees', 'envoyerFacturesControlees')
     .addItem('Archiver les factures du mois dernier', 'archiverFacturesDuMois')
+    .addItem('Generer lien Espace Client', 'menuGenererLienClient')
     .addSeparator()
-    .addItem('Vérifier la cohérence du calendrier', 'verifierCoherenceCalendrier');
+    .addItem('Verifier la coherence du calendrier', 'verifierCoherenceCalendrier');
 
   const sousMenuMaintenance = ui.createMenu('Maintenance')
+    .addItem('Verifier l installation', 'menuVerifierInstallation')
+    .addItem('Verifier structure des feuilles', 'menuVerifierStructureFeuilles')
     .addItem('Sauvegarder le code du projet', 'sauvegarderCodeProjet')
-    .addItem('Sauvegarder les données', 'sauvegarderDonnees')
-    .addItem('Vérifier structure des feuilles', 'menuVerifierStructureFeuilles')
-    .addItem("Vérifier l'installation", 'menuVerifierInstallation')
-    .addItem('Purger les anciennes données (RGPD)', 'purgerAnciennesDonnees')
+    .addItem('Sauvegarder les donnees', 'sauvegarderDonnees')
+    .addItem('Purger les anciennes donnees (RGPD)', 'purgerAnciennesDonnees')
     .addSeparator()
     .addItem("Nettoyer l'onglet Facturation", 'nettoyerOngletFacturation')
     .addItem('Reparer entetes Facturation', 'reparerEntetesFacturation')
     .addItem('Normaliser entetes Facturation', 'normaliserEntetesFacturation');
 
   if (isFlagEnabled_('CALENDAR_RESYNC_ENABLED')) {
-    sousMenuMaintenance.addItem('Resynchroniser événement manquant', 'menuResynchroniserEvenement');
+    sousMenuMaintenance.addItem('Resynchroniser evenement manquant', 'menuResynchroniserEvenement');
   }
   if (isFlagEnabled_('CALENDAR_PURGE_ENABLED')) {
     sousMenuMaintenance.addItem('Purger Event ID introuvable', 'menuPurgerEventId');
@@ -47,22 +50,23 @@ function onOpen(e) {
   if (isCallable_('genererDevisPdfDepuisSelection')) {
     menuPrincipal.addItem('Generer un devis (PDF) - selection', 'genererDevisPdfDepuisSelection');
   }
+  menuPrincipal.addSeparator();
   menuPrincipal.addItem('Rafraichir le menu', 'onOpen');
 
   if (isFlagEnabled_('DEBUG_MENU_ENABLED')) {
     const sousMenuDebug = ui.createMenu('Debug')
       .addItem('Lancer tous les tests', 'lancerTousLesTests')
       .addItem('Tester audit Drive', 'testerAuditDrive')
-      .addItem('Générer lien Espace Client', 'menuGenererLienClient');
+      .addItem('Generer lien Espace Client', 'menuGenererLienClient');
     menuPrincipal.addSubMenu(sousMenuDebug);
   }
 
   menuPrincipal.addToUi();
-  safeToast_('Menu ELS mis à jour', 'ELS', 5);
+  safeToast_('Menu ELS mis a jour', 'ELS', 5);
 
   const canValidate = hasFullAuthorization_(e);
   if (!canValidate) {
-    safeToast_('Autorisations Apps Script requises pour valider la config. Ouvrez le projet Apps Script et exécutez validerConfiguration().', 'ELS', 10);
+    safeToast_('Autorisations Apps Script requises pour valider la config. Ouvrez le projet Apps Script et executez validerConfiguration().', 'ELS', 10);
     return;
   }
 
@@ -71,6 +75,7 @@ function onOpen(e) {
   } catch (err) {
     ui.alert('Configuration invalide', err.message, ui.ButtonSet.OK);
   }
+}
 }
 
 function onInstall(e) {
