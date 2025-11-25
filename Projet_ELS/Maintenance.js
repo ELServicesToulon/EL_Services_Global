@@ -16,6 +16,78 @@ const FACTURATION_HEADERS = (function() {
   return headers;
 })();
 
+// Registre extensible pour declarer les feuilles attendues (onglet + en-tetes).
+var SHEET_EXPECTATIONS_REGISTRY = [];
+
+/**
+ * Permet aux modules d'ajouter une feuille attendue (utilisee par la verification auto).
+ * @param {{name:string,headers:string[],required?:boolean}} exp
+ */
+function registerSheetExpectation(exp) {
+  if (!exp || !exp.name) return;
+  var entry = {
+    name: String(exp.name),
+    headers: Array.isArray(exp.headers) ? exp.headers.slice() : [],
+    required: exp.required !== false
+  };
+  for (var i = 0; i < SHEET_EXPECTATIONS_REGISTRY.length; i++) {
+    if (SHEET_EXPECTATIONS_REGISTRY[i].name === entry.name) {
+      var existing = new Set(SHEET_EXPECTATIONS_REGISTRY[i].headers);
+      entry.headers.forEach(function(h) {
+        if (!existing.has(h)) {
+          SHEET_EXPECTATIONS_REGISTRY[i].headers.push(h);
+        }
+      });
+      return;
+    }
+  }
+  SHEET_EXPECTATIONS_REGISTRY.push(entry);
+}
+
+function getBaseSheetExpectations_() {
+  return [
+    { name: 'Clients', headers: ['Email', 'Raison Sociale', 'Adresse', 'SIRET', COLONNE_TYPE_REMISE_CLIENT, COLONNE_VALEUR_REMISE_CLIENT, COLONNE_NB_TOURNEES_OFFERTES, COLONNE_RESIDENT_CLIENT, COLONNE_ID_CLIENT, COLONNE_CODE_POSTAL_CLIENT], required: true },
+    { name: SHEET_CODES_POSTAUX_RETRAIT, headers: [COLONNE_CODE_POSTAL_CLIENT, 'Libell�'], required: true },
+    { name: 'Facturation', headers: FACTURATION_HEADERS, required: true },
+    { name: 'Plages_Bloquees', headers: ['Date', 'Heure_Debut', 'Heure_Fin'], required: false },
+    { name: 'Logs', headers: ['Timestamp', 'Reservation ID', 'Client Email', 'R�sum�', 'Montant', 'Statut'], required: false },
+    { name: 'Admin_Logs', headers: ['Timestamp', 'Utilisateur', 'Action', 'Statut'], required: false },
+    { name: SHEET_CHAT, headers: ['timestamp','thread_id','author_type','author_ref','author_pseudo','message','visible_to','status','attachments'], required: false },
+    { name: SHEET_CHAT_META, headers: ['key','value'], required: false },
+    { name: SHEET_DEMANDES_TOURNEE, headers: ['timestamp','etablissement_type','etablissement_nom','contact_email','contact_tel','adresse','jours_souhaites','plage_horaire','details','statut','pharmacie_cible','note_interne'], required: false },
+    { name: SHEET_QUESTIONS, headers: ['id','question','auteur','reponses_json'], required: false }
+  ];
+}
+
+function getSheetExpectations_() {
+  var expectations = [];
+  expectations = expectations.concat(getBaseSheetExpectations_());
+  expectations = expectations.concat(SHEET_EXPECTATIONS_REGISTRY || []);
+  if (typeof getExtraSheetExpectations === 'function') {
+    try {
+      var extra = getExtraSheetExpectations();
+      if (Array.isArray(extra)) {
+        expectations = expectations.concat(extra.filter(function(e){ return e && e.name; }));
+      }
+    } catch (_err) {}
+  }
+  var merged = {};
+  expectations.forEach(function(exp) {
+    var key = exp.name;
+    if (!merged[key]) {
+      merged[key] = { name: key, headers: [], required: exp.required !== false };
+    }
+    var set = new Set(merged[key].headers);
+    (Array.isArray(exp.headers) ? exp.headers : []).forEach(function(h) {
+      if (!set.has(h)) {
+        merged[key].headers.push(h);
+        set.add(h);
+      }
+    });
+  });
+  return Object.keys(merged).map(function(k){ return merged[k]; });
+}
+
 // =================================================================
 //                      1. JOURNALISATION (LOGGING)
 // =================================================================
@@ -118,15 +190,7 @@ function notifyAdminWithThrottle(typeErreur, sujet, corps) {
  */
 function verifierStructureFeuilles() {
   const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
-  const expectations = [
-    { name: 'Clients', headers: ['Email', 'Raison Sociale', 'Adresse', 'SIRET', COLONNE_TYPE_REMISE_CLIENT, COLONNE_VALEUR_REMISE_CLIENT, COLONNE_NB_TOURNEES_OFFERTES, COLONNE_RESIDENT_CLIENT, COLONNE_ID_CLIENT, COLONNE_CODE_POSTAL_CLIENT], required: true },
-    { name: SHEET_CODES_POSTAUX_RETRAIT, headers: [COLONNE_CODE_POSTAL_CLIENT, 'Libellé'], required: true },
-    { name: 'Facturation', headers: FACTURATION_HEADERS, required: true },
-    { name: 'Plages_Bloquees', headers: ['Date', 'Heure_Debut', 'Heure_Fin'], required: false },
-    { name: 'Logs', headers: ['Timestamp', 'Reservation ID', 'Client Email', 'Résumé', 'Montant', 'Statut'], required: false },
-    { name: 'Admin_Logs', headers: ['Timestamp', 'Utilisateur', 'Action', 'Statut'], required: false }
-  ];
-
+  const expectations = getSheetExpectations_();
   const report = [];
   expectations.forEach(exp => {
     let sh = ss.getSheetByName(exp.name);
