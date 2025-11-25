@@ -1,124 +1,234 @@
 <script>
-  (function() {
-    const fab = document.getElementById('piluleur-fab');
-    const windowEl = document.getElementById('piluleur-window');
-    const closeBtn = document.getElementById('piluleur-close');
-    const inputEl = document.getElementById('piluleur-input');
-    const sendBtn = document.getElementById('piluleur-send');
-    const messagesContainer = document.getElementById('piluleur-messages');
+  /**
+   * PiluleurManager - Gestionnaire de l'Assistant Contextuel
+   * Gère la position de la gélule, le contexte et la communication
+   */
+  const PiluleurManager = {
+    // État interne
+    state: {
+      isOpen: false,
+      currentContext: 'Général',
+      lastClickX: 0,
+      lastClickY: 0,
+      isDragging: false
+    },
 
-    // État local
-    let isWindowOpen = false;
-    let currentSessionData = { step: 'ACCUEIL' }; // Initial state
+    // Elements DOM (initialisés dans init)
+    dom: {},
 
-    // Gestion Ouverture/Fermeture
-    function toggleWindow() {
-      isWindowOpen = !isWindowOpen;
-      if (isWindowOpen) {
-        windowEl.classList.remove('hidden');
-        inputEl.focus();
-        // Message d'accueil automatique si conversation vide
-        if (messagesContainer.children.length === 0) {
-            // On peut déclencher un "Bonjour" automatique ou attendre l'user.
-            // Pour l'instant on attend l'user ou on affiche un message local.
-            // appendMessage("Bonjour ! Je suis Piluleur.", false);
+    /**
+     * Initialisation principale
+     */
+    init: function() {
+      // Référencement des éléments DOM
+      this.dom.container = document.getElementById('els-piluleur-container');
+      this.dom.window = document.getElementById('piluleur-window');
+      this.dom.input = document.getElementById('chat-input');
+      this.dom.messages = document.getElementById('chat-messages');
+      this.dom.contextIndicator = document.getElementById('context-indicator');
+      this.dom.label = document.getElementById('piluleur-label');
+
+      // Écouteur global pour le positionnement et le contexte
+      document.addEventListener('click', (e) => this.handleGlobalClick(e));
+
+      console.log("💊 Piluleur (Assistant ELS) initialisé.");
+
+      // Message de bienvenue automatique
+      this.addMessage('assistant', "Bonjour Emmanuel. Je suis prêt à vous assister. Cliquez sur une section pour que je cible ma réponse.");
+    },
+
+    /**
+     * Gère les clics globaux sur la page
+     * 1. Détecte le contexte (ex: clic sur un tableau de facture)
+     * 2. Déplace la gélule à proximité (si le chat est fermé)
+     */
+    handleGlobalClick: function(e) {
+      // Ignorer si clic DANS le piluleur
+      if (this.dom.container.contains(e.target)) return;
+
+      this.state.lastClickX = e.clientX;
+      this.state.lastClickY = e.clientY;
+
+      // 1. Détection du contexte
+      const newContext = this.detectContext(e.target);
+      if (newContext !== this.state.currentContext) {
+        this.state.currentContext = newContext;
+        this.updateContextUI();
+      }
+
+      // 2. Déplacement de la gélule (Seulement si chat fermé pour ne pas gêner)
+      if (!this.state.isOpen) {
+        this.moveCapsuleNear(e.clientX, e.clientY);
+      }
+    },
+
+    /**
+     * Logique de détection de contexte basée sur le DOM
+     */
+    detectContext: function(target) {
+      let context = 'Général';
+
+      // Recherche des indices dans les parents
+      if (target.closest('#reservation-form') || target.closest('.reservation-step')) {
+        context = 'Réservation';
+      } else if (target.closest('#facturation-table') || target.closest('.facture-row')) {
+        context = 'Facturation';
+      } else if (target.closest('.client-card') || target.closest('#client-search')) {
+        context = 'Client';
+      } else if (target.tagName === 'INPUT' || target.tagName === 'SELECT') {
+        const label = target.previousElementSibling?.innerText || target.placeholder;
+        if(label) context = `Champ : ${label.substring(0, 15)}...`;
+      }
+
+      return context;
+    },
+
+    /**
+     * Met à jour l'UI avec le nouveau contexte
+     */
+    updateContextUI: function() {
+      if(this.dom.contextIndicator) {
+        this.dom.contextIndicator.innerText = "Contexte : " + this.state.currentContext;
+        // Animation légère pour signaler le changement
+        this.dom.contextIndicator.style.color = '#D32F2F';
+        setTimeout(() => this.dom.contextIndicator.style.color = '#666', 1000);
+      }
+
+      // Met à jour le texte de la gélule
+      if(this.dom.label) {
+          this.dom.label.innerText = (this.state.currentContext === 'Général') ? 'Aide' : 'Aide ici';
+      }
+    },
+
+    /**
+     * Déplace la gélule à une position ergonomique près du clic
+     */
+    moveCapsuleNear: function(x, y) {
+      // Dimensions de la fenêtre
+      const winW = window.innerWidth;
+      const winH = window.innerHeight;
+
+      // Marges de sécurité
+      const margin = 20;
+      const capsuleW = 100; // approx
+      const capsuleH = 44;
+
+      // Position cible : 50px à droite et 20px en bas du clic
+      let targetX = x + 40;
+      let targetY = y + 20;
+
+      // Correction débordement Droite
+      if (targetX + capsuleW > winW) targetX = x - capsuleW - 20;
+      // Correction débordement Bas
+      if (targetY + capsuleH > winH) targetY = y - capsuleH - 20;
+
+      // Application
+      this.dom.container.style.left = targetX + 'px';
+      this.dom.container.style.top = targetY + 'px';
+      this.dom.container.style.bottom = 'auto'; // Désactiver le bottom initial
+      this.dom.container.style.right = 'auto';
+    },
+
+    /**
+     * Ouvre/Ferme le chat
+     */
+    toggleChat: function() {
+      this.state.isOpen = !this.state.isOpen;
+
+      if (this.state.isOpen) {
+        this.dom.window.classList.remove('hidden');
+        // Focus sur l'input
+        setTimeout(() => this.dom.input.focus(), 300);
+        // Message d'accueil contextuel si vide
+        if (this.dom.messages.children.length <= 1) { // 1 car message système
+             // On pourrait ajouter un message automatique ici
         }
       } else {
-        windowEl.classList.add('hidden');
+        this.dom.window.classList.add('hidden');
       }
-    }
+    },
 
-    fab.addEventListener('click', toggleWindow);
-    closeBtn.addEventListener('click', toggleWindow);
+    closeChat: function() {
+      this.state.isOpen = false;
+      this.dom.window.classList.add('hidden');
+    },
 
-    // Affichage message
-    function appendMessage(text, isUser) {
-      const bubble = document.createElement('div');
-      bubble.classList.add('message-bubble');
-      bubble.classList.add(isUser ? 'message-user' : 'message-piluleur');
-      bubble.innerHTML = text; // innerHTML pour permettre gras/italique si besoin
-      messagesContainer.appendChild(bubble);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
+    /**
+     * Gestion de la touche Entrée
+     */
+    handleInputKey: function(e) {
+      if (e.key === 'Enter') this.sendMessage();
+    },
 
-    // Affichage Options (Boutons)
-    function appendOptions(options) {
-      if (!options || !Array.isArray(options) || options.length === 0) return;
-
-      const optionsContainer = document.createElement('div');
-      optionsContainer.classList.add('piluleur-options');
-      optionsContainer.style.display = 'flex';
-      optionsContainer.style.gap = '8px';
-      optionsContainer.style.marginTop = '8px';
-      optionsContainer.style.flexWrap = 'wrap';
-
-      options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.textContent = opt;
-        btn.style.padding = '6px 12px';
-        btn.style.border = '1px solid #007bff';
-        btn.style.borderRadius = '15px';
-        btn.style.backgroundColor = 'white';
-        btn.style.color = '#007bff';
-        btn.style.cursor = 'pointer';
-        btn.onclick = () => {
-            inputEl.value = opt;
-            sendMessage();
-        };
-        optionsContainer.appendChild(btn);
-      });
-
-      // Ajouter à la dernière bulle ou au container
-      messagesContainer.appendChild(optionsContainer);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    // Envoi message
-    function sendMessage() {
-      const text = inputEl.value.trim();
+    /**
+     * Envoi du message au backend
+     */
+    sendMessage: function() {
+      const text = this.dom.input.value.trim();
       if (!text) return;
 
-      appendMessage(text, true);
-      inputEl.value = '';
+      // 1. Afficher message utilisateur
+      this.addMessage('user', text);
+      this.dom.input.value = '';
 
-      // Désactiver input pendant le chargement
-      inputEl.disabled = true;
-      sendBtn.disabled = true;
+      // Indicateur de chargement
+      const loadingId = this.addLoadingIndicator();
 
-      // Retirer les anciennes options si présentes (optionnel, pour nettoyage)
-      const oldOptions = messagesContainer.querySelectorAll('.piluleur-options');
-      oldOptions.forEach(el => el.style.display = 'none');
-
+      // 2. Appel Backend avec le contexte
+      // Note: On suppose que la fonction 'processChatRequest' existe dans Code_Piluleur.js
+      // Sinon, il faudra l'ajouter.
       google.script.run
-        .withSuccessHandler(function(response) {
-           inputEl.disabled = false;
-           sendBtn.disabled = false;
-           inputEl.focus();
-
-           if (response.sessionData) {
-             currentSessionData = response.sessionData;
-           }
-
-           if (response.texte) {
-             appendMessage(response.texte, false);
-           }
-
-           if (response.options && response.options.length > 0) {
-             appendOptions(response.options);
-           }
+        .withSuccessHandler((response) => {
+          this.removeMessage(loadingId);
+          this.addMessage('assistant', response.text || "Je n'ai pas compris.");
         })
-        .withFailureHandler(function(err) {
-           inputEl.disabled = false;
-           sendBtn.disabled = false;
-           appendMessage("Erreur: " + err, false);
+        .withFailureHandler((err) => {
+          this.removeMessage(loadingId);
+          this.addMessage('system', "Erreur de connexion : " + err.message);
         })
-        .traiterMessagePiluleur(text, currentSessionData);
+        .processChatRequest({
+            message: text,
+            context: this.state.currentContext,
+            timestamp: new Date().toISOString()
+        });
+    },
+
+    /**
+     * Ajoute un message visuel
+     */
+    addMessage: function(type, text) {
+      const div = document.createElement('div');
+      div.className = `message ${type}`;
+      div.innerHTML = `<div class="message-content">${text}</div>`;
+      this.dom.messages.appendChild(div);
+      this.scrollToBottom();
+      return div.id = 'msg-' + Date.now();
+    },
+
+    addLoadingIndicator: function() {
+      const id = 'loading-' + Date.now();
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = 'message assistant';
+      div.innerHTML = `<div class="message-content"><i>Réflexion en cours...</i></div>`;
+      this.dom.messages.appendChild(div);
+      this.scrollToBottom();
+      return id;
+    },
+
+    removeMessage: function(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    },
+
+    scrollToBottom: function() {
+      this.dom.messages.scrollTop = this.dom.messages.scrollHeight;
     }
+  };
 
-    sendBtn.addEventListener('click', sendMessage);
-    inputEl.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
-
-  })();
+  // Démarrage au chargement de la page
+  window.addEventListener('load', () => {
+    // Petit délai pour laisser le temps au DOM principal de se charger
+    setTimeout(() => PiluleurManager.init(), 500);
+  });
 </script>

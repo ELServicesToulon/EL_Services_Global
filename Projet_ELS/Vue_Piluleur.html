@@ -1,199 +1,43 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-    <style>
-      /* Styles globaux */
-      body {
-        font-family: 'Google Sans', Arial, sans-serif;
-        padding: 20px;
-        background-color: #f8f9fa;
-      }
+<div id="els-piluleur-container" class="piluleur-container">
 
-      .container {
-        max-width: 1000px;
-        margin: 0 auto;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
+  <div id="piluleur-capsule" class="piluleur-capsule" onclick="PiluleurManager.toggleChat()">
+    <div class="capsule-part red">
+      <span class="capsule-icon">💊</span>
+    </div>
+    <div class="capsule-part white">
+      <span id="piluleur-label" class="capsule-text">Aide</span>
+    </div>
+    <div id="piluleur-badge" class="piluleur-badge" style="display:none;">0</div>
+  </div>
 
-      h2 { color: #202124; margin-bottom: 20px; }
+  <div id="piluleur-window" class="piluleur-window hidden">
 
-      /* Zone de l'image interactive */
-      #image-wrapper {
-        position: relative;
-        display: inline-block;
-        border: 2px solid #dadce0;
-        border-radius: 4px;
-        overflow: hidden;
-        cursor: crosshair;
-      }
-
-      #target-image {
-        display: block;
-        max-width: 100%;
-        height: auto;
-      }
-
-      /* Marqueurs visuels (les points sur l'image) */
-      .marker {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 0 3px rgba(0,0,0,0.5);
-        transform: translate(-50%, -50%); /* Centrer sur le clic */
-        z-index: 10;
-        pointer-events: none; /* Laisser passer les clics si besoin */
-      }
-
-      .marker.valid { background-color: #34a853; } /* Vert */
-      .marker.missing { background-color: #ea4335; } /* Rouge */
-      .marker.broken { background-color: #fbbc04; } /* Orange */
-
-      /* Menu Contextuel personnalisé */
-      #context-menu {
-        display: none;
-        position: absolute;
-        z-index: 100;
-        background: white;
-        border: 1px solid #dadce0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-        border-radius: 4px;
-        min-width: 150px;
-      }
-
-      #context-menu button {
-        display: block;
-        width: 100%;
-        padding: 10px 15px;
-        text-align: left;
-        border: none;
-        background: none;
-        cursor: pointer;
-        font-size: 14px;
-        color: #3c4043;
-      }
-
-      #context-menu button:hover {
-        background-color: #f1f3f4;
-      }
-
-      #context-menu button.cancel {
-        border-top: 1px solid #dadce0;
-        color: #5f6368;
-      }
-
-      /* Zone de logs/feedback */
-      #feedback-log {
-        margin-top: 20px;
-        padding: 10px;
-        background: #f1f3f4;
-        border-radius: 4px;
-        font-family: monospace;
-        height: 100px;
-        overflow-y: auto;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h2>Assistant Piluleur - Vérification Visuelle</h2>
-      <p>Cliquez sur l'image pour annoter : Médicament, Manquant ou Cassé.</p>
-
-      <div id="image-wrapper">
-        <img id="target-image" src="<?= photoUrl ?>" alt="Analyse Blister">
-
-        <div id="context-menu">
-          <button onclick="selectAction('valid')">✅ Conforme</button>
-          <button onclick="selectAction('missing')">❌ Manquant</button>
-          <button onclick="selectAction('broken')">⚠️ Cassé/Abîmé</button>
-          <button class="cancel" onclick="hideMenu()">Annuler</button>
-        </div>
+    <div class="chat-header">
+      <div class="header-info">
+        <span class="status-indicator online"></span>
+        <span id="chat-header-title">Assistant ELS</span>
       </div>
-
-      <div id="feedback-log" id="logs">Prêt pour l'analyse...</div>
+      <button class="close-btn" onclick="PiluleurManager.closeChat()">×</button>
     </div>
 
-    <script>
-      // Variables globales pour stocker la position du dernier clic
-      let currentX = 0;
-      let currentY = 0;
-      let currentImageId = "<?= imageId ?>"; // ID unique de l'image/livraison
+    <div id="chat-messages" class="chat-messages">
+      <div class="message system">
+        <div class="message-content">
+          Bonjour ! Je suis l'assistant EL Services. Cliquez sur une zone de l'écran pour que je puisse vous aider contextuellement.
+        </div>
+      </div>
+    </div>
 
-      const imageWrapper = document.getElementById('image-wrapper');
-      const menu = document.getElementById('context-menu');
-      const logDiv = document.getElementById('feedback-log');
+    <div class="chat-input-area">
+      <div id="context-indicator" class="context-tag">Général</div>
 
-      // 1. GESTION DU CLIC SUR L'IMAGE
-      imageWrapper.addEventListener('click', function(e) {
-        // Empêcher le menu de s'ouvrir si on clique sur le menu lui-même
-        if (e.target.closest('#context-menu')) return;
+      <div class="input-wrapper">
+        <input type="text" id="chat-input" placeholder="Posez votre question..." onkeypress="PiluleurManager.handleInputKey(event)">
+        <button id="send-btn" onclick="PiluleurManager.sendMessage()">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
 
-        e.preventDefault();
-
-        // Récupérer les coordonnées relatives à l'image
-        const rect = imageWrapper.getBoundingClientRect();
-        currentX = e.clientX - rect.left;
-        currentY = e.clientY - rect.top;
-
-        // Positionner et afficher le menu contextuel au point de clic
-        menu.style.left = currentX + 'px';
-        menu.style.top = currentY + 'px';
-        menu.style.display = 'block';
-      });
-
-      // 2. SÉLECTION D'UNE ACTION DANS LE MENU
-      function selectAction(type) {
-        // Cacher le menu
-        hideMenu();
-
-        // Ajouter un marqueur visuel
-        addMarker(currentX, currentY, type);
-
-        // Logger localement
-        log("Action: " + type + " en (" + Math.round(currentX) + ", " + Math.round(currentY) + ")");
-
-        // Envoyer au serveur (Google Apps Script)
-        google.script.run
-          .withSuccessHandler(function(response) {
-             console.log("Sauvegarde OK", response);
-          })
-          .withFailureHandler(function(err) {
-             log("Erreur serveur: " + err.message);
-          })
-          .enregistrerActionPiluleur(currentImageId, type, Math.round(currentX), Math.round(currentY));
-      }
-
-      // 3. FONCTIONS UTILITAIRES
-      function hideMenu() {
-        menu.style.display = 'none';
-      }
-
-      function addMarker(x, y, type) {
-        const marker = document.createElement('div');
-        marker.className = 'marker ' + type;
-        marker.style.left = x + 'px';
-        marker.style.top = y + 'px';
-        imageWrapper.appendChild(marker);
-      }
-
-      function log(msg) {
-        const line = document.createElement('div');
-        line.textContent = "> " + msg;
-        logDiv.prepend(line);
-      }
-
-      // Fermer le menu si on clique ailleurs dans le document
-      document.addEventListener('click', function(e) {
-        if (!imageWrapper.contains(e.target)) {
-          hideMenu();
-        }
-      });
-    </script>
-  </body>
-</html>
+</div>

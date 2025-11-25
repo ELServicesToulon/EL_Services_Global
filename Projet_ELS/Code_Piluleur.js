@@ -102,3 +102,55 @@ function enregistrerActionPiluleur(imageId, actionType, x, y) {
     throw new Error("Erreur lors de l'enregistrement : " + e.message);
   }
 }
+
+/**
+ * Nouvelle fonction pour gérer les requêtes du chatbot contextuel.
+ * Exposée au client via google.script.run.
+ * @param {object} request - L'objet contenant le message et le contexte.
+ * @returns {object} Une réponse textuelle simple.
+ */
+function processChatRequest(request) {
+  try {
+    // Validation simple de la requête
+    if (!request || !request.message || !request.context) {
+      throw new Error("Requête invalide.");
+    }
+
+    var message = request.message;
+    var context = request.context;
+    var responseText = "";
+
+    // Log de la requête pour le débogage
+    Logger.log("Nouveau message Piluleur: [Contexte: " + context + "] Message: '" + message + "'");
+
+    // Logique de réponse simulée basée sur le contexte
+    switch (context) {
+      case 'Réservation':
+        responseText = "Le contexte 'Réservation' est bien reçu. Dans cette section, vous pouvez planifier une nouvelle tournée ou modifier une réservation existante. Quelle est votre question précise ?";
+        break;
+      case 'Facturation':
+        responseText = "Je vois que vous êtes dans la section 'Facturation'. Vous pouvez ici consulter l'historique ou générer une nouvelle facture. Avez-vous besoin d'aide pour une action spécifique ?";
+        break;
+      case 'Client':
+        responseText = "Le contexte 'Client' a été identifié. Cette interface vous permet de gérer les fiches de vos clients. Que souhaitez-vous faire ?";
+        break;
+      default:
+        if (context.startsWith('Champ :')) {
+           responseText = "Je vois que vous cliquez sur le champ '" + context.substring(7) + "'. Je peux vous aider à comprendre à quoi il sert ou comment le remplir.";
+        } else {
+           responseText = "Je suis l'assistant ELS. Votre question dans le contexte '" + context + "' a bien été reçue. Pour l'instant, mes capacités sont en cours de développement, mais je note votre demande.";
+        }
+        break;
+    }
+
+    // Simuler un petit délai pour le réalisme
+    Utilities.sleep(500);
+
+    return { text: responseText };
+
+  } catch (e) {
+    console.error("Erreur dans processChatRequest: " + e.message);
+    // Renvoyer une erreur claire au client
+    throw new Error("L'assistant a rencontré un problème. Veuillez réessayer plus tard.");
+  }
+}
