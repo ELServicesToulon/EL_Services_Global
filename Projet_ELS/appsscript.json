@@ -24,6 +24,14 @@
         "version": "v4",
         "serviceId": "sheets"
       }
+    ],
+    "libraries": [
+      {
+        "userSymbol": "Resideur",
+        "version": "2",
+        "libraryId": "1IIOx-qqdSbnov1lZg_X0Lcm3a51KlodioD7HCC-ej1lTK4KqLqPRVAxs",
+        "developmentMode": false
+      }
     ]
   },
   "webapp": {
