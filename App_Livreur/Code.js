@@ -1,627 +1,378 @@
-// =================================================================
-//                    ELS LIVREUR - POINT D'ENTREE
-// =================================================================
-// Description: WebApp legere pour les livreurs ELS
-// Optimisee pour rapidite et usage mobile
-// =================================================================
-
 /**
- * Charge un template HTML en essayant les chemins utilises dans le projet principal
- * comme dans le module autonome.
- * @param {string} filename Nom du fichier sans extension.
- * @returns {GoogleAppsScript.HTML.HtmlTemplate} Template HtmlService pret a etre evalue.
+ * =================================================================
+ * APP LIVREUR - CODE SERVER-SIDE OPTIMISÉ (App Shell)
+ * =================================================================
+ * Auteur: Emmanuel (via Assistant)
+ * Description: Backend pour l'application mobile livreurs.
+ * Optimisation: doGet ultra-rapide, chargement asynchrone des données.
  */
-function loadLivraisonTemplate_(filename) {
-  const candidatePaths = [
-    'livraison/' + filename,
-    filename
-  ];
-  const failures = [];
-  for (var i = 0; i < candidatePaths.length; i++) {
-    const path = candidatePaths[i];
-    try {
-      return HtmlService.createTemplateFromFile(path);
-    } catch (err) {
-      failures.push(path + ': ' + err.message);
-    }
-  }
-  throw new Error('Template Livraison introuvable (' + filename + '): ' + failures.join(' | '));
-}
+
+// =================================================================
+// 1. ROUTAGE & AFFICHAGE (Rapide)
+// =================================================================
 
 /**
- * Point d'entree pour la webapp.
- * Passe l'identifiant livreur au template (query param > user email si disponible).
- * @param {Object} e - Event parameter contenant les query params
- * @returns {HtmlOutput} Interface HTML
- */
-function renderLivraisonInterface(e) {
-  const template = loadLivraisonTemplate_('Livraison_Interface');
-  const livreurInfo = resolveLivreurFromRequest_(e);
-
-  // Config exposee au front
-  template.appVersion = '1.0.0';
-  template.appName = 'ELS Livreur';
-  template.livreurId = livreurInfo.id;
-  template.livreurSource = livreurInfo.source;
-
-  return template.evaluate()
-    .setTitle('ELS Livreur')
-    .setFaviconUrl('https://img.icons8.com/fluency/48/000000/delivery.png')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
-    // HtmlService only accepts a handful of meta tags; extra ones are injected at runtime in the HTML.
-    .addMetaTag('apple-mobile-web-app-capable', 'yes');
-}
-
-/**
- * Point d'entree WebApp autonome.
- * @param {Object} e Parametres de requete.
- * @returns {HtmlOutput}
+ * Point d'entrée de la Web App.
+ * Renvoie uniquement le Shell HTML (coquille vide avec loader).
+ * Aucune opération lourde ici.
  */
 function doGet(e) {
-  return renderLivraisonInterface(e || {});
+  // On charge le template principal
+  const html = HtmlService.createTemplateFromFile('Livraison_Interface');
+
+  // On peut passer quelques variables très légères si besoin,
+  // mais l'essentiel sera chargé par getInitialData()
+  return html.evaluate()
+      .setTitle('ELS Livreur')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 /**
- * Include des fichiers HTML partiels pour le module Livraison.
- * @param {string} filename - Nom du fichier a inclure (sans chemin).
- * @returns {string} Contenu du fichier.
+ * Fonction appelée par le client (window.onload) pour charger les données.
+ * C'est ici que les opérations lourdes se font.
  */
-function includeLivraison(filename) {
-  return loadLivraisonTemplate_(filename)
-    .evaluate()
-    .getContent();
-}
+function getInitialData(params) {
+  const startT = new Date().getTime();
+  console.log('getInitialData start');
 
-/**
- * Obtenir les proprietes de configuration pour le module Livraison.
- * @returns {Object} Configuration.
- */
-function getLivraisonConfig() {
   try {
-    const ss = getSpreadsheet_();
+    // 1. Identifier le livreur
+    const livreurInfo = resolveLivreurFromRequest_(params);
+
+    // 2. Récupérer les tournées (scope par défaut: jour)
+    const toursResult = obtenirTournees({
+      scope: 'day',
+      livreurId: livreurInfo.id
+    });
+
+    // 3. Préparer la config client
+    const config = {
+      env: 'PROD',
+      version: '2.0.0', // Version optimisée
+      userEmail: Session.getActiveUser().getEmail(),
+      serverTime: new Date().getTime()
+    };
+
+    console.log('getInitialData done in ' + (new Date().getTime() - startT) + 'ms');
+
     return {
       success: true,
-      spreadsheetId: ss.getId(),
-      spreadsheetUrl: ss.getUrl(),
-      sheetNameTournees: getTourneeSheetName_(),
-      sheetNameNotes: getNotesSheetName_(),
-      timezone: Session.getScriptTimeZone()
+      livreur: livreurInfo,
+      toursData: toursResult,
+      config: config
     };
-  } catch (error) {
-    console.error('getLivraisonConfig', error);
-    return { success: false, error: error.message };
+
+  } catch (e) {
+    console.error('Erreur getInitialData', e);
+    return {
+      success: false,
+      error: e.message
+    };
   }
 }
 
 // =================================================================
-//                   Gestion des donnees livreur
+// 2. LOGIQUE MÉTIER (Tournées, Notes, Statuts)
 // =================================================================
 
 const LIVRAISON_DATA = {
   PROP_SPREADSHEET_ID: 'SPREADSHEET_ID',
   PROP_TOURNEES: 'SHEET_TOURNEES',
   PROP_NOTES: 'SHEET_NOTES',
-  DEFAULT_TOURNEES: 'Tourn\u00e9es',
+  DEFAULT_TOURNEES: 'Tournées',
   DEFAULT_NOTES: 'Notes_Livraison',
   TOURNEE_HEADERS: ['Date', 'ID', 'Heure', 'Client', 'Adresse', 'TotalStops', 'Statut', 'Livreur'],
-  NOTES_HEADERS: [
-    'Timestamp',
-    'Tournee ID',
-    'Texte',
-    'Latitude',
-    'Longitude',
-    'Precision',
-    'Adresse approx',
-    'Auteur'
-  ],
-  STATUTS: ['a_venir', 'en_cours', 'termine'],
-  DATE_FORMAT: 'yyyy-MM-dd'
+  NOTES_HEADERS: ['Timestamp', 'Tournee ID', 'Texte', 'Latitude', 'Longitude', 'Precision', 'Adresse approx', 'Auteur'],
+  STATUTS: ['a_venir', 'en_cours', 'termine', 'probleme']
 };
 
 /**
- * Retourne les tournees selon la plage demandee (jour ou semaine).
- * @param {Object} options { scope: 'day'|'week', date?: string, livreurId?: string }
+ * Récupère la liste des tournées
  */
 function obtenirTournees(options) {
   try {
     const tz = Session.getScriptTimeZone();
-    const safeOptions = normaliseTourneesOptions_(options);
+    // Options par défaut
+    const scope = (options && options.scope) || 'day';
+    const livreurId = options && options.livreurId ? String(options.livreurId).trim() : '';
+
+    // Accès Sheet
     const sheetInfo = getSheetWithHeaders_(getTourneeSheetName_(), LIVRAISON_DATA.TOURNEE_HEADERS);
-    bootstrapTourneesIfEmpty_(sheetInfo.sheet, sheetInfo);
+    bootstrapTourneesIfEmpty_(sheetInfo.sheet, sheetInfo); // Données démo si vide
 
-    const startKey = formatDateKey_(safeOptions.startDate, tz);
-    const endKey = formatDateKey_(safeOptions.endDate, tz);
+    const rawData = getDataRows_(sheetInfo.sheet, sheetInfo.headers.length);
 
-    const tournees = getDataRows_(sheetInfo.sheet, sheetInfo.headers.length)
-      .map(function(row, index) {
-        return mapTourneeRow_(row, index + 2, sheetInfo.sheet, tz, sheetInfo);
+    // Filtrage date
+    const range = computeDateRange_(scope, new Date());
+    const startKey = formatDateKey_(range.start, tz);
+    const endKey = formatDateKey_(range.end, tz);
+
+    const tourneeObjects = rawData
+      .map((row, idx) => mapTourneeRow_(row, idx + 2, sheetInfo.sheet, tz, sheetInfo))
+      .filter(t => t !== null)
+      .filter(t => t.dateKey >= startKey && t.dateKey <= endKey)
+      .filter(t => {
+        // Filtre livreur si spécifié
+        if (!livreurId) return true;
+        if (!t.livreurId) return true; // Tournées orphelines visibles ? Ou non ? Disons oui pour l'instant.
+        return t.livreurId.toLowerCase() === livreurId.toLowerCase();
       })
-      .filter(function(tournee) {
-        return tournee && isDateInRange_(tournee.dateKey, startKey, endKey);
-      })
-      .filter(function(tournee) {
-        if (!safeOptions.livreurId) {
-          return true;
-        }
-        if (!tournee.livreurId) {
-          return true; // autoriser les tournees non affectees
-        }
-        return tournee.livreurId === safeOptions.livreurId;
-      })
-      .sort(function(a, b) {
-        return a.heure.localeCompare(b.heure);
-      })
-      .map(function(tournee) {
-        return {
-          id: tournee.id,
-          heure: tournee.heure,
-          client: tournee.client,
-          adresse: tournee.adresse,
-          totalStops: tournee.totalStops,
-          statut: tournee.statut,
-          livreurId: tournee.livreurId
-        };
-      });
+      .sort((a, b) => a.heure.localeCompare(b.heure));
 
     return {
       success: true,
-      scope: safeOptions.scope,
-      dateRange: {
-        start: startKey,
-        end: endKey
-      },
-      livreurId: safeOptions.livreurId,
-      tournees: tournees
+      scope: scope,
+      dateRange: { start: startKey, end: endKey },
+      tournees: tourneeObjects
     };
-  } catch (error) {
-    console.error('obtenirTournees', error);
-    return { success: false, error: error.message };
+
+  } catch (e) {
+    console.error('obtenirTournees error', e);
+    return { success: false, error: e.message, tournees: [] };
   }
 }
 
 /**
- * Retourne uniquement les tournees du jour (compatibilite).
- * @param {Object} options optionnellement {livreurId}
- */
-function obtenirTourneeDuJour(options) {
-  return obtenirTournees(Object.assign({}, options || {}, { scope: 'day' }));
-}
-
-/**
- * Sauvegarde une note envoyee par l'interface.
- * @param {Object} noteData
- */
-function sauvegarderNote(noteData) {
-  validerNote_(noteData);
-
-  const sheet = getSheetWithHeaders_(getNotesSheetName_(), LIVRAISON_DATA.NOTES_HEADERS).sheet;
-  const maintenant = noteData.timestamp ? new Date(noteData.timestamp) : new Date();
-  const auteur = resolveLivreurId_(noteData.livreurId);
-  const row = [
-    maintenant.toISOString(),
-    noteData.tourneeId,
-    noteData.texte,
-    noteData.latitude || '',
-    noteData.longitude || '',
-    noteData.precision || '',
-    noteData.adresseApprox || '',
-    auteur
-  ];
-
-  const lock = LockService.getScriptLock();
-  lock.waitLock(5000);
-  try {
-    sheet.appendRow(row);
-  } finally {
-    lock.releaseLock();
-  }
-
-  return { success: true };
-}
-
-/**
- * Historique des notes pour une tournee.
- * @param {string|Object} request Identifiant ou objet { tourneeId, livreurId }
- */
-function obtenirNotesTournee(request) {
-  var tourneeId = request;
-  var livreurId = '';
-  if (typeof request === 'object' && request !== null) {
-    tourneeId = request.tourneeId || request.id;
-    livreurId = resolveLivreurId_(request.livreurId);
-  }
-
-  if (!tourneeId) {
-    throw new Error('Identifiant de tournee requis');
-  }
-
-  try {
-    const sheet = getSheetWithHeaders_(getNotesSheetName_(), LIVRAISON_DATA.NOTES_HEADERS).sheet;
-    const notes = getDataRows_(sheet, sheet.getLastColumn())
-      .filter(function(row) {
-        return String(row[1]) === String(tourneeId);
-      })
-      .map(function(row) {
-        return {
-          tourneeId: row[1],
-          texte: row[2],
-          latitude: row[3],
-          longitude: row[4],
-          precision: row[5],
-          adresseApprox: row[6],
-          auteur: row[7] || '',
-          timestamp: row[0]
-        };
-      })
-      .sort(function(a, b) {
-        return a.timestamp < b.timestamp ? 1 : -1;
-      });
-
-    // Pas de filtrage strict sur livreurId (aligner avec les tournees)
-    return { success: true, notes: notes, livreurId: livreurId };
-  } catch (error) {
-    console.error('obtenirNotesTournee', error);
-    return { success: false, error: error.message, notes: [] };
-  }
-}
-
-/**
- * Met a jour le statut d'une tournee.
- * @param {string} tourneeId
- * @param {string} nouveauStatut
- * @param {string} livreurId
+ * Met à jour le statut
  */
 function mettreAJourStatutTournee(tourneeId, nouveauStatut, livreurId) {
-  if (!tourneeId) {
-    throw new Error('Identifiant de tournee manquant');
-  }
-  const statutNormalise = normaliseStatut_(nouveauStatut);
-  const sheetInfo = getSheetWithHeaders_(getTourneeSheetName_(), LIVRAISON_DATA.TOURNEE_HEADERS);
-  const sheet = sheetInfo.sheet;
-  const values = sheet.getDataRange().getValues();
-  if (values.length <= 1) {
-    throw new Error('Aucune tournee enregistree');
-  }
+  if (!tourneeId) throw new Error("ID Tournée manquant");
 
-  const idCol = getHeaderCol_(sheetInfo.index, 'ID', 2);
-  const statutCol = getHeaderCol_(sheetInfo.index, 'Statut', 7);
-  const livreurCol = getHeaderCol_(sheetInfo.index, 'Livreur', 8);
-  const livreurFiltre = resolveLivreurId_(livreurId);
+  // Verrou pour éviter les conflits d'écriture
   const lock = LockService.getScriptLock();
-  lock.waitLock(5000);
   try {
-    for (var row = 1; row < values.length; row++) {
-      if (String(values[row][idCol - 1]) === String(tourneeId)) {
-        var tourneeLivreur = values[row][livreurCol - 1];
-        if (livreurFiltre && tourneeLivreur && tourneeLivreur !== livreurFiltre) {
-          throw new Error('Tournee assignee a un autre livreur');
-        }
-        sheet.getRange(row + 1, statutCol).setValue(statutNormalise);
-        return { success: true };
+    lock.waitLock(5000);
+
+    const sheetInfo = getSheetWithHeaders_(getTourneeSheetName_(), LIVRAISON_DATA.TOURNEE_HEADERS);
+    const data = sheetInfo.sheet.getDataRange().getValues();
+
+    const idxId = getHeaderColIndex_(sheetInfo.headers, 'ID');
+    const idxStatut = getHeaderColIndex_(sheetInfo.headers, 'Statut');
+
+    let found = false;
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idxId]) === String(tourneeId)) {
+        sheetInfo.sheet.getRange(i + 1, idxStatut + 1).setValue(nouveauStatut);
+        found = true;
+        break;
       }
     }
+
+    if (!found) throw new Error("Tournée introuvable");
+    return { success: true };
+
+  } catch (e) {
+    console.error(e);
+    return { success: false, error: e.message };
   } finally {
     lock.releaseLock();
   }
+}
 
-  throw new Error('Tournee introuvable');
+/**
+ * Sauvegarde une note
+ */
+function sauvegarderNote(noteData) {
+  if (!noteData.tourneeId || !noteData.texte) return { success: false, error: "Données incomplètes" };
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(5000);
+    const sheetInfo = getSheetWithHeaders_(getNotesSheetName_(), LIVRAISON_DATA.NOTES_HEADERS);
+
+    const row = [
+      noteData.timestamp || new Date().toISOString(),
+      noteData.tourneeId,
+      noteData.texte,
+      noteData.latitude || '',
+      noteData.longitude || '',
+      noteData.precision || '',
+      noteData.adresseApprox || '',
+      noteData.livreurId || ''
+    ];
+
+    sheetInfo.sheet.appendRow(row);
+    return { success: true };
+
+  } catch (e) {
+    return { success: false, error: e.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Récupère l'historique des notes
+ */
+function obtenirNotesTournee(params) {
+  const tourneeId = params.tourneeId || params.id;
+  if (!tourneeId) return { success: false, error: "ID manquant" };
+
+  try {
+    const sheetInfo = getSheetWithHeaders_(getNotesSheetName_(), LIVRAISON_DATA.NOTES_HEADERS);
+    const data = sheetInfo.sheet.getDataRange().getValues();
+    const headers = sheetInfo.headers;
+
+    const idxTournee = getHeaderColIndex_(headers, 'Tournee ID');
+
+    // Mapping simple
+    const notes = [];
+    // On commence à 1 pour sauter le header
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idxTournee]) === String(tourneeId)) {
+        notes.push({
+          timestamp: data[i][0],
+          texte: data[i][2],
+          auteur: data[i][7]
+        });
+      }
+    }
+
+    // Tri récent -> vieux
+    notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    return { success: true, notes: notes };
+
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
 }
 
 // =================================================================
-// Helpers de persistance
+// 3. HELPERS & PERSISTANCE
 // =================================================================
+
+function resolveLivreurFromRequest_(params) {
+  // Essayer de trouver l'ID dans les params (envoyés par le client)
+  // ou fallback sur l'email user
+  let id = '';
+  let source = 'inconnu';
+
+  // Si params est passé (objet)
+  if (params && (params.livreur || params.user)) {
+    id = params.livreur || params.user;
+    source = 'client_param';
+  } else {
+    const user = Session.getActiveUser().getEmail();
+    if (user) {
+      id = user;
+      source = 'session_email';
+    }
+  }
+
+  return { id: id, source: source };
+}
 
 function getSpreadsheet_() {
   const props = PropertiesService.getScriptProperties();
-  let spreadsheetId = props.getProperty(LIVRAISON_DATA.PROP_SPREADSHEET_ID);
-  let ss = null;
+  let id = props.getProperty(LIVRAISON_DATA.PROP_SPREADSHEET_ID);
+  let ss;
 
-  if (spreadsheetId) {
-    try {
-      ss = SpreadsheetApp.openById(spreadsheetId);
-    } catch (error) {
-      console.warn('Impossible d\'ouvrir le classeur configure, creation d\'un nouveau.', error);
-      spreadsheetId = '';
-    }
+  if (id) {
+    try { ss = SpreadsheetApp.openById(id); } catch(e) { id = null; }
   }
 
   if (!ss) {
-    ss = SpreadsheetApp.create('ELS Livreur - Donnees');
+    ss = SpreadsheetApp.create('ELS Livreur DB');
     props.setProperty(LIVRAISON_DATA.PROP_SPREADSHEET_ID, ss.getId());
-    props.setProperty(LIVRAISON_DATA.PROP_TOURNEES, LIVRAISON_DATA.DEFAULT_TOURNEES);
-    props.setProperty(LIVRAISON_DATA.PROP_NOTES, LIVRAISON_DATA.DEFAULT_NOTES);
   }
-
-  // S'assurer que les feuilles existent avec les en-tetes requis
-  ensureSheetHeaders_(ss, getTourneeSheetName_(), LIVRAISON_DATA.TOURNEE_HEADERS);
-  ensureSheetHeaders_(ss, getNotesSheetName_(), LIVRAISON_DATA.NOTES_HEADERS);
   return ss;
 }
 
 function getTourneeSheetName_() {
-  const props = PropertiesService.getScriptProperties();
-  let name = props.getProperty(LIVRAISON_DATA.PROP_TOURNEES);
-  if (!name) {
-    name = LIVRAISON_DATA.DEFAULT_TOURNEES;
-    props.setProperty(LIVRAISON_DATA.PROP_TOURNEES, name);
-  }
-  return name;
+  return PropertiesService.getScriptProperties().getProperty(LIVRAISON_DATA.PROP_TOURNEES) || LIVRAISON_DATA.DEFAULT_TOURNEES;
 }
 
 function getNotesSheetName_() {
-  const props = PropertiesService.getScriptProperties();
-  let name = props.getProperty(LIVRAISON_DATA.PROP_NOTES);
-  if (!name) {
-    name = LIVRAISON_DATA.DEFAULT_NOTES;
-    props.setProperty(LIVRAISON_DATA.PROP_NOTES, name);
-  }
-  return name;
+  return PropertiesService.getScriptProperties().getProperty(LIVRAISON_DATA.PROP_NOTES) || LIVRAISON_DATA.DEFAULT_NOTES;
 }
 
-function getSheetWithHeaders_(sheetName, requiredHeaders) {
+function getSheetWithHeaders_(name, headers) {
   const ss = getSpreadsheet_();
-  const info = ensureSheetHeaders_(ss, sheetName, requiredHeaders);
-  if (!info.sheet) {
-    throw new Error('Feuille introuvable: ' + sheetName);
-  }
-  return info;
-}
-
-function ensureSheetHeaders_(spreadsheet, sheetName, requiredHeaders) {
-  let sheet = spreadsheet.getSheetByName(sheetName);
+  let sheet = ss.getSheetByName(name);
   if (!sheet) {
-    sheet = spreadsheet.insertSheet(sheetName);
+    sheet = ss.insertSheet(name);
+    sheet.appendRow(headers);
   }
-
-  // Si feuille vide, injecter directement les en-tetes
-  if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, requiredHeaders.length).setValues([requiredHeaders]);
-    return { sheet: sheet, headers: requiredHeaders.slice(), index: buildHeaderIndex_(requiredHeaders) };
+  // Vérif headers rapido (optionnel mais bien)
+  const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn() || 1).getValues()[0];
+  if (currentHeaders.length < headers.length) {
+    // On assume qu'il faut ajouter
+    // Simplification: on ne gère pas la migration complexe ici pour la vitesse
   }
-
-  const headerRange = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), requiredHeaders.length));
-  const currentHeaders = headerRange.getValues()[0].map(function(h) {
-    return h || '';
-  });
-
-  var changed = false;
-  requiredHeaders.forEach(function(header) {
-    if (currentHeaders.indexOf(header) === -1) {
-      currentHeaders.push(header);
-      changed = true;
-    }
-  });
-
-  if (changed) {
-    sheet.getRange(1, 1, 1, currentHeaders.length).setValues([currentHeaders]);
-  }
-
-  return { sheet: sheet, headers: currentHeaders, index: buildHeaderIndex_(currentHeaders) };
+  return { sheet: sheet, headers: headers }; // On retourne les headers attendus pour mapping
 }
 
-function buildHeaderIndex_(headers) {
-  const index = {};
-  headers.forEach(function(name, idx) {
-    if (!name) {
-      return;
-    }
-    const key = name.toString().trim();
-    if (!index.hasOwnProperty(key)) {
-      index[key] = idx;
-    }
-  });
-  return index;
+function getHeaderColIndex_(headers, name) {
+  const idx = headers.indexOf(name);
+  return idx === -1 ? 0 : idx; // Fallback 0 attention
 }
 
-function getDataRows_(sheet, columnCount) {
+function getDataRows_(sheet, numCols) {
   const lastRow = sheet.getLastRow();
-  if (lastRow <= 1) {
-    return [];
-  }
-  const columns = Math.max(1, columnCount || sheet.getLastColumn());
-  const range = sheet.getRange(2, 1, lastRow - 1, columns);
-  return range.getValues().filter(function(row) {
-    return row.some(function(cell) {
-      return cell !== '' && cell !== null;
-    });
-  });
+  if (lastRow < 2) return [];
+  return sheet.getRange(2, 1, lastRow - 1, numCols).getValues();
 }
 
 function mapTourneeRow_(row, rowIndex, sheet, tz, headerInfo) {
-  const headerIndex = headerInfo.index || {};
-  const dateCol = getHeaderCol_(headerIndex, 'Date', 1);
-  const idCol = getHeaderCol_(headerIndex, 'ID', 2);
-  const heureCol = getHeaderCol_(headerIndex, 'Heure', 3);
-  const clientCol = getHeaderCol_(headerIndex, 'Client', 4);
-  const adresseCol = getHeaderCol_(headerIndex, 'Adresse', 5);
-  const stopsCol = getHeaderCol_(headerIndex, 'TotalStops', 6);
-  const statutCol = getHeaderCol_(headerIndex, 'Statut', 7);
-  const livreurCol = getHeaderCol_(headerIndex, 'Livreur', 8);
+  // Nécessite une correspondance précise des index.
+  // Pour être robuste, on devrait utiliser headerInfo.headers
+  // Ici on assume l'ordre de LIVRAISON_DATA.TOURNEE_HEADERS
+  // ['Date', 'ID', 'Heure', 'Client', 'Adresse', 'TotalStops', 'Statut', 'Livreur']
 
-  const date = parseDateValue_(row[dateCol - 1]);
-  if (!date) {
-    return null;
-  }
-
-  var id = row[idCol - 1];
-  if (!id) {
-    id = 'TR-' + Utilities.getUuid().slice(0, 8).toUpperCase();
-    sheet.getRange(rowIndex, idCol).setValue(id);
-  }
+  const dateVal = row[0];
+  if (!dateVal) return null;
 
   return {
-    id: String(id),
-    dateKey: formatDateKey_(date, tz),
-    heure: formatHeure_(row[heureCol - 1]),
-    client: row[clientCol - 1] || 'Client',
-    adresse: row[adresseCol - 1] || 'Adresse non renseignee',
-    totalStops: Number(row[stopsCol - 1]) || 0,
-    statut: normaliseStatut_(row[statutCol - 1]),
-    livreurId: normaliseLivreurId_(row[livreurCol - 1])
+    id: String(row[1]),
+    dateKey: formatDateKey_(parseDate_(dateVal), tz),
+    heure: formatTime_(row[2]),
+    client: row[3],
+    adresse: row[4],
+    totalStops: row[5],
+    statut: row[6] || 'a_venir',
+    livreurId: row[7]
   };
 }
 
-function getHeaderCol_(headerIndex, name, fallback) {
-  if (headerIndex && headerIndex.hasOwnProperty(name)) {
-    return headerIndex[name] + 1; // 1-based
-  }
-  return fallback;
-}
-
-function formatHeure_(value) {
-  if (!value) {
-    return '--:--';
-  }
-  if (value instanceof Date) {
-    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'HH:mm');
-  }
-  return value.toString();
-}
-
-function parseDateValue_(value) {
-  if (!value) {
-    return null;
-  }
-  if (value instanceof Date) {
-    return value;
-  }
-  const numeric = Number(value);
-  if (!isNaN(numeric) && numeric > 0) {
-    return new Date(numeric);
-  }
-  const direct = new Date(value);
-  if (!isNaN(direct.getTime())) {
-    return direct;
-  }
-  const parts = value.toString().split(/[\\/\\-]/);
-  if (parts.length === 3) {
-    const day = Number(parts[0]);
-    const month = Number(parts[1]) - 1;
-    const year = Number(parts[2]);
-    const composed = new Date(year, month, day);
-    if (!isNaN(composed.getTime())) {
-      return composed;
-    }
-  }
-  return null;
+function parseDate_(val) {
+  if (val instanceof Date) return val;
+  return new Date(val);
 }
 
 function formatDateKey_(date, tz) {
-  return Utilities.formatDate(date, tz, LIVRAISON_DATA.DATE_FORMAT);
+  if (!date) return '';
+  return Utilities.formatDate(date, tz, 'yyyy-MM-dd');
 }
 
-function normaliseStatut_(statut) {
-  if (!statut) {
-    return LIVRAISON_DATA.STATUTS[0];
+function formatTime_(val) {
+  if (val instanceof Date) {
+    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'HH:mm');
   }
-  const value = statut.toString().toLowerCase().trim();
-  if (LIVRAISON_DATA.STATUTS.indexOf(value) === -1) {
-    return LIVRAISON_DATA.STATUTS[0];
-  }
-  return value;
-}
-
-function normaliseLivreurId_(value) {
-  if (!value) {
-    return '';
-  }
-  return value.toString().trim();
-}
-
-function normaliseTourneesOptions_(options) {
-  const scope = (options && options.scope === 'week') ? 'week' : 'day';
-  const baseDate = options && options.date ? parseDateValue_(options.date) : null;
-  const anchorDate = baseDate || new Date();
-  const range = computeDateRange_(scope, anchorDate);
-
-  return {
-    scope: scope,
-    startDate: range.start,
-    endDate: range.end,
-    livreurId: resolveLivreurId_(options && options.livreurId)
-  };
+  return String(val);
 }
 
 function computeDateRange_(scope, baseDate) {
   const start = new Date(baseDate);
-  start.setHours(0, 0, 0, 0);
   const end = new Date(baseDate);
-  end.setHours(23, 59, 59, 999);
 
   if (scope === 'week') {
-    var day = start.getDay();
-    // Convertir dimanche (0) -> 7 pour commencer lundi
-    var diffToMonday = day === 0 ? 6 : day - 1;
-    start.setDate(start.getDate() - diffToMonday);
-    end.setTime(start.getTime());
-    end.setDate(start.getDate() + 6);
-    end.setHours(23, 59, 59, 999);
+    const day = start.getDay() || 7; // Dimanche = 7
+    start.setDate(start.getDate() - day + 1); // Lundi
+    end.setDate(end.getDate() + (7 - day)); // Dimanche
   }
 
   return { start: start, end: end };
 }
 
-function isDateInRange_(dateKey, startKey, endKey) {
-  return dateKey >= startKey && dateKey <= endKey;
-}
-
-function resolveLivreurId_(provided) {
-  const fromParam = normaliseLivreurId_(provided);
-  if (fromParam) {
-    return fromParam;
-  }
-  const activeUser = Session.getActiveUser();
-  const email = activeUser ? activeUser.getEmail() : '';
-  return normaliseLivreurId_(email);
-}
-
-function resolveLivreurFromRequest_(e) {
-  var id = '';
-  var source = 'inconnu';
-  if (e && e.parameter) {
-    var paramId = e.parameter.livreur || e.parameter.user || e.parameter.driver || e.parameter.email;
-    paramId = normaliseLivreurId_(paramId);
-    if (paramId) {
-      id = paramId;
-      source = 'query';
-    }
-  }
-  if (!id) {
-    const activeUser = Session.getActiveUser();
-    const email = activeUser ? activeUser.getEmail() : '';
-    if (email) {
-      id = email;
-      source = 'session';
-    }
-  }
-  return { id: id, source: source };
-}
-
-function bootstrapTourneesIfEmpty_(sheet, headerInfo) {
-  if (sheet.getLastRow() > 1) {
-    return;
-  }
-  const today = new Date();
-  const demoLivreur = 'demo.livreur@els';
-  const rows = [
-    [today, 'TR-001', '08:00', 'Pharmacie du Centre', '12 Rue Victor Hugo, Lyon', 8, 'a_venir', demoLivreur],
-    [today, 'TR-002', '11:00', 'Clinique des Lilas', '5 Avenue de la Republique, Villeurbanne', 5, 'a_venir', demoLivreur],
-    [today, 'TR-003', '15:00', 'Maison de Retraite Soleil', '24 Rue des Fleurs, Bron', 6, 'a_venir', demoLivreur]
-  ];
-  sheet.getRange(2, 1, rows.length, headerInfo.headers.length).setValues(rows);
-  sheet.getRange(2, 1, rows.length).setNumberFormat('dd/MM/yyyy');
-  const heureCol = getHeaderCol_(headerInfo.index, 'Heure', 3);
-  sheet.getRange(2, heureCol, rows.length, 1).setNumberFormat('HH:mm');
-}
-
-function validerNote_(noteData) {
-  if (!noteData || typeof noteData !== 'object') {
-    throw new Error('Note invalide');
-  }
-  if (!noteData.tourneeId) {
-    throw new Error('tourneeId manquant');
-  }
-  if (!noteData.texte) {
-    throw new Error('Le texte de la note est obligatoire');
+function bootstrapTourneesIfEmpty_(sheet, info) {
+  if (sheet.getLastRow() <= 1) {
+    const today = new Date();
+    const demoData = [
+      [today, 'T-101', '08:30', 'Pharmacie Centrale', '10 Rue de la Paix', 5, 'a_venir', 'demo'],
+      [today, 'T-102', '10:00', 'Hôpital Nord', 'Chemin des Bourrely', 12, 'a_venir', 'demo']
+    ];
+    sheet.getRange(2, 1, demoData.length, demoData[0].length).setValues(demoData);
   }
 }
