@@ -2,3 +2,4 @@
 livraison/**
 # Exclure la copie .gs du connecteur pour éviter le doublon lors du push
 Resideur_Connector.gs
+OneShotCleaner.gs
