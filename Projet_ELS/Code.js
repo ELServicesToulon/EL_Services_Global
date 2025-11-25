@@ -12,8 +12,8 @@
  */
 function doGet(e) {
   var output;
-  var page = 'Admin_Interface'; // Page par défaut
-  var title = 'EL Services - Admin';
+  var page = 'Reservation_Interface'; // Page par défaut (accueil réservation)
+  var title = 'EL Services - Réservation';
 
   try {
     // 1. Récupération sécurisée du paramètre 'page'
@@ -30,6 +30,10 @@ function doGet(e) {
       title = 'Espace Client | EL Services';
     } else if (page === 'Piluleur_Index') {
       title = 'Interface Piluleur | EL Services';
+    } else if (page === 'Admin_Interface') {
+      title = 'EL Services - Admin';
+    } else {
+      title = 'EL Services - Réservation';
     }
 
     // 3. Création du Template
