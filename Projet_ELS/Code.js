@@ -76,7 +76,6 @@ function onOpen(e) {
     ui.alert('Configuration invalide', err.message, ui.ButtonSet.OK);
   }
 }
-}
 
 function onInstall(e) {
   onOpen(e);
