@@ -328,7 +328,7 @@ function obtenirReservationsClient(emailClient, exp, sig) {
       throw validationError;
     }
     const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
-    const indices = obtenirIndicesEnTetes(feuille, ["Date", "Client (Email)", "Event ID", "Détails", "Client (Raison S. Client)", "ID Réservation", "Montant"]);
+    const indices = getFacturationHeaderIndices_(feuille, ["Date", "Client (Email)", "Event ID", "Détails", "Client (Raison S. Client)", "ID Réservation", "Montant"]).indices;
     
     const donnees = feuille.getDataRange().getValues();
     const maintenant = new Date();
@@ -421,7 +421,7 @@ function calculerCAEnCoursClient(emailClient, exp, sig) {
 
     const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
     if (!feuille) return 0;
-    const indices = obtenirIndicesEnTetes(feuille, ['Date', 'Client (Email)', 'Montant']);
+    const indices = getFacturationHeaderIndices_(feuille, ['Date', 'Client (Email)', 'Montant']).indices;
     const lignes = feuille.getDataRange().getValues();
     const aujourdHui = new Date();
     let total = 0;
@@ -576,14 +576,14 @@ function chargerMetadonneesFactures_() {
   }
   feuilles.forEach(feuille => {
     if (!feuille) return;
-    const headerRaw = feuille.getRange(1, 1, 1, Math.max(1, feuille.getLastColumn())).getValues()[0];
-    const headers = headerRaw.map(h => String(h || '').trim());
+    const headerInfo = getFacturationHeaderIndices_(feuille, ['Client (Email)', 'N° Facture']);
+    const headers = headerInfo.header.map(h => String(h || '').trim());
     const headersNorm = headers.map(normaliserCleFacture_);
-    const idxNumero = headers.indexOf('N° Facture');
-    const idxEmail = headers.indexOf('Client (Email)');
+    const idxNumero = headerInfo.indices['N° Facture'];
+    const idxEmail = headerInfo.indices['Client (Email)'];
     if (idxNumero === -1 || idxEmail === -1) return;
-    const idxMontant = headers.indexOf('Montant');
-    const idxDateStd = headers.indexOf('Date');
+    const idxMontant = headerInfo.indices['Montant'] !== undefined ? headerInfo.indices['Montant'] : -1;
+    const idxDateStd = headerInfo.indices['Date'] !== undefined ? headerInfo.indices['Date'] : -1;
     const idxDateEdition = trouverIndexEnteteFacture_(headersNorm, ['date facture', 'date facturation', 'date edition', 'date d edition', 'date emission', 'date d emission']);
     const idxPeriode = trouverIndexEnteteFacture_(headersNorm, ['periode facture', 'periode facturation', 'periode', 'periode de facturation']);
     const idxPeriodeDebut = trouverIndexEnteteFacture_(headersNorm, ['date debut periode', 'debut periode', 'date debut de periode']);
@@ -747,40 +747,38 @@ function envoyerFactureClient(emailClient, numeroFacture, exp, sig) {
     let row = null;
     let idx = null;
     for (const feuille of feuilles) {
-      const header = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0];
-      idx = {
-        email: header.indexOf('Client (Email)'),
-        numero: header.indexOf('N° Facture'),
-        idPdf: header.indexOf('ID PDF'),
-        montant: header.indexOf('Montant')
-      };
-      if (idx.email === -1 || idx.numero === -1) {
-        throw new Error("Colonnes requises absentes (Client (Email), N° Facture).");
-      }
+      const headerInfo = getFacturationHeaderIndices_(feuille, ['Client (Email)', 'N° Facture']);
+      idx = headerInfo.indices;
+      const idxEmail = idx['Client (Email)'];
+      const idxNumero = idx['N° Facture'];
       const rows = feuille.getDataRange().getValues().slice(1);
-      row = rows.find(r => String(r[idx.numero]).trim() === String(numeroFacture).trim() && String(r[idx.email]).trim().toLowerCase() === emailNorm);
+      row = rows.find(r => String(r[idxNumero]).trim() === String(numeroFacture).trim() && String(r[idxEmail]).trim().toLowerCase() === emailNorm);
       if (row) break;
     }
     if (!row) throw new Error('Facture introuvable pour ce client.');
-    let idPdf = idx.idPdf !== -1 ? String(row[idx.idPdf] || '').trim() : '';
+    const idxPdf = idx['ID PDF'];
+    const idxNumero = idx['N° Facture'];
+    const idxMontant = idx['Montant'];
+    let idPdf = (typeof idxPdf === 'number' && idxPdf !== -1) ? String(row[idxPdf] || '').trim() : '';
     let fichier;
     if (idPdf) {
       fichier = DriveApp.getFileById(idPdf);
     } else {
-      const fichierDrive = trouverFactureDriveParNumero_(String(row[idx.numero]).trim());
+      const fichierDrive = trouverFactureDriveParNumero_(String(row[idxNumero]).trim());
       if (!fichierDrive) {
         throw new Error('Aucun fichier PDF associé à cette facture.');
       }
       idPdf = fichierDrive.id;
       fichier = DriveApp.getFileById(fichierDrive.id);
     }
-    const montant = idx.montant !== -1 ? (parseFloat(row[idx.montant]) || null) : null;
-    const pdfBlob = fichier.getAs(MimeType.PDF).setName(`${String(row[idx.numero]).trim()}.pdf`);
-    const sujet = `[${NOM_ENTREPRISE}] Facture ${String(row[idx.numero]).trim()}`;
+    const montant = (typeof idxMontant === 'number' && idxMontant !== -1) ? (parseFloat(row[idxMontant]) || null) : null;
+    const numeroLigne = String(row[idxNumero]).trim();
+    const pdfBlob = fichier.getAs(MimeType.PDF).setName(`${numeroLigne}.pdf`);
+    const sujet = `[${NOM_ENTREPRISE}] Facture ${numeroLigne}`;
     const logoBlock = getLogoEmailBlockHtml();
     const corps = [
       logoBlock,
-      `<p>Veuillez trouver ci-joint votre facture <strong>${String(row[idx.numero]).trim()}</strong>${montant !== null ? ` d'un montant de <strong>${montant.toFixed(2)} €</strong>` : ''}.</p>`,
+      `<p>Veuillez trouver ci-joint votre facture <strong>${numeroLigne}</strong>${montant !== null ? ` d'un montant de <strong>${montant.toFixed(2)} €</strong>` : ''}.</p>`,
       `<p>Cordiales salutations,<br>${NOM_ENTREPRISE}</p>`
     ].filter(Boolean).join('');
     GmailApp.sendEmail(
@@ -814,26 +812,26 @@ function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, e
     const emailNorm = emailClient ? assertClient(emailClient, exp, sig) : null;
     const idNorm = assertReservationId(idReservation);
     const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
-    const enTete = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0];
-    const indices = {
-      idResa: enTete.indexOf("ID Réservation"), idEvent: enTete.indexOf("Event ID"),
-      details: enTete.indexOf("Détails"), email: enTete.indexOf("Client (Email)"),
-      montant: enTete.indexOf("Montant"), date: enTete.indexOf("Date")
-    };
-    if (Object.values(indices).some(i => i === -1)) throw new Error("Colonnes requises introuvables.");
+    const headerInfo = getFacturationHeaderIndices_(feuille, ["ID Réservation", "Détails", "Montant", "Client (Email)"]);
+    const indices = headerInfo.indices;
+    const idxEvent = indices["Event ID"];
+    const idxDate = indices["Date"];
 
     const donnees = feuille.getDataRange().getValues();
-    const indexLigne = donnees.findIndex(row => String(row[indices.idResa]).trim() === idNorm);
+    const indexLigne = donnees.findIndex(row => String(row[indices["ID Réservation"]]).trim() === idNorm);
     if (indexLigne === -1) return { success: false, error: "Réservation introuvable." };
 
     const ligneDonnees = donnees[indexLigne];
-    const idEvenement = String(ligneDonnees[indices.idEvent]).trim();
-    const detailsAnciens = String(ligneDonnees[indices.details]);
-    const emailFeuille = String(ligneDonnees[indices.email]).trim().toLowerCase();
+    const idEvenement = typeof idxEvent === 'number' && idxEvent !== -1 ? String(ligneDonnees[idxEvent]).trim() : '';
+    const detailsAnciens = String(ligneDonnees[indices["Détails"]]);
+    const emailFeuille = String(ligneDonnees[indices["Client (Email)"]]).trim().toLowerCase();
     if (emailNorm && emailFeuille !== emailNorm) return { success: false, error: "Accès non autorisé." };
 
     let ressourceEvenement = null;
-    let dateDebutOriginale = new Date(ligneDonnees[indices.date]); // Fallback sur la date du Sheet
+    const idxDateFallback = indices["Date"];
+    let dateDebutOriginale = (typeof idxDate === 'number' && idxDate !== -1)
+      ? new Date(ligneDonnees[idxDate])
+      : (typeof idxDateFallback === 'number' ? new Date(ligneDonnees[idxDateFallback]) : new Date());
 
     try {
       if (idEvenement) {
@@ -866,8 +864,8 @@ function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, e
     }
 
     // On met TOUJOURS à jour la feuille de calcul
-    feuille.getRange(indexLigne + 1, indices.details + 1).setValue(nouveauxDetails);
-    feuille.getRange(indexLigne + 1, indices.montant + 1).setValue(nouveauPrix);
+    feuille.getRange(indexLigne + 1, indices["Détails"] + 1).setValue(nouveauxDetails);
+    feuille.getRange(indexLigne + 1, indices["Montant"] + 1).setValue(nouveauPrix);
 
     logActivity(idNorm, emailNorm || emailFeuille, `Modification: ${totalStops} arrêts totaux.`, nouveauPrix, "Modification");
     return { success: true };
@@ -895,61 +893,23 @@ function replanifierReservation(idReservation, nouvelleDate, nouvelleHeure, emai
     const emailNorm = emailClient ? assertClient(emailClient, exp, sig) : null;
     const idNorm = assertReservationId(idReservation);
     const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
-    const enTete = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0];
-    const headerValues = enTete.map(function (value) { return String(value || '').trim(); });
-    const headerIndex = headerValues.reduce(function (acc, value, idx) {
-      if (!acc.hasOwnProperty(value)) {
-        acc[value] = idx;
-      }
-      if (typeof value === 'string' && value.normalize) {
-        const asciiValue = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        if (!acc.hasOwnProperty(asciiValue)) {
-          acc[asciiValue] = idx;
-        }
-      }
-      return acc;
-    }, {});
-    const getIndex = function (candidates) {
-      for (var i = 0; i < candidates.length; i++) {
-        if (headerIndex.hasOwnProperty(candidates[i])) {
-          return headerIndex[candidates[i]];
-        }
-      }
-      return -1;
-    };
-    const indices = {
-      idResa: getIndex(["ID Réservation", "ID R?servation", "ID Reservation"]),
-      idEvent: getIndex(["Event ID"]),
-      email: getIndex(["Client (Email)"]),
-      date: getIndex(["Date"]),
-      montant: getIndex(["Montant"]),
-      details: getIndex(["Détails", "D?tails", "Details"]),
-      resident: getIndex(["Resident"]),
-      type: getIndex(["Type"]),
-      tourneeOfferte: getIndex(["Tournée Offerte Appliquée", "Tournée Offerte Appliqu?e", "Tournee Offerte Appliquee"]),
-      typeRemise: getIndex(["Type Remise Appliquée", "Type Remise Appliqu?e", "Type Remise Appliquee"]),
-      valeurRemise: getIndex(["Valeur Remise Appliquée", "Valeur Remise Appliqu?e", "Valeur Remise Appliquee"])
-    };
-    const colonnesRequises = ['idResa', 'idEvent', 'email', 'date', 'montant', 'details'];
-    if (colonnesRequises.some(function (cle) { return indices[cle] === -1; })) {
-      throw new Error("Colonnes requises introuvables.");
-    }
+    const indices = getFacturationHeaderIndices_(feuille, ["ID Réservation", "Event ID", "Client (Email)", "Date", "Montant", "Détails"]).indices;
     if (!nouvelleHeure) {
       return { success: false, error: "Merci d'indiquer un horaire valide." };
     }
 
     const donnees = feuille.getDataRange().getValues();
     const indexLigne = donnees.findIndex(function (row) {
-      return String(row[indices.idResa]).trim() === idNorm;
+      return String(row[indices["ID Réservation"]]).trim() === idNorm;
     });
     if (indexLigne === -1) return { success: false, error: "Reservation introuvable." };
 
     const ligneDonnees = donnees[indexLigne];
-    const estResident = indices.resident !== -1 ? ligneDonnees[indices.resident] === true : false;
-    const idEvenementAncien = String(ligneDonnees[indices.idEvent]).trim();
-    const emailFeuille = String(ligneDonnees[indices.email]).trim().toLowerCase();
+    const estResident = indices["Resident"] !== undefined && indices["Resident"] !== -1 ? ligneDonnees[indices["Resident"]] === true : false;
+    const idEvenementAncien = String(ligneDonnees[indices["Event ID"]]).trim();
+    const emailFeuille = String(ligneDonnees[indices["Client (Email)"]]).trim().toLowerCase();
     if (emailNorm && emailFeuille !== emailNorm) return { success: false, error: "Acces non autorise." };
-    const details = String(ligneDonnees[indices.details]);
+    const details = String(ligneDonnees[indices["Détails"]]);
 
     const matchTotal = details.match(/(\d+)\s*arrêt\(s\)\s*total\(s\)/);
     const matchSup = matchTotal ? null : details.match(/(\d+)\s*arrêt\(s\)\s*sup/);
@@ -980,9 +940,15 @@ function replanifierReservation(idReservation, nouvelleDate, nouvelleHeure, emai
     const totalStops = Math.max(1, arrets + 1);
     const infosTournee = calculerInfosTourneeBase(totalStops, retour, nouvelleDate, nouvelleHeure);
 
-    const tourneeOfferte = indices.tourneeOfferte !== -1 ? ligneDonnees[indices.tourneeOfferte] === true : false;
-    const typeRemise = indices.typeRemise !== -1 ? String(ligneDonnees[indices.typeRemise] || '').trim() : '';
-    const valeurRemise = indices.valeurRemise !== -1 ? Number(ligneDonnees[indices.valeurRemise]) || 0 : 0;
+    const tourneeOfferte = indices["Tournée Offerte Appliquée"] !== undefined && indices["Tournée Offerte Appliquée"] !== -1
+      ? ligneDonnees[indices["Tournée Offerte Appliquée"]] === true
+      : false;
+    const typeRemise = indices["Type Remise Appliquée"] !== undefined && indices["Type Remise Appliquée"] !== -1
+      ? String(ligneDonnees[indices["Type Remise Appliquée"]] || '').trim()
+      : '';
+    const valeurRemise = indices["Valeur Remise Appliquée"] !== undefined && indices["Valeur Remise Appliquée"] !== -1
+      ? Number(ligneDonnees[indices["Valeur Remise Appliquée"]]) || 0
+      : 0;
 
     let nouveauMontant = infosTournee.prix;
     let nouveauType = infosTournee.typeCourse;
@@ -1029,16 +995,16 @@ function replanifierReservation(idReservation, nouvelleDate, nouvelleHeure, emai
       Logger.log(`L'ancien événement ${idEvenementAncien} n'a pas pu être supprimé (il n'existait probablement plus).`);
     }
 
-    feuille.getRange(indexLigne + 1, indices.date + 1).setValue(nouvelleDateDebut);
-    feuille.getRange(indexLigne + 1, indices.idEvent + 1).setValue(nouvelEvenement.getId());
-    if (indices.montant !== -1) {
-      feuille.getRange(indexLigne + 1, indices.montant + 1).setValue(nouveauMontant);
+    feuille.getRange(indexLigne + 1, indices["Date"] + 1).setValue(nouvelleDateDebut);
+    feuille.getRange(indexLigne + 1, indices["Event ID"] + 1).setValue(nouvelEvenement.getId());
+    if (indices["Montant"] !== undefined && indices["Montant"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Montant"] + 1).setValue(nouveauMontant);
     }
-    if (indices.details !== -1) {
-      feuille.getRange(indexLigne + 1, indices.details + 1).setValue(nouveauDetails);
+    if (indices["Détails"] !== undefined && indices["Détails"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Détails"] + 1).setValue(nouveauDetails);
     }
-    if (indices.type !== -1) {
-      feuille.getRange(indexLigne + 1, indices.type + 1).setValue(nouveauType);
+    if (indices["Type"] !== undefined && indices["Type"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Type"] + 1).setValue(nouveauType);
     }
 
     logActivity(idNorm, emailNorm || emailFeuille, `Déplacement au ${nouvelleDate} à ${nouvelleHeure}.`, nouveauMontant, "Modification");

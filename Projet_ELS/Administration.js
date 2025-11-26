@@ -28,7 +28,7 @@ function calculerCAEnCours() {
   const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
   if (!feuille) return null;
 
-  const indices = obtenirIndicesEnTetes(feuille, ["Date", "Montant"]);
+  const indices = getFacturationHeaderIndices_(feuille, ["Date", "Montant"]).indices;
   const donnees = feuille.getDataRange().getValues();
   const aujourdHui = new Date();
   const moisActuel = aujourdHui.getMonth();
@@ -109,7 +109,7 @@ function obtenirToutesReservationsAdmin() {
     if (!feuille) throw new Error("La feuille 'Facturation' est introuvable.");
 
     const enTetesRequis = ["Date", "Client (Email)", "Event ID", "Détails", "Client (Raison S. Client)", "ID Réservation", "Montant", "Type Remise Appliquée", "Valeur Remise Appliquée", "Tournée Offerte Appliquée", "Statut", "Note Interne"];
-    const indices = obtenirIndicesEnTetes(feuille, enTetesRequis);
+    const indices = getFacturationHeaderIndices_(feuille, enTetesRequis).indices;
 
     const donnees = feuille.getDataRange().getValues();
 
@@ -209,7 +209,7 @@ function obtenirToutesReservationsPourDate(dateFiltreString) {
     if (!feuille) throw new Error("La feuille 'Facturation' est introuvable.");
 
     const enTetesRequis = ["Date", "Client (Email)", "Event ID", "Détails", "Client (Raison S. Client)", "ID Réservation", "Montant", "Type Remise Appliquée", "Valeur Remise Appliquée", "Tournée Offerte Appliquée", "Statut", "Note Interne"];
-    const indices = obtenirIndicesEnTetes(feuille, enTetesRequis);
+    const indices = getFacturationHeaderIndices_(feuille, enTetesRequis).indices;
 
     const donnees = feuille.getDataRange().getValues();
     
@@ -641,26 +641,19 @@ function supprimerReservation(idReservation) {
     const feuilleFacturation = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
     if (!feuilleFacturation) throw new Error("La feuille 'Facturation' est introuvable.");
 
-    const enTete = feuilleFacturation.getRange(1, 1, 1, feuilleFacturation.getLastColumn()).getValues()[0];
-    const indices = {
-      idResa: enTete.indexOf("ID Réservation"),
-      idEvent: enTete.indexOf("Event ID"),
-      email: enTete.indexOf("Client (Email)"),
-      montant: enTete.indexOf("Montant")
-    };
-    if (Object.values(indices).some(i => i === -1)) throw new Error("Colonnes requises introuvables.");
+    const indices = getFacturationHeaderIndices_(feuilleFacturation, ["ID Réservation", "Event ID", "Client (Email)", "Montant"]).indices;
 
     const donneesFacturation = feuilleFacturation.getDataRange().getValues();
-    const indexLigneASupprimer = donneesFacturation.findIndex(row => String(row[indices.idResa]).trim() === String(idReservation).trim());
+    const indexLigneASupprimer = donneesFacturation.findIndex(row => String(row[indices["ID Réservation"]]).trim() === String(idReservation).trim());
 
     if (indexLigneASupprimer === -1) {
       return { success: false, error: "Réservation introuvable." };
     }
 
     const ligneASupprimer = donneesFacturation[indexLigneASupprimer];
-    const eventId = String(ligneASupprimer[indices.idEvent]).trim();
-    const emailClient = ligneASupprimer[indices.email];
-    const montant = ligneASupprimer[indices.montant];
+    const eventId = String(ligneASupprimer[indices["Event ID"]]).trim();
+    const emailClient = ligneASupprimer[indices["Client (Email)"]];
+    const montant = ligneASupprimer[indices["Montant"]];
 
     try {
       CalendarApp.getCalendarById(getSecret('ID_CALENDRIER')).getEventById(eventId).deleteEvent();
@@ -701,34 +694,19 @@ function appliquerRemiseSurTournee(idReservation, typeRemise, valeurRemise, nbTo
     const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
     if (!feuille) throw new Error("La feuille 'Facturation' est introuvable.");
 
-    const enTete = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0].map(h => String(h || '').trim());
-    const indices = {
-      idResa: enTete.indexOf("ID Réservation"),
-      typeCourse: enTete.indexOf("Type"),
-      details: enTete.indexOf("Détails"),
-      montant: enTete.indexOf("Montant"),
-      email: enTete.indexOf("Client (Email)"),
-      typeRemise: enTete.indexOf("Type Remise Appliquée"),
-      valeurRemise: enTete.indexOf("Valeur Remise Appliquée"),
-      tourneeOfferte: enTete.indexOf("Tournée Offerte Appliquée"),
-      eventId: enTete.indexOf("Event ID"),
-      resident: enTete.indexOf("Resident")
-    };
-    if (indices.idResa === -1 || indices.details === -1 || indices.montant === -1 || indices.email === -1) {
-      throw new Error("Colonnes requises introuvables dans la feuille de facturation.");
-    }
+    const indices = getFacturationHeaderIndices_(feuille, ["ID Réservation", "Type", "Détails", "Montant", "Client (Email)"]).indices;
 
     const donnees = feuille.getDataRange().getValues();
-    const indexLigne = donnees.findIndex(row => String(row[indices.idResa]).trim() === String(idReservation).trim());
+    const indexLigne = donnees.findIndex(row => String(row[indices["ID Réservation"]]).trim() === String(idReservation).trim());
     if (indexLigne === -1) return { success: false, error: "Réservation introuvable." };
 
     const ligne = donnees[indexLigne];
-    const emailClient = String(ligne[indices.email] || '').trim();
-    const detailsCourse = String(ligne[indices.details] || '');
-    const typeCourse = indices.typeCourse !== -1 ? String(ligne[indices.typeCourse] || '').trim().toLowerCase() : 'normal';
-    const eventId = indices.eventId !== -1 ? String(ligne[indices.eventId] || '').trim() : '';
-    const etaitTourneeOfferte = indices.tourneeOfferte !== -1 ? ligne[indices.tourneeOfferte] === true : false;
-    const estResident = indices.resident !== -1 ? ligne[indices.resident] === true : false;
+    const emailClient = String(ligne[indices["Client (Email)"]] || '').trim();
+    const detailsCourse = String(ligne[indices["Détails"]] || '');
+    const typeCourse = indices["Type"] !== undefined && indices["Type"] !== -1 ? String(ligne[indices["Type"]] || '').trim().toLowerCase() : 'normal';
+    const eventId = indices["Event ID"] !== undefined && indices["Event ID"] !== -1 ? String(ligne[indices["Event ID"]] || '').trim() : '';
+    const etaitTourneeOfferte = indices["Tournée Offerte Appliquée"] !== undefined && indices["Tournée Offerte Appliquée"] !== -1 ? ligne[indices["Tournée Offerte Appliquée"]] === true : false;
+    const estResident = indices["Resident"] !== undefined && indices["Resident"] !== -1 ? ligne[indices["Resident"]] === true : false;
 
     const matchStops = detailsCourse.match(/(\d+)\s*arr/i);
     if (!matchStops) return { success: false, error: "Impossible de déterminer le nombre d'arrêts à partir des détails." };
@@ -806,15 +784,15 @@ function appliquerRemiseSurTournee(idReservation, typeRemise, valeurRemise, nbTo
 
     nouveauMontant = Math.round(nouveauMontant * 100) / 100;
 
-    feuille.getRange(indexLigne + 1, indices.montant + 1).setValue(nouveauMontant);
-    if (indices.typeRemise !== -1) {
-      feuille.getRange(indexLigne + 1, indices.typeRemise + 1).setValue(typeRemiseStockee);
+    feuille.getRange(indexLigne + 1, indices["Montant"] + 1).setValue(nouveauMontant);
+    if (indices["Type Remise Appliquée"] !== undefined && indices["Type Remise Appliquée"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Type Remise Appliquée"] + 1).setValue(typeRemiseStockee);
     }
-    if (indices.valeurRemise !== -1) {
-      feuille.getRange(indexLigne + 1, indices.valeurRemise + 1).setValue(valeurRemiseStockee);
+    if (indices["Valeur Remise Appliquée"] !== undefined && indices["Valeur Remise Appliquée"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Valeur Remise Appliquée"] + 1).setValue(valeurRemiseStockee);
     }
-    if (indices.tourneeOfferte !== -1) {
-      feuille.getRange(indexLigne + 1, indices.tourneeOfferte + 1).setValue(nouvelleTourneeOfferte);
+    if (indices["Tournée Offerte Appliquée"] !== undefined && indices["Tournée Offerte Appliquée"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Tournée Offerte Appliquée"] + 1).setValue(nouvelleTourneeOfferte);
     }
 
     if (nouvelleTourneeOfferte && !etaitTourneeOfferte && emailClient) {
@@ -871,12 +849,13 @@ function genererFactures() {
       throw new Error("Une des feuilles requises ('Facturation', 'Clients', 'Paramètres') est introuvable.");
     }
 
-    const indicesFacturation = obtenirIndicesEnTetes(feuilleFacturation, ['Date', 'Client (Email)', 'Valider', 'N° Facture', 'Montant', 'ID PDF', 'Détails', 'Note Interne', 'Lien Note']);
-    const enTeteFacturation = feuilleFacturation.getRange(1, 1, 1, feuilleFacturation.getLastColumn()).getValues()[0].map(v => String(v).trim());
+    const requiredFacturation = ['Date', 'Client (Email)', 'Valider', 'N° Facture', 'Montant', 'ID PDF', 'Détails', 'Note Interne', 'Lien Note'];
+    const facturationHeaders = getFacturationHeaderIndices_(feuilleFacturation, requiredFacturation);
+    const indicesFacturation = facturationHeaders.indices;
     const indicesRemise = {
-      type: enTeteFacturation.indexOf('Type Remise Appliquée'),
-      valeur: enTeteFacturation.indexOf('Valeur Remise Appliquée'),
-      tourneeOfferte: enTeteFacturation.indexOf('Tournée Offerte Appliquée')
+      type: facturationHeaders.indices['Type Remise Appliquée'] !== undefined ? facturationHeaders.indices['Type Remise Appliquée'] : -1,
+      valeur: facturationHeaders.indices['Valeur Remise Appliquée'] !== undefined ? facturationHeaders.indices['Valeur Remise Appliquée'] : -1,
+      tourneeOfferte: facturationHeaders.indices['Tournée Offerte Appliquée'] !== undefined ? facturationHeaders.indices['Tournée Offerte Appliquée'] : -1
     };
     const indicesClients = obtenirIndicesEnTetes(feuilleClients, ["Email", "Raison Sociale", "Adresse"]);
 
@@ -1163,21 +1142,12 @@ function envoyerFacturesControlees() {
     const feuille = ss.getSheetByName(SHEET_FACTURATION);
     if (!feuille) throw new Error("La feuille 'Facturation' est introuvable.");
 
-    const lastCol = feuille.getLastColumn();
-    const header = feuille.getRange(1, 1, 1, lastCol).getValues()[0].map(v => String(v).trim());
-    const idx = {
-      email: header.indexOf('Client (Email)'),
-      numero: header.indexOf('N° Facture'),
-      idPdf: header.indexOf('ID PDF'),
-      aEnvoyer: header.indexOf('Email à envoyer'),
-      montant: header.indexOf('Montant'),
-      statut: header.indexOf('Statut'),
-      note: header.indexOf('Note Interne')
-    };
-
-    if (idx.email === -1 || idx.numero === -1 || idx.idPdf === -1) {
-      throw new Error("Colonnes requises manquantes dans 'Facturation' (Client (Email), N° Facture, ID PDF).");
-}
+    const headerInfo = getFacturationHeaderIndices_(feuille, ['Client (Email)', 'N° Facture', 'ID PDF']);
+    const idx = headerInfo.indices;
+    const idxAEnvoyer = idx['Email à envoyer'];
+    const idxMontant = idx['Montant'];
+    const idxStatut = idx['Statut'];
+    const idxNote = idx['Note Interne'];
 
 /**
  * Archive les factures du mois précédent en déplaçant les fichiers PDF
@@ -1196,16 +1166,11 @@ function archiverFacturesDuMois() {
     const feuille = ss.getSheetByName(SHEET_FACTURATION);
     if (!feuille) throw new Error("La feuille 'Facturation' est introuvable.");
 
-    const header = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0].map(v => String(v).trim());
-    const idx = {
-      date: header.indexOf('Date'),
-      numero: header.indexOf('N° Facture'),
-      idPdf: header.indexOf('ID PDF'),
-      statut: header.indexOf('Statut')
-    };
-    if (idx.date === -1 || idx.numero === -1 || idx.idPdf === -1) {
-      throw new Error("Colonnes requises manquantes (Date, N° Facture, ID PDF).");
-    }
+    const idxMap = getFacturationHeaderIndices_(feuille, ['Date', 'N° Facture', 'ID PDF']).indices;
+    const idxDate = idxMap['Date'];
+    const idxNumero = idxMap['N° Facture'];
+    const idxIdPdf = idxMap['ID PDF'];
+    const idxStatut = idxMap['Statut'];
 
     const donnees = feuille.getDataRange().getValues();
     const dossierArchives = DriveApp.getFolderById(getSecret('ID_DOSSIER_ARCHIVES'));
@@ -1216,9 +1181,9 @@ function archiverFacturesDuMois() {
     let deplaces = 0, ignores = 0, erreurs = 0;
     for (let r = 1; r < donnees.length; r++) {
       const ligne = donnees[r];
-      const valDate = ligne[idx.date];
-      const numero = String(ligne[idx.numero] || '').trim();
-      const idPdf = String(ligne[idx.idPdf] || '').trim();
+      const valDate = ligne[idxDate];
+      const numero = String(ligne[idxNumero] || '').trim();
+      const idPdf = String(ligne[idxIdPdf] || '').trim();
       if (!(valDate instanceof Date)) continue;
       if (!numero || !idPdf) continue;
       if (valDate < debutMoisPrecedent || valDate > finMoisPrecedent) { ignores++; continue; }
@@ -1234,7 +1199,7 @@ function archiverFacturesDuMois() {
         if (!dejaBonDossier) {
           fichier.moveTo(dossierMois);
         }
-        if (idx.statut !== -1) feuille.getRange(r + 1, idx.statut + 1).setValue('Archivée');
+        if (typeof idxStatut === 'number' && idxStatut !== -1) feuille.getRange(r + 1, idxStatut + 1).setValue('Archivée');
         deplaces++;
       } catch (e) {
         Logger.log('Erreur archivage facture ' + numero + ' : ' + e.message);
@@ -1258,16 +1223,16 @@ function archiverFacturesDuMois() {
 
     for (let r = 1; r < data.length; r++) {
       const row = data[r];
-      const email = String(row[idx.email] || '').trim();
-      const numero = String(row[idx.numero] || '').trim();
-      const idPdf = String(row[idx.idPdf] || '').trim();
-      const flag = idx.aEnvoyer !== -1 ? row[idx.aEnvoyer] === true : true;
+      const email = String(row[idx["Client (Email)"]] || '').trim();
+      const numero = String(row[idx["N° Facture"]] || '').trim();
+      const idPdf = String(row[idx["ID PDF"]] || '').trim();
+      const flag = (typeof idxAEnvoyer === 'number' && idxAEnvoyer !== -1) ? row[idxAEnvoyer] === true : true;
       if (!email || !numero || !idPdf || !flag) continue;
 
       try {
         const fichier = DriveApp.getFileById(idPdf);
         const pdfBlob = fichier.getAs(MimeType.PDF).setName(`${numero}.pdf`);
-        const montant = idx.montant !== -1 ? parseFloat(row[idx.montant]) || 0 : null;
+        const montant = (typeof idxMontant === 'number' && idxMontant !== -1) ? parseFloat(row[idxMontant]) || 0 : null;
         const sujet = `[${NOM_ENTREPRISE}] Facture ${numero}`;
         const corps = [
           logoBlock,
@@ -1287,8 +1252,8 @@ function archiverFacturesDuMois() {
           }
         );
 
-        if (idx.aEnvoyer !== -1) feuille.getRange(r + 1, idx.aEnvoyer + 1).setValue(false);
-        if (idx.statut !== -1) feuille.getRange(r + 1, idx.statut + 1).setValue('Envoyée');
+        if (typeof idxAEnvoyer === 'number' && idxAEnvoyer !== -1) feuille.getRange(r + 1, idxAEnvoyer + 1).setValue(false);
+        if (typeof idxStatut === 'number' && idxStatut !== -1) feuille.getRange(r + 1, idxStatut + 1).setValue('Envoyée');
         envoyees++;
       } catch (e) {
         erreurs.push(`Ligne ${r + 1} (${numero}) : ${e.message}`);
@@ -1320,18 +1285,13 @@ function genererDevisPdfDepuisSelection() {
 
     const values = sheet.getRange(range.getRow(), 1, range.getNumRows(), Math.max(1, sheet.getLastColumn())).getValues();
     const feuilleFacturation = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
-    const header = feuilleFacturation.getRange(1, 1, 1, Math.max(1, feuilleFacturation.getLastColumn())).getValues()[0];
-    const indices = {};
-    header.forEach((h, i) => indices[String(h || '').trim()] = i);
-
+    const headerInfo = getFacturationHeaderIndices_(feuilleFacturation, ['Date', 'Client (Email)', 'Client (Raison S. Client)', 'Détails', 'Montant']);
+    const indices = headerInfo.indices;
     const idxDate = indices['Date'];
     const idxEmail = indices['Client (Email)'];
     const idxNom = indices['Client (Raison S. Client)'];
-    const idxDetails = indices['Détails'] !== undefined ? indices['Détails'] : indices['Dtails'];
+    const idxDetails = indices['Détails'];
     const idxMontant = indices['Montant'];
-    if ([idxDate, idxEmail, idxNom, idxDetails, idxMontant].some(x => typeof x !== 'number')) {
-      throw new Error("Colonnes requises manquantes (Date, Client (Email), Client (Raison S. Client), Détails, Montant).");
-    }
 
     const emails = new Set(values.map(r => String(r[idxEmail] || '').trim()).filter(Boolean));
     if (emails.size === 0) {
