@@ -162,8 +162,16 @@ function serveAsset_(assetName) {
 
 function extractCssFromTemplate_(filename) {
   const raw = HtmlService.createHtmlOutputFromFile(filename).getContent() || '';
-  const match = raw.match(/<style[^>]*>([\\s\\S]*?)<\\/style>/i);
-  return (match ? match[1] : raw).trim();
+  const startStyle = raw.toLowerCase().indexOf('<style');
+  if (startStyle === -1) {
+    return raw.trim();
+  }
+  const open = raw.indexOf('>', startStyle);
+  const end = raw.toLowerCase().indexOf('</style>', open + 1);
+  if (open === -1 || end === -1) {
+    return raw.trim();
+  }
+  return raw.substring(open + 1, end).trim();
 }
 
 // ---------------------------------------------------------------------------
