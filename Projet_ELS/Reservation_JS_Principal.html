@@ -3,15 +3,15 @@
  * =================================================================
  * MODULE JAVASCRIPT - PRINCIPAL
  * =================================================================
- * Description: Point d'entrée principal du script côté client.
- * Initialise l'état de l'application, configure les écouteurs
- * d'événements et lance l'affichage initial.
+ * Description: Point d'entrÃ©e principal du script cÃ´tÃ© client.
+ * Initialise l'Ã©tat de l'application, configure les Ã©couteurs
+ * d'Ã©vÃ©nements et lance l'affichage initial.
  */
 
 /**
- * Initialise les drapeaux avec des valeurs par défaut et les fusionne avec ceux fournis.
+ * Initialise les drapeaux avec des valeurs par dÃ©faut et les fusionne avec ceux fournis.
  * @param {Object} [flags={}] Drapeaux provenant du serveur.
- * @returns {Object} Objet de drapeaux complété.
+ * @returns {Object} Objet de drapeaux complÃ©tÃ©.
  */
 function initializeFlags(flags = {}) {
   const defaults = {
@@ -55,11 +55,11 @@ const THEMES = Object.freeze({
 });
 let releaseCodePostalFocus = () => {};
 
-// État global de l'application côté client
+// Ã‰tat global de l'application cÃ´tÃ© client
 window.etat = {
   dateActuelle: new Date(),
   panier: [],
-  tourneeEnCours: {}, // Sera peuplé lors de la configuration
+  tourneeEnCours: {}, // Sera peuplÃ© lors de la configuration
   clientReconnu: null,
   codePostalOfficine: '',
   adresseSuggestion: null,
@@ -79,12 +79,12 @@ function mettreAJourThemeUI(theme) {
   const btn = window.ui?.btnThemeSwitch;
   const label = window.ui?.themeSwitchLabel;
   if (btn) {
-    btn.textContent = isUltra ? 'Revenir au thème immersif' : 'Activer le thème rapide';
+    btn.textContent = isUltra ? 'Revenir au thÃ¨me immersif' : 'Activer le thÃ¨me rapide';
     btn.setAttribute('aria-pressed', isUltra ? 'true' : 'false');
     btn.dataset.nextTheme = isUltra ? THEMES.IMMERSIVE : THEMES.ULTRA;
   }
   if (label) {
-    label.textContent = isUltra ? 'Thème actuel : rapide' : 'Thème actuel : immersif';
+    label.textContent = isUltra ? 'ThÃ¨me actuel : rapide' : 'ThÃ¨me actuel : immersif';
   }
 }
 
@@ -107,7 +107,7 @@ function appliquerThemeClient(theme, options = {}) {
     try {
       localStorage.setItem(CLE_THEME_PREFERENCE, cible);
     } catch (_err) {
-      // ignore storage errors (navigation privée, etc.)
+      // ignore storage errors (navigation privÃ©e, etc.)
     }
   }
 }
@@ -161,7 +161,7 @@ function obtenirModeResident() {
 }
 
 function obtenirLibelleResident(mode) {
-  return mode === 'urgence' ? 'Forfait résident - Urgence' : 'Forfait résident - Standard';
+  return mode === 'urgence' ? 'Forfait rÃ©sident - Urgence' : 'Forfait rÃ©sident - Standard';
 }
 
 function obtenirPrixResident(mode) {
@@ -181,7 +181,7 @@ function emettreEvenementCodePostal(code) {
   try {
     document.dispatchEvent(new CustomEvent('els-code-postal-change', { detail: code || '' }));
   } catch (_err) {
-    // CustomEvent non supporté (IE11); on ignore simplement.
+    // CustomEvent non supportÃ© (IE11); on ignore simplement.
   }
 }
 
@@ -214,7 +214,7 @@ function enregistrerCodePostalStocke(code) {
   try {
     localStorage.setItem(CLE_LOCALSTORAGE_CODE_POSTAL, code);
   } catch (_e) {
-    // ignore storage errors (navigation privée, etc.)
+    // ignore storage errors (navigation privÃ©e, etc.)
   }
 }
 
@@ -349,7 +349,7 @@ function initialiserVerrouCodePostal() {
       })
       .withFailureHandler(() => {
         basculerIndicateurChargement(false);
-        afficherVerrouCodePostal("Impossible de vérifier le code postal pour le moment.");
+        afficherVerrouCodePostal("Impossible de vÃ©rifier le code postal pour le moment.");
       })
       .verifierCodePostalAcces(codeStocke);
   } else {
@@ -360,7 +360,7 @@ function initialiserVerrouCodePostal() {
     event.preventDefault();
     const normalise = normaliserCodePostalLocal(champ.value);
     if (!normalise) {
-      afficherErreurCodePostal("Merci de saisir un code postal à 5 chiffres.");
+      afficherErreurCodePostal("Merci de saisir un code postal Ã  5 chiffres.");
       champ.focus();
       return;
     }
@@ -378,7 +378,7 @@ function initialiserVerrouCodePostal() {
       })
       .withFailureHandler(() => {
         basculerIndicateurChargement(false);
-        afficherErreurCodePostal("Impossible de vérifier le code postal pour le moment.");
+        afficherErreurCodePostal("Impossible de vÃ©rifier le code postal pour le moment.");
       })
       .verifierCodePostalAcces(normalise);
   });
@@ -399,16 +399,16 @@ function initialiserTarifsResident() {
   const prixStandard = obtenirPrixResident('standard');
   const prixUrgence = obtenirPrixResident('urgence');
   if (elStandard) {
-    elStandard.textContent = Number.isFinite(prixStandard) ? `${formatter.format(prixStandard)} �` : 'Forfait standard';
+    elStandard.textContent = Number.isFinite(prixStandard) ? `${formatter.format(prixStandard)} ï¿½` : 'Forfait standard';
   }
   if (elUrgence) {
-    elUrgence.textContent = Number.isFinite(prixUrgence) ? `${formatter.format(prixUrgence)} �` : 'Forfait urgence';
+    elUrgence.textContent = Number.isFinite(prixUrgence) ? `${formatter.format(prixUrgence)} ï¿½` : 'Forfait urgence';
   }
 }
 
 
 /**
- * Affiche une notification éphémère.
+ * Affiche une notification Ã©phÃ©mÃ¨re.
  * @param {string} message
  * @param {('succes'|'info'|'erreur')} [type='succes']
  */
@@ -443,7 +443,7 @@ function basculerIndicateurChargement(afficher) {
 }
 
 /**
- * Gestion d'erreur standardisée.
+ * Gestion d'erreur standardisÃ©e.
  * @param {any} erreur
  */
 function afficherErreur(erreur) {
@@ -454,7 +454,7 @@ function afficherErreur(erreur) {
 }
 
 /**
- * Affiche le conteneur de finalisation et pré-remplit les champs client.
+ * Affiche le conteneur de finalisation et prÃ©-remplit les champs client.
  */
 function afficherConteneurFinalisation() {
   const { ui } = window;
@@ -481,7 +481,7 @@ function afficherConteneurFinalisation() {
     ui.champNomClient.readOnly = true;
   } else {
     // Ne pas effacer les champs si l'utilisateur est en train de saisir un nouvel email
-    // pour éviter de retomber sur un champ vide et la boucle de validation du navigateur.
+    // pour Ã©viter de retomber sur un champ vide et la boucle de validation du navigateur.
     ui.champEmailClient.readOnly = false;
     ui.champNomClient.readOnly = false;
     if (ui.champTelephoneClient) {
@@ -502,14 +502,14 @@ function afficherConteneurFinalisation() {
 }
 
 /**
- * Détermine si le panier peut être validé automatiquement ou nécessite des informations complémentaires.
+ * DÃ©termine si le panier peut Ãªtre validÃ© automatiquement ou nÃ©cessite des informations complÃ©mentaires.
  * @param {Event} [ev]
  */
 function initierValidationPanier(ev) {
   ev?.preventDefault?.();
   const { clientReconnu, panier } = window.etat;
   if (!obtenirCodePostalCourant()) {
-    afficherNotification("Merci de valider le code postal de votre officine pour accéder à la réservation.", 'erreur');
+    afficherNotification("Merci de valider le code postal de votre officine pour accÃ©der Ã  la rÃ©servation.", 'erreur');
     afficherVerrouCodePostal();
     return;
   }
@@ -527,7 +527,7 @@ function initierValidationPanier(ev) {
 }
 
 /**
- * Soumet la réservation en utilisant directement les informations du client reconnu.
+ * Soumet la rÃ©servation en utilisant directement les informations du client reconnu.
  */
 function soumettreReservationClientReconnu() {
   const { ui } = window;
@@ -541,7 +541,7 @@ function soumettreReservationClientReconnu() {
     return;
   }
   if (!clientReconnu || !clientReconnu.email) {
-    afficherNotification("Identifiez-vous pour finaliser votre réservation.", 'erreur');
+    afficherNotification("Identifiez-vous pour finaliser votre rÃ©servation.", 'erreur');
     afficherConteneurFinalisation();
     return;
   }
@@ -553,7 +553,7 @@ function soumettreReservationClientReconnu() {
 
   const email = String(clientReconnu.email).trim();
   if (!emailRegex.test(email)) {
-    afficherNotification("Votre email enregistré nécessite une vérification. Merci de le confirmer.", 'erreur');
+    afficherNotification("Votre email enregistrÃ© nÃ©cessite une vÃ©rification. Merci de le confirmer.", 'erreur');
     afficherConteneurFinalisation();
     return;
   }
@@ -587,7 +587,7 @@ function soumettreReservationClientReconnu() {
     telephoneNormalise = normaliserTelephoneLocal(clientReconnu.telephone);
   }
   if (!telephoneValideLocal(telephoneNormalise)) {
-    afficherNotification("Merci de renseigner un numéro de téléphone valide pour créer ou mettre à jour votre accès client.", 'erreur');
+    afficherNotification("Merci de renseigner un numÃ©ro de tÃ©lÃ©phone valide pour crÃ©er ou mettre Ã  jour votre accÃ¨s client.", 'erreur');
     if (ui.champTelephoneClient) {
       ui.champTelephoneClient.value = telephoneNormalise;
       ui.champTelephoneClient.focus();
@@ -639,10 +639,10 @@ function mettreAJourEtatResident() {
     if (ui.clientEmailHelper) {
       if (actif) {
         ui.clientEmailHelper.textContent = affiliationReq
-          ? "Renseignez l'email de la structure : il servira à recevoir l'identifiant d'accès au portail client."
-          : "Nous utiliserons l'email de la structure pour envoyer l'identifiant d'accès client.";
+          ? "Renseignez l'email de la structure : il servira Ã  recevoir l'identifiant d'accÃ¨s au portail client."
+          : "Nous utiliserons l'email de la structure pour envoyer l'identifiant d'accÃ¨s client.";
       } else {
-        ui.clientEmailHelper.textContent = "Cette adresse email est requise pour recevoir votre identifiant d'accès client.";
+        ui.clientEmailHelper.textContent = "Cette adresse email est requise pour recevoir votre identifiant d'accÃ¨s client.";
       }
     }
     if (!actif) {
@@ -659,7 +659,7 @@ function mettreAJourEtatResident() {
 }
 
 /**
- * Envoie les données de réservation au serveur.
+ * Envoie les donnÃ©es de rÃ©servation au serveur.
  * @param {{client:Object,items:Array}} donneesReservation
  */
 function soumettreReservation(donneesReservation) {
@@ -680,14 +680,14 @@ function soumettreReservation(donneesReservation) {
       .withSuccessHandler(reponse => {
         basculerIndicateurChargement(false);
         if (reponse.success) {
-          afficherNotification("Réservation confirmée ! Un email vous a été envoyé.", 'succes');
+          afficherNotification("RÃ©servation confirmÃ©e ! Un email vous a Ã©tÃ© envoyÃ©.", 'succes');
           window.etat.panier = [];
           sauvegarderPanierDansLocalStorage();
           afficherPanier();
           ui.conteneurFinalisation.classList.add('hidden');
           memoriserClientReconnu(donneesReservation.client);
         } else {
-          afficherErreur(reponse.summary || "Une erreur est survenue lors de la réservation.");
+          afficherErreur(reponse.summary || "Une erreur est survenue lors de la rÃ©servation.");
           if (reponse.failedItemIds && reponse.failedItemIds.length > 0) {
             window.etat.panier = window.etat.panier.filter(item => !reponse.failedItemIds.includes(item.id));
             sauvegarderPanierDansLocalStorage();
@@ -703,14 +703,14 @@ function soumettreReservation(donneesReservation) {
 }
 
 /**
- * Gère la demande d'envoi de devis par email.
+ * GÃ¨re la demande d'envoi de devis par email.
  */
 function gererDemandeDevis() {
   const { ui } = window;
   const { panier, flags } = window.etat;
 
   if (flags?.devisEnabled === false) {
-    afficherNotification('La demande de devis est désactivée.', 'info');
+    afficherNotification('La demande de devis est dÃ©sactivÃ©e.', 'info');
     return;
   }
 
@@ -732,7 +732,7 @@ function gererDemandeDevis() {
 }
 
 /**
- * Collecte les données et appelle le serveur pour envoyer le devis.
+ * Collecte les donnÃ©es et appelle le serveur pour envoyer le devis.
  * @param {string} email
  */
 function envoyerDevis(email) {
@@ -740,7 +740,7 @@ function envoyerDevis(email) {
   const { panier, flags } = window.etat;
 
   if (flags?.devisEnabled === false) {
-    afficherNotification('La demande de devis est désactivée.', 'info');
+    afficherNotification('La demande de devis est dÃ©sactivÃ©e.', 'info');
     return;
   }
 
@@ -758,9 +758,9 @@ function envoyerDevis(email) {
     .withSuccessHandler(reponse => {
       basculerIndicateurChargement(false);
       if (reponse.success) {
-        afficherNotification(`Un devis a été envoyé à ${email}`, 'succes');
+        afficherNotification(`Un devis a Ã©tÃ© envoyÃ© Ã  ${email}`, 'succes');
       } else {
-        afficherErreur(reponse.error || "L'envoi du devis a échoué.");
+        afficherErreur(reponse.error || "L'envoi du devis a Ã©chouÃ©.");
       }
     })
     .withFailureHandler(afficherErreur)
@@ -769,7 +769,7 @@ function envoyerDevis(email) {
 
 /**
 
- * Gère la soumission du formulaire de réservation final.
+ * GÃ¨re la soumission du formulaire de rÃ©servation final.
  * @param {SubmitEvent} e
  */
 function gererSoumissionReservation(e) {
@@ -812,7 +812,7 @@ function gererSoumissionReservation(e) {
     }
   }
   if (!telephoneValideLocal(telephoneClient)) {
-    afficherNotification("Merci de renseigner un numéro de téléphone valide pour organiser le retrait.", 'erreur');
+    afficherNotification("Merci de renseigner un numÃ©ro de tÃ©lÃ©phone valide pour organiser le retrait.", 'erreur');
     if (ui.champTelephoneClient) {
       ui.champTelephoneClient.focus();
     }
@@ -858,7 +858,7 @@ function gererSoumissionReservation(e) {
 }
 
 /**
- * Affiche ou masque le bouton "Vider Panier" et gère son écouteur.
+ * Affiche ou masque le bouton "Vider Panier" et gÃ¨re son Ã©couteur.
  */
 function mettreAJourBoutonViderPanier() {
   const { ui } = window;
@@ -873,12 +873,12 @@ function mettreAJourBoutonViderPanier() {
 }
 
 /**
- * Configure tous les écouteurs d'événements de l'application.
+ * Configure tous les Ã©couteurs d'Ã©vÃ©nements de l'application.
  */
 function configurerEcouteursEvenements() {
   const { ui } = window;
 
-  // Gère les clics sur les jours du calendrier.
+  // GÃ¨re les clics sur les jours du calendrier.
   ui.grilleCalendrier?.addEventListener('click', (e) => {
     const jourClique = e.target.closest('.jour-calendrier');
     if (jourClique && !jourClique.classList.contains('desactive')) {
@@ -893,7 +893,7 @@ function configurerEcouteursEvenements() {
   ui.btnMoisPrecedent?.addEventListener('click', () => changerMois(-1));
   ui.btnMoisSuivant?.addEventListener('click', () => changerMois(1));
 
-  // Écouteur pour le formulaire de configuration de tournée
+  // Ã‰couteur pour le formulaire de configuration de tournÃ©e
   ui.formulaireConfigTournee?.addEventListener('submit', gererDemandeCreneaux);
 
   // Actions de la modale de configuration (Modale 1)
@@ -911,12 +911,12 @@ function configurerEcouteursEvenements() {
   });
   ui.interrupteurRetour?.addEventListener('change', mettreAJourResumeTournee);
 
-  // Actions de la modale de sélection de créneau (Modale 2)
+  // Actions de la modale de sÃ©lection de crÃ©neau (Modale 2)
   ui.btnFermerSelectionCreneau?.addEventListener('click', () => ui.modaleSelectionCreneau.classList.add('hidden'));
   ui.btnAjouterAuPanier?.addEventListener('click', gererAjoutAuPanier);
   ui.btnModifierTournee?.addEventListener('click', retourVersConfiguration);
 
-  // Écouteurs pour la modale de confirmation de récurrence (Modale 3)
+  // Ã‰couteurs pour la modale de confirmation de rÃ©currence (Modale 3)
   const modaleRecurrence = document.getElementById('modale-confirmation-recurrence');
   document.getElementById('btn-confirmer-recurrence')?.addEventListener('click', confirmerEtAjouterRecurrenceAuPanier);
   document.getElementById('btn-fermer-confirmation-recurrence')?.addEventListener('click', () => modaleRecurrence.classList.add('hidden'));
@@ -937,7 +937,7 @@ function configurerEcouteursEvenements() {
     });
   });
 
-  // Écouteurs pour la modale de demande d'email pour le devis
+  // Ã‰couteurs pour la modale de demande d'email pour le devis
   const modaleEmailDevis = document.getElementById('modale-email-devis');
   document.getElementById('formulaire-email-devis')?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -953,7 +953,7 @@ function configurerEcouteursEvenements() {
   });
 
   // Gestion du client
-  // Suppression de la recherche auto au blur pour éviter de réouvrir/rafraîchir le formulaire
+  // Suppression de la recherche auto au blur pour Ã©viter de rÃ©ouvrir/rafraÃ®chir le formulaire
   // pendant que l'utilisateur saisit un nouvel email. La connexion explicite se fait via le bouton.
   ui.btnChangerClient?.addEventListener('click', reinitialiserClient);
   ui.btnConnexionClient?.addEventListener('click', demanderConnexionClient);
@@ -963,7 +963,7 @@ function configurerEcouteursEvenements() {
       if (!window.etat?.clientReconnu) {
         e.preventDefault();
         if (typeof afficherNotification === 'function') {
-          afficherNotification("Aucun compte client trouvé. Veuillez valider une réservation pour créer votre compte.", 'info');
+          afficherNotification("Aucun compte client trouvÃ©. Veuillez valider une rÃ©servation pour crÃ©er votre compte.", 'info');
         }
         if (typeof afficherConteneurFinalisation === 'function') {
           afficherConteneurFinalisation();
@@ -1005,8 +1005,8 @@ function declencherActionTarif(element) {
   const variant = element.getAttribute('data-tarif-variant') || '';
   focusCalendrier();
 
-  if (action === 'tournee' && variant === 'normal') {
-    proposerPremiereCourseNormaleDisponible();
+  if (action === 'tournee' && (variant === 'normal' || variant === 'samedi' || variant === 'urgent')) {
+    proposerPremiereCourseParVariant(variant, { ouvrirWhatsapp: false });
     return;
   }
 
@@ -1023,7 +1023,7 @@ function declencherActionTarif(element) {
       }
     }
     afficherConteneurFinalisation();
-    afficherNotification("Forfait résident sélectionné. Complétez vos informations pour finaliser.", 'info');
+    afficherNotification("Forfait rÃ©sident sÃ©lectionnÃ©. ComplÃ©tez vos informations pour finaliser.", 'info');
     return;
   }
 
@@ -1031,7 +1031,7 @@ function declencherActionTarif(element) {
     type: variant || action,
     horodatage: Date.now()
   };
-  afficherNotification("Choisissez un créneau dans le calendrier pour poursuivre avec ce tarif.", 'info');
+  afficherNotification("Choisissez un crÃ©neau dans le calendrier pour poursuivre avec ce tarif.", 'info');
 }
 
 function initialiserActionsTarifs() {
@@ -1049,8 +1049,26 @@ function initialiserActionsTarifs() {
   });
 }
 
+
+function initialiserBoutonUrgentAide() {
+  const btn = document.getElementById('btn-urgent-aide');
+  if (!btn) return;
+  const trigger = (event) => {
+    event?.stopPropagation?.();
+    focusCalendrier();
+    proposerPremiereCourseParVariant('urgent', { ouvrirWhatsapp: true });
+  };
+  btn.addEventListener('click', trigger);
+  btn.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      trigger(event);
+    }
+  });
+}
+
 /**
- * Point d'entrée principal, exécuté après le chargement du DOM.
+ * Point d'entrÃ©e principal, exÃ©cutÃ© aprÃ¨s le chargement du DOM.
  */
 document.addEventListener('DOMContentLoaded', () => {
   initialiserVerrouCodePostal();
@@ -1073,6 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mettreAJourBoutonViderPanier();
     configurerEcouteursEvenements();
     initialiserActionsTarifs();
+    initialiserBoutonUrgentAide();
   }).getConfiguration();
   chargerPanierDepuisLocalStorage();
   verifierSessionClient();
@@ -1080,8 +1099,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Change le mois affiché dans le calendrier.
- * @param {number} delta - Le changement de mois (-1 pour précédent, 1 pour suivant).
+ * Change le mois affichÃ© dans le calendrier.
+ * @param {number} delta - Le changement de mois (-1 pour prÃ©cÃ©dent, 1 pour suivant).
  */
 function changerMois(delta) {
     window.etat.dateActuelle.setMonth(window.etat.dateActuelle.getMonth() + delta);
@@ -1114,20 +1133,40 @@ function demanderCreneauxPourDate(dateISO, duree, autresCoursesPanier = []) {
   });
 }
 
-async function proposerPremiereCourseNormaleDisponible() {
-  const MAX_JOURS_RECHERCHE = 30;
+
+function ouvrirWhatsappUrgent() {
+  const anchor = document.querySelector('.cta-whatsapp');
+  const baseHref = (anchor && anchor.getAttribute('href')) ? anchor.getAttribute('href') : 'https://wa.me/33768591888';
+  const separator = baseHref.includes('?') ? '&' : '?';
+  const message = "Bonjour, j'ai une livraison urgente à réserver via ELS.";
+  const url = `${baseHref}${separator}text=${encodeURIComponent(message)}`;
+  try {
+    window.open(url, '_blank', 'noopener');
+  } catch (_err) {
+    window.location.href = url;
+  }
+}
+
+async function proposerPremiereCourseParVariant(variant, options = {}) {
+  const typeMapping = { normal: 'Normal', samedi: 'Samedi', urgent: 'Urgent' };
+  const typeRecherche = typeMapping[variant] || 'Normal';
+  const maxJoursRecherche = variant === 'urgent' ? 10 : 30;
   const totalStops = 1;
   const returnToPharmacy = false;
   const dureeBase = parseInt(configServeur?.DUREE_BASE, 10) || 30;
   const aujourdHui = new Date();
+  const ouvrirWhatsapp = options && options.ouvrirWhatsapp === true;
   basculerIndicateurChargement(true);
   try {
     let resultat = null;
-    for (let i = 0; i < MAX_JOURS_RECHERCHE; i++) {
+    for (let i = 0; i < maxJoursRecherche; i++) {
       const dateCandidate = new Date(aujourdHui);
       dateCandidate.setDate(aujourdHui.getDate() + i);
       if (dateCandidate.getDay() === 0) {
-        continue; // skip dimanches
+        continue; // pas de dimanche
+      }
+      if (variant === 'samedi' && dateCandidate.getDay() !== 6) {
+        continue; // on saute jusqu'au samedi suivant
       }
       const dateISO = isoDateLocale(dateCandidate);
       const dispoLocale = window.etat?.donneesCalendrier?.[dateISO];
@@ -1146,19 +1185,19 @@ async function proposerPremiereCourseNormaleDisponible() {
       if (!creneaux.length) {
         continue;
       }
-      const premierNormal = creneaux.find(creneau => {
+      const slotChoisi = creneaux.find(creneau => {
         const slotTime = extraireHeureCreneau(creneau);
         const estimation = calculerInfosTourneeClient(totalStops, returnToPharmacy, dateISO, slotTime);
-        return estimation.typeCourse === 'Normal';
+        return estimation.typeCourse === typeRecherche;
       });
-      if (premierNormal) {
-        resultat = { dateISO, creneaux, slot: premierNormal };
+      if (slotChoisi) {
+        resultat = { dateISO, creneaux, slot: slotChoisi };
         break;
       }
     }
 
     if (!resultat) {
-      afficherNotification('Aucune course au tarif Normal n’est disponible dans les prochains jours. Choisissez un autre créneau.', 'info');
+      afficherNotification(`Aucune course au tarif ${typeRecherche} n'est disponible dans les prochains jours. Choisissez un autre créneau.`, 'info');
       return;
     }
 
@@ -1170,7 +1209,7 @@ async function proposerPremiereCourseNormaleDisponible() {
       returnToPharmacy,
       duree: estimation.duree
     };
-    window.etat.tarifChoisi = { type: 'normal', horodatage: Date.now() };
+    window.etat.tarifChoisi = { type: variant || typeRecherche.toLowerCase(), horodatage: Date.now() };
 
     afficherSelectionCreneaux(resultat.creneaux);
     setTimeout(() => {
@@ -1181,14 +1220,16 @@ async function proposerPremiereCourseNormaleDisponible() {
     }, 20);
 
     const dateLisible = new Date(resultat.dateISO + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-    afficherNotification(`Proposition : ${dateLisible} à ${slotTime} (tarif Normal).`, 'info');
+    afficherNotification(`Proposition : ${dateLisible} à ${slotTime} (tarif ${typeRecherche}).`, 'info');
+
+    if (variant === 'urgent' && ouvrirWhatsapp) {
+      ouvrirWhatsappUrgent();
+    }
   } catch (err) {
     afficherErreur(err);
   } finally {
     basculerIndicateurChargement(false);
   }
 }
+
 </script>
-
-
-
