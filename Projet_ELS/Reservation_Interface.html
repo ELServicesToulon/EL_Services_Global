@@ -346,9 +346,13 @@
               <span class="tarif-valeur" id="tarif-samedi-base">-</span>
               <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison" data-meta-separator=" + "></span>
             </li>
-            <li class="tarif-ligne tarif-action" data-tarif-action="tournee" data-tarif-variant="urgent" role="button" tabindex="0" aria-label="Choisir le tarif urgent">
+            <li class="tarif-ligne tarif-action tarif-ligne--urgent" data-tarif-action="tournee" data-tarif-variant="urgent" role="button" tabindex="0" aria-label="Choisir le tarif urgent">
               <span class="tarif-libelle">Urgent</span>
               <span class="tarif-valeur" id="tarif-urgent-base">-</span>
+              <button type="button" class="btn-urgent-aide" id="btn-urgent-aide" aria-label="Besoin d'aide pour une livraison urgente">
+                <span class="urgent-dot" aria-hidden="true"></span>
+                Aide urgence
+              </button>
               <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison" data-meta-separator=" + "></span>
             </li>
             <li class="tarif-ligne tarif-ligne--wrap tarif-action" data-tarif-action="tournee" data-tarif-variant="supplements" role="button" tabindex="0" aria-label="Voir les suppléments par arrêt">

@@ -685,6 +685,7 @@ main.layout > .main > * {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   align-items: baseline;
+  position: relative;
 }
 #tarifs-card .tarif-description {
   grid-column: 1 / -1;
@@ -713,6 +714,58 @@ main.layout > .main > * {
 #tarifs-card .tarif-ligne--note .tarif-valeur {
   justify-self: start;
 }
+
+.tarif-ligne--urgent {
+  padding-right: 96px;
+}
+
+.btn-urgent-aide {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff4d4d, #ff8a00);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 18px rgba(255, 77, 77, 0.35);
+  cursor: pointer;
+  animation: urgentPulse 1.4s infinite;
+}
+
+.btn-urgent-aide:hover,
+.btn-urgent-aide:focus-visible {
+  box-shadow: 0 10px 22px rgba(255, 77, 77, 0.45);
+  outline: none;
+}
+
+.btn-urgent-aide .urgent-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.18);
+  animation: urgentDot 1.4s infinite;
+}
+
+@keyframes urgentPulse {
+  0% { transform: translateY(-50%) scale(1); }
+  50% { transform: translateY(-50%) scale(1.04); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+
+@keyframes urgentDot {
+  0% { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.12); }
+  100% { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25); }
+}
+
 #tarifs-card .tarif-supplement-chip {
   background: rgba(142, 68, 173, 0.12);
   color: var(--violet);
@@ -738,6 +791,16 @@ main.layout > .main > * {
   }
   #tarifs-card .tarif-valeur {
     justify-self: start;
+  }
+  .tarif-ligne--urgent {
+    padding-right: 0;
+  }
+  .btn-urgent-aide {
+    position: static;
+    transform: none;
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
   }
 }
 /* Stack pour découpe en 3 cartes */
