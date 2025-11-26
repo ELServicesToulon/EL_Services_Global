@@ -144,18 +144,6 @@
     <div class="spinner"></div>
   </div>
 
-  <div class="livreur-cta" role="complementary" aria-label="Acces livreur ELS">
-    <span class="livreur-cta__label">Vous &ecirc;tes livreur ELS&nbsp;?</span>
-      <a
-        class="btn btn-primaire btn-sm livreur-cta__button"
-        href="<?= livreurAppUrl ?>">
-        Acc&eacute;der &agrave; l'appli livreur
-      </a>
-  </div>
-
-  
-  
-
   <main id="layout" class="container layout-two-cols layout-els">
     <section id="col-center" class="col col--calendar els-center-grid" aria-label="Sélection de créneau">
       <div id="calendar-panel" class="card" aria-label="Calendrier de réservation" role="region" data-component="calendar">
@@ -326,12 +314,21 @@
     </section>
   </main>
   <section id="tarifs-full" class="section section--tarifs-full">
-    <!-- Bouton WhatsApp ELS au-dessus des tarifs -->
-    <div class="cta-whatsapp-wrapper">
-      <a class="cta-whatsapp" href="https://wa.me/33768591888" target="_blank" rel="noopener noreferrer">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" width="22" height="22">
-        Discuter sur WhatsApp
-      </a>
+    <div class="cta-duo">
+      <div class="livreur-cta" role="complementary" aria-label="Acces livreur ELS">
+        <span class="livreur-cta__label">Vous &ecirc;tes livreur ELS&nbsp;?</span>
+          <a
+            class="btn btn-primaire btn-sm livreur-cta__button"
+            href="<?= livreurAppUrl ?>">
+            Acc&eacute;der &agrave; l'appli livreur
+          </a>
+      </div>
+      <div class="cta-whatsapp-wrapper">
+        <a class="cta-whatsapp" href="https://wa.me/33768591888" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" width="22" height="22">
+          Discuter sur WhatsApp
+        </a>
+      </div>
     </div>
     <div id="tarifs-card" class="carte card">
       <h2 id="titre-tarifs-detaille">Tarifs détaillés</h2>
