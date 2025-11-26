@@ -131,7 +131,7 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin: 18px auto 0;
+  margin: 0;
   padding: 14px 22px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--els-violet, #8e44ad) 10%, #ffffff);
@@ -149,6 +149,21 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var
   white-space: nowrap;
 }
 
+.cta-duo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 30px auto 18px;
+  width: fit-content;
+}
+
+.cta-duo .cta-whatsapp-wrapper,
+.cta-duo .livreur-cta {
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .livreur-cta {
     width: calc(100% - 32px);
@@ -161,11 +176,25 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var
     width: 100%;
     text-align: center;
   }
+
+  .cta-duo {
+    width: calc(100% - 32px);
+    margin: 24px auto 18px;
+  }
+
+  .cta-duo .cta-whatsapp-wrapper {
+    width: 100%;
+  }
+
+  .cta-duo .cta-whatsapp {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .cta-whatsapp-wrapper {
   text-align: center;
-  margin: 30px auto;
+  margin: 0;
   width: fit-content;
 }
 
