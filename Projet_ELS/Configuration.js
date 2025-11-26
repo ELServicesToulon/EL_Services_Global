@@ -650,6 +650,16 @@ var Config = (function() {
     // URLs & WebHooks
     get LIVRAISON_WEBAPP_URL() { return _get("LIVRAISON_WEBAPP_URL"); },
 
+    // --- MODULE TESLA (API Tessie) ---
+    get TESLA() {
+      return {
+        TOKEN: _getOrDefault('TESLA_TOKEN', 'TON_TOKEN_TESSIE_ICI'), // Token API Tessie
+        VIN: _getOrDefault('TESLA_VIN', 'TON_VIN_TESLA_ICI'), // VIN (5YJ...)
+        SEUIL_ALERTE: _getOrDefault('TESLA_SEUIL_ALERTE', 20), // % Batterie minimum avant alerte
+        EMAIL_ALERTE: _getOrDefault('TESLA_EMAIL_ALERTE', 'elservicestoulon@gmail.com')
+      };
+    },
+
     // Identité Société (compatibilité legacy)
     get APP_NAME() { return "EL Services Gestion"; },
     get SOCIETE_NOM() { return _getOrDefault("SOCIETE_NOM", _get("NOM_ENTREPRISE")); },
