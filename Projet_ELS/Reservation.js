@@ -750,14 +750,17 @@ function trouverAlternativeProche(creneauCible, creneauxDisponibles) {
  */
 function obtenirReservationsPourClient(email, date) {
   var sheet = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
-  var data = sheet.getDataRange().getValues();
-  var headers = data[0];
-  var emailIndex = headers.indexOf("Client (Email)");
-  var dateIndex = headers.indexOf("Date");
-  var statutIndex = headers.indexOf("Statut");
-  if (emailIndex === -1 || dateIndex === -1) {
+  var headerInfo;
+  try {
+    headerInfo = getFacturationHeaderIndices_(sheet, ["Client (Email)", "Date"]);
+  } catch (e) {
+    Logger.log("En-têtes Facturation manquants pour obtenirReservationsPourClient: " + e.message);
     return [];
   }
+  var data = sheet.getDataRange().getValues();
+  var emailIndex = headerInfo.indices["Client (Email)"];
+  var dateIndex = headerInfo.indices["Date"];
+  var statutIndex = headerInfo.indices["Statut"] !== undefined ? headerInfo.indices["Statut"] : -1;
   var hasStatut = statutIndex !== -1;
   var reservations = [];
   var now = new Date();

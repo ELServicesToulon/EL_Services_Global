@@ -314,8 +314,10 @@ function enregistrerReservationPourFacturation(dateHeureDebut, nomClient, emailC
       feuilleFacturation.getRange(1, trimmedHeaders.length + 1).setValue('Resident');
     }
 
-    const enTetesRequis = ["Date", "Client (Raison S. Client)", "Client (Email)", "Type", "Détails", "Montant", "Statut", "Valider", "N° Facture", "Event ID", "ID Réservation", "Note Interne", "Tournée Offerte Appliquée", "Type Remise Appliquée", "Valeur Remise Appliquée", "Lien Note", "Resident"];
-    const indices = obtenirIndicesEnTetes(feuilleFacturation, enTetesRequis);
+    const requiredHeaders = (typeof FACTURATION_HEADERS !== 'undefined' && Array.isArray(FACTURATION_HEADERS))
+      ? FACTURATION_HEADERS.concat(['Resident'])
+      : ["Date", "Client (Raison S. Client)", "Client (Email)", "Type", "Détails", "Montant", "Statut", "Valider", "N° Facture", "Event ID", "ID Réservation", "Note Interne", "Tournée Offerte Appliquée", "Type Remise Appliquée", "Valeur Remise Appliquée", "Lien Note", "Resident"];
+    const indices = getFacturationHeaderIndices_(feuilleFacturation, requiredHeaders).indices;
 
     const nouvelleLigne = new Array(feuilleFacturation.getLastColumn()).fill('');
     

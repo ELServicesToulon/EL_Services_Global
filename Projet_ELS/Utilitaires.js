@@ -401,6 +401,90 @@ function obtenirIndicesEnTetes(feuille, enTetesRequis) {
   return indices;
 }
 
+// -----------------------------------------------------------------
+//           Mapping centralisé des en-têtes de "Facturation"
+// -----------------------------------------------------------------
+// Canonique: on reprend FACTURATION_HEADERS si disponible, sinon un fallback identique.
+const FACTURATION_HEADERS_CANONICAL = (typeof FACTURATION_HEADERS !== 'undefined' && Array.isArray(FACTURATION_HEADERS))
+  ? FACTURATION_HEADERS
+  : ['Date','Client (Raison S. Client)','Client (Email)','Type','Détails','Montant','Statut','Valider','N° Facture','Event ID','ID Réservation','Note Interne','Tournée Offerte Appliquée','Type Remise Appliquée','Valeur Remise Appliquée','Lien Note'];
+const FACTURATION_HEADERS_OPTIONAL = ['ID PDF', 'Email à envoyer', 'Resident', 'ID Devis'];
+const FACTURATION_HEADER_ALIASES = {
+  'Date': ['date prestation', 'date course'],
+  'Client (Raison S. Client)': ['client', 'client nom', 'raison sociale', 'raison sociale client', 'client (nom)'],
+  'Client (Email)': ['email', 'e-mail', 'mail', 'courriel', 'email client', 'client email', 'adresse mail'],
+  'Type': ['type course', 'categorie'],
+  'Détails': ['details', 'detail', 'description', 'prestation', 'course'],
+  'Montant': ['total', 'prix', 'amount', 'montant ttc', 'montant ht'],
+  'Statut': ['status', 'etat'],
+  'Valider': ['a valider', 'à valider', 'validation', 'a envoyer', 'à envoyer'],
+  'N° Facture': ['numero facture', 'num facture', 'no facture', 'n facture', 'facture numero', 'facture #'],
+  'Event ID': ['id event', 'id evenement', 'id événement', 'calendar id'],
+  'ID Réservation': ['id reservation', 'reservation id', 'resa id'],
+  'Note Interne': ['note interne', 'notes', 'note', 'commentaire'],
+  'Tournée Offerte Appliquée': ['tournee offerte appliquee', 'tournee offerte', 'course offerte'],
+  'Type Remise Appliquée': ['type remise appliquee', 'type remise', 'remise type'],
+  'Valeur Remise Appliquée': ['valeur remise appliquee', 'valeur remise', 'remise valeur', 'remise montant'],
+  'Lien Note': ['lien note', 'note lien', 'url note'],
+  'ID PDF': ['id pdf', 'pdf id', 'pdf'],
+  'Email à envoyer': ['email a envoyer', 'email envoyer', 'a envoyer email'],
+  'Resident': ['resident', 'résident', 'residente'],
+  'ID Devis': ['id devis', 'devis id']
+};
+
+function normalizeHeaderValue_(value) {
+  return String(value || '')
+    .replace(/\u00A0/g, ' ')
+    .replace(/[°º]/g, 'o')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function buildFacturationHeaderIndex_(headers) {
+  const normalizedHeaders = headers.map(normalizeHeaderValue_);
+  const allCanon = Array.from(new Set([].concat(FACTURATION_HEADERS_CANONICAL, FACTURATION_HEADERS_OPTIONAL)));
+  const indexMap = {};
+  const resolvedNames = {};
+
+  allCanon.forEach(function(name) {
+    const target = normalizeHeaderValue_(name);
+    const aliases = (FACTURATION_HEADER_ALIASES[name] || []).map(normalizeHeaderValue_);
+    const idx = normalizedHeaders.findIndex(function(h) {
+      if (!h) return false;
+      if (h === target) return true;
+      return aliases.indexOf(h) !== -1;
+    });
+    if (idx !== -1) {
+      indexMap[name] = idx;
+      resolvedNames[name] = headers[idx];
+    }
+  });
+
+  return { indexMap: indexMap, resolvedNames: resolvedNames, normalizedHeaders: normalizedHeaders };
+}
+
+/**
+ * Retourne les indices des en-têtes de l'onglet Facturation en s'alignant sur le Sheet.
+ * Accepte des alias fréquents (ex: "Email" au lieu de "Client (Email)") sans toucher au Sheet.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @param {string[]=} requiredHeaders Liste personnalisée d'en-têtes à rendre obligatoires.
+ * @returns {{header: *, indices: Object, resolved: Object}}
+ */
+function getFacturationHeaderIndices_(sheet, requiredHeaders) {
+  if (!sheet) throw new Error("Feuille 'Facturation' introuvable.");
+  const header = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0];
+  const { indexMap, resolvedNames } = buildFacturationHeaderIndex_(header);
+  const required = (requiredHeaders && requiredHeaders.length) ? requiredHeaders : FACTURATION_HEADERS_CANONICAL;
+  const missing = required.filter(function(name) { return typeof indexMap[name] === 'undefined'; });
+  if (missing.length) {
+    throw new Error(`Colonnes manquantes dans "${sheet.getName()}": ${missing.join(', ')}`);
+  }
+  return { header: header, indices: indexMap, resolved: resolvedNames };
+}
+
 /**
  * Obtient un dossier par son nom dans un dossier parent, ou le crée s'il n'existe pas.
  * @param {GoogleAppsScript.Drive.Folder} dossierParent Le dossier parent.
