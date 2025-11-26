@@ -30,7 +30,7 @@ function onOpen(e) {
     .addItem('Sauvegarder les donnees', 'sauvegarderDonnees')
     .addItem('Purger les anciennes donnees (RGPD)', 'purgerAnciennesDonnees')
     .addSeparator()
-    .addItem(\"Nettoyer l'onglet Facturation\", 'nettoyerOngletFacturation')
+    .addItem("Nettoyer l'onglet Facturation", 'nettoyerOngletFacturation')
     .addItem('Reparer entetes Facturation', 'reparerEntetesFacturation')
     .addItem('Normaliser entetes Facturation', 'normaliserEntetesFacturation');
 
