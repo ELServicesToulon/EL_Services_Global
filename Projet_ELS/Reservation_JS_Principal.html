@@ -1005,6 +1005,11 @@ function declencherActionTarif(element) {
   const variant = element.getAttribute('data-tarif-variant') || '';
   focusCalendrier();
 
+  if (action === 'tournee' && variant === 'normal') {
+    proposerPremiereCourseNormaleDisponible();
+    return;
+  }
+
   if (action === 'resident') {
     if (window.ui?.champResidentClient && !window.ui.champResidentClient.checked) {
       window.ui.champResidentClient.checked = true;
@@ -1081,6 +1086,107 @@ document.addEventListener('DOMContentLoaded', () => {
 function changerMois(delta) {
     window.etat.dateActuelle.setMonth(window.etat.dateActuelle.getMonth() + delta);
     afficherCalendrier(window.etat.dateActuelle.getMonth() + 1, window.etat.dateActuelle.getFullYear());
+}
+
+function isoDateLocale(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function extraireHeureCreneau(slot) {
+  if (!slot) return '';
+  if (typeof slot === 'string') return slot;
+  if (typeof slot === 'object') {
+    if (slot.time) return slot.time;
+    if (slot.creneau) return slot.creneau;
+  }
+  return String(slot);
+}
+
+function demanderCreneauxPourDate(dateISO, duree, autresCoursesPanier = []) {
+  return new Promise((resolve, reject) => {
+    google.script.run
+      .withSuccessHandler(creneaux => resolve(Array.isArray(creneaux) ? creneaux : []))
+      .withFailureHandler(reject)
+      .obtenirCreneauxDisponiblesPourDate(dateISO, duree, null, null, autresCoursesPanier);
+  });
+}
+
+async function proposerPremiereCourseNormaleDisponible() {
+  const MAX_JOURS_RECHERCHE = 30;
+  const totalStops = 1;
+  const returnToPharmacy = false;
+  const dureeBase = parseInt(configServeur?.DUREE_BASE, 10) || 30;
+  const aujourdHui = new Date();
+  basculerIndicateurChargement(true);
+  try {
+    let resultat = null;
+    for (let i = 0; i < MAX_JOURS_RECHERCHE; i++) {
+      const dateCandidate = new Date(aujourdHui);
+      dateCandidate.setDate(aujourdHui.getDate() + i);
+      if (dateCandidate.getDay() === 0) {
+        continue; // skip dimanches
+      }
+      const dateISO = isoDateLocale(dateCandidate);
+      const dispoLocale = window.etat?.donneesCalendrier?.[dateISO];
+      if (dispoLocale && dispoLocale.disponibles === 0) {
+        continue;
+      }
+      const autresCoursesPanier = (window.etat?.panier || [])
+        .filter(item => item.date === dateISO)
+        .map(item => ({ startTime: item.startTime, duree: item.duree }));
+      let creneaux = [];
+      try {
+        creneaux = await demanderCreneauxPourDate(dateISO, dureeBase, autresCoursesPanier);
+      } catch (_err) {
+        continue;
+      }
+      if (!creneaux.length) {
+        continue;
+      }
+      const premierNormal = creneaux.find(creneau => {
+        const slotTime = extraireHeureCreneau(creneau);
+        const estimation = calculerInfosTourneeClient(totalStops, returnToPharmacy, dateISO, slotTime);
+        return estimation.typeCourse === 'Normal';
+      });
+      if (premierNormal) {
+        resultat = { dateISO, creneaux, slot: premierNormal };
+        break;
+      }
+    }
+
+    if (!resultat) {
+      afficherNotification('Aucune course au tarif Normal n’est disponible dans les prochains jours. Choisissez un autre créneau.', 'info');
+      return;
+    }
+
+    const slotTime = extraireHeureCreneau(resultat.slot);
+    const estimation = calculerInfosTourneeClient(totalStops, returnToPharmacy, resultat.dateISO, slotTime);
+    window.etat.tourneeEnCours = {
+      date: resultat.dateISO,
+      totalStops,
+      returnToPharmacy,
+      duree: estimation.duree
+    };
+    window.etat.tarifChoisi = { type: 'normal', horodatage: Date.now() };
+
+    afficherSelectionCreneaux(resultat.creneaux);
+    setTimeout(() => {
+      const btn = window.ui?.grilleSelectionCreneau?.querySelector(`[data-creneau="${slotTime}"]`);
+      if (btn && !btn.disabled && !btn.classList.contains('indispo')) {
+        btn.click();
+      }
+    }, 20);
+
+    const dateLisible = new Date(resultat.dateISO + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    afficherNotification(`Proposition : ${dateLisible} à ${slotTime} (tarif Normal).`, 'info');
+  } catch (err) {
+    afficherErreur(err);
+  } finally {
+    basculerIndicateurChargement(false);
+  }
 }
 </script>
 
