@@ -1,41 +1,90 @@
 /**
- * @fileoverview Gestion de la flotte (Tesla Model Y) pour EL Services via API Tessie.
- * Ce module gère la récupération de l'état batterie et les alertes de sécurité.
- * * DÉPENDANCE : Nécessite l'objet 'Config.TESLA' dans le fichier Configuration.js
+ * @fileoverview Gestion de la Tesla via l'API Tessie (suivi batterie et alertes).
+ * Secrets stockes dans les ScriptProperties:
+ * - VIN_TESLA_JUNIPER_2025
+ * - TOKEN_TESSIE
+ * - SECRET (optionnel)
  */
-
-// --- FONCTIONS PRINCIPALES ---
 
 /**
- * Récupère les données télémétriques de la Tesla.
- * Utilise l'API Tessie pour minimiser l'impact sur la batterie du véhicule (Vampire drain).
- * * @param {boolean} forceWake - Si true, force le réveil de la voiture (A utiliser avec précaution).
- * @return {Object|null} Un objet contenant {batteryLevel, rangeKm, chargingState, isPlugged} ou null en cas d'erreur.
+ * Charge la configuration Tesla depuis les ScriptProperties,
+ * avec retour en arriere sur l'ancien bloc Config.TESLA si besoin.
+ * @return {{VIN:string,TOKEN:string,SECRET:string,SEUIL_ALERTE:number,EMAIL_ALERTE:string}}
+ */
+function getTeslaConfig_() {
+  var props;
+  try {
+    props = PropertiesService.getScriptProperties();
+  } catch (err) {
+    Logger.log('Impossible de lire les ScriptProperties Tesla : ' + err.toString());
+    props = null;
+  }
+
+  var fallbackConfig = (typeof Config !== 'undefined' && Config.TESLA) ? Config.TESLA : null;
+  var vin = props && (props.getProperty('VIN_TESLA_JUNIPER_2025') || props.getProperty('TESLA_VIN')) || (fallbackConfig ? fallbackConfig.VIN : '');
+  var token = props && (props.getProperty('TOKEN_TESSIE') || props.getProperty('TESLA_TOKEN')) || (fallbackConfig ? fallbackConfig.TOKEN : '');
+  var secret = props && (props.getProperty('SECRET') || props.getProperty('TESLA_SECRET')) || '';
+
+  return {
+    VIN: (vin || '').trim(),
+    TOKEN: (token || '').trim(),
+    SECRET: (secret || '').trim(),
+    SEUIL_ALERTE: parseTeslaNumber_(props, 'TESLA_SEUIL_ALERTE', fallbackConfig ? fallbackConfig.SEUIL_ALERTE : 20),
+    EMAIL_ALERTE: (props && props.getProperty('TESLA_EMAIL_ALERTE')) ||
+      (fallbackConfig ? fallbackConfig.EMAIL_ALERTE : '') ||
+      (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'elservicestoulon@gmail.com')
+  };
+}
+
+/**
+ * Convertit une valeur ScriptProperty en nombre avec valeur par defaut.
+ * @param {PropertiesService.ScriptProperties|null} props
+ * @param {string} key
+ * @param {number} defaultValue
+ * @return {number}
+ */
+function parseTeslaNumber_(props, key, defaultValue) {
+  var raw = props && props.getProperty(key);
+  var num = Number(raw);
+  if (!isFinite(num)) {
+    num = Number(defaultValue);
+  }
+  if (!isFinite(num)) {
+    num = 0;
+  }
+  return num;
+}
+
+/**
+ * Recupere les donnees telemetriques de la Tesla via Tessie.
+ * @param {boolean} forceWake Si true, force le reveil de la voiture.
+ * @return {Object|null} {batteryLevel, rangeKm, chargingState, isPlugged, minutesToFull, timestamp} ou null en cas d'erreur.
  */
 function getTeslaData(forceWake) {
-  // 1. VÉRIFICATION DE LA CONFIGURATION
-  var configTesla = Config.TESLA;
+  var configTesla = getTeslaConfig_();
 
-  if (!configTesla || !configTesla.TOKEN || !configTesla.VIN || configTesla.TOKEN === 'TON_TOKEN_TESSIE_ICI' || configTesla.VIN === 'TON_VIN_TESLA_ICI') {
-    Logger.log("ERREUR : Le module Tesla n'est pas correctement configuré. Le TOKEN ou le VIN sont manquants ou non initialisés dans Configuration.js.");
+  if (!configTesla.TOKEN || !configTesla.VIN) {
+    Logger.log('ERREUR : configuration Tessie absente (TOKEN_TESSIE ou VIN_TESLA_JUNIPER_2025).');
     return null;
   }
 
-  // 2. PRÉPARATION DE LA REQUÊTE
-  // Si forceWake est faux (par défaut), on utilise le cache de Tessie
   var useCache = forceWake ? 'false' : 'true';
-  var url = 'https://api.tessie.com/' + configTesla.VIN + '/state?use_cache=' + useCache;
+  var url = 'https://api.tessie.com/' + encodeURIComponent(configTesla.VIN) + '/state?use_cache=' + useCache;
+
+  var headers = {
+    Authorization: 'Bearer ' + configTesla.TOKEN,
+    Accept: 'application/json'
+  };
+  if (configTesla.SECRET) {
+    headers['X-Tessie-Secret'] = configTesla.SECRET;
+  }
 
   var options = {
-    'method': 'get',
-    'headers': {
-      'Authorization': 'Bearer ' + configTesla.TOKEN,
-      'Accept': 'application/json'
-    },
-    'muteHttpExceptions': true
+    method: 'get',
+    headers: headers,
+    muteHttpExceptions: true
   };
 
-  // 3. EXÉCUTION SÉCURISÉE
   try {
     var response = UrlFetchApp.fetch(url, options);
     var code = response.getResponseCode();
@@ -47,66 +96,56 @@ function getTeslaData(forceWake) {
     }
 
     var json = JSON.parse(text);
-
-    // Vérification que les données de charge sont accessibles
-    // Si la voiture dort profondément et qu'on utilise le cache, ces données peuvent être anciennes mais présentes
     if (!json.charge_state) {
-      Logger.log("Données charge_state absentes du retour API.");
+      Logger.log('Donnees charge_state absentes du retour Tessie.');
       return null;
     }
 
-    // 4. NORMALISATION DES DONNÉES
     var data = {
-      batteryLevel: json.charge_state.battery_level, // Pourcentage entier
-      rangeKm: Math.round(json.charge_state.battery_range * 1.60934), // Conversion Miles -> Km
-      chargingState: json.charge_state.charging_state, // ex: "Charging", "Stopped", "Disconnected", "Complete"
+      batteryLevel: json.charge_state.battery_level,
+      rangeKm: Math.round(json.charge_state.battery_range * 1.60934),
+      chargingState: json.charge_state.charging_state,
       minutesToFull: json.charge_state.minutes_to_full_charge,
-      isPlugged: json.charge_state.charge_port_door_open || (json.charge_state.charging_state !== "Disconnected"),
+      isPlugged: json.charge_state.charge_port_door_open || (json.charge_state.charging_state !== 'Disconnected'),
       timestamp: new Date()
     };
 
-    Logger.log('✅ Tesla Data : ' + data.batteryLevel + '% | ' + data.rangeKm + 'km | Statut: ' + data.chargingState);
+    Logger.log('Tesla Data : ' + data.batteryLevel + '% | ' + data.rangeKm + 'km | Statut: ' + data.chargingState);
     return data;
-
   } catch (e) {
-    Logger.log("EXCEPTION CRITIQUE dans getTeslaData : " + e.toString());
-    // Envoi d'un mail d'erreur admin si nécessaire (optionnel)
+    Logger.log('EXCEPTION dans getTeslaData : ' + e.toString());
     return null;
   }
 }
 
 /**
- * TÂCHE PLANIFIÉE : Vérifie la santé de la batterie.
- * À déclencher via Trigger (ex: Tous les jours à 19h00 et 07h00).
- * N'envoie un email QUE si le niveau est critique.
+ * Tache planifiee : verifie la sante de la batterie et envoie un email si seuil critique.
  */
 function checkBatteryHealth() {
-  // Récupération de la config pour l'email
-  var configTesla = Config.TESLA;
-
-  // false = on ne réveille pas la voiture, on lit le dernier état connu
+  var configTesla = getTeslaConfig_();
   var data = getTeslaData(false);
 
   if (!data) {
-    Logger.log("Pas de données disponibles pour checkBatteryHealth.");
+    Logger.log('Pas de donnees disponibles pour checkBatteryHealth.');
     return;
   }
 
-  // LOGIQUE MÉTIER : Alerte seuil critique
-  // Si batterie inférieure au seuil ET que la voiture ne charge pas
   if (data.batteryLevel < configTesla.SEUIL_ALERTE && data.chargingState !== 'Charging') {
+    if (!configTesla.EMAIL_ALERTE) {
+      Logger.log('Alerte batterie non envoyee : EMAIL_ALERTE manquant.');
+      return;
+    }
 
-    var subject = "⚠️ ALERTE BATTERIE TESLA : " + data.batteryLevel + "%";
-    var body = "Bonjour Emmanuel,\n\n" +
-               "Niveau de batterie critique détecté sur la Tesla Model Y.\n" +
-               "---------------------------------------------------\n" +
-               "🔋 Niveau actuel : " + data.batteryLevel + "%\n" +
-               "🚗 Autonomie est. : " + data.rangeKm + " km\n" +
-               "⚡ Statut : " + data.chargingState + "\n" +
-               "---------------------------------------------------\n\n" +
-               "Action requise : Pense à brancher le véhicule pour assurer les livraisons.\n\n" +
-               "Cordialement,\n" +
-               "Ton Assistant ELS";
+    var subject = 'ALERTE BATTERIE TESLA : ' + data.batteryLevel + '%';
+    var body = 'Bonjour Emmanuel,\n\n' +
+               'Niveau de batterie critique detecte sur la Tesla Model Y.\n' +
+               '---------------------------------------\n' +
+               '- Niveau actuel : ' + data.batteryLevel + '%\n' +
+               '- Autonomie estimee : ' + data.rangeKm + ' km\n' +
+               '- Statut : ' + data.chargingState + '\n' +
+               '---------------------------------------\n\n' +
+               'Action requise : branche le vehicule pour assurer les livraisons.\n\n' +
+               'Assistant ELS';
 
     try {
       MailApp.sendEmail({
@@ -114,18 +153,17 @@ function checkBatteryHealth() {
         subject: subject,
         body: body
       });
-      Logger.log("📧 Alerte batterie envoyée à " + configTesla.EMAIL_ALERTE);
+      Logger.log('Alerte batterie envoyee a ' + configTesla.EMAIL_ALERTE);
     } catch (e) {
       Logger.log("Erreur lors de l'envoi de l'email d'alerte : " + e.toString());
     }
   } else {
-    Logger.log("Santé batterie OK (Supérieure à " + configTesla.SEUIL_ALERTE + "% ou en charge).");
+    Logger.log('Sante batterie OK (>= ' + configTesla.SEUIL_ALERTE + '% ou en charge).');
   }
 }
 
 /**
- * (Optionnel) Enregistre l'historique de charge dans un Google Sheet pour analyse.
- * Utile pour calculer le coût électrique vs Kilomètres.
+ * Optionnel : enregistre l'historique de charge dans un onglet Google Sheet.
  */
 function logTeslaHistory() {
   try {
@@ -133,20 +171,19 @@ function logTeslaHistory() {
     var sheetName = 'Suivi_Tesla';
     var sheet = ss.getSheetByName(sheetName);
 
-    // Initialisation automatique si l'onglet n'existe pas
     if (!sheet) {
       sheet = ss.insertSheet(sheetName);
-      sheet.appendRow(['Date', 'Heure', 'Batterie %', 'Autonomie Km', 'Statut', 'Branché ?']);
+      sheet.appendRow(['Date', 'Heure', 'Batterie %', 'Autonomie Km', 'Statut', 'Branche ?']);
       sheet.setFrozenRows(1);
     }
 
-    var data = getTeslaData(false); // Toujours privilégier le cache
+    var data = getTeslaData(false);
 
     if (data) {
       var now = new Date();
       sheet.appendRow([
-        Utilities.formatDate(now, Session.getScriptTimeZone(), "dd/MM/yyyy"),
-        Utilities.formatDate(now, Session.getScriptTimeZone(), "HH:mm:ss"),
+        Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy'),
+        Utilities.formatDate(now, Session.getScriptTimeZone(), 'HH:mm:ss'),
         data.batteryLevel,
         data.rangeKm,
         data.chargingState,
@@ -154,6 +191,6 @@ function logTeslaHistory() {
       ]);
     }
   } catch (e) {
-    Logger.log("Erreur dans logTeslaHistory : " + e.toString());
+    Logger.log('Erreur dans logTeslaHistory : ' + e.toString());
   }
 }
