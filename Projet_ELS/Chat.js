@@ -184,6 +184,24 @@ function sanitizeEmail(value) {
 }
 
 /**
+ * Nettoie et valide un identifiant de thread de chat.
+ * Accepte THR_GLOBAL ou THR_CLIENT_/THR_PHC_ suivis de 4-64 caracteres alphanumeriques.
+ * @param {string} threadId
+ * @returns {string}
+ */
+function sanitizeChatThreadId(threadId) {
+  const raw = String(threadId || '').trim().toUpperCase();
+  if (!raw) return '';
+  if (raw === CHAT_THREAD_GLOBAL) return CHAT_THREAD_GLOBAL;
+  const match = /^THR_(CLIENT|PHC)_([A-Z0-9]{4,64})$/.exec(raw);
+  if (match && match[0]) {
+    // Troncature defensive a 64 caracteres pour eviter les abus.
+    return match[0].substring(0, 64);
+  }
+  return '';
+}
+
+/**
  * Formate un libellé de ville pour affichage.
  * @param {string} raw
  * @returns {string}
