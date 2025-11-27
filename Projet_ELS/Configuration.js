@@ -204,7 +204,7 @@ const CALENDAR_RESYNC_ENABLED = true;
 /** @const {boolean} Supprime les identifiants d'événements introuvables pour garder la base propre. */
 const CALENDAR_PURGE_ENABLED = true;
 const RESERVATION_CONFIRMATION_EMAILS_ENABLED = true;
-
+const CFG_ENABLE_ASSISTANT = true
 /** @const {boolean} Module l'opacité de la barre de disponibilité selon le taux de charge. */
 const CALENDAR_BAR_OPACITY_ENABLED = false;
 
