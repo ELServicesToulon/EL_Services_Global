@@ -1,65 +1,59 @@
 /**
- * @fileoverview Fonctions d'installation et de désinstallation
- * pour les déclencheurs (triggers) du module Tesla.
- *
- * Pour utiliser :
- * 1. Ouvrez votre projet Apps Script.
- * 2. Dans l'éditeur, sélectionnez la fonction `installerDeclencheursTesla`.
- * 3. Cliquez sur "Exécuter".
- * 4. Autorisez les permissions si demandé.
- *
- * Cela créera automatiquement les deux déclencheurs nécessaires.
+ * @fileoverview Declencheurs du module Tesla (Tessie).
+ * Prerequis: ScriptProperties VIN_TESLA_JUNIPER_2025, TOKEN_TESSIE, SECRET (optionnel).
  */
 
 /**
- * Le nom de la fonction qui doit être exécutée par le déclencheur.
+ * Le nom de la fonction qui doit etre executee par le declencheur.
  * @const {string}
  */
 const FONCTION_A_DECLENCHER = 'checkBatteryHealth';
 
 /**
- * Installe les déclencheurs quotidiens pour la vérification de la batterie Tesla.
- *
- * Cette fonction supprime d'abord les anciens déclencheurs pour éviter les doublons,
- * puis en crée deux nouveaux :
- * - Un pour 7h du matin.
- * - Un pour 19h du soir.
+ * Installe deux declencheurs quotidiens (07h et 19h) pour surveiller la batterie Tesla.
+ * - Verifie d'abord la presence des secrets Tessie.
+ * - Supprime les anciens declencheurs avant de recreer les nouveaux.
  */
 function installerDeclencheursTesla() {
   try {
-    // Étape 1 : Supprimer les anciens déclencheurs pour cette fonction
-    supprimerDeclencheursTesla();
-    Logger.log('Anciens déclencheurs pour "' + FONCTION_A_DECLENCHER + '" supprimés.');
+    const statutConfig = verifierConfigTesla();
+    if (!statutConfig.ok) {
+      const ui = SpreadsheetApp.getUi();
+      ui.alert(
+        'Configuration Tesla manquante',
+        'Ajoute les ScriptProperties suivantes avant d installer les declencheurs : ' +
+          statutConfig.missing.join(', '),
+        ui.ButtonSet.OK
+      );
+      return;
+    }
 
-    // Étape 2 : Créer le déclencheur du matin (7h)
+    supprimerDeclencheursTesla();
+    Logger.log('Ancien(s) declencheur(s) pour "' + FONCTION_A_DECLENCHER + '" supprime(s).');
+
     ScriptApp.newTrigger(FONCTION_A_DECLENCHER)
       .timeBased()
       .atHour(7)
       .everyDays(1)
       .create();
-    Logger.log('-> Déclencheur créé pour 7h00.');
+    Logger.log('Declencheur cree pour 07h00.');
 
-    // Étape 3 : Créer le déclencheur du soir (19h)
     ScriptApp.newTrigger(FONCTION_A_DECLENCHER)
       .timeBased()
       .atHour(19)
       .everyDays(1)
       .create();
-    Logger.log('-> Déclencheur créé pour 19h00.');
+    Logger.log('Declencheur cree pour 19h00.');
 
     SpreadsheetApp.getUi().alert(
-      '✅ Succès !',
-      'Les déclencheurs pour la surveillance de la Tesla ont été installés.\n\n' +
-      'La batterie sera vérifiée tous les jours à 7h00 et 19h00.',
+      'Succes',
+      'Les declencheurs Tesla ont ete installes (07h00 et 19h00).',
       SpreadsheetApp.getUi().ButtonSet.OK
     );
-
-    Logger.log('✅ Installation des déclencheurs terminée avec succès.');
-
   } catch (e) {
-    Logger.log('Une erreur est survenue lors de l`installation des déclencheurs : ' + e.toString());
+    Logger.log('Erreur pendant l installation des declencheurs Tesla : ' + e.toString());
     SpreadsheetApp.getUi().alert(
-      '❌ Erreur',
+      'Erreur',
       'Une erreur est survenue : ' + e.message,
       SpreadsheetApp.getUi().ButtonSet.OK
     );
@@ -67,32 +61,55 @@ function installerDeclencheursTesla() {
 }
 
 /**
- * Supprime tous les déclencheurs associés à la fonction de vérification de la batterie.
- * Utile pour la maintenance ou la désactivation du module.
+ * Supprime tous les declencheurs associes a la verification de batterie.
  */
 function supprimerDeclencheursTesla() {
   try {
     const tousLesDeclencheurs = ScriptApp.getProjectTriggers();
-    let declencheursSupprimes = 0;
+    let supprimes = 0;
 
     tousLesDeclencheurs.forEach(function(declencheur) {
       if (declencheur.getHandlerFunction() === FONCTION_A_DECLENCHER) {
         ScriptApp.deleteTrigger(declencheur);
-        declencheursSupprimes++;
+        supprimes++;
       }
     });
 
-    if (declencheursSupprimes > 0) {
-      Logger.log(declencheursSupprimes + ' déclencheur(s) ont été supprimés pour la fonction "' + FONCTION_A_DECLENCHER + '".');
+    if (supprimes > 0) {
+      Logger.log(supprimes + ' declencheur(s) supprime(s) pour "' + FONCTION_A_DECLENCHER + '".');
     } else {
-      Logger.log('Aucun déclencheur existant trouvé pour la fonction "' + FONCTION_A_DECLENCHER + '".');
+      Logger.log('Aucun declencheur existant pour "' + FONCTION_A_DECLENCHER + '".');
     }
   } catch (e) {
-    Logger.log('Erreur lors de la suppression des déclencheurs : ' + e.toString());
-     SpreadsheetApp.getUi().alert(
-      '❌ Erreur lors de la suppression',
+    Logger.log('Erreur lors de la suppression des declencheurs : ' + e.toString());
+    SpreadsheetApp.getUi().alert(
+      'Erreur lors de la suppression',
       'Une erreur est survenue : ' + e.message,
       SpreadsheetApp.getUi().ButtonSet.OK
     );
+  }
+}
+
+/**
+ * Verifie que les secrets Tessie sont bien definis dans les ScriptProperties.
+ * @return {{ok:boolean, missing:string[]}} Statut et liste des cles manquantes.
+ */
+function verifierConfigTesla() {
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const vin = props.getProperty('VIN_TESLA_JUNIPER_2025') || props.getProperty('TESLA_VIN');
+    const token = props.getProperty('TOKEN_TESSIE') || props.getProperty('TESLA_TOKEN');
+    const secret = props.getProperty('SECRET') || props.getProperty('TESLA_SECRET');
+
+    const missing = [];
+    const optional = [];
+    if (!token) missing.push('TOKEN_TESSIE');
+    if (!vin) missing.push('VIN_TESLA_JUNIPER_2025');
+    if (!secret) optional.push('SECRET (optionnel)');
+
+    return { ok: missing.length === 0, missing: missing.concat(optional) };
+  } catch (err) {
+    Logger.log('Erreur lors du controle des ScriptProperties Tesla : ' + err.toString());
+    return { ok: false, missing: ['TOKEN_TESSIE', 'VIN_TESLA_JUNIPER_2025'] };
   }
 }
