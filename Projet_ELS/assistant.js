@@ -5,7 +5,7 @@
 // poster automatiquement la reponse dans l'onglet Chat.
 // =================================================================
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent';
 const CHAT_ASSISTANT_MODEL = 'gemini-1.0-pro';
 const CHAT_ASSISTANT_HISTORY_LIMIT = 10;
 const CHAT_ASSISTANT_SYSTEM_PROMPT = 'Assistant pour pharmaciens en EHPAD; réponses concises; pas de données personnelles.';
