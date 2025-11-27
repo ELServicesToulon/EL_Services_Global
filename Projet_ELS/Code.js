@@ -18,50 +18,25 @@ function onOpen(e) {
   const ui = SpreadsheetApp.getUi();
 
   const menuPrincipal = ui.createMenu('ELS');
-
-  menuPrincipal
+  const menuFacturation = ui.createMenu('Facturation')
     .addItem('Generer les factures selectionnees', 'genererFactures')
     .addItem('Envoyer les factures controlees', 'envoyerFacturesControlees')
-    .addItem('Archiver les factures du mois dernier', 'archiverFacturesDuMois')
-    .addItem('Generer lien Espace Client', 'menuGenererLienClient')
-    .addSeparator()
-    .addItem('Verifier la coherence du calendrier', 'verifierCoherenceCalendrier');
+    .addItem('Archiver les factures du mois dernier', 'archiverFacturesDuMois');
 
-  const sousMenuMaintenance = ui.createMenu('Maintenance')
-    .addItem('Verifier l installation', 'menuVerifierInstallation')
-    .addItem('Verifier structure des feuilles', 'menuVerifierStructureFeuilles')
-    .addItem('Sauvegarder le code du projet', 'sauvegarderCodeProjet')
-    .addItem('Sauvegarder les donnees', 'sauvegarderDonnees')
-    .addItem('Purger les anciennes donnees (RGPD)', 'purgerAnciennesDonnees')
+  const menuMaintenance = ui.createMenu('Maintenance')
+    .addItem('Verifier l installation (Setup Master)', 'menuVerifierInstallation')
+    .addItem('Completer les onglets requis (Setup Master)', 'setupSheetsMaster')
     .addSeparator()
     .addItem("Nettoyer l'onglet Facturation", 'nettoyerOngletFacturation')
     .addItem('Reparer entetes Facturation', 'reparerEntetesFacturation')
     .addItem('Normaliser entetes Facturation', 'normaliserEntetesFacturation');
 
-  if (isFlagEnabled_('CALENDAR_RESYNC_ENABLED')) {
-    sousMenuMaintenance.addItem('Resynchroniser evenement manquant', 'menuResynchroniserEvenement');
-  }
-  if (isFlagEnabled_('CALENDAR_PURGE_ENABLED')) {
-    sousMenuMaintenance.addItem('Purger Event ID introuvable', 'menuPurgerEventId');
-  }
-
-  menuPrincipal.addSubMenu(sousMenuMaintenance);
-
-  if (isCallable_('genererDevisPdfDepuisSelection')) {
-    menuPrincipal.addItem('Generer un devis (PDF) - selection', 'genererDevisPdfDepuisSelection');
-  }
-  menuPrincipal.addSeparator();
-  menuPrincipal.addItem('Rafraichir le menu', 'onOpen');
-
-  if (isFlagEnabled_('DEBUG_MENU_ENABLED')) {
-    const sousMenuDebug = ui.createMenu('Debug')
-      .addItem('Lancer tous les tests', 'lancerTousLesTests')
-      .addItem('Tester audit Drive', 'testerAuditDrive')
-      .addItem('Generer lien Espace Client', 'menuGenererLienClient');
-    menuPrincipal.addSubMenu(sousMenuDebug);
-  }
-
-  menuPrincipal.addToUi();
+  menuPrincipal
+    .addSubMenu(menuFacturation)
+    .addSubMenu(menuMaintenance)
+    .addSeparator()
+    .addItem('Rafraichir le menu', 'onOpen')
+    .addToUi();
   safeToast_('Menu ELS mis a jour', 'ELS', 5);
 
   const canValidate = hasFullAuthorization_(e);
