@@ -1,0 +1,914 @@
+<script>
+// =================================================================
+//                    ELS LIVREUR - JAVASCRIPT
+// =================================================================
+// Description: Logique client-side avec g?olocalisation et offline
+// =================================================================
+
+(function() {
+  'use strict';
+
+  // ?tat global de l'application
+  const app = {
+    livreurId: '',
+    livreurSource: 'inconnu',
+    viewScope: 'day',
+    dateRange: null,
+    tournees: [],
+    currentTournee: null,
+    gpsPosition: null,
+    gpsWatchId: null,
+    offlineQueue: [],
+    syncInterval: null,
+    filtreStatut: null
+  };
+
+  // =================================================================
+  //                    INITIALISATION
+  // =================================================================
+
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('? ELS Livreur - D?marrage');
+    const initialConfig = (window.ELS_LIVREUR_CONFIG || {});
+    app.livreurId = initialConfig.livreurId || '';
+    app.livreurSource = initialConfig.livreurSource || 'inconnu';
+    app.viewScope = 'day';
+
+    // Initialiser l'interface
+    initUI();
+
+    // D?marrer la g?olocalisation
+    initGeolocation();
+
+    // Charger les tourn?es
+    chargerTournees();
+
+    // Charger la queue offline
+    chargerQueueOffline();
+
+    // Tenter de synchroniser toutes les 30 secondes
+    app.syncInterval = setInterval(synchroniserOfflineQueue, 30000);
+
+    // Afficher la plage
+    afficherDateDuJour(app.viewScope, null);
+  });
+
+  // =================================================================
+  //                    INTERFACE UTILISATEUR
+  // =================================================================
+
+  function initUI() {
+    lierBouton('btn-close-notes', fermerPanelNotes);
+    lierBouton('btn-save-note', sauvegarderNote);
+    lierBouton('btn-quick-delivered', function() {
+      ajouterNoteRapide('? Livraison effectu?e');
+    });
+    lierBouton('btn-quick-absent', function() {
+      ajouterNoteRapide('? Client absent - D?p?t en lieu s?r');
+    });
+
+    initHeaderInteractions();
+    initialiserStatistiquesInteractives();
+    initialiserSwitchVue();
+    mettreAJourFiltreStatistiquesUI();
+    mettreAJourBadgeLivreur();
+
+    // Auto-save toutes les 3 secondes
+    const noteInput = document.getElementById('note-input');
+    if (noteInput) {
+      let autoSaveTimeout;
+      noteInput.addEventListener('input', function() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(function() {
+          const texte = noteInput.value.trim();
+          if (texte && texte.length > 5) {
+            sauvegarderBrouillon(texte);
+          }
+        }, 3000);
+      });
+    }
+  }
+
+  function lierBouton(elementOrId, handler) {
+    const element = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
+    if (!element || typeof handler !== 'function') {
+      return;
+    }
+    element.addEventListener('click', handler);
+    element.dataset.actionBound = 'true';
+  }
+
+  function rendreElementInteractif(element, handler) {
+    if (!element || typeof handler !== 'function') {
+      return;
+    }
+
+    element.addEventListener('click', function(event) {
+      event.preventDefault();
+      handler(event);
+    });
+
+    element.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handler(event);
+      }
+    });
+  }
+
+  function initHeaderInteractions() {
+    const gpsStatus = document.getElementById('gps-status');
+    rendreElementInteractif(gpsStatus, function() {
+      rafraichirPosition(true);
+    });
+
+    const syncStatus = document.getElementById('sync-status');
+    rendreElementInteractif(syncStatus, function() {
+      forcerSynchronisationManuelle();
+    });
+
+    const locationBar = document.getElementById('current-location');
+    rendreElementInteractif(locationBar, function() {
+      ouvrirPositionDansMaps();
+    });
+  }
+
+  function initialiserStatistiquesInteractives() {
+    const statItems = document.querySelectorAll('.stat-item[data-stat-filter]');
+    statItems.forEach(function(item) {
+      rendreElementInteractif(item, function() {
+        appliquerFiltreStatut(item.dataset.statFilter);
+      });
+    });
+  }
+
+  function initialiserSwitchVue() {
+    const viewButtons = document.querySelectorAll('.view-btn[data-scope]');
+    viewButtons.forEach(function(btn) {
+      rendreElementInteractif(btn, function() {
+        basculerVue(btn.dataset.scope);
+      });
+    });
+    mettreAJourSwitchVueUI();
+  }
+
+  function basculerVue(scope) {
+    const cible = scope === 'week' ? 'week' : 'day';
+    if (app.viewScope === cible) {
+      return;
+    }
+    app.viewScope = cible;
+    mettreAJourSwitchVueUI();
+    chargerTournees();
+  }
+
+  function mettreAJourSwitchVueUI() {
+    const viewButtons = document.querySelectorAll('.view-btn[data-scope]');
+    viewButtons.forEach(function(btn) {
+      const isActive = btn.dataset.scope === app.viewScope;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  function mettreAJourBadgeLivreur() {
+    const label = document.getElementById('livreur-label');
+    if (!label) return;
+    if (app.livreurId) {
+      const source = app.livreurSource === 'query' ? ' (parametre)' :
+        app.livreurSource === 'session' ? ' (session)' : '';
+      label.textContent = 'Livreur: ' + app.livreurId + source;
+    } else {
+      label.textContent = 'Livreur non identifie';
+    }
+  }
+
+  function appliquerFiltreStatut(filtre) {
+    let nouveauFiltre = null;
+    if (filtre === 'termine' || filtre === 'en_cours') {
+      nouveauFiltre = filtre;
+    }
+
+    if (app.filtreStatut === nouveauFiltre) {
+      app.filtreStatut = null;
+    } else {
+      app.filtreStatut = nouveauFiltre;
+    }
+
+    afficherTournees();
+    mettreAJourFiltreStatistiquesUI();
+
+    if (app.filtreStatut) {
+      afficherToast('Filtre appliqu?: ' + getStatusLabel(app.filtreStatut), 'info');
+    } else {
+      afficherToast('Filtre r?initialis?', 'info');
+    }
+  }
+
+  function mettreAJourFiltreStatistiquesUI() {
+    const statItems = document.querySelectorAll('.stat-item[data-stat-filter]');
+    statItems.forEach(function(item) {
+      const filtre = item.dataset.statFilter;
+      const isActive = (!app.filtreStatut && filtre === 'total') || app.filtreStatut === filtre;
+      item.classList.toggle('active', isActive);
+      item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  function afficherDateDuJour(scope, dateRange) {
+    const dateEl = document.getElementById('current-date');
+    if (!dateEl) return;
+
+    if (scope === 'week' && dateRange && dateRange.start && dateRange.end) {
+      const start = new Date(dateRange.start + 'T00:00:00');
+      const end = new Date(dateRange.end + 'T00:00:00');
+      const options = { day: 'numeric', month: 'long' };
+      const startStr = start.toLocaleDateString('fr-FR', options);
+      const endStr = end.toLocaleDateString('fr-FR', options);
+      dateEl.textContent = 'Semaine du ' + startStr + ' au ' + endStr;
+      return;
+    }
+
+    const baseDate = dateRange && dateRange.start ? new Date(dateRange.start + 'T00:00:00') : new Date();
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    const dateStr = baseDate.toLocaleDateString('fr-FR', options);
+    dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  }
+
+  // =================================================================
+  //                    G?OLOCALISATION
+  // =================================================================
+
+
+  function initGeolocation() {
+    const gpsStatus = document.getElementById('gps-status');
+    const locationText = document.getElementById('location-text');
+
+    if (!navigator.geolocation) {
+      afficherToast('GPS non disponible sur cet appareil', 'error');
+      if (gpsStatus) {
+        gpsStatus.classList.add('error');
+        gpsStatus.querySelector('.status-text').textContent = 'GPS N/A';
+      }
+      if (locationText) {
+        locationText.textContent = 'Position non disponible';
+      }
+      return;
+    }
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 30000
+    };
+
+    app.gpsWatchId = navigator.geolocation.watchPosition(
+      function(position) {
+        app.gpsPosition = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          precision: position.coords.accuracy,
+          timestamp: new Date(position.timestamp)
+        };
+
+        mettreAJourPositionUI();
+        console.log('?? Position GPS mise ? jour:', app.gpsPosition);
+      },
+      function(error) {
+        gererErreurGeolocalisation(error);
+      },
+      options
+    );
+
+    console.log('?? G?olocalisation initialis?e');
+  }
+
+  function mettreAJourPositionUI() {
+    if (!app.gpsPosition) {
+      return;
+    }
+
+    const gpsStatus = document.getElementById('gps-status');
+    const locationText = document.getElementById('location-text');
+    const currentGps = document.getElementById('current-gps');
+
+    const posText = `${app.gpsPosition.latitude.toFixed(6)}, ${app.gpsPosition.longitude.toFixed(6)} (?${Math.round(app.gpsPosition.precision)}m)`;
+
+    if (gpsStatus) {
+      gpsStatus.classList.add('active');
+      gpsStatus.classList.remove('error');
+      const statusText = gpsStatus.querySelector('.status-text');
+      if (statusText) {
+        statusText.textContent = 'GPS OK';
+      }
+    }
+
+    if (locationText) {
+      locationText.textContent = posText;
+    }
+
+    if (currentGps) {
+      currentGps.textContent = posText;
+    }
+  }
+
+  function gererErreurGeolocalisation(error) {
+    console.error('? Erreur GPS:', error);
+    const gpsStatus = document.getElementById('gps-status');
+    const locationText = document.getElementById('location-text');
+
+    if (gpsStatus) {
+      gpsStatus.classList.add('error');
+      gpsStatus.classList.remove('active');
+      const statusText = gpsStatus.querySelector('.status-text');
+      if (statusText) {
+        statusText.textContent = 'GPS KO';
+      }
+    }
+
+    if (locationText) {
+      locationText.textContent = 'Position non disponible';
+    }
+
+    afficherToast('Erreur de g?olocalisation: ' + error.message, 'error');
+  }
+
+  function rafraichirPosition(manuel) {
+    if (!navigator.geolocation) {
+      afficherToast('GPS non disponible sur cet appareil', 'error');
+      return;
+    }
+
+    if (manuel) {
+      afficherToast('Rafra?chissement de la position...', 'info');
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        app.gpsPosition = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          precision: position.coords.accuracy,
+          timestamp: new Date(position.timestamp)
+        };
+
+        mettreAJourPositionUI();
+        if (manuel) {
+          afficherToast('Position mise ? jour', 'success');
+        }
+      },
+      function(error) {
+        gererErreurGeolocalisation(error);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0
+      }
+    );
+  }
+
+  function forcerSynchronisationManuelle() {
+    afficherToast('Synchronisation manuelle en cours...', 'info');
+    synchroniserOfflineQueue();
+    chargerTournees();
+  }
+
+  function ouvrirPositionDansMaps() {
+    if (app.gpsPosition) {
+      const url = `https://www.google.com/maps?q=${app.gpsPosition.latitude},${app.gpsPosition.longitude}`;
+      window.open(url, '_blank');
+      afficherToast('Ouverture de la position dans Maps', 'info');
+    } else {
+      afficherToast('Position inconnue, tentative de rafra?chissement...', 'warning');
+      rafraichirPosition(true);
+    }
+  }
+
+
+  // =================================================================
+  //                    CHARGEMENT DES TOURN?ES
+  // =================================================================
+
+  function chargerTournees() {
+    const syncStatus = document.getElementById('sync-status');
+    if (syncStatus) {
+      syncStatus.classList.remove('active', 'error');
+    }
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result && result.success) {
+          app.tournees = result.tournees || [];
+          app.dateRange = result.dateRange || null;
+          if (result.livreurId) {
+            app.livreurId = result.livreurId;
+          }
+          mettreAJourBadgeLivreur();
+          afficherTournees();
+          mettreAJourStats();
+          afficherDateDuJour(result.scope || app.viewScope, result.dateRange);
+
+          if (syncStatus) {
+            syncStatus.classList.add('active');
+            syncStatus.querySelector('.status-text').textContent = 'Sync OK';
+          }
+
+          const scopeLabel = (result.scope === 'week' || app.viewScope === 'week') ? ' (semaine)' : '';
+          afficherToast(app.tournees.length + ' tournee(s) chargee(s)' + scopeLabel, 'success');
+          console.log('? Tournees chargees:', app.tournees);
+        } else {
+          throw new Error(result.error || 'Erreur inconnue');
+        }
+      })
+      .withFailureHandler(function(error) {
+        console.error('? Erreur chargement:', error);
+        afficherToast('Erreur de chargement: ' + error.message, 'error');
+
+        if (syncStatus) {
+          syncStatus.classList.add('error');
+          syncStatus.querySelector('.status-text').textContent = 'Sync KO';
+        }
+      })
+      .obtenirTournees({
+        scope: app.viewScope,
+        livreurId: app.livreurId
+      });
+  }
+
+
+  function afficherTournees() {
+    const listEl = document.getElementById('tournees-list');
+    if (!listEl) return;
+
+    listEl.innerHTML = '';
+
+    const tourneesAAfficher = app.filtreStatut ?
+      app.tournees.filter(function(tournee) {
+        return tournee.statut === app.filtreStatut;
+      }) :
+      app.tournees;
+
+    if (!tourneesAAfficher || tourneesAAfficher.length === 0) {
+      const message = app.filtreStatut ?
+        'Aucune tournee pour ce statut' :
+        (app.viewScope === 'week' ? 'Aucune tournee pour cette semaine' : "Aucune tournee pour aujourd'hui");
+      listEl.innerHTML = '<div class="loading-placeholder"><p>' + message + '</p></div>';
+      return;
+    }
+
+    tourneesAAfficher.forEach(function(tournee) {
+      const card = creerCarteTournee(tournee);
+      listEl.appendChild(card);
+    });
+  }
+
+
+  function creerCarteTournee(tournee) {
+    const card = document.createElement('div');
+    card.className = 'tournee-card status-' + (tournee.statut || 'a_venir');
+    card.dataset.tourneeId = tournee.id;
+    card.setAttribute('role', 'button');
+    card.tabIndex = 0;
+
+    card.addEventListener('click', function() {
+      ouvrirPanelNotes(tournee);
+    });
+
+    card.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        ouvrirPanelNotes(tournee);
+      }
+    });
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'tournee-header';
+
+    const heure = document.createElement('div');
+    heure.className = 'tournee-heure';
+    heure.textContent = tournee.heure;
+
+    const status = document.createElement('span');
+    status.className = 'tournee-status ' + (tournee.statut || 'a_venir');
+    status.textContent = getStatusLabel(tournee.statut);
+
+    header.appendChild(heure);
+    header.appendChild(status);
+
+    // Info
+    const info = document.createElement('div');
+    info.className = 'tournee-info';
+
+    const client = document.createElement('div');
+    client.className = 'tournee-client';
+    client.textContent = tournee.client;
+
+    const adresse = document.createElement('div');
+    adresse.className = 'tournee-adresse';
+    adresse.textContent = tournee.adresse;
+
+    const meta = document.createElement('div');
+    meta.className = 'tournee-meta';
+    meta.innerHTML = `<span>? ${tournee.totalStops} arr?t(s)</span>`;
+
+    info.appendChild(client);
+    info.appendChild(adresse);
+    info.appendChild(meta);
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'tournee-actions';
+
+
+    const btnNotes = document.createElement('button');
+    btnNotes.type = 'button';
+    btnNotes.className = 'btn btn-primary';
+    btnNotes.innerHTML = '?? Notes';
+    btnNotes.onclick = function(e) {
+      e.stopPropagation();
+      ouvrirPanelNotes(tournee);
+    };
+    btnNotes.dataset.actionBound = 'true';
+
+    const btnStatut = document.createElement('button');
+    btnStatut.type = 'button';
+    btnStatut.className = 'btn ' + getNextStatusButtonClass(tournee.statut);
+    btnStatut.textContent = getNextStatusButtonLabel(tournee.statut);
+    btnStatut.onclick = function(e) {
+      e.stopPropagation();
+      changerStatutTournee(tournee);
+    };
+    btnStatut.dataset.actionBound = 'true';
+
+    actions.appendChild(btnNotes);
+    actions.appendChild(btnStatut);
+
+    // Assemblage
+    card.appendChild(header);
+    card.appendChild(info);
+    card.appendChild(actions);
+
+    return card;
+  }
+
+  function getStatusLabel(statut) {
+    const labels = {
+      'a_venir': '? venir',
+      'en_cours': 'En cours',
+      'termine': 'Termin?',
+      'probleme': 'Probl?me'
+    };
+    return labels[statut] || 'Inconnu';
+  }
+
+  function getNextStatusButtonClass(statut) {
+    if (statut === 'a_venir') return 'btn-warning';
+    if (statut === 'en_cours') return 'btn-success';
+    return 'btn-secondary';
+  }
+
+  function getNextStatusButtonLabel(statut) {
+    if (statut === 'a_venir') return '?? D?marrer';
+    if (statut === 'en_cours') return '? Terminer';
+    if (statut === 'termine') return '? R?ouvrir';
+    return '?? Probl?me';
+  }
+
+  function changerStatutTournee(tournee) {
+    let nouveauStatut = 'a_venir';
+
+    if (tournee.statut === 'a_venir') {
+      nouveauStatut = 'en_cours';
+    } else if (tournee.statut === 'en_cours') {
+      nouveauStatut = 'termine';
+    } else if (tournee.statut === 'termine') {
+      nouveauStatut = 'a_venir';
+    }
+
+    // Optimistic update
+    tournee.statut = nouveauStatut;
+    afficherTournees();
+    mettreAJourStats();
+
+    // Envoyer au serveur
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result && result.success) {
+          afficherToast('Statut mis ? jour: ' + getStatusLabel(nouveauStatut), 'success');
+        } else {
+          throw new Error(result.error || 'Erreur');
+        }
+      })
+      .withFailureHandler(function(error) {
+        console.error('? Erreur changement statut:', error);
+        afficherToast('Erreur: ' + error.message, 'error');
+        // Recharger pour avoir l'?tat correct
+        chargerTournees();
+      })
+      .mettreAJourStatutTournee(tournee.id, nouveauStatut, app.livreurId);
+  }
+
+  // =================================================================
+  //                    GESTION DES NOTES
+  // =================================================================
+
+  function ouvrirPanelNotes(tournee) {
+    app.currentTournee = tournee;
+
+    const panel = document.getElementById('notes-panel');
+    const notesInfo = document.getElementById('notes-info');
+    const notesTitle = document.getElementById('notes-title');
+    const noteInput = document.getElementById('note-input');
+
+    if (notesTitle) {
+      notesTitle.textContent = 'Notes - ' + tournee.client;
+    }
+
+    if (notesInfo) {
+      notesInfo.innerHTML = `
+        <div><strong>${tournee.client}</strong></div>
+        <div>${tournee.adresse}</div>
+        <div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+          ${tournee.heure} ? ${tournee.totalStops} arr?t(s)
+        </div>
+      `;
+    }
+
+    // Charger le brouillon si disponible
+    const brouillon = localStorage.getItem('note_brouillon_' + tournee.id);
+    if (brouillon && noteInput) {
+      noteInput.value = brouillon;
+    } else if (noteInput) {
+      noteInput.value = '';
+    }
+
+    // Charger l'historique des notes
+    chargerHistoriqueNotes(tournee.id);
+
+    if (panel) {
+      panel.classList.remove('hidden');
+      panel.classList.add('active');
+    }
+
+    // Focus sur le textarea
+    if (noteInput) {
+      setTimeout(function() {
+        noteInput.focus();
+      }, 300);
+    }
+  }
+
+  function fermerPanelNotes() {
+    const panel = document.getElementById('notes-panel');
+    if (panel) {
+      panel.classList.remove('active');
+      setTimeout(function() {
+        panel.classList.add('hidden');
+      }, 300);
+    }
+    app.currentTournee = null;
+  }
+
+  function sauvegarderNote() {
+    if (!app.currentTournee) {
+      afficherToast('Aucune tourn?e s?lectionn?e', 'error');
+      return;
+    }
+
+    const noteInput = document.getElementById('note-input');
+    const texte = noteInput ? noteInput.value.trim() : '';
+
+    if (!texte) {
+      afficherToast('Veuillez saisir une note', 'error');
+      return;
+    }
+
+    ajouterNote(texte);
+  }
+
+  function ajouterNoteRapide(texte) {
+    if (!app.currentTournee) {
+      afficherToast('Aucune tourn?e s?lectionn?e', 'error');
+      return;
+    }
+    ajouterNote(texte);
+  }
+
+  function ajouterNote(texte) {
+    const maintenant = new Date();
+    const heure = maintenant.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    const noteData = {
+      tourneeId: app.currentTournee.id,
+      texte: `[${heure}] ${texte}`,
+      livreurId: app.livreurId,
+      latitude: app.gpsPosition ? app.gpsPosition.latitude : null,
+      longitude: app.gpsPosition ? app.gpsPosition.longitude : null,
+      precision: app.gpsPosition ? app.gpsPosition.precision : null,
+      adresseApprox: app.gpsPosition ?
+        `${app.gpsPosition.latitude.toFixed(6)}, ${app.gpsPosition.longitude.toFixed(6)}` :
+        'Position non disponible',
+      timestamp: maintenant.toISOString()
+    };
+
+    // Ajouter ? la queue offline
+    app.offlineQueue.push(noteData);
+    sauvegarderQueueOffline();
+
+    // Tenter d'envoyer imm?diatement
+    envoyerNote(noteData);
+
+    // Nettoyer le champ
+    const noteInput = document.getElementById('note-input');
+    if (noteInput) {
+      noteInput.value = '';
+    }
+
+    // Supprimer le brouillon
+    localStorage.removeItem('note_brouillon_' + app.currentTournee.id);
+
+    afficherToast('Note ajout?e', 'success');
+  }
+
+  function envoyerNote(noteData) {
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result && result.success) {
+          console.log('? Note sauvegard?e:', result);
+
+          // Retirer de la queue offline
+          app.offlineQueue = app.offlineQueue.filter(function(n) {
+            return n.timestamp !== noteData.timestamp;
+          });
+          sauvegarderQueueOffline();
+
+          // Recharger l'historique
+          if (app.currentTournee) {
+            chargerHistoriqueNotes(app.currentTournee.id);
+          }
+        }
+      })
+      .withFailureHandler(function(error) {
+        console.error('? Erreur sauvegarde note:', error);
+        // La note reste dans la queue offline
+      })
+      .sauvegarderNote(noteData);
+  }
+
+  function chargerHistoriqueNotes(tourneeId) {
+    const historyList = document.getElementById('notes-history-list');
+    if (!historyList) return;
+
+    historyList.innerHTML = '<p class="text-muted">Chargement...</p>';
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result && result.success) {
+          afficherHistorique(result.notes);
+        } else {
+          historyList.innerHTML = '<p class="text-muted">Erreur de chargement</p>';
+        }
+      })
+      .withFailureHandler(function(error) {
+        console.error('? Erreur chargement notes:', error);
+        historyList.innerHTML = '<p class="text-muted">Erreur de chargement</p>';
+      })
+      .obtenirNotesTournee({
+        tourneeId: tourneeId,
+        livreurId: app.livreurId
+      });
+  }
+
+  function afficherHistorique(notes) {
+    const historyList = document.getElementById('notes-history-list');
+    if (!historyList) return;
+
+    historyList.innerHTML = '';
+
+    if (!notes || notes.length === 0) {
+      historyList.innerHTML = '<p class="text-muted">Aucune note pour cette tourn?e</p>';
+      return;
+    }
+
+    notes.forEach(function(note) {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+
+      const time = document.createElement('div');
+      time.className = 'history-time';
+      time.textContent = note.heure + ' - ' + (note.adresse || 'Position N/A');
+
+      const text = document.createElement('div');
+      text.className = 'history-text';
+      text.textContent = note.texte;
+
+      item.appendChild(time);
+      item.appendChild(text);
+      historyList.appendChild(item);
+    });
+  }
+
+  function sauvegarderBrouillon(texte) {
+    if (app.currentTournee) {
+      localStorage.setItem('note_brouillon_' + app.currentTournee.id, texte);
+      console.log('? Brouillon sauvegard?');
+    }
+  }
+
+  // =================================================================
+  //                    MODE OFFLINE
+  // =================================================================
+
+  function sauvegarderQueueOffline() {
+    try {
+      localStorage.setItem('offline_queue', JSON.stringify(app.offlineQueue));
+      console.log('? Queue offline sauvegard?e:', app.offlineQueue.length, 'note(s)');
+    } catch (e) {
+      console.error('? Erreur sauvegarde queue:', e);
+    }
+  }
+
+  function chargerQueueOffline() {
+    try {
+      const queue = localStorage.getItem('offline_queue');
+      if (queue) {
+        app.offlineQueue = JSON.parse(queue);
+        console.log('? Queue offline charg?e:', app.offlineQueue.length, 'note(s)');
+      }
+    } catch (e) {
+      console.error('? Erreur chargement queue:', e);
+      app.offlineQueue = [];
+    }
+  }
+
+  function synchroniserOfflineQueue() {
+    if (app.offlineQueue.length === 0) return;
+
+    console.log('? Synchronisation de', app.offlineQueue.length, 'note(s)...');
+
+    app.offlineQueue.forEach(function(noteData) {
+      envoyerNote(noteData);
+    });
+  }
+
+  // =================================================================
+  //                    STATISTIQUES
+  // =================================================================
+
+  function mettreAJourStats() {
+    const statTotal = document.getElementById('stat-total');
+    const statTermine = document.getElementById('stat-termine');
+    const statEnCours = document.getElementById('stat-en-cours');
+
+    const total = app.tournees.length;
+    const termine = app.tournees.filter(function(t) { return t.statut === 'termine'; }).length;
+    const enCours = app.tournees.filter(function(t) { return t.statut === 'en_cours'; }).length;
+
+    if (statTotal) statTotal.textContent = total;
+    if (statTermine) statTermine.textContent = termine;
+    if (statEnCours) statEnCours.textContent = enCours;
+
+    mettreAJourFiltreStatistiquesUI();
+  }
+
+  // =================================================================
+  //                    NOTIFICATIONS (TOAST)
+  // =================================================================
+
+  function afficherToast(message, type) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + (type || 'info');
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(function() {
+      toast.style.opacity = '0';
+      setTimeout(function() {
+        container.removeChild(toast);
+      }, 300);
+    }, 3000);
+  }
+
+  // =================================================================
+  //                    NETTOYAGE
+  // =================================================================
+
+  window.addEventListener('beforeunload', function() {
+    // Arr?ter le GPS watch
+    if (app.gpsWatchId) {
+      navigator.geolocation.clearWatch(app.gpsWatchId);
+    }
+
+    // Arr?ter le sync interval
+    if (app.syncInterval) {
+      clearInterval(app.syncInterval);
+    }
+  });
+
+})();
+</script>
