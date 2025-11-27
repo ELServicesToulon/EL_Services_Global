@@ -32,8 +32,36 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
 
-  <!-- APP SHELL: Loading Screen (Visible par défaut) -->
-  <div id="app-loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
+  <!-- =============================================================== -->
+  <!-- LOGIN SCREEN (Nouveau) -->
+  <!-- =============================================================== -->
+  <div id="login-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-100 p-8 text-center">
+    <h1 class="text-2xl font-bold text-blue-600 mb-2">🚚 ELS Livreur</h1>
+    <p class="text-gray-600 mb-8">Veuillez vous connecter pour continuer.</p>
+
+    <div class="w-full max-w-sm">
+      <input type="email" id="email-input" class="w-full px-4 py-3 border rounded-lg text-lg text-center focus:ring-2 focus:ring-blue-500 outline-none" placeholder="votre.email@example.com">
+      <button onclick="app.handleLogin()" id="login-button" class="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-bold shadow-md hover:bg-blue-700 transition-all active:scale-95">
+        Se connecter
+      </button>
+      <div id="login-error" class="mt-4 text-red-500 font-medium text-sm h-5"></div>
+    </div>
+
+    <!-- Section "Candidature" (cachée par défaut) -->
+    <div id="candidature-section" class="w-full max-w-sm mt-6 p-4 bg-white rounded-lg shadow-md hidden">
+        <h3 class="font-bold text-gray-800">Accès non autorisé</h3>
+        <p class="text-sm text-gray-600 mt-2">
+            Votre email n'est pas reconnu. Si vous souhaitez devenir livreur pour ELS, veuillez envoyer votre candidature.
+        </p>
+        <a id="candidature-link" href="mailto:admin@example.com?subject=Candidature App Livreur" class="inline-block mt-4 bg-green-500 text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-green-600">
+            Envoyer ma candidature
+        </a>
+    </div>
+  </div>
+
+
+  <!-- APP SHELL: Loading Screen (Caché par défaut maintenant) -->
+  <div id="app-loader" class="fixed inset-0 z-40 flex flex-col items-center justify-center bg-white hidden">
     <div class="loader mb-4"></div>
     <p class="text-gray-500 text-sm font-medium animate-pulse">Chargement ELS...</p>
   </div>
@@ -143,13 +171,75 @@
         currentTourId: null
       },
 
-      init: function() {
-        console.log('App init...');
-        // Appel Serveur asynchrone
+      // NOUVELLE FONCTION: Gère le clic sur le bouton de connexion
+      handleLogin: function() {
+        const emailInput = document.getElementById('email-input');
+        const email = emailInput.value.trim().toLowerCase();
+        const errorDiv = document.getElementById('login-error');
+        const loginButton = document.getElementById('login-button');
+        const candidatureSection = document.getElementById('candidature-section');
+
+        // Validation simple de l'email
+        if (!email || !email.includes('@')) {
+          errorDiv.textContent = 'Veuillez entrer un email valide.';
+          return;
+        }
+
+        // UI de chargement
+        errorDiv.textContent = '';
+        loginButton.disabled = true;
+        loginButton.textContent = 'Vérification...';
+        candidatureSection.classList.add('hidden');
+
+        // Appel au serveur pour vérifier l'email
+        google.script.run
+          .withSuccessHandler((response) => {
+            if (response.success) {
+              // Si la connexion réussit, on lance le chargement de l'app
+              this.init(response.livreur); // Lancer l'app
+            } else {
+              // Sinon, on affiche l'erreur et la section de candidature
+              errorDiv.textContent = response.error;
+              this.showCandidatureForm(response.adminEmail); // On passe l'email admin reçu
+              loginButton.disabled = false;
+              loginButton.textContent = 'Se connecter';
+            }
+          })
+          .withFailureHandler((err) => {
+            errorDiv.textContent = 'Une erreur technique est survenue.';
+            console.error('Login failed:', err);
+            loginButton.disabled = false;
+            loginButton.textContent = 'Se connecter';
+          })
+          .verifierLivreur(email);
+      },
+
+      // NOUVELLE FONCTION: Affiche la section de candidature
+      showCandidatureForm: function(adminEmail) {
+        const candidatureSection = document.getElementById('candidature-section');
+        const mailtoLink = document.getElementById('candidature-link');
+
+        // L'email est maintenant dynamique
+        const email = adminEmail || 'contact@example.com'; // Fallback au cas où
+        mailtoLink.href = `mailto:${email}?subject=Candidature App Livreur`;
+
+        candidatureSection.classList.remove('hidden');
+      },
+
+      // `init` est maintenant appelé APRÈS la connexion réussie
+      init: function(livreurInfo) {
+        console.log('App init for livreur:', livreurInfo.id);
+
+        // On masque l'écran de login et on affiche le loader
+        document.getElementById('login-screen').classList.add('hidden');
+        this.showLoader(true);
+
+        // Appel Serveur asynchrone pour les données de l'app
         google.script.run
           .withSuccessHandler(this.onDataLoaded.bind(this))
           .withFailureHandler(this.onError.bind(this))
-          .getInitialData({}); // Passer params si besoin
+          // On passe l'ID du livreur pour ne charger que ses tournées
+          .getInitialData({ livreur: livreurInfo.id });
       },
 
       onDataLoaded: function(data) {
@@ -424,9 +514,12 @@
       }
     };
 
-    // Start
+    // Start: On n'appelle plus init() automatiquement.
+    // L'utilisateur doit cliquer sur "Se connecter" via app.handleLogin().
     window.onload = function() {
-      app.init();
+      // L'app est prête à recevoir l'action de l'utilisateur.
+      console.log('Login screen ready.');
+      document.getElementById('email-input').focus(); // Focus sur le champ email
     };
   </script>
 </body>

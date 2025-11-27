@@ -16,6 +16,16 @@
  * Renvoie uniquement le Shell HTML (coquille vide avec loader).
  * Aucune opération lourde ici.
  */
+
+/**
+ * ! FONCTION D'INITIALISATION - À SUPPRIMER OU COMMENTER EN PRODUCTION !
+ * Exécute la configuration définie dans Setup_Livreur.js.
+ * Pour l'exécuter, sélectionnez "runSetup" dans l'éditeur Apps Script et cliquez sur "Exécuter".
+ */
+function runSetup() {
+  setupInitial();
+}
+
 function doGet(e) {
   // On charge le template principal
   const html = HtmlService.createTemplateFromFile('Livraison_Interface');
@@ -37,20 +47,26 @@ function getInitialData(params) {
   console.log('getInitialData start');
 
   try {
-    // 1. Identifier le livreur
-    const livreurInfo = resolveLivreurFromRequest_(params);
+    // 1. Identifier le livreur (obtient seulement l'ID via le paramètre sécurisé)
+    const livreurSession = resolveLivreurFromRequest_(params);
 
-    // 2. Récupérer les tournées (scope par défaut: jour)
+    // 2. Récupérer les informations complètes du livreur (y compris l'email) via son ID
+    const livreurInfo = getLivreurInfoById(livreurSession.id);
+    if (!livreurInfo) {
+      throw new Error(`Livreur avec ID "${livreurSession.id}" introuvable.`);
+    }
+
+    // 3. Récupérer les tournées assignées à ce livreur
     const toursResult = obtenirTournees({
       scope: 'day',
       livreurId: livreurInfo.id
     });
 
-    // 3. Préparer la config client
+    // 4. Préparer la config client avec les bonnes informations
     const config = {
       env: 'PROD',
-      version: '2.0.0', // Version optimisée
-      userEmail: Session.getActiveUser().getEmail(),
+      version: '2.0.0',
+      userEmail: livreurInfo.email, // Correction du bug : on utilise l'email récupéré
       serverTime: new Date().getTime()
     };
 
@@ -58,7 +74,7 @@ function getInitialData(params) {
 
     return {
       success: true,
-      livreur: livreurInfo,
+      livreur: livreurInfo, // On renvoie les infos complètes
       toursData: toursResult,
       config: config
     };
@@ -73,8 +89,104 @@ function getInitialData(params) {
 }
 
 // =================================================================
-// 2. LOGIQUE MÉTIER (Tournées, Notes, Statuts)
+// 2. LOGIQUE MÉTIER (Connexion, Tournées, Notes, Statuts)
 // =================================================================
+
+/**
+ * Vérifie si un email correspond à un livreur autorisé dans la feuille "liste livreurs".
+ * @param {string} email L'email à vérifier, envoyé depuis le client.
+ * @returns {object} Un objet avec {success: true, livreur: {...}} ou {success: false, error: "..."}.
+ */
+function verifierLivreur(email) {
+  try {
+    if (!email) {
+      return { success: false, error: "L'email est manquant." };
+    }
+
+    const sheetName = "liste livreurs";
+    const ss = getSpreadsheet_(); // Réutilise la fonction helper existante
+    const sheet = ss.getSheetByName(sheetName);
+
+    if (!sheet) {
+      console.error(`La feuille "${sheetName}" est introuvable. Veuillez exécuter la configuration (runSetup).`);
+      return { success: false, error: "Erreur de configuration du serveur." };
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data.shift() || []; // Extrait la ligne d'en-tête
+
+    const emailColIndex = headers.indexOf("Email");
+    const idColIndex = headers.indexOf("ID Livreur");
+    const nomColIndex = headers.indexOf("Nom Personnage");
+
+    if (emailColIndex === -1 || idColIndex === -1 || nomColIndex === -1) {
+      console.error(`Les en-têtes ("ID Livreur", "Nom Personnage", "Email") sont incorrects dans la feuille "${sheetName}".`);
+      return { success: false, error: "Erreur de configuration des données." };
+    }
+
+    const searchEmail = String(email).trim().toLowerCase();
+
+    for (const row of data) {
+      const rowEmail = String(row[emailColIndex]).trim().toLowerCase();
+      if (rowEmail === searchEmail) {
+        // Livreur trouvé !
+        const livreurInfo = {
+          id: row[idColIndex],
+          nom: row[nomColIndex],
+          email: rowEmail
+        };
+        console.log(`Connexion réussie pour le livreur: ${JSON.stringify(livreurInfo)}`);
+        return { success: true, livreur: livreurInfo };
+      }
+    }
+
+    // Si la boucle se termine sans trouver l'email
+    console.warn(`Tentative de connexion échouée pour l'email non autorisé: ${email}`);
+    const adminEmail = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL') || 'contact@example.com';
+    return { success: false, error: "Email non autorisé.", adminEmail: adminEmail };
+
+  } catch (e) {
+    console.error('Erreur critique dans verifierLivreur:', e);
+    return { success: false, error: "Une erreur inattendue est survenue." };
+  }
+}
+
+/**
+ * Récupère les informations d'un livreur en se basant sur son ID.
+ * @param {string} livreurId L'ID unique du livreur.
+ * @returns {object|null} Un objet contenant les infos du livreur, ou null s'il n'est pas trouvé.
+ */
+function getLivreurInfoById(livreurId) {
+  try {
+    const sheetName = "liste livreurs";
+    const sheet = getSpreadsheet_().getSheetByName(sheetName);
+    if (!sheet) return null;
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data.shift() || [];
+
+    const idColIndex = headers.indexOf("ID Livreur");
+    if (idColIndex === -1) return null;
+
+    const searchId = String(livreurId).trim();
+
+    for (const row of data) {
+      if (String(row[idColIndex]).trim() === searchId) {
+        return {
+          id: row[headers.indexOf("ID Livreur")],
+          nom: row[headers.indexOf("Nom Personnage")],
+          email: row[headers.indexOf("Email")]
+        };
+      }
+    }
+    return null; // Non trouvé
+
+  } catch (e) {
+    console.error(`Erreur dans getLivreurInfoById pour l'ID ${livreurId}:`, e);
+    return null;
+  }
+}
+
 
 const LIVRAISON_DATA = {
   PROP_SPREADSHEET_ID: 'SPREADSHEET_ID',
@@ -244,24 +356,18 @@ function obtenirNotesTournee(params) {
 // =================================================================
 
 function resolveLivreurFromRequest_(params) {
-  // Essayer de trouver l'ID dans les params (envoyés par le client)
-  // ou fallback sur l'email user
-  let id = '';
-  let source = 'inconnu';
-
-  // Si params est passé (objet)
-  if (params && (params.livreur || params.user)) {
-    id = params.livreur || params.user;
-    source = 'client_param';
-  } else {
-    const user = Session.getActiveUser().getEmail();
-    if (user) {
-      id = user;
-      source = 'session_email';
-    }
+  // La seule source fiable est maintenant le paramètre `livreur`
+  // passé après une connexion réussie.
+  if (params && params.livreur) {
+    return {
+      id: params.livreur,
+      source: 'authenticated_login'
+    };
   }
 
-  return { id: id, source: source };
+  // Si aucun ID n'est fourni, on ne peut pas identifier le livreur.
+  // C'est une sécurité pour empêcher l'accès non authentifié.
+  throw new Error("Impossible d'identifier le livreur. Session invalide.");
 }
 
 function getSpreadsheet_() {
