@@ -123,32 +123,76 @@ function processChatRequest(request) {
       throw new Error("Requete invalide.");
     }
 
-    var message = request.message;
-    var context = request.context;
+    var rawMessage = request.message;
+    var rawContext = request.context;
+
+    // Assainissement basique pour eviter les injections ou messages vides
+    var message = (typeof sanitizeMultiline === 'function')
+      ? sanitizeMultiline(rawMessage, 800)
+      : String(rawMessage || '').trim();
+    var context = (typeof sanitizeMultiline === 'function')
+      ? sanitizeMultiline(rawContext, 120)
+      : String(rawContext || '').trim();
+
+    if (!message) {
+      throw new Error("Message vide.");
+    }
+
     var responseText = "";
 
     // Log de la requete pour le debogage
     Logger.log("Nouveau message Piluleur: [Contexte: " + context + "] Message: '" + message + "'");
 
-    // Logique de reponse simulee basee sur le contexte
+    // Reponse par defaut si l'IA n'est pas disponible
+    var fallbackResponse;
     switch (context) {
       case 'Reservation':
       case 'R\u00e9servation':
-        responseText = "Le contexte 'Reservation' est bien recu. Dans cette section, vous pouvez planifier une nouvelle tournee ou modifier une reservation existante. Quelle est votre question precise ?";
+        fallbackResponse = "Le contexte 'Reservation' est bien recu. Dans cette section, vous pouvez planifier une nouvelle tournee ou modifier une reservation existante. Quelle est votre question precise ?";
         break;
       case 'Facturation':
-        responseText = "Je vois que vous etes dans la section 'Facturation'. Vous pouvez ici consulter l'historique ou generer une nouvelle facture. Avez-vous besoin d'aide pour une action specifique ?";
+        fallbackResponse = "Je vois que vous etes dans la section 'Facturation'. Vous pouvez ici consulter l'historique ou generer une nouvelle facture. Avez-vous besoin d'aide pour une action specifique ?";
         break;
       case 'Client':
-        responseText = "Le contexte 'Client' a ete identifie. Cette interface vous permet de gerer les fiches de vos clients. Que souhaitez-vous faire ?";
+        fallbackResponse = "Le contexte 'Client' a ete identifie. Cette interface vous permet de gerer les fiches de vos clients. Que souhaitez-vous faire ?";
         break;
       default:
         if (context && context.indexOf('Champ :') === 0) {
-          responseText = "Je vois que vous cliquez sur le champ '" + context.substring(7) + "'. Je peux vous aider a comprendre a quoi il sert ou comment le remplir.";
+          fallbackResponse = "Je vois que vous cliquez sur le champ '" + context.substring(7) + "'. Je peux vous aider a comprendre a quoi il sert ou comment le remplir.";
         } else {
-          responseText = "Je suis l'assistant ELS. Votre question dans le contexte '" + context + "' a bien ete recue. Pour l'instant, mes capacites sont en cours de developpement, mais je note votre demande.";
+          fallbackResponse = "Je suis l'assistant ELS. Votre question dans le contexte '" + context + "' a bien ete recue. Pour l'instant, mes capacites sont en cours de developpement, mais je note votre demande.";
         }
         break;
+    }
+
+    // Tentative d'appel Gemini pour une reponse contextuelle
+    var aiResult = null;
+    try {
+      var contextMessages = [];
+      if (context) {
+        contextMessages.push({
+          role: 'assistant',
+          content: "Contexte interface utilisateur : " + context
+        });
+      }
+      var prompt = [
+        "Tu es l'assistant EL Services integre sur le site public. Reponds en francais avec une reponse courte et actionable.",
+        "Si l'utilisateur demande une reservation ou une aide logistique, guide-le en une ou deux etapes claires.",
+        "Contexte UI : " + context,
+        "Question : " + message
+      ].join("\n");
+      aiResult = callGemini(contextMessages, prompt);
+    } catch (aiErr) {
+      Logger.log("processChatRequest - erreur appel Gemini : " + aiErr);
+    }
+
+    if (aiResult && aiResult.ok === true && aiResult.message) {
+      responseText = aiResult.message;
+    } else {
+      // Fallback statique si Gemini indisponible
+      var reason = aiResult && aiResult.reason ? aiResult.reason : "API_ERROR";
+      Logger.log("processChatRequest - fallback assistant (raison: " + reason + ")");
+      responseText = fallbackResponse;
     }
 
     // Trace silencieuse vers Resideur pour l'auto-apprentissage.
@@ -160,7 +204,11 @@ function processChatRequest(request) {
     // Simuler un petit delai pour le realisme
     Utilities.sleep(500);
 
-    return { text: responseText };
+    return {
+      text: responseText,
+      source: aiResult && aiResult.ok === true ? 'gemini' : 'fallback',
+      reason: aiResult && aiResult.reason ? aiResult.reason : null
+    };
 
   } catch (e) {
     console.error("Erreur dans processChatRequest: " + e.message);
