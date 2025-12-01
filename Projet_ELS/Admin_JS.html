@@ -546,21 +546,63 @@ document.addEventListener('DOMContentLoaded', () => {
     function ouvrirModaleAjoutArret(idReservation) {
         const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
         if (!reservation) return afficherErreur("Réservation introuvable.");
-        const matchTotal = reservation.details.match(/(\d+)\s*arrêt\(s\)\s*total\(s\)/);
-        const matchSup = reservation.details.match(/(\d+)\s*arrêt\(s\)\s*sup/);
+        const matchTotal = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*total\(s\)/);
+        const matchSup = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*sup/);
         const arretsActuels = matchTotal ? parseInt(matchTotal[1], 10) : (matchSup ? parseInt(matchSup[1], 10) + 1 : 1);
+        const typeRemiseInitial = reservation.tourneeOfferte ? 'Tournee Offerte' : (reservation.typeRemise || '');
+        const valeurRemiseInitiale = typeRemiseInitial === 'Arrets Offerts'
+            ? (reservation.arretsOfferts || reservation.valeurRemise || 0)
+            : (reservation.valeurRemise || 0);
+        const noteInitiale = reservation.note || '';
         if (!contenuModale) return;
         renderHTML(contenuModale, `
             <h3 id="modale-titre">Modifier les arrêts</h3><p><strong>Client :</strong> ${escapeHTML(reservation.clientName)}</p>
             <div class="groupe-formulaire"><label>Nombre d'arrêt(s) total(s) :</label><div class="champ-compteur"><button type="button" class="btn-compteur btn-retirer">-</button><span class="valeur-compteur">${escapeHTML(String(arretsActuels))}</span><button type="button" class="btn-compteur btn-ajouter">+</button></div></div>
+            <div class="groupe-formulaire"><label for="type-remise-maj">Remise / avantage</label><select id="type-remise-maj" class="champ-formulaire"><option value="">Aucune</option><option value="Pourcentage">Pourcentage</option><option value="Montant Fixe">Montant fixe</option><option value="Arrets Offerts">Arrêt(s) offert(s)</option><option value="Tournee Offerte">Tournée offerte</option></select></div>
+            <div class="groupe-formulaire hidden" id="conteneur-valeur-remise-maj"><label for="valeur-remise-maj">Valeur de la remise</label><input type="number" id="valeur-remise-maj" class="champ-formulaire" step="0.01" min="0"></div>
+            <div class="groupe-formulaire hidden" id="conteneur-arrets-offerts-maj"><label for="arrets-offerts-maj">Arrêt(s) offert(s)</label><input type="number" id="arrets-offerts-maj" class="champ-formulaire" step="1" min="0"></div>
+            <div class="groupe-formulaire"><label for="note-maj">Note interne</label><textarea id="note-maj" class="champ-formulaire" rows="3" placeholder="Ajouter une note (optionnel)"></textarea></div>
             <div class="modale-pied-de-page"><button type="button" id="btn-confirmer-maj" class="btn btn-primaire">Valider la modification</button></div>`);
         openModal();
         const valeurCompteur = contenuModale.querySelector('.valeur-compteur');
+        const selectRemise = contenuModale.querySelector('#type-remise-maj');
+        const champValeurRemise = contenuModale.querySelector('#valeur-remise-maj');
+        const champArretsOfferts = contenuModale.querySelector('#arrets-offerts-maj');
+        const champNoteMaj = contenuModale.querySelector('#note-maj');
+        const contValeurRemise = contenuModale.querySelector('#conteneur-valeur-remise-maj');
+        const contArretsOfferts = contenuModale.querySelector('#conteneur-arrets-offerts-maj');
+        const majAffichageRemiseMaj = () => {
+            const typeSel = selectRemise?.value || '';
+            contValeurRemise?.classList.toggle('hidden', !(typeSel === 'Pourcentage' || typeSel === 'Montant Fixe'));
+            contArretsOfferts?.classList.toggle('hidden', typeSel !== 'Arrets Offerts');
+        };
+        if (selectRemise) { selectRemise.value = typeRemiseInitial; }
+        if (champValeurRemise && (typeRemiseInitial === 'Pourcentage' || typeRemiseInitial === 'Montant Fixe')) { champValeurRemise.value = valeurRemiseInitiale || ''; }
+        if (champArretsOfferts) { champArretsOfferts.value = typeRemiseInitial === 'Arrets Offerts' ? (valeurRemiseInitiale || 0) : 0; }
+        if (champNoteMaj) { champNoteMaj.value = noteInitiale; }
+        majAffichageRemiseMaj();
+        selectRemise?.addEventListener('change', majAffichageRemiseMaj);
         if (valeurCompteur) {
             contenuModale.querySelector('.btn-ajouter')?.addEventListener('click', () => { valeurCompteur.textContent = parseInt(valeurCompteur.textContent, 10) + 1; });
             contenuModale.querySelector('.btn-retirer')?.addEventListener('click', () => { let val = parseInt(valeurCompteur.textContent, 10); if (val > 1) valeurCompteur.textContent = val - 1; });
         }
-        contenuModale.querySelector('#btn-confirmer-maj')?.addEventListener('click', () => { gererSoumissionMiseAJour(idReservation, parseInt(valeurCompteur?.textContent || '1', 10)); });
+        contenuModale.querySelector('#btn-confirmer-maj')?.addEventListener('click', () => {
+            const totalStopsMaj = parseInt(valeurCompteur?.textContent || '1', 10);
+            const typeSelectionne = selectRemise?.value || '';
+            const noteMaj = (champNoteMaj?.value || '').trim();
+            let valeurRemise = 0;
+            let arretsOffertsMaj = 0;
+            let tourneeOfferte = false;
+            if (typeSelectionne === 'Pourcentage' || typeSelectionne === 'Montant Fixe') {
+                valeurRemise = parseFloat(champValeurRemise?.value || '0') || 0;
+            } else if (typeSelectionne === 'Arrets Offerts') {
+                arretsOffertsMaj = Math.max(0, parseInt(champArretsOfferts?.value || '0', 10));
+                valeurRemise = arretsOffertsMaj;
+            } else if (typeSelectionne === 'Tournee Offerte') {
+                tourneeOfferte = true;
+            }
+            gererSoumissionMiseAJour(idReservation, totalStopsMaj, { typeRemise: typeSelectionne, valeurRemise: valeurRemise, arretsOfferts: arretsOffertsMaj, tourneeOfferte: tourneeOfferte, note: noteMaj });
+        });
     }
     function ouvrirModaleReplanifier(idReservation) {
         const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
@@ -726,16 +768,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- SOUMISSIONS (utilisent maintenant rafraichirVueActuelle) ---
-    function gererSoumissionMiseAJour(idReservation, totalStops) {
+    function gererSoumissionMiseAJour(idReservation, totalStops, options = {}) {
         basculerIndicateurChargement(true);
         closeModal();
         google.script.run.withSuccessHandler(reponse => {
             basculerIndicateurChargement(false);
             if (reponse.success) {
-                afficherNotification("Réservation mise à jour !", "succes");
+                afficherNotification("R�servation mise � jour !", "succes");
                 rafraichirVueActuelle();
             } else { afficherErreur(reponse.error); }
-        }).withFailureHandler(afficherErreur).mettreAJourDetailsReservation(idReservation, totalStops);
+        }).withFailureHandler(afficherErreur).mettreAJourDetailsReservation(idReservation, totalStops, null, null, null, options);
     }
     function gererSoumissionReplanifier(idReservation, nouvelleDate, nouvelleHeure) {
         basculerIndicateurChargement(true);
@@ -806,6 +848,10 @@ document.addEventListener('DOMContentLoaded', () => {
             km: 0,
             statut: 'Calcul en cours…',
             infoRemise: '',
+            typeRemise: '',
+            valeurRemise: 0,
+            tourneeOfferte: false,
+            arretsOfferts: 0,
             isDraft: true,
             justCreated: false
         };

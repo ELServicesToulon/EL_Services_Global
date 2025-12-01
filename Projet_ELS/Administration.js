@@ -155,13 +155,16 @@ function obtenirToutesReservationsAdmin() {
         const typeRemiseAppliquee = String(ligne[indices["Type Remise Appliquée"]]).trim();
         const valeurRemiseAppliquee = parseFloat(ligne[indices["Valeur Remise Appliquée"]]) || 0;
         const tourneeOfferteAppliquee = ligne[indices["Tournée Offerte Appliquée"]] === true;
+        const arretsOffertsAppliques = typeRemiseAppliquee === 'Arrets Offerts' ? valeurRemiseAppliquee : 0;
 
         if (tourneeOfferteAppliquee) {
           infoRemise = '(Offerte)';
         } else if (typeRemiseAppliquee === 'Pourcentage' && valeurRemiseAppliquee > 0) {
           infoRemise = `(-${valeurRemiseAppliquee}%)`;
         } else if (typeRemiseAppliquee === 'Montant Fixe' && valeurRemiseAppliquee > 0) {
-          infoRemise = `(-${valeurRemiseAppliquee}€)`;
+          infoRemise = `(-${valeurRemiseAppliquee}?)`;
+        } else if (typeRemiseAppliquee === 'Arrets Offerts' && valeurRemiseAppliquee > 0) {
+          infoRemise = `(${valeurRemiseAppliquee} arrêt(s) offert(s))`;
         }
 
         return {
@@ -176,7 +179,11 @@ function obtenirToutesReservationsAdmin() {
           km: km,
           statut: ligne[indices["Statut"]],
           infoRemise: infoRemise,
-          note: ligne[indices["Note Interne"]] || ''
+          note: ligne[indices["Note Interne"]] || '',
+          typeRemise: typeRemiseAppliquee,
+          valeurRemise: valeurRemiseAppliquee,
+          tourneeOfferte: tourneeOfferteAppliquee,
+          arretsOfferts: arretsOffertsAppliques
         };
       } catch(e) { 
         Logger.log(`Erreur de traitement d'une ligne de réservation admin : ${e.toString()} sur la ligne avec ID ${ligne[indices["ID Réservation"]]}`);
@@ -260,9 +267,10 @@ function obtenirToutesReservationsPourDate(dateFiltreString) {
         const km = KM_BASE + ((arrets + (retour ? 1 : 0)) * KM_ARRET_SUP);
         
         let infoRemise = '';
-        const typeRemiseAppliquee = String(ligne[indices["Type Remise Appliquée"]]).trim();
-        const valeurRemiseAppliquee = parseFloat(ligne[indices["Valeur Remise Appliquée"]]) || 0;
-        const tourneeOfferteAppliquee = ligne[indices["Tournée Offerte Appliquée"]] === true;
+        const typeRemiseAppliquee = String(ligne[indices["Type Remise Appliqu\u00e9e"]]).trim();
+        const valeurRemiseAppliquee = parseFloat(ligne[indices["Valeur Remise Appliqu\u00e9e"]]) || 0;
+        const tourneeOfferteAppliquee = ligne[indices["Tourn\u00e9e Offerte Appliqu\u00e9e"]] === true;
+        const arretsOffertsAppliques = typeRemiseAppliquee === 'Arrets Offerts' ? valeurRemiseAppliquee : 0;
 
         if (tourneeOfferteAppliquee) {
             infoRemise = '(Offerte)';
@@ -270,6 +278,8 @@ function obtenirToutesReservationsPourDate(dateFiltreString) {
             infoRemise = `(-${valeurRemiseAppliquee}%)`;
         } else if (typeRemiseAppliquee === 'Montant Fixe' && valeurRemiseAppliquee > 0) {
             infoRemise = `(-${valeurRemiseAppliquee}€)`;
+        } else if (typeRemiseAppliquee === 'Arrets Offerts' && valeurRemiseAppliquee > 0) {
+            infoRemise = `(${valeurRemiseAppliquee} arrêt(s) offert(s))`;
         }
 
         return {
@@ -284,7 +294,11 @@ function obtenirToutesReservationsPourDate(dateFiltreString) {
           km: km,
           statut: ligne[indices["Statut"]],
           infoRemise: infoRemise,
-          note: ligne[indices["Note Interne"]] || ''
+          note: ligne[indices["Note Interne"]] || '',
+          typeRemise: typeRemiseAppliquee,
+          valeurRemise: valeurRemiseAppliquee,
+          tourneeOfferte: tourneeOfferteAppliquee,
+          arretsOfferts: arretsOffertsAppliques
         };
       } catch(e) { 
         Logger.log(`Erreur de traitement d'une ligne de réservation admin : ${e.toString()}`);
@@ -597,7 +611,11 @@ function creerReservationAdmin(data) {
         amount: prix,
         km: KM_BASE + ((tarif.nbSupp + (data.returnToPharmacy ? 1 : 0)) * KM_ARRET_SUP),
         statut: '',
-        infoRemise: infoRemise
+        infoRemise: infoRemise,
+        typeRemise: clientPourCalcul ? clientPourCalcul.typeRemise : '',
+        valeurRemise: clientPourCalcul ? clientPourCalcul.valeurRemise : 0,
+        tourneeOfferte: tourneeOfferte,
+        arretsOfferts: 0
       });
     });
 
@@ -775,6 +793,17 @@ function appliquerRemiseSurTournee(idReservation, typeRemise, valeurRemise, nbTo
       nouvelleTourneeOfferte = false;
       typeRemiseStockee = 'Montant Fixe';
       valeurRemiseStockee = Math.round(montantRemise * 100) / 100;
+    } else if (typeNormalise === 'arrets offerts') {
+      const arretsOfferts = Math.max(0, Math.floor(Number(valeurRemise)));
+      const totalStopsFactures = Math.max(1, totalStops - arretsOfferts);
+      const calcul = computeCoursePrice({ totalStops: totalStopsFactures, retour: retourPharmacie, urgent: urgent, samedi: samedi });
+      if (!calcul || calcul.error) {
+        throw new Error(calcul && calcul.error ? calcul.error : 'Tarification indisponible pour la remise arr�ts offerts.');
+      }
+      nouveauMontant = Math.min(prixBase, calcul.total);
+      nouvelleTourneeOfferte = false;
+      typeRemiseStockee = 'Arrets Offerts';
+      valeurRemiseStockee = arretsOfferts;
     } else {
       nouveauMontant = prixBase;
       typeRemiseStockee = '';
