@@ -501,7 +501,8 @@ function creerReservationAdmin(data) {
       if (!tarif || tarif.error) {
         throw new Error(tarif && tarif.error ? tarif.error : "Tarification indisponible.");
       }
-      const duree = DUREE_BASE + (tarif.nbSupp * DUREE_ARRET_SUP);
+      const nbSegments = tarif.nbSupp + (data.returnToPharmacy ? 1 : 0); // treat return as its own segment for time/km
+      const duree = DUREE_BASE + (nbSegments * DUREE_ARRET_SUP);
 
       let prix = tarif.total;
       let libelleResident = '';
@@ -609,7 +610,7 @@ function creerReservationAdmin(data) {
         clientName: data.client.nom,
         clientEmail: data.client.email,
         amount: prix,
-        km: KM_BASE + ((tarif.nbSupp + (data.returnToPharmacy ? 1 : 0)) * KM_ARRET_SUP),
+        km: KM_BASE + (nbSegments * KM_ARRET_SUP),
         statut: '',
         infoRemise: infoRemise,
         typeRemise: clientPourCalcul ? clientPourCalcul.typeRemise : '',
