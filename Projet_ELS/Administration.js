@@ -931,6 +931,8 @@ function genererFactures() {
         let totalMontant = 0;
         let totalRemises = 0;
         let totalAvantRemises = 0;
+        let totalRemisesOffertes = 0;
+        let nbRemisesOffertes = 0;
         const symboleEuro = String.fromCharCode(8364);
         const lignesBordereau = [];
         let dateMin = new Date(lignesFactureClient[0].data[indicesFacturation['Date']]);
@@ -954,7 +956,9 @@ function genererFactures() {
 
           if (tourneeOfferte) {
             libelleRemise = 'Offerte';
-            montantRemiseValeur = 0;
+            montantRemiseValeur = montantAvantRemise; // tout le montant est offert
+            nbRemisesOffertes += 1;
+            totalRemisesOffertes += montantAvantRemise;
           } else if (typeRemise === 'Pourcentage' && valeurRemise > 0) {
             libelleRemise = `-${valeurRemise}%`;
             if (valeurRemise < 100) {
@@ -1033,6 +1037,10 @@ function genererFactures() {
         const totalAvantRemisesTexte = formatMontantEuro(totalAvantRemises);
         corps.replaceText('{{total_remises}}', totalRemisesTexte);
         corps.replaceText('{{total_avant_remises}}', totalAvantRemisesTexte);
+        const totalRemisesOffertesTexte = totalRemisesOffertes > 0
+          ? `${formatMontantEuro(totalRemisesOffertes)} ${symboleEuro} (${nbRemisesOffertes} offerte${nbRemisesOffertes > 1 ? 's' : ''})`
+          : `0,00 ${symboleEuro} (${nbRemisesOffertes} offerte${nbRemisesOffertes > 1 ? 's' : ''})`;
+        corps.replaceText('{{total_remises_offertes}}', totalRemisesOffertesTexte);
         corps.replaceText('{{nombre_courses}}', String(lignesBordereau.length));
 
         const lienTarifs = (() => {
