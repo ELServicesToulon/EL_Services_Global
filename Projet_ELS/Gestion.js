@@ -804,18 +804,51 @@ function envoyerFactureClient(emailClient, numeroFacture, exp, sig) {
  * @param {number} totalStops Le nouveau nombre d'arrêt(s) total(s).
  * @returns {Object} Un résumé de l'opération.
  */
-function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, exp, sig) {
+function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, exp, sig, options) {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(30000)) return { success: false, error: "Le système est occupé, veuillez réessayer." };
 
   try {
+    const normaliserTypeRemise = function (val) {
+      const str = String(val || '').trim();
+      if (!str) return '';
+      const decompose = typeof str.normalize === 'function' ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : str;
+      const lower = decompose.toLowerCase();
+      if (lower.indexOf('pourcentage') !== -1) return 'Pourcentage';
+      if (lower.indexOf('montant') !== -1) return 'Montant Fixe';
+      if (lower.indexOf('tournee') !== -1) return 'Tournee Offerte';
+      if (lower.indexOf('arret') !== -1) return 'Arrets Offerts';
+      return '';
+    };
+
+    const opts = (options && typeof options === 'object') ? options : {};
+    const champsRemiseRenseignes = ('typeRemise' in opts) || ('remiseType' in opts) || ('valeurRemise' in opts) || ('arretsOfferts' in opts) || ('tourneeOfferte' in opts);
+    const typeRemiseOption = normaliserTypeRemise(opts.typeRemise || opts.remiseType || '');
+    const valeurRemiseOption = (opts.valeurRemise !== undefined) ? Number(opts.valeurRemise) : null;
+    const arretsOffertsOption = (opts.arretsOfferts !== undefined) ? Math.max(0, Math.floor(Number(opts.arretsOfferts) || 0)) : null;
+    const tourneeOfferteOption = opts.tourneeOfferte === true ? true : (opts.tourneeOfferte === false ? false : null);
+    const noteOption = opts.note !== undefined ? String(opts.note || '').trim() : null;
+
     const emailNorm = emailClient ? assertClient(emailClient, exp, sig) : null;
     const idNorm = assertReservationId(idReservation);
     const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
-    const headerInfo = getFacturationHeaderIndices_(feuille, ["ID Réservation", "Détails", "Montant", "Client (Email)"]);
+    const headerInfo = getFacturationHeaderIndices_(feuille, [
+      "ID Réservation",
+      "Détails",
+      "Montant",
+      "Client (Email)",
+      "Type Remise Appliquée",
+      "Valeur Remise Appliquée",
+      "Tournée Offerte Appliquée",
+      "Note Interne",
+      "Type",
+      "Resident"
+    ]);
     const indices = headerInfo.indices;
     const idxEvent = indices["Event ID"];
     const idxDate = indices["Date"];
+    const idxType = indices["Type"];
+    const idxResident = indices["Resident"];
 
     const donnees = feuille.getDataRange().getValues();
     const indexLigne = donnees.findIndex(row => String(row[indices["ID Réservation"]]).trim() === idNorm);
@@ -843,13 +876,81 @@ function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, e
       ressourceEvenement = null;
     }
     
-    const dateEvenement = formaterDateEnYYYYMMDD(dateDebutOriginale);
-    const heureEvenement = formaterDateEnHHMM(dateDebutOriginale);
+    const typeCourse = typeof idxType === 'number' && idxType !== -1 ? String(ligneDonnees[idxType] || '').trim().toLowerCase() : '';
+    const estUrgent = typeCourse === 'urgent';
+    const estSamedi = typeCourse === 'samedi' || dateDebutOriginale.getDay() === 6;
+    const estResident = typeof idxResident === 'number' && idxResident !== -1 ? ligneDonnees[idxResident] === true : false;
     const retourPharmacie = detailsAnciens.includes('retour: oui');
+    const totalStopsInt = Math.max(1, Number(totalStops) || 1);
 
-    const clientPourCalcul = obtenirInfosClientParEmail(emailNorm || emailFeuille);
-    const { prix: nouveauPrix, duree: nouvelleDuree, details: nouveauxDetails } = calculerPrixEtDureeServeur(totalStops, retourPharmacie, dateEvenement, heureEvenement, clientPourCalcul);
-    
+    const typeRemiseActuel = normaliserTypeRemise((indices["Type Remise Appliqu�e"] !== undefined && indices["Type Remise Appliqu�e"] !== -1) ? ligneDonnees[indices["Type Remise Appliqu�e"]] : '');
+    const valeurRemiseActuelle = (indices["Valeur Remise Appliqu�e"] !== undefined && indices["Valeur Remise Appliqu�e"] !== -1) ? Number(ligneDonnees[indices["Valeur Remise Appliqu�e"]]) || 0 : 0;
+    const tourneeOfferteActuelle = (indices["Tournée Offerte Appliqu�e"] !== undefined && indices["Tournée Offerte Appliqu�e"] !== -1) ? ligneDonnees[indices["Tournée Offerte Appliqu�e"]] === true : false;
+    const noteActuelle = (indices["Note Interne"] !== undefined && indices["Note Interne"] !== -1) ? String(ligneDonnees[indices["Note Interne"]] || '').trim() : '';
+
+    let typeRemiseFinal = typeRemiseActuel;
+    let valeurRemiseFinal = valeurRemiseActuelle;
+    let tourneeOfferteFinal = tourneeOfferteActuelle;
+    if (tourneeOfferteOption !== null) {
+      tourneeOfferteFinal = tourneeOfferteOption;
+    }
+    if (champsRemiseRenseignes) {
+      if (typeRemiseOption === 'Tournee Offerte' || tourneeOfferteOption === true) {
+        tourneeOfferteFinal = true;
+        typeRemiseFinal = '';
+        valeurRemiseFinal = 0;
+      } else if (typeRemiseOption === 'Arrets Offerts') {
+        tourneeOfferteFinal = false;
+        typeRemiseFinal = 'Arrets Offerts';
+        valeurRemiseFinal = arretsOffertsOption !== null ? arretsOffertsOption : Math.max(0, Math.floor(valeurRemiseOption || 0));
+      } else if (typeRemiseOption === 'Pourcentage') {
+        tourneeOfferteFinal = false;
+        typeRemiseFinal = 'Pourcentage';
+        valeurRemiseFinal = Math.max(0, Math.min(100, valeurRemiseOption || 0));
+      } else if (typeRemiseOption === 'Montant Fixe') {
+        tourneeOfferteFinal = false;
+        typeRemiseFinal = 'Montant Fixe';
+        valeurRemiseFinal = Math.max(0, valeurRemiseOption || 0);
+      } else {
+        tourneeOfferteFinal = false;
+        typeRemiseFinal = '';
+        valeurRemiseFinal = 0;
+      }
+    }
+
+    const arretsOfferts = typeRemiseFinal === 'Arrets Offerts' ? Math.max(0, Math.min(valeurRemiseFinal, Math.max(0, totalStopsInt - 1))) : 0;
+    const totalStopsFactures = typeRemiseFinal === 'Arrets Offerts' ? Math.max(1, totalStopsInt - arretsOfferts) : totalStopsInt;
+
+    let prixBase;
+    if (estResident && typeof FORFAIT_RESIDENT !== 'undefined') {
+      prixBase = estUrgent ? FORFAIT_RESIDENT.URGENCE_PRICE : FORFAIT_RESIDENT.STANDARD_PRICE;
+    } else {
+      const calcul = computeCoursePrice({ totalStops: totalStopsInt, retour: retourPharmacie, urgent: estUrgent, samedi: estSamedi });
+      if (!calcul || calcul.error) {
+        return { success: false, error: calcul && calcul.error ? calcul.error : 'Tarification indisponible.' };
+      }
+      prixBase = calcul.total;
+    }
+
+    let nouveauPrix = prixBase;
+    if (tourneeOfferteFinal) {
+      nouveauPrix = 0;
+    } else if (typeRemiseFinal === 'Pourcentage' && valeurRemiseFinal > 0) {
+      nouveauPrix = Math.max(0, prixBase * (1 - valeurRemiseFinal / 100));
+    } else if (typeRemiseFinal === 'Montant Fixe' && valeurRemiseFinal > 0) {
+      nouveauPrix = Math.max(0, prixBase - valeurRemiseFinal);
+    } else if (typeRemiseFinal === 'Arrets Offerts' && arretsOfferts > 0) {
+      const calcul = computeCoursePrice({ totalStops: totalStopsFactures, retour: retourPharmacie, urgent: estUrgent, samedi: estSamedi });
+      if (calcul && !calcul.error) {
+        nouveauPrix = Math.min(prixBase, calcul.total);
+      }
+      valeurRemiseFinal = arretsOfferts;
+    }
+    nouveauPrix = Math.round(nouveauPrix * 100) / 100;
+
+    const nbSupp = Math.max(0, totalStopsInt - 1);
+    const nouvelleDuree = DUREE_BASE + ((nbSupp + (retourPharmacie ? 1 : 0)) * DUREE_ARRET_SUP);
+    const nouveauxDetails = formatCourseLabel_(nouvelleDuree, totalStopsInt, retourPharmacie);
     // Si l'événement existe, on le met à jour
     if (ressourceEvenement) {
       const nouvelleDateFin = new Date(dateDebutOriginale.getTime() + nouvelleDuree * 60000);
@@ -858,7 +959,7 @@ function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, e
         end: { dateTime: nouvelleDateFin.toISOString() },
         description: descriptionCourante
           .replace(/Total:.*€/, `Total: ${nouveauPrix.toFixed(2)} €`)
-          .replace(/Arrêts (?:suppl|totaux):.*\n/, `Arrêts totaux: ${totalStops}, Retour: ${retourPharmacie ? 'Oui' : 'Non'}\n`)
+          .replace(/Arrêts (?:suppl|totaux):.*\n/, `Arrêts totaux: ${totalStopsInt}, Retour: ${retourPharmacie ? 'Oui' : 'Non'}\n`)
       };
       Calendar.Events.patch(ressourceMaj, getSecret('ID_CALENDRIER'), idEvenement);
     }
@@ -866,8 +967,32 @@ function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, e
     // On met TOUJOURS à jour la feuille de calcul
     feuille.getRange(indexLigne + 1, indices["Détails"] + 1).setValue(nouveauxDetails);
     feuille.getRange(indexLigne + 1, indices["Montant"] + 1).setValue(nouveauPrix);
+    if (indices["Type Remise Appliqu\u00e9e"] !== undefined && indices["Type Remise Appliqu\u00e9e"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Type Remise Appliqu\u00e9e"] + 1).setValue(typeRemiseFinal);
+    }
+    if (indices["Valeur Remise Appliqu\u00e9e"] !== undefined && indices["Valeur Remise Appliqu\u00e9e"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Valeur Remise Appliqu\u00e9e"] + 1).setValue(valeurRemiseFinal);
+    }
+    if (indices["Tourn\u00e9e Offerte Appliqu\u00e9e"] !== undefined && indices["Tourn\u00e9e Offerte Appliqu\u00e9e"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Tourn\u00e9e Offerte Appliqu\u00e9e"] + 1).setValue(tourneeOfferteFinal);
+    }
+    if (indices["Note Interne"] !== undefined && indices["Note Interne"] !== -1) {
+      feuille.getRange(indexLigne + 1, indices["Note Interne"] + 1).setValue(noteFinale);
+    }
 
-    logActivity(idNorm, emailNorm || emailFeuille, `Modification: ${totalStops} arrêts totaux.`, nouveauPrix, "Modification");
+    const resumeParts = [`${totalStopsInt} arrêts totaux`];
+    if (tourneeOfferteFinal) {
+      resumeParts.push("Tournée offerte");
+    } else if (typeRemiseFinal === "Pourcentage" && valeurRemiseFinal > 0) {
+      resumeParts.push(`Remise ${valeurRemiseFinal}%`);
+    } else if (typeRemiseFinal === "Montant Fixe" && valeurRemiseFinal > 0) {
+      resumeParts.push(`Remise ${valeurRemiseFinal}`);
+    } else if (typeRemiseFinal === "Arrets Offerts" && valeurRemiseFinal > 0) {
+      resumeParts.push(`${valeurRemiseFinal} arrêt(s) offert(s)`);
+    }
+    if (noteModifiee) { resumeParts.push('Note mise à jour'); }
+
+    logActivity(idNorm, emailNorm || emailFeuille, `Modification: ${resumeParts.join(" | ")}.`, nouveauPrix, "Modification");
     return { success: true };
 
   } catch (e) {
@@ -953,6 +1078,7 @@ function replanifierReservation(idReservation, nouvelleDate, nouvelleHeure, emai
     let nouveauMontant = infosTournee.prix;
     let nouveauType = infosTournee.typeCourse;
     const nouveauDetails = infosTournee.details;
+    const arretsOfferts = typeRemise === 'Arrets Offerts' ? Math.max(0, Math.min(valeurRemise, totalStops - 1)) : 0;
 
     if (estResident && typeof FORFAIT_RESIDENT !== 'undefined') {
       nouveauMontant = nouveauType === 'Urgent'
@@ -966,6 +1092,14 @@ function replanifierReservation(idReservation, nouvelleDate, nouvelleHeure, emai
       nouveauMontant = Math.max(0, nouveauMontant * (1 - valeurRemise / 100));
     } else if (typeRemise === 'Montant Fixe' && valeurRemise > 0) {
       nouveauMontant = Math.max(0, nouveauMontant - valeurRemise);
+    } else if (typeRemise === 'Arrets Offerts' && arretsOfferts > 0) {
+      const factures = Math.max(1, totalStops - arretsOfferts);
+      const urgent = nouveauType === 'Urgent';
+      const samedi = nouveauType === 'Samedi';
+      const calcul = computeCoursePrice({ totalStops: factures, retour: retour, urgent: urgent, samedi: samedi });
+      if (calcul && !calcul.error) {
+        nouveauMontant = Math.min(nouveauMontant, calcul.total);
+      }
     }
 
     const clientInfos = obtenirInfosClientParEmail(emailNorm || emailFeuille) || {};
