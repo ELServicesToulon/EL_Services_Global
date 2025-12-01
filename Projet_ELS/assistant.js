@@ -5,8 +5,13 @@
 // poster automatiquement la reponse dans l'onglet Chat.
 // =================================================================
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-const CHAT_ASSISTANT_MODEL = 'gemini-pro';
+const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
+// Liste ordonnée des modèles à tenter : du plus léger/rapide au plus performant
+// 1. gemini-1.5-flash : Rapide, économique (modèle par défaut)
+// 2. gemini-1.5-pro   : Plus performant, contexte plus large (si flash échoue)
+// 3. gemini-pro       : Legacy fallback
+const GEMINI_MODELS = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+
 const CHAT_ASSISTANT_HISTORY_LIMIT = 10;
 const CHAT_ASSISTANT_SYSTEM_PROMPT = 'Assistant pour pharmaciens en EHPAD; réponses concises; pas de données personnelles.';
 const CHAT_ASSISTANT_DEFAULT_VISIBILITY = 'pharmacy';
@@ -87,53 +92,97 @@ function callGemini(contextMessages, userPrompt, opts) {
   const backoffBase = Math.max(0, Number(options.backoffMs) || CHAT_ASSISTANT_BACKOFF_MS);
 
   let lastError = null;
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const response = fetchImpl(GEMINI_API_URL + '?key=' + apiKey, {
-        method: 'post',
-        contentType: 'application/json',
-        payload: JSON.stringify(requestBody),
-        muteHttpExceptions: true
-      });
-      const status = typeof response.getResponseCode === 'function' ? response.getResponseCode() : Number(response.status || 0);
-      const body = typeof response.getContentText === 'function' ? response.getContentText() : String(response.body || '');
-      if (status === 200) {
-        let parsed;
-        try { parsed = JSON.parse(body); } catch (parseErr) {
-          console.error('[callGemini] JSON parse error', parseErr);
-          return { ok: false, reason: 'API_ERROR' };
-        }
-        const firstCandidate = parsed && parsed.candidates && parsed.candidates[0];
-        const rawMessage = firstCandidate && firstCandidate.content && firstCandidate.content.parts && firstCandidate.content.parts[0] && firstCandidate.content.parts[0].text;
-        const assistantText = scrubChatMessage_(sanitizeMultiline(rawMessage, 1200));
-        if (!assistantText) {
-          console.error('[callGemini] Empty message content');
-          return { ok: false, reason: 'API_ERROR' };
-        }
-        const usage = parsed && parsed.usageMetadata ? parsed.usageMetadata : {};
-        const totalTokens = Number(usage.totalTokenCount) || 0;
-        const promptTokens = Number(usage.promptTokenCount) || 0;
-        const completionTokens = Number(usage.candidatesTokenCount) || 0;
+  let successfulModel = null;
 
-        const newUsage = currentUsage + totalTokens;
-        writeAssistantUsage_(usageKey, newUsage);
-        return { ok: true, message: assistantText, usage: { totalTokens: totalTokens, promptTokens: promptTokens, completionTokens: completionTokens, budget: { limit: limit, used: newUsage, remaining: limit > 0 ? Math.max(0, limit - newUsage) : null } } };
+  // BOUCLE SUR LES MODELES (Flash -> Pro -> Legacy)
+  for (const modelName of GEMINI_MODELS) {
+    const apiUrl = GEMINI_BASE_URL + modelName + ':generateContent';
+    let modelSuccess = false;
+
+    // BOUCLE DE RETRIES (Réseau)
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = fetchImpl(apiUrl + '?key=' + apiKey, {
+          method: 'post',
+          contentType: 'application/json',
+          payload: JSON.stringify(requestBody),
+          muteHttpExceptions: true
+        });
+        const status = typeof response.getResponseCode === 'function' ? response.getResponseCode() : Number(response.status || 0);
+        const body = typeof response.getContentText === 'function' ? response.getContentText() : String(response.body || '');
+
+        if (status === 200) {
+          let parsed;
+          try { parsed = JSON.parse(body); } catch (parseErr) {
+            console.error('[callGemini] JSON parse error on model ' + modelName, parseErr);
+            // Si le JSON est invalide, on peut retenter ou passer au modèle suivant.
+            // Ici on considère ça comme une erreur API grave pour ce modèle.
+            lastError = parseErr;
+            break; // Sortie de la boucle retry
+          }
+          const firstCandidate = parsed && parsed.candidates && parsed.candidates[0];
+          const rawMessage = firstCandidate && firstCandidate.content && firstCandidate.content.parts && firstCandidate.content.parts[0] && firstCandidate.content.parts[0].text;
+          const assistantText = scrubChatMessage_(sanitizeMultiline(rawMessage, 1200));
+
+          if (!assistantText) {
+            console.error('[callGemini] Empty message content on model ' + modelName);
+             // Réponse vide mais 200 OK -> Probablement un filtrage de sécurité ou autre.
+             // On passe au modèle suivant car le retry sur le même modèle donnera probablement la même chose.
+             lastError = 'Empty Content';
+             break;
+          }
+
+          const usage = parsed && parsed.usageMetadata ? parsed.usageMetadata : {};
+          const totalTokens = Number(usage.totalTokenCount) || 0;
+          const promptTokens = Number(usage.promptTokenCount) || 0;
+          const completionTokens = Number(usage.candidatesTokenCount) || 0;
+
+          const newUsage = currentUsage + totalTokens;
+          writeAssistantUsage_(usageKey, newUsage);
+
+          return {
+            ok: true,
+            message: assistantText,
+            usedModel: modelName, // Info utile pour debug
+            usage: {
+              totalTokens: totalTokens,
+              promptTokens: promptTokens,
+              completionTokens: completionTokens,
+              budget: { limit: limit, used: newUsage, remaining: limit > 0 ? Math.max(0, limit - newUsage) : null }
+            }
+          };
+        }
+
+        // Gestion des erreurs HTTP
+        const shouldRetry = status === 429 || status >= 500;
+
+        if (!shouldRetry) {
+          // Erreur 4xx non-429 (ex: 400 Bad Request, 404 Model Not Found)
+          console.warn('[callGemini] Model ' + modelName + ' HTTP ' + status + ' - ' + body);
+          lastError = 'HTTP ' + status;
+          // Inutile de retrier ce modèle, on break la boucle de retry pour passer au modèle suivant
+          break;
+        }
+
+        // Si 429/500, on retente le meme modèle
+        lastError = 'HTTP ' + status;
+
+      } catch (err) {
+        console.error('[callGemini] fetch error on model ' + modelName, err);
+        lastError = err;
       }
-      const shouldRetry = status === 429 || status >= 500;
-      if (!shouldRetry) {
-        console.error('[callGemini] HTTP ' + status + ' - ' + body);
-        return { ok: false, reason: 'API_ERROR' };
+
+      // Wait before retry
+      if (attempt < maxRetries - 1 && backoffBase > 0) {
+        try { const delay = backoffBase * Math.pow(2, attempt); sleepImpl(delay); } catch (_err) {}
       }
-      lastError = 'HTTP ' + status;
-    } catch (err) {
-      console.error('[callGemini] fetch error', err);
-      lastError = err;
-    }
-    if (attempt < maxRetries - 1 && backoffBase > 0) {
-      try { const delay = backoffBase * Math.pow(2, attempt); sleepImpl(delay); } catch (_err) {}
-    }
-  }
-  console.warn('[callGemini] Attempts exhausted', lastError);
+    } // Fin boucle Retries
+
+    // Si on arrive ici, c'est que le modèle courant a échoué (tous retries épuisés ou erreur fatale)
+    console.info('[callGemini] Model ' + modelName + ' failed. Switching to next model if available.');
+  } // Fin boucle Models
+
+  console.warn('[callGemini] All models exhausted', lastError);
   return { ok: false, reason: 'API_ERROR' };
 }
 
