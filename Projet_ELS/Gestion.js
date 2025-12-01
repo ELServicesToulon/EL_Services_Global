@@ -887,6 +887,8 @@ function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, e
     const valeurRemiseActuelle = (indices["Valeur Remise Appliqu�e"] !== undefined && indices["Valeur Remise Appliqu�e"] !== -1) ? Number(ligneDonnees[indices["Valeur Remise Appliqu�e"]]) || 0 : 0;
     const tourneeOfferteActuelle = (indices["Tournée Offerte Appliqu�e"] !== undefined && indices["Tournée Offerte Appliqu�e"] !== -1) ? ligneDonnees[indices["Tournée Offerte Appliqu�e"]] === true : false;
     const noteActuelle = (indices["Note Interne"] !== undefined && indices["Note Interne"] !== -1) ? String(ligneDonnees[indices["Note Interne"]] || '').trim() : '';
+    const noteFinale = noteOption !== null ? noteOption : noteActuelle;
+    const noteModifiee = noteOption !== null && noteOption !== noteActuelle;
 
     let typeRemiseFinal = typeRemiseActuel;
     let valeurRemiseFinal = valeurRemiseActuelle;
