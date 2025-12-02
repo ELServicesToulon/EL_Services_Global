@@ -117,6 +117,7 @@ function sauvegarderNote(noteData) {
         'Tournée ID',
         'Heure Note',
         'Texte',
+        'Arrêt',
         'Latitude',
         'Longitude',
         'Précision (m)',
@@ -132,6 +133,7 @@ function sauvegarderNote(noteData) {
       noteData.tourneeId,
       heureNote,
       noteData.texte,
+      noteData.stopNumber || '',
       noteData.latitude || '',
       noteData.longitude || '',
       noteData.precision || '',
@@ -220,10 +222,11 @@ function obtenirNotesTournee(tourneeId) {
           timestamp: data[i][0],
           heure: data[i][2],
           texte: data[i][3],
-          latitude: data[i][4],
-          longitude: data[i][5],
-          precision: data[i][6],
-          adresse: data[i][7]
+          stopNumber: data[i][4] || null,
+          latitude: data[i][5],
+          longitude: data[i][6],
+          precision: data[i][7],
+          adresse: data[i][8]
         });
       }
     }
