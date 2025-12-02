@@ -583,52 +583,70 @@
   // =================================================================
 
   function ouvrirPanelNotes(tournee) {
-    app.currentTournee = tournee;
+  app.currentTournee = tournee;
 
-    const panel = document.getElementById('notes-panel');
-    const notesInfo = document.getElementById('notes-info');
-    const notesTitle = document.getElementById('notes-title');
-    const noteInput = document.getElementById('note-input');
+  const panel = document.getElementById('notes-panel');
+  const notesInfo = document.getElementById('notes-info');
+  const notesTitle = document.getElementById('notes-title');
+  const noteInput = document.getElementById('note-input');
+  const noteStop = document.getElementById('note-stop');
 
-    if (notesTitle) {
-      notesTitle.textContent = 'Notes - ' + tournee.client;
-    }
+  if (notesTitle) {
+    notesTitle.textContent = 'Notes - ' + tournee.client;
+  }
 
-    if (notesInfo) {
-      notesInfo.innerHTML = `
-        <div><strong>${tournee.client}</strong></div>
-        <div>${tournee.adresse}</div>
-        <div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-          ${tournee.heure} • ${tournee.totalStops} arrêt(s)
-        </div>
-      `;
-    }
+  if (notesInfo) {
+    notesInfo.innerHTML = `
+      <div><strong>${tournee.client}</strong></div>
+      <div>${tournee.adresse}</div>
+      <div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+        ${tournee.heure} • ${tournee.totalStops} arret(s)
+      </div>
+    `;
+  }
 
-    // Charger le brouillon si disponible
-    const brouillon = localStorage.getItem('note_brouillon_' + tournee.id);
-    if (brouillon && noteInput) {
-      noteInput.value = brouillon;
-    } else if (noteInput) {
-      noteInput.value = '';
-    }
-
-    // Charger l'historique des notes
-    chargerHistoriqueNotes(tournee.id);
-
-    if (panel) {
-      panel.classList.remove('hidden');
-      panel.classList.add('active');
-    }
-
-    // Focus sur le textarea
-    if (noteInput) {
-      setTimeout(function() {
-        noteInput.focus();
-      }, 300);
+  if (noteStop) {
+    noteStop.innerHTML = '';
+    const total = tournee.totalStops || 1;
+    for (let i = 1; i <= total; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = 'Arret ' + i;
+      noteStop.appendChild(option);
     }
   }
 
-  function fermerPanelNotes() {
+  const brouillon = localStorage.getItem('note_brouillon_' + tournee.id);
+  if (brouillon && noteInput) {
+    noteInput.value = brouillon;
+  } else if (noteInput) {
+    noteInput.value = '';
+  }
+
+  chargerHistoriqueNotes(tournee.id);
+
+  if (panel) {
+    panel.classList.remove('hidden');
+    panel.classList.add('active');
+  }
+
+  if (noteInput) {
+    setTimeout(function() {
+      noteInput.focus();
+    }, 300);
+  }
+}
+
+function fermerPanelNotes() {
+  const panel = document.getElementById('notes-panel');
+  if (panel) {
+    panel.classList.remove('active');
+    setTimeout(function() {
+      panel.classList.add('hidden');
+    }, 300);
+  }
+  app.currentTournee = null;
+}() {
     const panel = document.getElementById('notes-panel');
     if (panel) {
       panel.classList.remove('active');
@@ -668,9 +686,13 @@
     const maintenant = new Date();
     const heure = maintenant.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
+    const noteStopSelect = document.getElementById('note-stop');
+    const stopNumber = noteStopSelect ? parseInt(noteStopSelect.value || '1', 10) : null;
+
     const noteData = {
       tourneeId: app.currentTournee.id,
       texte: `[${heure}] ${texte}`,
+      stopNumber: isNaN(stopNumber) ? null : stopNumber,
       latitude: app.gpsPosition ? app.gpsPosition.latitude : null,
       longitude: app.gpsPosition ? app.gpsPosition.longitude : null,
       precision: app.gpsPosition ? app.gpsPosition.precision : null,
@@ -762,7 +784,8 @@
 
       const time = document.createElement('div');
       time.className = 'history-time';
-      time.textContent = note.heure + ' - ' + (note.adresse || 'Position N/A');
+      const stopLabel = note.stopNumber ? ` | Arret ${note.stopNumber}` : '';
+      time.textContent = note.heure + stopLabel + ' - ' + (note.adresse || 'Position N/A');
 
       const text = document.createElement('div');
       text.className = 'history-text';
@@ -877,6 +900,10 @@
 
 })();
 </script>
+
+
+
+
 
 
 
