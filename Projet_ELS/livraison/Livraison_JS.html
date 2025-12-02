@@ -49,14 +49,17 @@
   //                    INTERFACE UTILISATEUR
   // =================================================================
 
-  function initUI() {
+      function initUI() {
     lierBouton('btn-close-notes', fermerPanelNotes);
     lierBouton('btn-save-note', sauvegarderNote);
     lierBouton('btn-quick-delivered', function() {
-      ajouterNoteRapide('? Livraison effectuée');
+      ajouterNoteRapide('Livraison effectuee');
     });
     lierBouton('btn-quick-absent', function() {
-      ajouterNoteRapide('? Client absent - Dépôt en lieu sûr');
+      ajouterNoteRapide('Client absent - Depot en lieu sur');
+    });
+    lierBouton('btn-quick-tessie', function() {
+      ajouterNoteRapide('Stop Tessie (RAS)', 'tessie');
     });
 
     initHeaderInteractions();
@@ -78,35 +81,7 @@
       });
     }
   }
-
-  function lierBouton(elementOrId, handler) {
-    const element = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
-    if (!element || typeof handler !== 'function') {
-      return;
-    }
-    element.addEventListener('click', handler);
-    element.dataset.actionBound = 'true';
-  }
-
-  function rendreElementInteractif(element, handler) {
-    if (!element || typeof handler !== 'function') {
-      return;
-    }
-
-    element.addEventListener('click', function(event) {
-      event.preventDefault();
-      handler(event);
-    });
-
-    element.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        handler(event);
-      }
-    });
-  }
-
-  function initHeaderInteractions() {
+function initHeaderInteractions() {
     const gpsStatus = document.getElementById('gps-status');
     rendreElementInteractif(gpsStatus, function() {
       rafraichirPosition(true);
@@ -671,18 +646,18 @@ function fermerPanelNotes() {
       return;
     }
 
-    ajouterNote(texte);
+    ajouterNote(texte, 'manuelle');
   }
 
-  function ajouterNoteRapide(texte) {
+  function ajouterNoteRapide(texte, source) {
     if (!app.currentTournee) {
       afficherToast('Aucune tournée sélectionnée', 'error');
       return;
     }
-    ajouterNote(texte);
+    ajouterNote(texte, source);
   }
 
-  function ajouterNote(texte) {
+  function ajouterNote(texte, source) {
     const maintenant = new Date();
     const heure = maintenant.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -699,7 +674,8 @@ function fermerPanelNotes() {
       adresseApprox: app.gpsPosition ?
         `${app.gpsPosition.latitude.toFixed(6)}, ${app.gpsPosition.longitude.toFixed(6)}` :
         'Position non disponible',
-      timestamp: maintenant.toISOString()
+      timestamp: maintenant.toISOString(),
+      source: source || 'app'
     };
 
     // Ajouter à la queue offline
@@ -785,7 +761,8 @@ function fermerPanelNotes() {
       const time = document.createElement('div');
       time.className = 'history-time';
       const stopLabel = note.stopNumber ? ` | Arret ${note.stopNumber}` : '';
-      time.textContent = note.heure + stopLabel + ' - ' + (note.adresse || 'Position N/A');
+      const sourceLabel = note.source ? ` [${note.source}]` : '';
+      time.textContent = note.heure + stopLabel + sourceLabel + ' - ' + (note.adresse || 'Position N/A');
 
       const text = document.createElement('div');
       text.className = 'history-text';
@@ -900,6 +877,11 @@ function fermerPanelNotes() {
 
 })();
 </script>
+
+
+
+
+
 
 
 
