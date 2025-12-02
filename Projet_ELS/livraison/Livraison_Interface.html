@@ -32,20 +32,20 @@
   <!-- Header -->
   <header id="app-header">
     <div class="header-content">
-      <h1>🚚 ELS Livreur</h1>
+      <h1>­ƒÜÜ ELS Livreur</h1>
       <div class="header-status">
         <span id="gps-status" class="status-badge" title="Statut GPS" role="button" tabindex="0">
-          <span class="status-icon">📍</span>
+          <span class="status-icon">­ƒôì</span>
           <span class="status-text">GPS...</span>
         </span>
         <span id="sync-status" class="status-badge" title="Synchronisation" role="button" tabindex="0">
-          <span class="status-icon">☁️</span>
+          <span class="status-icon">Ôÿü´©Å</span>
           <span class="status-text">Sync</span>
         </span>
       </div>
     </div>
     <div id="current-location" class="location-bar" role="button" tabindex="0" title="Ouvrir la position dans Maps">
-      <span class="location-icon">📌</span>
+      <span class="location-icon">­ƒôî</span>
       <span id="location-text">Localisation en cours...</span>
     </div>
   </header>
@@ -57,36 +57,36 @@
       <h2 id="current-date">Chargement...</h2>
     </section>
 
-    <!-- Liste des tournées -->
+    <!-- Liste des tourn├®es -->
     <section id="tournees-section" class="tournees-section">
       <div id="tournees-list" class="tournees-list">
         <!-- Chargement initial -->
         <div class="loading-placeholder">
           <div class="spinner"></div>
-          <p>Chargement des tournées...</p>
+          <p>Chargement des tourn├®es...</p>
         </div>
       </div>
     </section>
 
-    <!-- Zone de notes flottante (cachée par défaut) -->
+    <!-- Zone de notes flottante (cach├®e par d├®faut) -->
     <aside id="notes-panel" class="notes-panel hidden">
       <div class="notes-header">
         <h3 id="notes-title">Notes de livraison</h3>
-        <button id="btn-close-notes" type="button" class="btn-icon" aria-label="Fermer">✕</button>
+        <button id="btn-close-notes" type="button" class="btn-icon" aria-label="Fermer">Ô£ò</button>
       </div>
 
       <div class="notes-content">
-        <!-- Info tournée -->
+        <!-- Info tourn├®e -->
         <div id="notes-info" class="notes-info"></div>
 
         <div class="note-stop-selector">
-          <label for="note-stop" class="selector-label">Arrêt concerné</label>
+          <label for="note-stop" class="selector-label">Arr├¬t concern├®</label>
           <select id="note-stop" class="selector-input"></select>
         </div>
 
-        <!-- Géolocalisation actuelle -->
+        <!-- G├®olocalisation actuelle -->
         <div class="gps-info">
-          <span class="gps-icon">📍</span>
+          <span class="gps-icon">­ƒôì</span>
           <span id="current-gps" class="gps-text">Position actuelle...</span>
         </div>
 
@@ -96,13 +96,16 @@
           <textarea
             id="note-input"
             class="note-textarea"
-            placeholder="Tapez votre note ici... (ex: Livraison effectuée, client absent, sonnette cassée...)"
+            placeholder="Tapez votre note ici... (ex: Livraison effectu├®e, client absent, sonnette cass├®e...)"
             rows="4"
           ></textarea>
 
-          <div class="note-actions">
+                    <div class="note-actions">
             <button id="btn-save-note" type="button" class="btn btn-primary btn-large">
               💾 Sauvegarder la note
+            </button>
+            <button id="btn-quick-tessie" type="button" class="btn btn-secondary">
+              🚗 Stop Tessie (RAS)
             </button>
             <button id="btn-quick-delivered" type="button" class="btn btn-success">
               ✅ Livré
@@ -110,14 +113,13 @@
             <button id="btn-quick-absent" type="button" class="btn btn-warning">
               ❌ Absent
             </button>
-          </div>
-        </div>
+          </div>        </div>
 
         <!-- Historique des notes -->
         <div class="notes-history">
           <h4>Historique</h4>
           <div id="notes-history-list" class="history-list">
-            <p class="text-muted">Aucune note pour cette tournée</p>
+            <p class="text-muted">Aucune note pour cette tourn├®e</p>
           </div>
         </div>
       </div>
@@ -133,7 +135,7 @@
       </div>
       <div class="stat-item" data-stat-filter="termine" role="button" tabindex="0" aria-pressed="false">
         <span class="stat-value" id="stat-termine">-</span>
-        <span class="stat-label">Terminées</span>
+        <span class="stat-label">Termin├®es</span>
       </div>
       <div class="stat-item" data-stat-filter="en_cours" role="button" tabindex="0" aria-pressed="false">
         <span class="stat-value" id="stat-en-cours">-</span>
@@ -149,3 +151,5 @@
   <?!= includeLivraison('Livraison_JS'); ?>
 </body>
 </html>
+
+

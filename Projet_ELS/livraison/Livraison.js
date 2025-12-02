@@ -121,7 +121,8 @@ function sauvegarderNote(noteData) {
         'Latitude',
         'Longitude',
         'Précision (m)',
-        'Adresse approx.'
+        'Adresse approx.',
+        'Source'
       ]);
     }
 
@@ -137,7 +138,8 @@ function sauvegarderNote(noteData) {
       noteData.latitude || '',
       noteData.longitude || '',
       noteData.precision || '',
-      noteData.adresseApprox || ''
+      noteData.adresseApprox || '',
+      noteData.source || ''
     ]);
 
     return {
@@ -226,7 +228,8 @@ function obtenirNotesTournee(tourneeId) {
           latitude: data[i][5],
           longitude: data[i][6],
           precision: data[i][7],
-          adresse: data[i][8]
+          adresse: data[i][8],
+          source: data[i][9] || ''
         });
       }
     }
