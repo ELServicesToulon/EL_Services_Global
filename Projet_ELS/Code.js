@@ -247,6 +247,10 @@ function getPageHandler_(page) {
     case 'livraison':
     case 'livreur':
       return handleLivraisonPage_;
+    case 'tesla':
+    case 'tesla_livreur':
+    case 'tesla_juniper':
+      return handleTeslaLivreurPage_;
     case 'gestion':
       return handleGestionPage_;
     case 'debug':
@@ -287,6 +291,13 @@ function handleLivraisonPage_(e) {
     return renderLivraisonInterface(e);
   }
   return creerReponseHtml('Indisponible', 'Le module Livraison est désactivé.');
+}
+
+function handleTeslaLivreurPage_(e) {
+  var template = HtmlService.createTemplateFromFile('Tesla_Livreur_Interface');
+  template.pageTitle = 'Tesla Junyper - ELS';
+  var output = template.evaluate().setTitle('Tesla Junyper - ELS');
+  return output.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function handleGestionPage_(e, params) {

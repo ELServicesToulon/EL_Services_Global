@@ -194,3 +194,73 @@ function logTeslaHistory() {
     Logger.log('Erreur dans logTeslaHistory : ' + e.toString());
   }
 }
+
+/**
+ * Retourne un etat simplifie pour l'interface chauffeur (Tesla Junyper + mobile).
+ * @param {boolean=} forceWake Force un reveil Tessie si true.
+ * @return {Object} Payload pour google.script.run.
+ */
+function getTeslaStatusForUI(forceWake) {
+  try {
+    var config = getTeslaConfig_();
+    if (!config.VIN || !config.TOKEN) {
+      return {
+        success: false,
+        error: 'Configuration Tesla manquante (VIN_TESLA_JUNIPER_2025 ou TOKEN_TESSIE).'
+      };
+    }
+
+    var data = getTeslaData(forceWake === true);
+    if (!data) {
+      return { success: false, error: 'Impossible de recuperer les donnees Tesla via Tessie.' };
+    }
+
+    var status = {
+      batteryLevel: data.batteryLevel,
+      rangeKm: data.rangeKm,
+      chargingState: data.chargingState,
+      isPlugged: data.isPlugged,
+      minutesToFull: data.minutesToFull,
+      timestamp: (data.timestamp instanceof Date) ? data.timestamp.toISOString() : data.timestamp
+    };
+
+    return {
+      success: true,
+      status: status,
+      advice: buildTeslaAdvice_(status, config.SEUIL_ALERTE),
+      threshold: config.SEUIL_ALERTE,
+      source: forceWake ? 'forced_refresh' : 'cached_refresh'
+    };
+  } catch (err) {
+    Logger.log('Erreur getTeslaStatusForUI : ' + err.toString());
+    return { success: false, error: err.message || 'Erreur inconnue' };
+  }
+}
+
+/**
+ * Ajoute un message conseil pour le chauffeur selon le niveau de charge.
+ * @param {{batteryLevel:number, rangeKm:number, chargingState:string, isPlugged:boolean, minutesToFull:number}|null} status
+ * @param {number} threshold
+ * @return {string}
+ */
+function buildTeslaAdvice_(status, threshold) {
+  if (!status) return '';
+
+  if (status.chargingState === 'Charging') {
+    if (status.minutesToFull && status.minutesToFull > 0) {
+      var hours = Math.round(status.minutesToFull / 60);
+      return 'Charge en cours - plein estime dans ~' + hours + 'h';
+    }
+    return 'Charge en cours - verifier la prise avant de partir';
+  }
+
+  if (status.batteryLevel <= threshold) {
+    return 'Batterie basse (' + status.batteryLevel + '%). Brancher avant le prochain depart.';
+  }
+
+  if (status.rangeKm && status.rangeKm < 80) {
+    return 'Autonomie reduite (' + status.rangeKm + ' km). Prevoir une charge rapide.';
+  }
+
+  return 'Vehicule pret pour la tournee.';
+}
