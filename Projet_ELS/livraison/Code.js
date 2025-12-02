@@ -77,6 +77,7 @@ function getLivraisonConfig() {
   return {
     spreadsheetId: props.getProperty('SPREADSHEET_ID') || '',
     sheetNameTournees: props.getProperty('SHEET_TOURNEES') || 'Tournées',
-    sheetNameNotes: props.getProperty('SHEET_NOTES') || 'Notes_Livraison'
+    sheetNameNotes: props.getProperty('SHEET_NOTES') || 'Notes_Livraison',
+    calendarLivraisonId: props.getProperty('CALENDRIER_LIVRAISON_ID') || props.getProperty('ID_CALENDRIER') || ''
   };
 }
