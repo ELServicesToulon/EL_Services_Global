@@ -235,3 +235,110 @@ function obtenirNotesTournee(tourneeId) {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Synchronise les tournées du jour avec le calendrier de livraison (Google Calendar).
+ * Crée ou met à jour un événement par tournée, basé sur l'ID de tournée.
+ * @param {boolean=} forceWake Non utilisé ici, conservé pour parité d'API éventuelle.
+ * @returns {{success:boolean, created:number, updated:number, errors?:Array<string>}}
+ */
+function synchroniserCalendrierLivraison(forceWake) {
+  try {
+    const config = getLivraisonConfig();
+    if (!config.calendarLivraisonId) {
+      return { success: false, error: 'CALENDRIER_LIVRAISON_ID manquant dans les ScriptProperties.' };
+    }
+
+    const res = obtenirTourneeDuJour();
+    if (!res || res.success !== true) {
+      return { success: false, error: res && res.error ? res.error : 'Impossible de charger les tournées du jour.' };
+    }
+
+    const tournees = res.tournees || [];
+    if (tournees.length === 0) {
+      return { success: true, created: 0, updated: 0, message: 'Aucune tournée à synchroniser.' };
+    }
+
+    const dateJour = res.date || new Date().toISOString().split('T')[0];
+    let created = 0;
+    let updated = 0;
+    const errors = [];
+
+    tournees.forEach(tournee => {
+      try {
+        const eventId = construireEventIdCalendrier_(tournee.id || '');
+        const start = construireDateHeure_(dateJour, tournee.heure || '08:00');
+        if (!start) {
+          errors.push('Heure invalide pour ' + tournee.id);
+          return;
+        }
+        const end = new Date(start.getTime() + 45 * 60000); // durée par défaut 45 min
+
+        const timeZone = Session.getScriptTimeZone ? Session.getScriptTimeZone() : 'Europe/Paris';
+        const resource = {
+          summary: 'Livraison - ' + (tournee.client || 'Client'),
+          location: tournee.adresse || '',
+          description: 'Tournée ELS\nStatut: ' + (tournee.statut || 'a_venir') + '\nArrêts: ' + (tournee.totalStops || 0),
+          start: { dateTime: start.toISOString(), timeZone: timeZone },
+          end: { dateTime: end.toISOString(), timeZone: timeZone },
+          colorId: couleurPourStatut_(tournee.statut),
+          reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 15 }] }
+        };
+
+        try {
+          Calendar.Events.update(resource, config.calendarLivraisonId, eventId);
+          updated++;
+        } catch (updateErr) {
+          if (String(updateErr).indexOf('Not Found') !== -1) {
+            Calendar.Events.insert(resource, config.calendarLivraisonId, { eventId: eventId });
+            created++;
+          } else {
+            throw updateErr;
+          }
+        }
+      } catch (errTournee) {
+        errors.push('Tournee ' + (tournee.id || '?') + ': ' + errTournee.toString());
+      }
+    });
+
+    return {
+      success: errors.length === 0,
+      created: created,
+      updated: updated,
+      errors: errors
+    };
+  } catch (err) {
+    Logger.log('Erreur synchroniserCalendrierLivraison: ' + err);
+    return { success: false, error: err.message || 'Erreur inconnue' };
+  }
+}
+
+function construireEventIdCalendrier_(tourneeId) {
+  const base = String(tourneeId || 'tournee').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  const sanitized = base && base.length >= 4 ? base : ('tournee-' + new Date().getTime());
+  return 'liv-' + sanitized;
+}
+
+function construireDateHeure_(dateISO, heureStr) {
+  if (!dateISO || !heureStr) return null;
+  const safeHeure = String(heureStr).trim();
+  const hh = safeHeure.split(':')[0] || '08';
+  const mm = safeHeure.split(':')[1] || '00';
+  const iso = dateISO + 'T' + hh.padStart(2, '0') + ':' + mm.padStart(2, '0') + ':00';
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function couleurPourStatut_(statut) {
+  // Palette Google Calendar : https://developers.google.com/calendar/api/v3/reference/colors
+  switch (statut) {
+    case 'en_cours':
+      return '5'; // jaune
+    case 'termine':
+      return '10'; // vert
+    case 'probleme':
+      return '11'; // rouge
+    default:
+      return '9'; // bleu par défaut
+  }
+}

@@ -309,6 +309,7 @@
     afficherToast('Synchronisation manuelle en cours...', 'info');
     synchroniserOfflineQueue();
     chargerTournees();
+    synchroniserCalendrierLivraison();
   }
 
   function ouvrirPositionDansMaps() {
@@ -320,6 +321,46 @@
       afficherToast('Position inconnue, tentative de rafraîchissement...', 'warning');
       rafraichirPosition(true);
     }
+  }
+
+  function synchroniserCalendrierLivraison() {
+    const syncStatus = document.getElementById('sync-status');
+    if (syncStatus) {
+      syncStatus.classList.add('active');
+      syncStatus.querySelector('.status-text').textContent = 'Sync Cal.';
+    }
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (!res || res.success === false) {
+          afficherToast(res && res.error ? res.error : 'Erreur synchro calendrier', 'error');
+          if (syncStatus) {
+            syncStatus.classList.add('error');
+            syncStatus.classList.remove('active');
+            syncStatus.querySelector('.status-text').textContent = 'Sync KO';
+          }
+          return;
+        }
+
+        const created = res.created || 0;
+        const updated = res.updated || 0;
+        const msg = `Calendrier livré: ${created} créé(s), ${updated} mis à jour`;
+        afficherToast(msg, 'success');
+        if (syncStatus) {
+          syncStatus.classList.add('active');
+          syncStatus.classList.remove('error');
+          syncStatus.querySelector('.status-text').textContent = 'Sync OK';
+        }
+      })
+      .withFailureHandler(function(err) {
+        afficherToast('Erreur synchro calendrier: ' + err.message, 'error');
+        if (syncStatus) {
+          syncStatus.classList.add('error');
+          syncStatus.classList.remove('active');
+          syncStatus.querySelector('.status-text').textContent = 'Sync KO';
+        }
+      })
+      .synchroniserCalendrierLivraison();
   }
 
 
