@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <title><?= appName ?></title>
+
+  <!-- CSS inline pour chargement ultra-rapide -->
+  <?!= includeLivraison('Livraison_CSS'); ?>
+  <script>
+    (function ensureMetaTags() {
+      var metaTags = [
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        { name: 'theme-color', content: '#1a1a2e' }
+      ];
+      metaTags.forEach(function(tag) {
+        var existing = document.querySelector('meta[name="' + tag.name + '"]');
+        if (!existing) {
+          existing = document.createElement('meta');
+          existing.setAttribute('name', tag.name);
+          document.head.appendChild(existing);
+        }
+        existing.setAttribute('content', tag.content);
+      });
+    })();
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header id="app-header">
+    <div class="header-content">
+      <h1>­ƒÜÜ ELS Livreur</h1>
+      <div class="header-status">
+        <span id="gps-status" class="status-badge" title="Statut GPS" role="button" tabindex="0">
+          <span class="status-icon">­ƒôì</span>
+          <span class="status-text">GPS...</span>
+        </span>
+        <span id="sync-status" class="status-badge" title="Synchronisation" role="button" tabindex="0">
+          <span class="status-icon">Ôÿü´©Å</span>
+          <span class="status-text">Sync</span>
+        </span>
+      </div>
+    </div>
+    <div id="current-location" class="location-bar" role="button" tabindex="0" title="Ouvrir la position dans Maps">
+      <span class="location-icon">­ƒôî</span>
+      <span id="location-text">Localisation en cours...</span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="app-main">
+    <!-- Date du jour -->
+    <section class="date-section">
+      <h2 id="current-date">Chargement...</h2>
+    </section>
+
+    <!-- Liste des tourn├®es -->
+    <section id="tournees-section" class="tournees-section">
+      <div id="tournees-list" class="tournees-list">
+        <!-- Chargement initial -->
+        <div class="loading-placeholder">
+          <div class="spinner"></div>
+          <p>Chargement des tourn├®es...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Zone de notes flottante (cach├®e par d├®faut) -->
+    <aside id="notes-panel" class="notes-panel hidden">
+      <div class="notes-header">
+        <h3 id="notes-title">Notes de livraison</h3>
+        <button id="btn-close-notes" type="button" class="btn-icon" aria-label="Fermer">Ô£ò</button>
+      </div>
+
+      <div class="notes-content">
+        <!-- Info tourn├®e -->
+        <div id="notes-info" class="notes-info"></div>
+
+        <div class="note-stop-selector">
+          <label for="note-stop" class="selector-label">Arr├¬t concern├®</label>
+          <select id="note-stop" class="selector-input"></select>
+        </div>
+
+        <!-- G├®olocalisation actuelle -->
+        <div class="gps-info">
+          <span class="gps-icon">­ƒôì</span>
+          <span id="current-gps" class="gps-text">Position actuelle...</span>
+        </div>
+
+        <!-- Zone de saisie -->
+        <div class="note-input-group">
+          <label for="note-input" class="sr-only">Votre note</label>
+          <textarea
+            id="note-input"
+            class="note-textarea"
+            placeholder="Tapez votre note ici... (ex: Livraison effectu├®e, client absent, sonnette cass├®e...)"
+            rows="4"
+          ></textarea>
+
+                    <div class="note-actions">
+            <button id="btn-save-note" type="button" class="btn btn-primary btn-large">
+              💾 Sauvegarder la note
+            </button>
+            <button id="btn-quick-tessie" type="button" class="btn btn-secondary">
+              🚗 Stop Tessie (RAS)
+            </button>
+            <button id="btn-quick-delivered" type="button" class="btn btn-success">
+              ✅ Livré
+            </button>
+            <button id="btn-quick-absent" type="button" class="btn btn-warning">
+              ❌ Absent
+            </button>
+          </div>        </div>
+
+        <!-- Historique des notes -->
+        <div class="notes-history">
+          <h4>Historique</h4>
+          <div id="notes-history-list" class="history-list">
+            <p class="text-muted">Aucune note pour cette tourn├®e</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Footer avec stats -->
+  <footer id="app-footer">
+    <div class="stats">
+      <div class="stat-item active" data-stat-filter="total" role="button" tabindex="0" aria-pressed="true">
+        <span class="stat-value" id="stat-total">-</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-item" data-stat-filter="termine" role="button" tabindex="0" aria-pressed="false">
+        <span class="stat-value" id="stat-termine">-</span>
+        <span class="stat-label">Termin├®es</span>
+      </div>
+      <div class="stat-item" data-stat-filter="en_cours" role="button" tabindex="0" aria-pressed="false">
+        <span class="stat-value" id="stat-en-cours">-</span>
+        <span class="stat-label">En cours</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- JavaScript inline pour chargement ultra-rapide -->
+  <?!= includeLivraison('Livraison_JS'); ?>
+</body>
+</html>
+
+
