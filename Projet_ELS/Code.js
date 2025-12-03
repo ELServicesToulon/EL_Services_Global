@@ -577,6 +577,19 @@ function include(filename) {
   }
 }
 
+function includeLivraison(filename) {
+  try {
+    return HtmlService.createTemplateFromFile(filename).evaluate().getContent();
+  } catch (error) {
+    Logger.log('Erreur includeLivraison(' + filename + '): ' + error.toString());
+    try {
+      return include(filename);
+    } catch (_err) {
+      return '';
+    }
+  }
+}
+
 function getScriptUrl() {
   try {
     return ScriptApp.getService().getUrl();
