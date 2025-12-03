@@ -243,3 +243,21 @@ var GooglePlacesService = (function() {
     enrichirDetailsManquants: enrichirDetailsManquants
   };
 })();
+
+/**
+ * Point d'entree Apps Script : importe des etablissements via Google Places.
+ * @param {string} query
+ * @param {string} type
+ * @returns {Object}
+ */
+function importerEtablissementsPlaces(query, type) {
+  return GooglePlacesService.importerEtablissements(query, type);
+}
+
+/**
+ * Point d'entree Apps Script : enrichit les telephones manquants depuis Place Details.
+ * @returns {Object}
+ */
+function enrichirTelephonesPlaces() {
+  return GooglePlacesService.enrichirDetailsManquants();
+}
