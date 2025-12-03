@@ -35,6 +35,10 @@ const SHEETS_REQUIRED = (function() {
       headers: ['Email','Raison Sociale','Adresse','SIRET','Type de Remise','Valeur Remise','Nombre Tournées Offertes','Resident','Client ID','Code Postal','Téléphone']
     },
     {
+      name: (typeof SHEET_ETABLISSEMENTS !== 'undefined') ? SHEET_ETABLISSEMENTS : 'Base_Etablissements',
+      headers: [COLONNE_TYPE_ETAB, COLONNE_NOM_ETAB, COLONNE_ADRESSE_ETAB, COLONNE_CODE_POSTAL_ETAB, COLONNE_VILLE_ETAB, COLONNE_CONTACT_ETAB, COLONNE_TELEPHONE_ETAB, COLONNE_EMAIL_ETAB, COLONNE_JOURS_ETAB, COLONNE_PLAGE_ETAB, COLONNE_SOURCE_ETAB, COLONNE_STATUT_ETAB, COLONNE_DERNIERE_MAJ_ETAB, COLONNE_NOTE_ETAB]
+    },
+    {
       name: (typeof SHEET_PARAMETRES !== 'undefined') ? SHEET_PARAMETRES : 'Paramètres',
       headers: ['Clé','Valeur']
     },

@@ -92,6 +92,8 @@ const SHEET_FACTURATION = 'Facturation';
 const SHEET_CLIENTS = 'Clients';
 /** @const {string} Feuille listant les codes postaux autorisés pour les retraits. */
 const SHEET_CODES_POSTAUX_RETRAIT = 'Codes_Postaux_Retrait';
+/** @const {string} Feuille recensant les etablissements desservis. */
+const SHEET_ETABLISSEMENTS = 'Base_Etablissements';
 /** @const {string} Feuille stockant les paramètres globaux. */
 const SHEET_PARAMETRES = 'Paramètres';
 /** @const {string} Feuille de journalisation pour l'administration. */
@@ -465,6 +467,23 @@ const COLONNE_RESIDENT_CLIENT = "Resident";
 const COLONNE_CODE_POSTAL_CLIENT = "Code Postal";
 /** @const {string} Colonne stockant le num&eacute;ro de t&eacute;l&eacute;phone principal de l'officine cliente. */
 const COLONNE_TELEPHONE_CLIENT = "Téléphone";
+
+// --- Base etablissements desservis ---
+const ETABLISSEMENT_TYPES = Object.freeze(['Pharmacie', 'EHPAD', 'Residence Senior', 'Foyer de Vie']);
+const COLONNE_TYPE_ETAB = 'Type';
+const COLONNE_NOM_ETAB = 'Nom';
+const COLONNE_ADRESSE_ETAB = 'Adresse';
+const COLONNE_CODE_POSTAL_ETAB = 'Code Postal';
+const COLONNE_VILLE_ETAB = 'Ville';
+const COLONNE_CONTACT_ETAB = 'Contact';
+const COLONNE_TELEPHONE_ETAB = 'Telephone';
+const COLONNE_EMAIL_ETAB = 'Email';
+const COLONNE_JOURS_ETAB = 'Jours Souhaites';
+const COLONNE_PLAGE_ETAB = 'Plage Horaire';
+const COLONNE_SOURCE_ETAB = 'Source';
+const COLONNE_NOTE_ETAB = 'Notes';
+const COLONNE_STATUT_ETAB = 'Actif';
+const COLONNE_DERNIERE_MAJ_ETAB = 'Derniere_MAJ';
 
 
 // =================================================================
