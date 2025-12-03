@@ -1,268 +1,259 @@
-// =================================================================
-//                        SERVICE GOOGLE PLACES
-// =================================================================
-// Description: Alimentation de l'onglet Base_Etablissements via
-//              l'API Google Places (Text Search + Details).
-// =================================================================
+/**
+ * Service Google Places - Alimente l'onglet Base_Etablissements.
+ * Colonnes cibles (ordre logique) :
+ * Type, Nom, Adresse, Code Postal, Ville, Contact, Telephone, Email,
+ * Jours Souhaites, Plage Horaire, Source, Actif, Derniere_MAJ, Notes, PlaceID (optionnel).
+ */
 
-var GooglePlacesService = (function() {
-  /**
-   * Colonnes attendues dans la base etablissements.
-   * @returns {string[]}
-   */
-  function getHeaders_() {
-    return [
-      COLONNE_TYPE_ETAB,
-      COLONNE_NOM_ETAB,
-      COLONNE_ADRESSE_ETAB,
-      COLONNE_CODE_POSTAL_ETAB,
-      COLONNE_VILLE_ETAB,
-      COLONNE_CONTACT_ETAB,
-      COLONNE_TELEPHONE_ETAB,
-      COLONNE_EMAIL_ETAB,
-      COLONNE_JOURS_ETAB,
-      COLONNE_PLAGE_ETAB,
-      COLONNE_SOURCE_ETAB,
-      COLONNE_STATUT_ETAB,
-      COLONNE_DERNIERE_MAJ_ETAB,
-      COLONNE_NOTE_ETAB,
-      'PlaceID'
-    ];
-  }
-
-  /**
-   * Ouvre la feuille Base_Etablissements et s'assure de la presence des en-tetes.
-   * @returns {{sheet: GoogleAppsScript.Spreadsheet.Sheet, indices: Object}}
-   */
-  function openSheet_() {
-    const headers = getHeaders_();
-    const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
-    const sheet = typeof ensureEtablissementsSheet_ === 'function'
-      ? ensureEtablissementsSheet_(ss)
-      : (function() {
-          let sh = ss.getSheetByName(SHEET_ETABLISSEMENTS);
-          if (!sh) {
-            sh = ss.insertSheet(SHEET_ETABLISSEMENTS);
-            sh.getRange(1, 1, 1, headers.length).setValues([headers]);
-            sh.setFrozenRows(1);
-          } else {
-            const row1 = sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), headers.length))
-              .getValues()[0]
-              .map(function(v){ return String(v || '').trim(); });
-            const missing = headers.filter(function(h){ return row1.indexOf(h) === -1; });
-            if (missing.length) {
-              sh.getRange(1, sh.getLastColumn() + 1, 1, missing.length).setValues([missing]);
-            }
-          }
-          return sh;
-        })();
-    const indices = obtenirIndicesEnTetes(sheet, headers);
-    return { sheet: sheet, indices: indices, headers: headers };
-  }
-
-  /**
-   * Parse une adresse formatee pour extraire code postal et ville.
-   * @param {string} formatted
-   * @returns {{codePostal:string, ville:string}}
-   */
-  function parseAdresse_(formatted) {
-    const res = { codePostal: '', ville: '' };
-    if (!formatted) return res;
-    const parts = String(formatted).split(',');
-    // Cherche un segment contenant le code postal
-    for (let i = parts.length - 1; i >= 0; i--) {
-      const segment = parts[i].trim();
-      const match = segment.match(/\b(\d{5})\b\s*(.+)?/);
-      if (match) {
-        res.codePostal = normaliserCodePostal(match[1]);
-        if (match[2]) {
-          res.ville = match[2].replace(/France/i, '').trim();
-        }
-        break;
-      }
-    }
-    // Si ville vide, tenter l'avant-dernier segment
-    if (!res.ville && parts.length >= 2) {
-      res.ville = parts[parts.length - 2].replace(/France/i, '').trim();
-    }
-    return res;
-  }
-
-  /**
-   * Construit la cle de deduplication Nom+CP.
-   */
-  function makeKey_(nom, codePostal) {
-    const cp = normaliserCodePostal(codePostal);
-    const name = String(nom || '').trim().toLowerCase();
-    return cp && name ? name + '::' + cp : '';
-  }
-
-  /**
-   * Appel API Text Search.
-   */
-  function callTextSearch_(query, apiKey) {
-    const url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' +
-      encodeURIComponent(query) +
-      '&key=' + encodeURIComponent(apiKey) +
-      '&language=fr';
-    const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    const status = resp.getResponseCode();
-    if (status !== 200) {
-      throw new Error('TextSearch HTTP ' + status + ' : ' + resp.getContentText());
-    }
-    const body = JSON.parse(resp.getContentText() || '{}');
-    if (body.status && body.status !== 'OK') {
-      throw new Error('TextSearch status ' + body.status + ' : ' + (body.error_message || ''));
-    }
-    return Array.isArray(body.results) ? body.results : [];
-  }
-
-  /**
-   * Appel API Details (telephone uniquement).
-   */
-  function callDetailsPhone_(placeId, apiKey) {
-    const url = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=' +
-      encodeURIComponent(placeId) +
-      '&fields=formatted_phone_number' +
-      '&language=fr' +
-      '&key=' + encodeURIComponent(apiKey);
-    const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    if (resp.getResponseCode() !== 200) {
-      throw new Error('Details HTTP ' + resp.getResponseCode());
-    }
-    const body = JSON.parse(resp.getContentText() || '{}');
-    if (body.status && body.status !== 'OK') {
-      throw new Error('Details status ' + body.status + ' : ' + (body.error_message || ''));
-    }
-    return body.result && body.result.formatted_phone_number ? String(body.result.formatted_phone_number) : '';
-  }
-
-  /**
-   * Ajoute les etablissements trouves si non existants (Nom+CP).
-   */
-  function importerEtablissements(query, type) {
-    try {
-      const cleanedQuery = String(query || '').trim();
-      if (!cleanedQuery) {
-        return { ok: false, reason: 'MISSING_QUERY' };
-      }
-      const typeNorm = normalizeEtablissementType_(type) || type || '';
-      const apiKey = getMapsApiKey();
-      const searchQuery = typeNorm ? (cleanedQuery + ' ' + typeNorm) : cleanedQuery;
-      const results = callTextSearch_(searchQuery, apiKey);
-      const opened = openSheet_();
-      const sheet = opened.sheet;
-      const indices = opened.indices;
-
-      const data = sheet.getDataRange().getValues();
-      const existing = new Set();
-      for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        const k = makeKey_(row[indices[COLONNE_NOM_ETAB]], row[indices[COLONNE_CODE_POSTAL_ETAB]]);
-        if (k) existing.add(k);
-      }
-
-      const rowsToAppend = [];
-      results.forEach(function(r) {
-        const nom = r && r.name ? String(r.name).trim() : '';
-        const adresse = r && r.formatted_address ? String(r.formatted_address).trim() : '';
-        if (!nom || !adresse) return;
-        const parsed = parseAdresse_(adresse);
-        if (!parsed.codePostal) return;
-        const key = makeKey_(nom, parsed.codePostal);
-        if (existing.has(key)) return;
-
-        rowsToAppend.push([
-          typeNorm || 'Pharmacie',
-          nom,
-          adresse,
-          parsed.codePostal,
-          parsed.ville || '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          'Google Places',
-          true,
-          new Date(),
-          '',
-          r.place_id || ''
-        ]);
-        existing.add(key);
-      });
-
-      if (rowsToAppend.length) {
-        sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAppend.length, getHeaders_().length)
-          .setValues(rowsToAppend);
-      }
-      return { ok: true, added: rowsToAppend.length, totalResults: results.length };
-    } catch (err) {
-      Logger.log('[GooglePlacesService.importerEtablissements] ' + err);
-      return { ok: false, reason: err && err.message ? err.message : String(err) };
-    }
-  }
-
-  /**
-   * Parcourt la base pour completer les telephones via Place Details.
-   */
-  function enrichirDetailsManquants() {
-    try {
-      const apiKey = getMapsApiKey();
-      const opened = openSheet_();
-      const sheet = opened.sheet;
-      const indices = opened.indices;
-      const data = sheet.getDataRange().getValues();
-      let updated = 0;
-
-      for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        const tel = String(row[indices[COLONNE_TELEPHONE_ETAB]] || '').trim();
-        const placeId = String(row[indices['PlaceID']] || '').trim();
-        if (tel || !placeId) continue;
-        try {
-          const phone = callDetailsPhone_(placeId, apiKey);
-          if (phone) {
-            sheet.getRange(i + 1, indices[COLONNE_TELEPHONE_ETAB] + 1).setValue(phone);
-            updated++;
-          }
-        } catch (detailsErr) {
-          Logger.log('[GooglePlacesService.enrichirDetailsManquants] Ligne ' + (i+1) + ' : ' + detailsErr);
-        }
-      }
-
-      return { ok: true, updated: updated };
-    } catch (err) {
-      Logger.log('[GooglePlacesService.enrichirDetailsManquants] ' + err);
-      return { ok: false, reason: err && err.message ? err.message : String(err) };
-    }
-  }
-
-  return {
-    importerEtablissements: importerEtablissements,
-    enrichirDetailsManquants: enrichirDetailsManquants
-  };
-})();
+// En-tetes canoniques (PlaceID est maintenu en colonne optionnelle pour l'enrichissement)
+function getPlacesHeaders_() {
+  return [
+    COLONNE_TYPE_ETAB,
+    COLONNE_NOM_ETAB,
+    COLONNE_ADRESSE_ETAB,
+    COLONNE_CODE_POSTAL_ETAB,
+    COLONNE_VILLE_ETAB,
+    COLONNE_CONTACT_ETAB,
+    COLONNE_TELEPHONE_ETAB,
+    COLONNE_EMAIL_ETAB,
+    COLONNE_JOURS_ETAB,
+    COLONNE_PLAGE_ETAB,
+    COLONNE_SOURCE_ETAB,
+    COLONNE_STATUT_ETAB,
+    COLONNE_DERNIERE_MAJ_ETAB,
+    COLONNE_NOTE_ETAB,
+    'PlaceID'
+  ];
+}
 
 /**
- * Point d'entree Apps Script : importe des etablissements via Google Places.
- * @param {string} query
- * @param {string} type
- * @returns {Object}
+ * Ouvre/prepare la feuille Base_Etablissements et retourne {sheet, indices, headers}.
  */
+function getEtablissementsContext_() {
+  const headers = getPlacesHeaders_();
+  const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
+  const sheet = (typeof ensureEtablissementsSheet_ === 'function')
+    ? ensureEtablissementsSheet_(ss)
+    : (function() {
+        let sh = ss.getSheetByName(SHEET_ETABLISSEMENTS);
+        if (!sh) {
+          sh = ss.insertSheet(SHEET_ETABLISSEMENTS);
+          sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+          sh.setFrozenRows(1);
+        } else {
+          const row1 = sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), headers.length))
+            .getValues()[0]
+            .map(function(v) { return String(v || '').trim(); });
+          const missing = headers.filter(function(h) { return row1.indexOf(h) === -1; });
+          if (missing.length) {
+            sh.getRange(1, sh.getLastColumn() + 1, 1, missing.length).setValues([missing]);
+          }
+          sh.setFrozenRows(1);
+        }
+        return sh;
+      })();
+  const indices = obtenirIndicesEnTetes(sheet, headers);
+  return { sheet: sheet, indices: indices, headers: headers };
+}
+
+var GooglePlacesService = {
+
+  /**
+   * Point d'entrée principal : Cherche et ajoute des établissements.
+   * @param {string} query - ex: "Pharmacie Sanary-sur-Mer"
+   * @param {string} typeEtablissement - ex: "Pharmacie", "EHPAD"
+   * @returns {string} Rapport court ("X ajoutes.")
+   */
+  importerEtablissements: function(query, typeEtablissement) {
+    try {
+      var apiKey = getMapsApiKey();
+      if (!apiKey) {
+        throw new Error("Clé API Google Maps (Maps_API_KEY) manquante dans les propriétés du script.");
+      }
+
+      var searchUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json" +
+                      "?query=" + encodeURIComponent(query) +
+                      "&region=fr" +
+                      "&language=fr" +
+                      "&key=" + apiKey;
+
+      var response = UrlFetchApp.fetch(searchUrl);
+      var json = JSON.parse(response.getContentText() || "{}");
+
+      if (json.status !== "OK") {
+        throw new Error("Erreur API Places : " + json.status + " - " + (json.error_message || ""));
+      }
+
+      var results = Array.isArray(json.results) ? json.results : [];
+      Logger.log(results.length + " résultats trouvés pour : " + query);
+
+      // Contexte feuille + indices
+      var ctx = getEtablissementsContext_();
+      var sheet = ctx.sheet;
+      var idx = ctx.indices;
+
+      // Dedup: clé = nom + CP
+      var existingKeys = new Set();
+      var data = sheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        var rowName = data[i][idx[COLONNE_NOM_ETAB]];
+        var rowCP = data[i][idx[COLONNE_CODE_POSTAL_ETAB]];
+        var key = (String(rowName || '') + "_" + String(rowCP || '')).toLowerCase().replace(/\s/g, '');
+        existingKeys.add(key);
+      }
+
+      var newRows = [];
+      var now = new Date();
+      var typeFinal = normalizeEtablissementType_(typeEtablissement) || typeEtablissement || 'Pharmacie';
+
+      results.forEach(function(place) {
+        var parsedAddress = GooglePlacesService._parseAddress(place.formatted_address || '');
+        var uniqueKey = (String(place.name || '') + "_" + String(parsedAddress.cp || '')).toLowerCase().replace(/\s/g, '');
+        if (!parsedAddress.cp || existingKeys.has(uniqueKey)) return;
+
+        var row = new Array(ctx.headers.length).fill('');
+        row[idx[COLONNE_TYPE_ETAB]] = typeFinal;
+        row[idx[COLONNE_NOM_ETAB]] = place.name || '';
+        row[idx[COLONNE_ADRESSE_ETAB]] = place.formatted_address || '';
+        row[idx[COLONNE_CODE_POSTAL_ETAB]] = parsedAddress.cp;
+        row[idx[COLONNE_VILLE_ETAB]] = parsedAddress.ville || '';
+        row[idx[COLONNE_CONTACT_ETAB]] = '';
+        row[idx[COLONNE_TELEPHONE_ETAB]] = '';
+        row[idx[COLONNE_EMAIL_ETAB]] = '';
+        row[idx[COLONNE_JOURS_ETAB]] = '';
+        row[idx[COLONNE_PLAGE_ETAB]] = '';
+        row[idx[COLONNE_SOURCE_ETAB]] = 'GoogleAPI';
+        row[idx[COLONNE_STATUT_ETAB]] = true;
+        row[idx[COLONNE_DERNIERE_MAJ_ETAB]] = now;
+        row[idx[COLONNE_NOTE_ETAB]] = place.place_id ? ("PlaceID: " + place.place_id) : '';
+        if (idx['PlaceID'] !== undefined && place.place_id) {
+          row[idx['PlaceID']] = place.place_id;
+        }
+        newRows.push(row);
+        existingKeys.add(uniqueKey);
+      });
+
+      if (newRows.length > 0) {
+        sheet.getRange(sheet.getLastRow() + 1, 1, newRows.length, ctx.headers.length).setValues(newRows);
+        Logger.log(newRows.length + " établissements ajoutés.");
+        return newRows.length + " ajoutés.";
+      } else {
+        Logger.log("Aucun nouvel établissement (doublons détectés ou aucun résultat).");
+        return "0 ajoutés.";
+      }
+
+    } catch (e) {
+      Logger.log("ERREUR Import Google Places : " + e.message);
+      throw e;
+    }
+  },
+
+  /**
+   * Enrichit les lignes existantes qui ont un PlaceID mais pas de téléphone.
+   */
+  enrichirDetailsManquants: function() {
+    try {
+      var apiKey = getMapsApiKey();
+      if (!apiKey) {
+        throw new Error("Clé API Google Maps (Maps_API_KEY) manquante dans les propriétés du script.");
+      }
+      var ctx = getEtablissementsContext_();
+      var sheet = ctx.sheet;
+      var idx = ctx.indices;
+      var data = sheet.getDataRange().getValues();
+      var updated = 0;
+
+      for (var i = 1; i < data.length; i++) {
+        var phone = String(data[i][idx[COLONNE_TELEPHONE_ETAB]] || '').trim();
+        var placeId = '';
+
+        if (idx['PlaceID'] !== undefined) {
+          placeId = String(data[i][idx['PlaceID']] || '').trim();
+        }
+        if (!placeId) {
+          var notes = String(data[i][idx[COLONNE_NOTE_ETAB]] || '');
+          var match = notes.match(/PlaceID:\s*([A-Za-z0-9_\-]+)/);
+          placeId = match && match[1] ? match[1] : '';
+        }
+
+        if (phone || !placeId) continue;
+
+        try {
+          var url = "https://maps.googleapis.com/maps/api/place/details/json" +
+                    "?place_id=" + encodeURIComponent(placeId) +
+                    "&fields=formatted_phone_number" +
+                    "&language=fr" +
+                    "&key=" + apiKey;
+
+          var resp = UrlFetchApp.fetch(url);
+          var json = JSON.parse(resp.getContentText() || "{}");
+
+          if (json.status === "OK" && json.result && json.result.formatted_phone_number) {
+            var newPhone = json.result.formatted_phone_number;
+            sheet.getRange(i + 1, idx[COLONNE_TELEPHONE_ETAB] + 1).setValue(newPhone);
+            updated++;
+          }
+        } catch (errApi) {
+          Logger.log("Erreur détail pour " + placeId + " : " + errApi);
+        }
+
+        Utilities.sleep(200); // evite de depasser les quotas
+      }
+
+      Logger.log(updated + " téléphones mis à jour.");
+      return updated + " téléphones mis à jour.";
+
+    } catch (e) {
+      Logger.log("Erreur Enrichissement : " + e.message);
+      throw e;
+    }
+  },
+
+  /**
+   * Utilitaire pour extraire CP et Ville d'une adresse formatee Google.
+   * Ex: "255 Av. Marcel Castie, 83000 Toulon, France"
+   */
+  _parseAddress: function(formattedAddress) {
+    var result = { cp: "", ville: "" };
+    if (!formattedAddress) return result;
+
+    var match = String(formattedAddress).match(/(\d{5})\s+(.+?),/);
+    if (match && match.length >= 3) {
+      result.cp = match[1];
+      result.ville = match[2].trim();
+    } else {
+      var parts = String(formattedAddress).split(",");
+      if (parts.length >= 2) {
+         var cityPart = parts[parts.length - 2].trim();
+         var cpMatch = cityPart.match(/\d{5}/);
+         if (cpMatch) {
+           result.cp = cpMatch[0];
+           result.ville = cityPart.replace(cpMatch[0], "").trim();
+         }
+      }
+    }
+    return result;
+  }
+};
+
+// Fonctions de test manuelles
+function testImportPharmacies() {
+  GooglePlacesService.importerEtablissements("Pharmacie 83000 Toulon", "Pharmacie");
+}
+
+function testEnrichissement() {
+  GooglePlacesService.enrichirDetailsManquants();
+}
+
+// Points d'entree globaux (compat)
 function importerEtablissementsPlaces(query, type) {
   return GooglePlacesService.importerEtablissements(query, type);
 }
 
-/**
- * Point d'entree Apps Script : enrichit les telephones manquants depuis Place Details.
- * @returns {Object}
- */
 function enrichirTelephonesPlaces() {
   return GooglePlacesService.enrichirDetailsManquants();
 }
 
-// Alias simples (noms courts) pour compatibilite ou appels manuels depuis l'editeur.
 function importerEtablissements(query, type) {
   return GooglePlacesService.importerEtablissements(query, type);
 }
