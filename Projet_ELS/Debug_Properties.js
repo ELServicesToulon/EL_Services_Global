@@ -32,7 +32,6 @@ const KNOWN_PROPERTIES = {
   IMPORTANT: [
     'ID_LOGO',                 // Utilitaires.js (branding)
     'ID_LOGO_FACTURE',         // Configuration.js (optionnel, fallback sur ID_LOGO)
-    'LIVRAISON_WEBAPP_URL',    // Configuration.js (liens inter-app)
     'TRACE_SECRET',            // auditProject.js (sécurité logs)
     'OPENAI_API_KEY',          // assistant.js (si utilisé)
     'TELEPHONE_ENTREPRISE',    // Reservation.js

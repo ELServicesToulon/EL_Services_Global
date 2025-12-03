@@ -28,19 +28,6 @@ const ADMIN_EMAIL = getSecret('ADMIN_EMAIL');
 // TODO: Renseignez ici l'URL de déploiement de votre WebApp pour garantir les liens dans les emails.
 const CLIENT_PORTAL_BASE_URL = '';
 
-/** @const {string} URL de d\u00e9ploiement de la WebApp livreur autonome (optionnel). */
-const LIVRAISON_WEBAPP_URL = (function() {
-  try {
-    const value = PropertiesService.getScriptProperties().getProperty('LIVRAISON_WEBAPP_URL');
-    if (typeof value !== 'string') {
-      return '';
-    }
-    const trimmed = value.trim();
-    return trimmed;
-  } catch (_err) {
-    return '';
-  }
-})();
 
 // --- Paramètres de facturation ---
 /** @const {boolean} Indique si la TVA est appliquée ; désactivé par défaut. */
@@ -513,8 +500,7 @@ const CONFIG = Object.freeze({
   BILLING_LOG_ENABLED,
   BILLING_V2_DRYRUN,
   BILLING_ID_PDF_CHECK_ENABLED,
-  BRANDING,
-  LIVRAISON_WEBAPP_URL
+  BRANDING
 });
 
 /**
@@ -539,8 +525,7 @@ function getPublicConfig() {
     HEURE_DEBUT_SERVICE: CONFIG.HEURE_DEBUT_SERVICE,
     HEURE_FIN_SERVICE: CONFIG.HEURE_FIN_SERVICE,
     TVA_APPLICABLE: CONFIG.TVA_APPLICABLE,
-    BRANDING: CONFIG.BRANDING,
-    LIVRAISON_WEBAPP_URL: CONFIG.LIVRAISON_WEBAPP_URL
+    BRANDING: CONFIG.BRANDING
   };
 }
 
@@ -648,9 +633,6 @@ var Config = (function() {
     get ELS_SHARED_SECRET() { return _get("ELS_SHARED_SECRET"); },
     get TRACE_SECRET() { return _get("TRACE_SECRET"); },
 
-    // URLs & WebHooks
-    get LIVRAISON_WEBAPP_URL() { return _get("LIVRAISON_WEBAPP_URL"); },
-
     // --- MODULE TESLA (API Tessie) ---
     get TESLA() {
       return {
@@ -726,7 +708,6 @@ function SETUP_INIT_PROPERTIES() {
     "ID_DOSSIER_ARCHIVES": "1HLBar6IvpJgrG_lfyRSKwNwib6U__w9U",
     "ID_DOCUMENT_CGV": "13nClmRx-6jsSf3NLT05gHy5QCFFDqAL5nA97aYPEMh0",
     "ID_CALENDRIER": "elservicestoulon@gmail.com",
-    "LIVRAISON_WEBAPP_URL": "https://script.google.com/macros/s/AKfycbyiFQU2pfmb4GS7UfV4aU9Jre_IDJRsQbkOSaHdeNMoDgNcSE7ZScrjZ-HktkndUCqOYA/exec",
     "ADRESSE_ENTREPRISE": "255 B Avenue Marcel Castié, 83000 Toulon",
     "ELS_SHARED_SECRET": "Boofi",
     "EMAIL_ENTREPRISE": "elservicestoulon@gmail.com",
