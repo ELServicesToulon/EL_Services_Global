@@ -261,3 +261,12 @@ function importerEtablissementsPlaces(query, type) {
 function enrichirTelephonesPlaces() {
   return GooglePlacesService.enrichirDetailsManquants();
 }
+
+// Alias simples (noms courts) pour compatibilite ou appels manuels depuis l'editeur.
+function importerEtablissements(query, type) {
+  return GooglePlacesService.importerEtablissements(query, type);
+}
+
+function enrichirDetailsManquants() {
+  return GooglePlacesService.enrichirDetailsManquants();
+}
