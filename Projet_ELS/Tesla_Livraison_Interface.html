@@ -86,6 +86,33 @@
         </ul>
       </article>
     </section>
+
+    <section class="card deliveries">
+      <div class="deliveries-head">
+        <div>
+          <p class="pill pill-muted">Livraisons</p>
+          <h2>Courses chauffeur</h2>
+        </div>
+        <div class="deliveries-actions">
+          <input type="date" id="livreur-date" class="input-compact">
+          <input type="password" id="livreur-code" class="input-compact" placeholder="Code chauffeur">
+          <button id="livreur-save-code" class="btn ghost">Enregistrer</button>
+          <button id="livreur-refresh" class="btn primary">Rafraichir</button>
+        </div>
+      </div>
+      <div class="deliveries-subhead">
+        <p class="hint" id="livreur-hint">Saisir le code chauffeur pour charger les courses du jour.</p>
+        <div class="status-legend">
+          <span class="status-badge planned">Prévue</span>
+          <span class="status-badge running">En cours</span>
+          <span class="status-badge done">Livrée</span>
+          <span class="status-badge cancel">Annulée</span>
+        </div>
+      </div>
+      <div id="livraisons-liste" class="deliveries-list">
+        <p class="hint">Aucune donnée chargée.</p>
+      </div>
+    </section>
   </main>
 
   <div id="error-banner" class="error-banner hidden"></div>

@@ -14,6 +14,23 @@ function invaliderCacheConfiguration() {
 }
 
 /**
+ * Autorisation chauffeur (webapp livraison) basee sur un code partage.
+ * @param {string} authToken Code fourni par le chauffeur (ex: ELS_SHARED_SECRET).
+ * @returns {boolean}
+ */
+function isLivreurAuthorized_(authToken) {
+  try {
+    const token = (authToken || '').toString().trim();
+    if (!token) return false;
+    const shared = getSecret('ELS_SHARED_SECRET');
+    return Boolean(shared) && token === shared;
+  } catch (err) {
+    Logger.log('isLivreurAuthorized_ error: ' + err.toString());
+    return false;
+  }
+}
+
+/**
  * Calcule le chiffre d'affaires du mois en cours.
  * @return {number|null} Total du CA ou null si désactivé ou non autorisé.
  */
@@ -101,7 +118,9 @@ function obtenirLienFactureParIdAdmin(idPdf) {
 function obtenirToutesReservationsAdmin() {
   try {
     const userEmail = Session.getActiveUser().getEmail();
-    if (!userEmail || userEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    const isAdmin = userEmail && userEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    const isLivreur = isLivreurAuthorized_(authToken);
+    if (!isAdmin && !isLivreur) {
       return { success: false, error: "Accès non autorisé." };
     }
 
@@ -205,10 +224,12 @@ function obtenirToutesReservationsAdmin() {
  * @param {string} dateFiltreString La date à rechercher au format "YYYY-MM-DD".
  * @returns {Object} Un objet avec le statut et la liste des réservations.
  */
-function obtenirToutesReservationsPourDate(dateFiltreString) {
+function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
   try {
     const userEmail = Session.getActiveUser().getEmail();
-    if (!userEmail || userEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    const isAdmin = userEmail && userEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    const isLivreur = isLivreurAuthorized_(authToken);
+    if (!isAdmin && !isLivreur) {
       return { success: false, error: "Accès non autorisé." };
     }
 
@@ -311,6 +332,54 @@ function obtenirToutesReservationsPourDate(dateFiltreString) {
 
   } catch (e) {
     Logger.log(`Erreur critique dans obtenirToutesReservationsPourDate: ${e.stack}`);
+    return { success: false, error: e.message };
+  }
+}
+
+
+
+function livreurMettreAJourStatutReservation(idReservation, statut, authToken) {
+  try {
+    const userEmail = Session.getActiveUser().getEmail();
+    const isAdmin = userEmail && userEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    const isLivreur = isLivreurAuthorized_(authToken);
+    if (!isAdmin && !isLivreur) {
+      return { success: false, error: "Accès non autorisé." };
+    }
+
+    const cleanId = String(idReservation || '').trim();
+    const nouveauStatut = String(statut || '').trim();
+    if (!cleanId || !nouveauStatut) {
+      return { success: false, error: "Paramètres manquants." };
+    }
+
+    const statutsAutorises = ["Prévue", "En cours", "Livrée", "Annulée", "Incident"];
+    if (statutsAutorises.indexOf(nouveauStatut) === -1) {
+      return { success: false, error: "Statut non autorisé." };
+    }
+
+    const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
+    if (!feuille) throw new Error("La feuille 'Facturation' est introuvable.");
+
+    const indices = getFacturationHeaderIndices_(feuille, ["ID Réservation", "Statut"]).indices;
+    const rowCount = Math.max(0, feuille.getLastRow() - 1);
+    if (rowCount <= 0) {
+      return { success: false, error: "Aucune réservation." };
+    }
+
+    const data = feuille.getRange(2, 1, rowCount, feuille.getLastColumn()).getValues();
+
+    for (let i = 0; i < data.length; i++) {
+      const id = String(data[i][indices["ID Réservation"]] || "").trim();
+      if (id === cleanId) {
+        feuille.getRange(i + 2, indices["Statut"] + 1).setValue(nouveauStatut);
+        return { success: true, statut: nouveauStatut };
+      }
+    }
+
+    return { success: false, error: "Réservation introuvable." };
+  } catch (e) {
+    Logger.log("Erreur dans livreurMettreAJourStatutReservation: " + e.toString());
     return { success: false, error: e.message };
   }
 }
