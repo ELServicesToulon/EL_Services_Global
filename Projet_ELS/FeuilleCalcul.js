@@ -176,7 +176,44 @@ function obtenirInfosClientParEmail(email) {
  */
 function obtenirCodesPostauxRetrait(options) {
   const forceRefresh = !!(options && options.forceRefresh);
-  const cacheKey = 'ELS_CODES_POSTAUX_RETRAIT';
+  const cacheKeyCodes = 'ELS_CODES_POSTAUX_RETRAIT';
+  const cache = CacheService.getScriptCache();
+  if (!forceRefresh) {
+    try {
+      const cached = cache.get(cacheKeyCodes);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+    } catch (_err) {
+      // ignore cache parsing errors
+    }
+  }
+
+  const { codes, details } = collectCodesPostauxRetrait_();
+  const resultat = Array.from(codes.values()).sort();
+
+  if (!forceRefresh && resultat.length > 0) {
+    try {
+      cache.put(cacheKeyCodes, JSON.stringify(resultat), 300);
+      cache.put('ELS_CODES_POSTAUX_RETRAIT_DETAILS', JSON.stringify(details), 300);
+    } catch (_cacheErr) {
+      // ignore cache errors
+    }
+  }
+  return resultat;
+}
+
+/**
+ * Variante retournant aussi le nom de la commune (colonne Libellé/Commune/Ville).
+ * @param {{forceRefresh?:boolean}=} options
+ * @returns {{codePostal:string, commune:string}[]}
+ */
+function obtenirCodesPostauxRetraitAvecCommunes(options) {
+  const forceRefresh = !!(options && options.forceRefresh);
+  const cacheKey = 'ELS_CODES_POSTAUX_RETRAIT_DETAILS';
   const cache = CacheService.getScriptCache();
   if (!forceRefresh) {
     try {
@@ -192,25 +229,59 @@ function obtenirCodesPostauxRetrait(options) {
     }
   }
 
+  const { codes, details } = collectCodesPostauxRetrait_();
+  const sortedDetails = details.sort(function(a, b) {
+    const cmp = String(a.codePostal).localeCompare(String(b.codePostal));
+    if (cmp !== 0) return cmp;
+    return String(a.commune || '').localeCompare(String(b.commune || ''));
+  });
+
+  if (!forceRefresh && codes.size > 0) {
+    try {
+      cache.put('ELS_CODES_POSTAUX_RETRAIT', JSON.stringify(Array.from(codes.values()).sort()), 300);
+      cache.put(cacheKey, JSON.stringify(sortedDetails), 300);
+    } catch (_cacheErr) {
+      // ignore cache errors
+    }
+  }
+  return sortedDetails;
+}
+
+/**
+ * Lecture unique de l'onglet Codes_Postaux_Retrait (codes + communes).
+ * @returns {{codes:Set<string>, details:{codePostal:string, commune:string}[]}}
+ */
+function collectCodesPostauxRetrait_() {
   try {
     const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_CODES_POSTAUX_RETRAIT);
-    if (!feuille) {
-      return [];
-    }
-    if (feuille.getLastRow() <= 1 || feuille.getLastColumn() < 1) {
-      return [];
+    if (!feuille || feuille.getLastRow() <= 1 || feuille.getLastColumn() < 1) {
+      return { codes: new Set(), details: [] };
     }
     const donnees = feuille.getDataRange().getValues();
     if (!donnees || donnees.length <= 1) {
-      return [];
+      return { codes: new Set(), details: [] };
     }
     const enTete = donnees[0].map(function(valeur) { return String(valeur || '').trim(); });
     const indexCode = enTete.indexOf(COLONNE_CODE_POSTAL_CLIENT);
     if (indexCode === -1) {
       throw new Error('La colonne "Code Postal" est absente de la feuille des codes postaux.');
     }
+    const normalizeHeader = function(label) {
+      return String(label || '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+    const headerNorm = enTete.map(normalizeHeader);
+    const indexCommune = headerNorm.findIndex(function(nom) {
+      return ['commune', 'ville', 'libelle', 'libelle commune'].indexOf(nom) !== -1;
+    });
     const indexActif = enTete.findIndex(function(nom) { return nom && nom.toString().trim().toLowerCase() === 'actif'; });
+
     const codes = new Set();
+    const detailsMap = new Map(); // codePostal -> commune
+
     for (let i = 1; i < donnees.length; i++) {
       const ligne = donnees[i];
       const codeNormalise = normaliserCodePostal(ligne[indexCode]);
@@ -227,19 +298,21 @@ function obtenirCodesPostauxRetrait(options) {
         }
       }
       codes.add(codeNormalise);
-    }
-    const resultat = Array.from(codes.values()).sort();
-    if (!forceRefresh && resultat.length > 0) {
-      try {
-        cache.put(cacheKey, JSON.stringify(resultat), 300);
-      } catch (_cacheErr) {
-        // ignore cache errors
+      if (indexCommune !== -1) {
+        const commune = String(ligne[indexCommune] || '').trim();
+        if (!detailsMap.has(codeNormalise) || (commune && !detailsMap.get(codeNormalise))) {
+          detailsMap.set(codeNormalise, commune);
+        }
       }
     }
-    return resultat;
+
+    const details = Array.from(detailsMap.entries()).map(function(entry) {
+      return { codePostal: entry[0], commune: entry[1] || '' };
+    });
+    return { codes: codes, details: details };
   } catch (e) {
-    Logger.log(`Erreur dans obtenirCodesPostauxRetrait : ${e.stack}`);
-    return [];
+    Logger.log(`Erreur dans collectCodesPostauxRetrait_ : ${e.stack}`);
+    return { codes: new Set(), details: [] };
   }
 }
 
