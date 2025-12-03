@@ -52,6 +52,20 @@ function getEtablissementsContext_() {
         }
         return sh;
       })();
+  // S'assure que tous les en-tetes (dont PlaceID) sont presents avant obtention des indices
+  try {
+    sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length))
+      .getValues()[0];
+    const firstRow = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length))
+      .getValues()[0]
+      .map(function(v) { return String(v || '').trim(); });
+    const missing = headers.filter(function(h) { return firstRow.indexOf(h) === -1; });
+    if (missing.length) {
+      sheet.getRange(1, sheet.getLastColumn() + 1, 1, missing.length).setValues([missing]);
+    }
+  } catch (_ensureErr) {
+    // ignore, retry with obtenirIndicesEnTetes which lancera une erreur explicite si besoin
+  }
   const indices = obtenirIndicesEnTetes(sheet, headers);
   return { sheet: sheet, indices: indices, headers: headers };
 }
