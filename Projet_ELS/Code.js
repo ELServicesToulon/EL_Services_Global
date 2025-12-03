@@ -394,11 +394,7 @@ function renderReservationInterface() {
   const conf = getPublicConfig();
 
   const serviceUrl = ScriptApp.getService().getUrl();
-  const livreurAppUrl = (conf && conf.LIVRAISON_WEBAPP_URL && conf.LIVRAISON_WEBAPP_URL.length)
-    ? conf.LIVRAISON_WEBAPP_URL
-    : (serviceUrl ? serviceUrl + '?page=livraison' : '');
   template.appUrl = serviceUrl;
-  template.livreurAppUrl = livreurAppUrl;
   template.nomService = NOM_ENTREPRISE;
   template.EMAIL_ENTREPRISE = EMAIL_ENTREPRISE;
   template.CLIENT_PORTAL_ENABLED = CLIENT_PORTAL_ENABLED;
