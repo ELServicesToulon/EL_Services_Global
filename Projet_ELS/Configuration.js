@@ -664,6 +664,39 @@ var Config = (function() {
     get GEMINI_API_KEY() { return _get("GEMINI_API_KEY"); },
     get ELS_SHARED_SECRET() { return _get("ELS_SHARED_SECRET"); },
     get TRACE_SECRET() { return _get("TRACE_SECRET"); },
+    getMapsApiKey: function() {
+      try {
+        // Privilégie la fonction globale si elle existe (compatibilité legacy).
+        if (typeof globalThis !== 'undefined' && typeof globalThis.getMapsApiKey === 'function') {
+          return globalThis.getMapsApiKey();
+        }
+        if (typeof getMapsApiKey === 'function') {
+          return getMapsApiKey();
+        }
+      } catch (_ignored) {
+        // On continue avec la récupération directe.
+      }
+      var key = _getOrDefault("Maps_API_KEY", "");
+      if (!key) {
+        throw new Error("Maps_API_KEY manquant dans les ScriptProperties.");
+      }
+      return key;
+    },
+
+    getSpreadsheetId: function() {
+      var id = _getOrDefault("ID_FEUILLE_CALCUL", "");
+      if (!id && typeof getSecret === 'function') {
+        try {
+          id = getSecret('ID_FEUILLE_CALCUL');
+        } catch (_ignored) {
+          // On laisse l'erreur gérée plus bas si toujours vide.
+        }
+      }
+      if (!id) {
+        throw new Error("ID_FEUILLE_CALCUL manquant dans la configuration.");
+      }
+      return id;
+    },
 
     // --- MODULE TESLA (API Tessie) ---
     get TESLA() {
@@ -693,6 +726,7 @@ var Config = (function() {
     // Compat: raccourcis groupés
     get IDS() { return Object.freeze({ CALENDAR: _get("ID_CALENDRIER") }); },
     get FILES() { return Object.freeze({ RESERVATIONS_DB: _get("ID_SHEET_RESERVATIONS") || _get("ID_FEUILLE_CALCUL") }); },
+    get SHEETS() { return Object.freeze({ ETABLISSEMENTS: (typeof SHEET_ETABLISSEMENTS !== 'undefined') ? SHEET_ETABLISSEMENTS : 'Base_Etablissements' }); },
 
     /**
      * Vérifie si la configuration minimale est présente.

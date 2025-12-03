@@ -1,88 +1,41 @@
 /**
- * Service Google Places - Alimente l'onglet Base_Etablissements.
- * Colonnes cibles (ordre logique) :
- * Type, Nom, Adresse, Code Postal, Ville, Contact, Telephone, Email,
- * Jours Souhaites, Plage Horaire, Source, Actif, Derniere_MAJ, Notes, PlaceID (optionnel).
+ * /Projet_ELS/Service_GooglePlaces.js
+ * Service d'interaction avec Google Places API pour alimenter Base_Etablissements.
+ * Version : 2.0 (corrigee et autonome)
  */
 
-// En-tetes canoniques (PlaceID est maintenu en colonne optionnelle pour l'enrichissement)
-function getPlacesHeaders_() {
-  return [
-    COLONNE_TYPE_ETAB,
-    COLONNE_NOM_ETAB,
-    COLONNE_ADRESSE_ETAB,
-    COLONNE_CODE_POSTAL_ETAB,
-    COLONNE_VILLE_ETAB,
-    COLONNE_CONTACT_ETAB,
-    COLONNE_TELEPHONE_ETAB,
-    COLONNE_EMAIL_ETAB,
-    COLONNE_JOURS_ETAB,
-    COLONNE_PLAGE_ETAB,
-    COLONNE_SOURCE_ETAB,
-    COLONNE_STATUT_ETAB,
-    COLONNE_DERNIERE_MAJ_ETAB,
-    COLONNE_NOTE_ETAB,
-    'PlaceID'
-  ];
-}
-
-/**
- * Ouvre/prepare la feuille Base_Etablissements et retourne {sheet, indices, headers}.
- */
-function getEtablissementsContext_() {
-  const headers = getPlacesHeaders_();
-  const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
-  const sheet = (typeof ensureEtablissementsSheet_ === 'function')
-    ? ensureEtablissementsSheet_(ss)
-    : (function() {
-        let sh = ss.getSheetByName(SHEET_ETABLISSEMENTS);
-        if (!sh) {
-          sh = ss.insertSheet(SHEET_ETABLISSEMENTS);
-          sh.getRange(1, 1, 1, headers.length).setValues([headers]);
-          sh.setFrozenRows(1);
-        } else {
-          const row1 = sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), headers.length))
-            .getValues()[0]
-            .map(function(v) { return String(v || '').trim(); });
-          const missing = headers.filter(function(h) { return row1.indexOf(h) === -1; });
-          if (missing.length) {
-            sh.getRange(1, sh.getLastColumn() + 1, 1, missing.length).setValues([missing]);
-          }
-          sh.setFrozenRows(1);
-        }
-        return sh;
-      })();
-  // S'assure que tous les en-tetes (dont PlaceID) sont presents avant obtention des indices
-  try {
-    sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length))
-      .getValues()[0];
-    const firstRow = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length))
-      .getValues()[0]
-      .map(function(v) { return String(v || '').trim(); });
-    const missing = headers.filter(function(h) { return firstRow.indexOf(h) === -1; });
-    if (missing.length) {
-      sheet.getRange(1, sheet.getLastColumn() + 1, 1, missing.length).setValues([missing]);
-    }
-  } catch (_ensureErr) {
-    // ignore, retry with obtenirIndicesEnTetes which lancera une erreur explicite si besoin
-  }
-  const indices = obtenirIndicesEnTetes(sheet, headers);
-  return { sheet: sheet, indices: indices, headers: headers };
-}
+// Mapping des en-tetes de la feuille Base_Etablissements
+var PLACES_HEADERS = [
+  "Type",            // A
+  "Nom",             // B
+  "Adresse",         // C
+  "Code Postal",     // D
+  "Ville",           // E
+  "Contact",         // F
+  "Telephone",       // G
+  "Email",           // H
+  "Jours Souhaites", // I
+  "Plage Horaire",   // J
+  "Source",          // K
+  "Actif",           // L
+  "Derniere_MAJ",    // M
+  "Notes",           // N
+  "PlaceID"          // O
+];
 
 var GooglePlacesService = {
 
   /**
-   * Point d'entrée principal : Cherche et ajoute des établissements.
-   * @param {string} query - ex: "Pharmacie Sanary-sur-Mer"
-   * @param {string} typeEtablissement - ex: "Pharmacie", "EHPAD"
+   * Recherche des etablissements et ajoute les lignes dedoublonnees.
+   * @param {string} query Recherche textuelle (ex: "Pharmacie Sanary-sur-Mer")
+   * @param {string} typeEtablissement Type d'etablissement (ex: "Pharmacie", "EHPAD")
    * @returns {string} Rapport court ("X ajoutes.")
    */
   importerEtablissements: function(query, typeEtablissement) {
     try {
-      var apiKey = getMapsApiKey();
+      var apiKey = GooglePlacesService._getApiKey();
       if (!apiKey) {
-        throw new Error("Clé API Google Maps (Maps_API_KEY) manquante dans les propriétés du script.");
+        throw new Error("Cle API Google Maps manquante (Config.getMapsApiKey).");
       }
 
       var searchUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json" +
@@ -94,66 +47,72 @@ var GooglePlacesService = {
       var response = UrlFetchApp.fetch(searchUrl);
       var json = JSON.parse(response.getContentText() || "{}");
 
-      if (json.status !== "OK") {
+      if (json.status !== "OK" && json.status !== "ZERO_RESULTS") {
         throw new Error("Erreur API Places : " + json.status + " - " + (json.error_message || ""));
       }
 
       var results = Array.isArray(json.results) ? json.results : [];
-      Logger.log(results.length + " résultats trouvés pour : " + query);
+      Logger.log(results.length + " resultats trouves pour : " + query);
 
-      // Contexte feuille + indices
-      var ctx = getEtablissementsContext_();
-      var sheet = ctx.sheet;
-      var idx = ctx.indices;
+      if (results.length === 0) return "0 trouves.";
 
-      // Dedup: clé = nom + CP
+      var sheet = this._ensureSheet();
+      var headers = PLACES_HEADERS;
+
+      // Mapping dynamique des colonnes (base 0)
+      var colMap = this._getColumnMapping(sheet, headers);
+
+      // Dedup: cle = nom + CP
       var existingKeys = new Set();
-      var data = sheet.getDataRange().getValues();
-      for (var i = 1; i < data.length; i++) {
-        var rowName = data[i][idx[COLONNE_NOM_ETAB]];
-        var rowCP = data[i][idx[COLONNE_CODE_POSTAL_ETAB]];
-        var key = (String(rowName || '') + "_" + String(rowCP || '')).toLowerCase().replace(/\s/g, '');
-        existingKeys.add(key);
+      var lastRow = sheet.getLastRow();
+
+      if (lastRow > 1) {
+        var data = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+        for (var i = 0; i < data.length; i++) {
+          var rowName = data[i][colMap["Nom"]];
+          var rowCP = data[i][colMap["Code Postal"]];
+          if (rowName && rowCP) {
+            var key = (String(rowName) + "_" + String(rowCP)).toLowerCase().replace(/\s/g, '');
+            existingKeys.add(key);
+          }
+        }
       }
 
       var newRows = [];
       var now = new Date();
-      var typeFinal = normalizeEtablissementType_(typeEtablissement) || typeEtablissement || 'Pharmacie';
+      var typeFinal = typeEtablissement || "Pharmacie";
 
       results.forEach(function(place) {
-        var parsedAddress = GooglePlacesService._parseAddress(place.formatted_address || '');
-        var uniqueKey = (String(place.name || '') + "_" + String(parsedAddress.cp || '')).toLowerCase().replace(/\s/g, '');
+        var parsedAddress = GooglePlacesService._parseAddress(place.formatted_address || "");
+        var uniqueKey = (String(place.name || "") + "_" + String(parsedAddress.cp || "")).toLowerCase().replace(/\s/g, "");
+
+        // Ignore si pas de CP ou deja present
         if (!parsedAddress.cp || existingKeys.has(uniqueKey)) return;
 
-        var row = new Array(ctx.headers.length).fill('');
-        row[idx[COLONNE_TYPE_ETAB]] = typeFinal;
-        row[idx[COLONNE_NOM_ETAB]] = place.name || '';
-        row[idx[COLONNE_ADRESSE_ETAB]] = place.formatted_address || '';
-        row[idx[COLONNE_CODE_POSTAL_ETAB]] = parsedAddress.cp;
-        row[idx[COLONNE_VILLE_ETAB]] = parsedAddress.ville || '';
-        row[idx[COLONNE_CONTACT_ETAB]] = '';
-        row[idx[COLONNE_TELEPHONE_ETAB]] = '';
-        row[idx[COLONNE_EMAIL_ETAB]] = '';
-        row[idx[COLONNE_JOURS_ETAB]] = '';
-        row[idx[COLONNE_PLAGE_ETAB]] = '';
-        row[idx[COLONNE_SOURCE_ETAB]] = 'GoogleAPI';
-        row[idx[COLONNE_STATUT_ETAB]] = true;
-        row[idx[COLONNE_DERNIERE_MAJ_ETAB]] = now;
-        row[idx[COLONNE_NOTE_ETAB]] = place.place_id ? ("PlaceID: " + place.place_id) : '';
-        if (idx['PlaceID'] !== undefined && place.place_id) {
-          row[idx['PlaceID']] = place.place_id;
-        }
+        var row = new Array(headers.length).fill("");
+
+        row[colMap["Type"]] = typeFinal;
+        row[colMap["Nom"]] = place.name || "";
+        row[colMap["Adresse"]] = place.formatted_address || "";
+        row[colMap["Code Postal"]] = parsedAddress.cp;
+        row[colMap["Ville"]] = parsedAddress.ville || "";
+        row[colMap["Source"]] = "GoogleAPI";
+        row[colMap["Actif"]] = true;
+        row[colMap["Derniere_MAJ"]] = now;
+        row[colMap["Notes"]] = place.place_id ? ("PlaceID: " + place.place_id) : "";
+        row[colMap["PlaceID"]] = place.place_id || "";
+
         newRows.push(row);
         existingKeys.add(uniqueKey);
       });
 
       if (newRows.length > 0) {
-        sheet.getRange(sheet.getLastRow() + 1, 1, newRows.length, ctx.headers.length).setValues(newRows);
-        Logger.log(newRows.length + " établissements ajoutés.");
-        return newRows.length + " ajoutés.";
+        sheet.getRange(sheet.getLastRow() + 1, 1, newRows.length, headers.length).setValues(newRows);
+        Logger.log(newRows.length + " etablissements ajoutes.");
+        return newRows.length + " ajoutes.";
       } else {
-        Logger.log("Aucun nouvel établissement (doublons détectés ou aucun résultat).");
-        return "0 ajoutés.";
+        Logger.log("Aucun nouvel etablissement.");
+        return "0 ajoutes.";
       }
 
     } catch (e) {
@@ -163,59 +122,62 @@ var GooglePlacesService = {
   },
 
   /**
-   * Enrichit les lignes existantes qui ont un PlaceID mais pas de téléphone.
+   * Enrichit les lignes existantes qui ont un PlaceID mais pas de telephone.
    */
   enrichirDetailsManquants: function() {
     try {
-      var apiKey = getMapsApiKey();
-      if (!apiKey) {
-        throw new Error("Clé API Google Maps (Maps_API_KEY) manquante dans les propriétés du script.");
-      }
-      var ctx = getEtablissementsContext_();
-      var sheet = ctx.sheet;
-      var idx = ctx.indices;
-      var data = sheet.getDataRange().getValues();
-      var updated = 0;
+      var apiKey = GooglePlacesService._getApiKey();
+      if (!apiKey) throw new Error("Cle API manquante.");
 
-      for (var i = 1; i < data.length; i++) {
-        var phone = String(data[i][idx[COLONNE_TELEPHONE_ETAB]] || '').trim();
-        var placeId = '';
+      var sheet = this._ensureSheet();
+      var headers = PLACES_HEADERS;
+      var colMap = this._getColumnMapping(sheet, headers);
 
-        if (idx['PlaceID'] !== undefined) {
-          placeId = String(data[i][idx['PlaceID']] || '').trim();
-        }
-        if (!placeId) {
-          var notes = String(data[i][idx[COLONNE_NOTE_ETAB]] || '');
+      var lastRow = sheet.getLastRow();
+      if (lastRow < 2) return "Vide";
+
+      var rangeData = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn());
+      var data = rangeData.getValues();
+      var updatedCount = 0;
+
+      for (var i = 0; i < data.length; i++) {
+        var phone = String(data[i][colMap["Telephone"]] || "").trim();
+        var placeId = String(data[i][colMap["PlaceID"]] || "").trim();
+        var notes = String(data[i][colMap["Notes"]] || "");
+
+        // Fallback: chercher PlaceID dans les notes si colonne PlaceID vide
+        if (!placeId && notes.indexOf("PlaceID:") > -1) {
           var match = notes.match(/PlaceID:\s*([A-Za-z0-9_\-]+)/);
-          placeId = match && match[1] ? match[1] : '';
+          if (match) placeId = match[1];
         }
 
-        if (phone || !placeId) continue;
+        // Si on a un PlaceID mais pas de telephone
+        if (placeId && !phone) {
+          try {
+            var url = "https://maps.googleapis.com/maps/api/place/details/json" +
+                      "?place_id=" + encodeURIComponent(placeId) +
+                      "&fields=formatted_phone_number" +
+                      "&language=fr" +
+                      "&key=" + apiKey;
 
-        try {
-          var url = "https://maps.googleapis.com/maps/api/place/details/json" +
-                    "?place_id=" + encodeURIComponent(placeId) +
-                    "&fields=formatted_phone_number" +
-                    "&language=fr" +
-                    "&key=" + apiKey;
+            var resp = UrlFetchApp.fetch(url);
+            var json = JSON.parse(resp.getContentText() || "{}");
 
-          var resp = UrlFetchApp.fetch(url);
-          var json = JSON.parse(resp.getContentText() || "{}");
-
-          if (json.status === "OK" && json.result && json.result.formatted_phone_number) {
-            var newPhone = json.result.formatted_phone_number;
-            sheet.getRange(i + 1, idx[COLONNE_TELEPHONE_ETAB] + 1).setValue(newPhone);
-            updated++;
+            if (json.status === "OK" && json.result && json.result.formatted_phone_number) {
+              // i + 2 car tableau base 0 et row commence a 2
+              sheet.getRange(i + 2, colMap["Telephone"] + 1).setValue(json.result.formatted_phone_number);
+              updatedCount++;
+            }
+            // Pause courte pour le rate limiting
+            Utilities.sleep(200);
+          } catch (errApi) {
+            Logger.log("Erreur detail API pour " + placeId);
           }
-        } catch (errApi) {
-          Logger.log("Erreur détail pour " + placeId + " : " + errApi);
         }
-
-        Utilities.sleep(200); // evite de depasser les quotas
       }
 
-      Logger.log(updated + " téléphones mis à jour.");
-      return updated + " téléphones mis à jour.";
+      Logger.log(updatedCount + " telephones mis a jour.");
+      return updatedCount + " telephones mis a jour.";
 
     } catch (e) {
       Logger.log("Erreur Enrichissement : " + e.message);
@@ -223,14 +185,74 @@ var GooglePlacesService = {
     }
   },
 
-  /**
-   * Utilitaire pour extraire CP et Ville d'une adresse formatee Google.
-   * Ex: "255 Av. Marcel Castie, 83000 Toulon, France"
-   */
+  // --- PRIVATE HELPERS ---
+
+  /** Assure l'existence de l'onglet et des entetes */
+  _ensureSheet: function() {
+    var ss = SpreadsheetApp.openById(GooglePlacesService._getSpreadsheetId());
+    var sheetName = "Base_Etablissements";
+    if (typeof Config !== "undefined" && Config.SHEETS && Config.SHEETS.ETABLISSEMENTS) {
+      sheetName = Config.SHEETS.ETABLISSEMENTS;
+    } else if (typeof SHEET_ETABLISSEMENTS !== "undefined") {
+      sheetName = SHEET_ETABLISSEMENTS;
+    }
+    var sheet = ss.getSheetByName(sheetName);
+
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      sheet.getRange(1, 1, 1, PLACES_HEADERS.length).setValues([PLACES_HEADERS]);
+      sheet.setFrozenRows(1);
+    } else {
+      // Verifie les entetes manquants
+      var currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      var missing = [];
+      PLACES_HEADERS.forEach(function(h) {
+        if (currentHeaders.indexOf(h) === -1) missing.push(h);
+      });
+      if (missing.length > 0) {
+        sheet.getRange(1, sheet.getLastColumn() + 1, 1, missing.length).setValues([missing]);
+      }
+    }
+    return sheet;
+  },
+
+  /** Retourne un objet map { "Nom": 1, "Adresse": 2 ... } (base 0) */
+  _getColumnMapping: function(sheet, headersRef) {
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var map = {};
+    headersRef.forEach(function(h) {
+      var idx = headers.indexOf(h);
+      if (idx > -1) map[h] = idx;
+    });
+    return map;
+  },
+
+  _getSpreadsheetId: function() {
+    if (typeof Config !== "undefined" && typeof Config.getSpreadsheetId === "function") {
+      return Config.getSpreadsheetId();
+    }
+    if (typeof Config !== "undefined" && Config.ID_FEUILLE_CALCUL) {
+      return Config.ID_FEUILLE_CALCUL;
+    }
+    if (typeof getSecret === "function") {
+      return getSecret("ID_FEUILLE_CALCUL");
+    }
+    throw new Error("ID_FEUILLE_CALCUL manquant.");
+  },
+
+  _getApiKey: function() {
+    if (typeof Config !== "undefined" && typeof Config.getMapsApiKey === "function") {
+      return Config.getMapsApiKey();
+    }
+    if (typeof getMapsApiKey === "function") {
+      return getMapsApiKey();
+    }
+    throw new Error("Maps_API_KEY manquant dans la configuration.");
+  },
+
   _parseAddress: function(formattedAddress) {
     var result = { cp: "", ville: "" };
     if (!formattedAddress) return result;
-
     var match = String(formattedAddress).match(/(\d{5})\s+(.+?),/);
     if (match && match.length >= 3) {
       result.cp = match[1];
@@ -250,16 +272,17 @@ var GooglePlacesService = {
   }
 };
 
-// Fonctions de test manuelles
-function testImportPharmacies() {
-  GooglePlacesService.importerEtablissements("Pharmacie 83000 Toulon", "Pharmacie");
+// --- FONCTIONS GLOBALES EXPOSEES ---
+
+function importerEtablissements(query, type) {
+  return GooglePlacesService.importerEtablissements(query, type);
 }
 
-function testEnrichissement() {
-  GooglePlacesService.enrichirDetailsManquants();
+function enrichirDetailsManquants() {
+  return GooglePlacesService.enrichirDetailsManquants();
 }
 
-// Points d'entree globaux (compat)
+// Aliases compatibilite legacy
 function importerEtablissementsPlaces(query, type) {
   return GooglePlacesService.importerEtablissements(query, type);
 }
@@ -268,10 +291,6 @@ function enrichirTelephonesPlaces() {
   return GooglePlacesService.enrichirDetailsManquants();
 }
 
-function importerEtablissements(query, type) {
-  return GooglePlacesService.importerEtablissements(query, type);
-}
-
-function enrichirDetailsManquants() {
-  return GooglePlacesService.enrichirDetailsManquants();
+function test_GooglePlaces() {
+  GooglePlacesService.importerEtablissements("Pharmacie 83000 Toulon", "Pharmacie");
 }
