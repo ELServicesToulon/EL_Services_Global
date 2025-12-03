@@ -246,6 +246,8 @@ function getPageHandler_(page) {
       return handleAdminPage_;
     case 'livraison':
     case 'livreur':
+    case 'tesla-livraison':
+    case 'tesla_livraison':
       return handleLivraisonPage_;
     case 'tesla':
     case 'tesla_livreur':
@@ -287,10 +289,10 @@ function handleAdminPage_(e) {
 }
 
 function handleLivraisonPage_(e) {
-  if (isCallable_('renderLivraisonInterface')) {
-    return renderLivraisonInterface(e);
+  if (isCallable_('renderTeslaLivraisonInterface')) {
+    return renderTeslaLivraisonInterface(e);
   }
-  return creerReponseHtml('Indisponible', 'Le module Livraison est désactivé.');
+  return handleTeslaLivreurPage_(e);
 }
 
 function handleTeslaLivreurPage_(e) {
@@ -577,11 +579,11 @@ function include(filename) {
   }
 }
 
-function includeLivraison(filename) {
+function includeTemplate(filename) {
   try {
     return HtmlService.createTemplateFromFile(filename).evaluate().getContent();
   } catch (error) {
-    Logger.log('Erreur includeLivraison(' + filename + '): ' + error.toString());
+    Logger.log('Erreur includeTemplate(' + filename + '): ' + error.toString());
     try {
       return include(filename);
     } catch (_err) {
