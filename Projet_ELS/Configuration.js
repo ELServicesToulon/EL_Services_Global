@@ -568,6 +568,19 @@ function getConfigCached() {
   return config;
 }
 
+/**
+ * Retourne la cle API Google Maps (Places).
+ * @returns {string}
+ */
+function getMapsApiKey() {
+  const props = PropertiesService.getScriptProperties();
+  const key = props ? String(props.getProperty('Maps_API_KEY') || '').trim() : '';
+  if (!key) {
+    throw new Error('Maps_API_KEY manquant dans les proprietes de script.');
+  }
+  return key;
+}
+
 
 /**
  * EL SERVICES - MODULE DE CONFIGURATION CENTRALISÉE
