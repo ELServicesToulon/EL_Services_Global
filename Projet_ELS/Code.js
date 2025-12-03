@@ -26,6 +26,7 @@ function onOpen(e) {
   const menuMaintenance = ui.createMenu('Maintenance')
     .addItem('Verifier l installation (Setup Master)', 'menuVerifierInstallation')
     .addItem('Completer les onglets requis (Setup Master)', 'setupSheetsMaster')
+    .addItem('Initialiser base etablissements desservis', 'menuProvisionnerBaseEtablissements')
     .addSeparator()
     .addItem("Nettoyer l'onglet Facturation", 'nettoyerOngletFacturation')
     .addItem('Reparer entetes Facturation', 'reparerEntetesFacturation')
@@ -136,6 +137,21 @@ function menuVerifierInstallation() {
   Logger.log(JSON.stringify(result));
   const message = result.ok ? 'OK' : 'Propriétés manquantes: ' + result.missingProps.join(', ');
   ui.alert('Vérification installation', message, ui.ButtonSet.OK);
+}
+
+/**
+ * Menu: provisionne/maj la base des etablissements desservis.
+ */
+function menuProvisionnerBaseEtablissements() {
+  const ui = SpreadsheetApp.getUi();
+  try {
+    const res = provisionnerBaseEtablissements();
+    const ajout = res && typeof res.added === 'number' ? res.added : 0;
+    const total = res && typeof res.total === 'number' ? res.total : 0;
+    ui.alert('Base etablissements', `Ajouts: ${ajout}\nTotal lignes (hors entete): ${total}`, ui.ButtonSet.OK);
+  } catch (err) {
+    ui.alert('Erreur', err && err.message ? err.message : String(err), ui.ButtonSet.OK);
+  }
 }
 
 /**

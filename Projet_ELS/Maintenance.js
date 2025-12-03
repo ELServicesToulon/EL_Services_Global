@@ -48,6 +48,7 @@ function getBaseSheetExpectations_() {
   return [
     { name: 'Clients', headers: ['Email', 'Raison Sociale', 'Adresse', 'SIRET', COLONNE_TYPE_REMISE_CLIENT, COLONNE_VALEUR_REMISE_CLIENT, COLONNE_NB_TOURNEES_OFFERTES, COLONNE_RESIDENT_CLIENT, COLONNE_ID_CLIENT, COLONNE_CODE_POSTAL_CLIENT], required: true },
     { name: SHEET_CODES_POSTAUX_RETRAIT, headers: [COLONNE_CODE_POSTAL_CLIENT, 'Libell�'], required: true },
+    { name: SHEET_ETABLISSEMENTS, headers: [COLONNE_TYPE_ETAB, COLONNE_NOM_ETAB, COLONNE_ADRESSE_ETAB, COLONNE_CODE_POSTAL_ETAB, COLONNE_VILLE_ETAB, COLONNE_CONTACT_ETAB, COLONNE_TELEPHONE_ETAB, COLONNE_EMAIL_ETAB, COLONNE_JOURS_ETAB, COLONNE_PLAGE_ETAB, COLONNE_SOURCE_ETAB, COLONNE_STATUT_ETAB, COLONNE_DERNIERE_MAJ_ETAB, COLONNE_NOTE_ETAB], required: false },
     { name: 'Facturation', headers: FACTURATION_HEADERS, required: true },
     { name: 'Plages_Bloquees', headers: ['Date', 'Heure_Debut', 'Heure_Fin'], required: false },
     { name: 'Logs', headers: ['Timestamp', 'Reservation ID', 'Client Email', 'R�sum�', 'Montant', 'Statut'], required: false },
