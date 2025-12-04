@@ -358,7 +358,7 @@ function importerEtablissementsParCodesPostaux(codes, type, options) {
  * @returns {string} Rapport d'importation.
  */
 function importerTousLesTypesPourCodesPostauxRetrait() {
-  const typesAImporter = ["Pharmacie", "EHPAD", "residence senior", "foyer de vie"];
+  const typesAImporter = ["Pharmacie", "EHPAD", "Residence Senior", "Foyer de Vie"];
   let totalAjoutes = 0;
   let totalRequetes = 0;
   let rapports = [];
