@@ -169,17 +169,28 @@ function processChatRequest(request) {
     var aiResult = null;
     try {
       var contextMessages = [];
-      if (context) {
-        contextMessages.push({
-          role: 'assistant',
-          content: "Contexte interface utilisateur : " + context
-        });
-      }
+      // On ne pousse pas le contexte ici comme message 'assistant' car cela briserait l'alternance User/Model attendue par Gemini.
+      // Le contexte est deja inclus dans le prompt utilisateur ci-dessous.
+
       var prompt = [
-        "Tu es l'assistant EL Services integre sur le site public. Reponds en francais avec une reponse courte et actionable.",
-        "Si l'utilisateur demande une reservation ou une aide logistique, guide-le en une ou deux etapes claires.",
-        "Contexte UI : " + context,
-        "Question : " + message
+        "Tu es l'assistant virtuel de EL Services (ELS), une société de logistique spécialisée pour les pharmacies et les EHPAD.",
+        "Ton rôle est d'aider les utilisateurs (pharmaciens, personnel soignant) à utiliser cette plateforme web.",
+        "",
+        "--- INFORMATIONS SUR LA PLATEFORME ---",
+        "1. RESERVATIONS : Permet de commander une tournée de livraison. Créneaux de 30min. Options : Urgence (<30min), Samedi, Forfait Résident (livraison individuelle).",
+        "2. FACTURATION : Permet de consulter l'historique des factures et de les télécharger.",
+        "3. CLIENTS : Gestion des fiches patients/résidents (création, modification).",
+        "4. TARIFS : Base 15€ (lun-ven), 25€ (samedi), 20€ (urgence). Supplément par arrêt : 5€ (puis dégressif).",
+        "5. HORAIRES : 08h30 - 18h30.",
+        "",
+        "--- CONSIGNES ---",
+        "- Réponds toujours en français.",
+        "- Sois concis, professionnel et direct.",
+        "- Si l'utilisateur a un problème technique, suggère de contacter le support à elservicestoulon@gmail.com.",
+        "- Base tes réponses sur le contexte UI fourni ci-dessous.",
+        "",
+        "Contexte UI actuel : " + context,
+        "Question utilisateur : " + message
       ].join("\n");
       aiResult = callGemini(contextMessages, prompt);
     } catch (aiErr) {
