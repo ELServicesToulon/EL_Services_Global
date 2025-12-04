@@ -351,3 +351,50 @@ function importerEtablissementsParCodesPostaux(codes, type, options) {
   Logger.log(rapport);
   return rapport;
 }
+
+/**
+ * Importe les etablissements pour les types definis (Pharmacie, EHPAD, etc.) 
+ * en se basant sur la liste de l'onglet Codes_Postaux_Retrait.
+ * @returns {string} Rapport d'importation.
+ */
+function importerTousLesTypesPourCodesPostauxRetrait() {
+  const typesAImporter = ["Pharmacie", "EHPAD", "residence senior", "foyer de vie"];
+  let totalAjoutes = 0;
+  let totalRequetes = 0;
+  let rapports = [];
+
+  try {
+    typesAImporter.forEach(function(type) {
+      Logger.log("Debut de l'import pour le type : " + type);
+      // Appelle la fonction existante sans liste de codes postaux pour utiliser l'onglet.
+      // Le 'type' est passe pour la requete Google Places.
+      var rapportPartiel = importerEtablissementsParCodesPostaux([], type);
+      
+      var matchAjoutes = String(rapportPartiel || "").match(/(\d+)\s+ajoute/);
+      var matchRequetes = String(rapportPartiel || "").match(/\((\d+)\s+requete/);
+
+      if (matchAjoutes && matchAjoutes[1]) {
+        totalAjoutes += parseInt(matchAjoutes[1], 10);
+      }
+      if (matchRequetes && matchRequetes[1]) {
+        totalRequetes += parseInt(matchRequetes[1], 10);
+      }
+      rapports.push(type + ": " + rapportPartiel);
+      Logger.log("Fin de l'import pour le type : " + type + ". Rapport: " + rapportPartiel);
+    });
+
+    const rapportFinal = "Importation terminee. Total ajoutes: " + totalAjoutes + " (" + totalRequetes + " requetes au total).\n\nDetails:\n" + rapports.join("\n");
+    Logger.log(rapportFinal);
+    
+    // Afficher le rapport a l'utilisateur
+    var ui = SpreadsheetApp.getUi();
+    ui.alert("Rapport d'importation", rapportFinal, ui.ButtonSet.OK);
+
+    return rapportFinal;
+
+  } catch (e) {
+    Logger.log("Erreur majeure durant l'importation par type : " + e.message);
+    SpreadsheetApp.getUi().alert("Erreur d'importation", e.message, SpreadsheetApp.getUi().ButtonSet.OK);
+    throw e;
+  }
+}
