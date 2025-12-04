@@ -86,6 +86,11 @@ var GooglePlacesService = {
         var parsedAddress = GooglePlacesService._parseAddress(place.formatted_address || "");
         var uniqueKey = (String(place.name || "") + "_" + String(parsedAddress.cp || "")).toLowerCase().replace(/\s/g, "");
 
+        Logger.log("Adresse formatee: " + place.formatted_address);
+        Logger.log("Adresse analysee: CP=" + parsedAddress.cp + ", Ville=" + parsedAddress.ville);
+        Logger.log("Cle unique: " + uniqueKey);
+        Logger.log("Deja existant: " + existingKeys.has(uniqueKey));
+
         // Ignore si pas de CP ou deja present
         if (!parsedAddress.cp || existingKeys.has(uniqueKey)) return;
 
