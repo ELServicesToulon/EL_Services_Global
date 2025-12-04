@@ -23,6 +23,7 @@ function getEtablissementsHeaders_() {
     COLONNE_JOURS_ETAB,
     COLONNE_PLAGE_ETAB,
     COLONNE_SOURCE_ETAB,
+    COLONNE_PHARMACIE_REFERENTE,
     COLONNE_STATUT_ETAB,
     COLONNE_DERNIERE_MAJ_ETAB,
     COLONNE_NOTE_ETAB,
@@ -127,6 +128,33 @@ function applyEtablissementsValidations_(ss, sheet) {
       .setAllowInvalid(false)
       .build();
     sheet.getRange(2, headerMap[COLONNE_CODE_POSTAL_ETAB] + 1, maxRows, 1).setDataValidation(cpValidation);
+  }
+
+  // Validation dynamique pour la colonne Pharmacie Référente
+  if (headerMap[COLONNE_PHARMACIE_REFERENTE] !== undefined) {
+    const data = sheet.getDataRange().getValues();
+    const idxType = headerMap[COLONNE_TYPE_ETAB];
+    const idxNom = headerMap[COLONNE_NOM_ETAB];
+    const pharmacies = [];
+
+    // Récupérer la liste des pharmacies existantes
+    for (let i = 1; i < data.length; i++) {
+      if (normalizeEtablissementType_(data[i][idxType]) === 'Pharmacie') {
+        const nom = String(data[i][idxNom] || '').trim();
+        if (nom) pharmacies.push(nom);
+      }
+    }
+
+    // Trier et dédoublonner
+    const uniquePharmacies = [...new Set(pharmacies)].sort();
+
+    if (uniquePharmacies.length > 0) {
+      const phValidation = SpreadsheetApp.newDataValidation()
+        .requireValueInList(uniquePharmacies, true)
+        .setAllowInvalid(true) // Permettre de laisser vide ou saisie libre si nouvelle
+        .build();
+      sheet.getRange(2, headerMap[COLONNE_PHARMACIE_REFERENTE] + 1, maxRows, 1).setDataValidation(phValidation);
+    }
   }
 }
 
