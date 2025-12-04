@@ -14,13 +14,14 @@ var PLACES_HEADERS = [
   "Contact",         // F
   "Telephone",       // G
   "Email",           // H
-  "Jours Souhaites", // I
-  "Plage Horaire",   // J
-  "Source",          // K
-  "Actif",           // L
-  "Derniere_MAJ",    // M
-  "Notes",           // N
-  "PlaceID"          // O
+  "Site Web",        // I
+  "Jours Souhaites", // J
+  "Plage Horaire",   // K
+  "Source",          // L
+  "Actif",           // M
+  "Derniere_MAJ",    // N
+  "Notes",           // O
+  "PlaceID"          // P
 ];
 
 var GooglePlacesService = {
@@ -124,7 +125,7 @@ var GooglePlacesService = {
   /**
    * Enrichit les lignes existantes qui ont un PlaceID mais pas de telephone.
    */
-  enrichirDetailsManquants: function() {
+  enrichirDetails: function() {
     try {
       var apiKey = GooglePlacesService._getApiKey();
       if (!apiKey) throw new Error("Cle API manquante.");
@@ -142,6 +143,7 @@ var GooglePlacesService = {
 
       for (var i = 0; i < data.length; i++) {
         var phone = String(data[i][colMap["Telephone"]] || "").trim();
+        var website = String(data[i][colMap["Site Web"]] || "").trim();
         var placeId = String(data[i][colMap["PlaceID"]] || "").trim();
         var notes = String(data[i][colMap["Notes"]] || "");
 
@@ -151,22 +153,32 @@ var GooglePlacesService = {
           if (match) placeId = match[1];
         }
 
-        // Si on a un PlaceID mais pas de telephone
-        if (placeId && !phone) {
+        // Si on a un PlaceID mais pas de telephone ou de site web
+        if (placeId && (!phone || !website)) {
           try {
             var url = "https://maps.googleapis.com/maps/api/place/details/json" +
                       "?place_id=" + encodeURIComponent(placeId) +
-                      "&fields=formatted_phone_number" +
+                      "&fields=formatted_phone_number,website" +
                       "&language=fr" +
                       "&key=" + apiKey;
 
             var resp = UrlFetchApp.fetch(url);
             var json = JSON.parse(resp.getContentText() || "{}");
 
-            if (json.status === "OK" && json.result && json.result.formatted_phone_number) {
-              // i + 2 car tableau base 0 et row commence a 2
-              sheet.getRange(i + 2, colMap["Telephone"] + 1).setValue(json.result.formatted_phone_number);
-              updatedCount++;
+            if (json.status === "OK" && json.result) {
+              var result = json.result;
+              var updated = false;
+              if (result.formatted_phone_number && !phone) {
+                sheet.getRange(i + 2, colMap["Telephone"] + 1).setValue(result.formatted_phone_number);
+                updated = true;
+              }
+              if (result.website && !website) {
+                sheet.getRange(i + 2, colMap["Site Web"] + 1).setValue(result.website);
+                updated = true;
+              }
+              if (updated) {
+                updatedCount++;
+              }
             }
             // Pause courte pour le rate limiting
             Utilities.sleep(200);
@@ -176,8 +188,8 @@ var GooglePlacesService = {
         }
       }
 
-      Logger.log(updatedCount + " telephones mis a jour.");
-      return updatedCount + " telephones mis a jour.";
+      Logger.log(updatedCount + " fiches mises a jour (telephone/site web).");
+      return updatedCount + " fiches mises a jour.";
 
     } catch (e) {
       Logger.log("Erreur Enrichissement : " + e.message);
@@ -273,8 +285,8 @@ function importerEtablissements(query, type) {
   return GooglePlacesService.importerEtablissements(query, type);
 }
 
-function enrichirDetailsManquants() {
-  return GooglePlacesService.enrichirDetailsManquants();
+function enrichirDetails() {
+  return GooglePlacesService.enrichirDetails();
 }
 
 // Aliases compatibilite legacy
@@ -282,8 +294,8 @@ function importerEtablissementsPlaces(query, type) {
   return GooglePlacesService.importerEtablissements(query, type);
 }
 
-function enrichirTelephonesPlaces() {
-  return GooglePlacesService.enrichirDetailsManquants();
+function enrichirDetailsPlaces() {
+  return GooglePlacesService.enrichirDetails();
 }
 
 function test_GooglePlaces() {
