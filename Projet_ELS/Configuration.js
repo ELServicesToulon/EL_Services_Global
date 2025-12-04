@@ -478,12 +478,14 @@ const COLONNE_VILLE_ETAB = 'Ville';
 const COLONNE_CONTACT_ETAB = 'Contact';
 const COLONNE_TELEPHONE_ETAB = 'Telephone';
 const COLONNE_EMAIL_ETAB = 'Email';
+const COLONNE_SITE_WEB_ETAB = 'Site Web';
 const COLONNE_JOURS_ETAB = 'Jours Souhaites';
 const COLONNE_PLAGE_ETAB = 'Plage Horaire';
 const COLONNE_SOURCE_ETAB = 'Source';
 const COLONNE_NOTE_ETAB = 'Notes';
 const COLONNE_STATUT_ETAB = 'Actif';
 const COLONNE_DERNIERE_MAJ_ETAB = 'Derniere_MAJ';
+const COLONNE_PLACE_ID_ETAB = 'PlaceID';
 
 
 // =================================================================
