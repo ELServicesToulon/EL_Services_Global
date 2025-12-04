@@ -28,6 +28,8 @@ function onOpen(e) {
     .addItem('Completer les onglets requis (Setup Master)', 'setupSheetsMaster')
     .addItem('Initialiser base etablissements desservis', 'menuProvisionnerBaseEtablissements')
     .addSeparator()
+    .addItem("Importer Etablissements (Pharmacies, EHPADs...)", "importerTousLesTypesPourCodesPostauxRetrait")
+    .addSeparator()
     .addItem("Nettoyer l'onglet Facturation", 'nettoyerOngletFacturation')
     .addItem('Reparer entetes Facturation', 'reparerEntetesFacturation')
     .addItem('Normaliser entetes Facturation', 'normaliserEntetesFacturation');
