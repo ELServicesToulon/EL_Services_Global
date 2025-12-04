@@ -28,6 +28,7 @@ function onOpen(e) {
     .addItem('Completer les onglets requis (Setup Master)', 'setupSheetsMaster')
     .addItem('Initialiser base etablissements desservis', 'menuProvisionnerBaseEtablissements')
     .addItem('Completer les emails base etablissements', 'menuCompleterEmailsBaseEtablissements')
+    .addItem('Auditer et enrichir base etablissements', 'auditBaseEtablissement')
     .addSeparator()
     .addItem("Importer Etablissements (Pharmacies, EHPADs...)", "importerTousLesTypesPourCodesPostauxRetrait")
     .addSeparator()
