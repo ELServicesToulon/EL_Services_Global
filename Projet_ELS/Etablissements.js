@@ -139,6 +139,73 @@ function extractCodePostalFromAddress_(adresse) {
 }
 
 /**
+ * Nettoie et valide un email.
+ * @param {string} value
+ * @returns {string}
+ */
+function normalizeEmailSafe_(value) {
+  const email = String(value || '').trim().toLowerCase();
+  if (!email) return '';
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
+}
+
+/**
+ * Construit un index des emails connus depuis Clients et Demandes.
+ * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} ss
+ * @returns {{index:Map<string,{email:string,source:string}>,stats:{clients:number,demandes:number}}}
+ */
+function construireIndexEmailsConnus_(ss) {
+  const index = new Map();
+  let clientsCount = 0;
+  let demandesCount = 0;
+
+  try {
+    const clientsSheet = ss.getSheetByName(SHEET_CLIENTS);
+    if (clientsSheet && clientsSheet.getLastRow() > 1) {
+      const idxClients = obtenirIndicesEnTetes(clientsSheet, ["Email", "Raison Sociale", COLONNE_CODE_POSTAL_CLIENT]);
+      const dataClients = clientsSheet.getDataRange().getValues();
+      for (let i = 1; i < dataClients.length; i++) {
+        const row = dataClients[i];
+        const email = normalizeEmailSafe_(row[idxClients["Email"]]);
+        const nom = row[idxClients["Raison Sociale"]];
+        const cp = row[idxClients[COLONNE_CODE_POSTAL_CLIENT]];
+        const key = buildEtablissementKey_('Pharmacie', nom, cp);
+        if (email && key && !index.has(key)) {
+          index.set(key, { email: email, source: 'Clients' });
+          clientsCount++;
+        }
+      }
+    }
+  } catch (errClients) {
+    Logger.log('[construireIndexEmailsConnus_] Clients error: ' + errClients);
+  }
+
+  try {
+    const demandesSheet = ss.getSheetByName(SHEET_DEMANDES_TOURNEE);
+    if (demandesSheet && demandesSheet.getLastRow() > 1) {
+      const idxDem = obtenirIndicesEnTetes(demandesSheet, ['etablissement_type', 'etablissement_nom', 'contact_email', 'adresse']);
+      const dataDem = demandesSheet.getDataRange().getValues();
+      for (let i = 1; i < dataDem.length; i++) {
+        const row = dataDem[i];
+        const type = normalizeEtablissementType_(row[idxDem['etablissement_type']]);
+        const nom = row[idxDem['etablissement_nom']];
+        const email = normalizeEmailSafe_(row[idxDem['contact_email']]);
+        const cp = extractCodePostalFromAddress_(row[idxDem['adresse']]);
+        const key = buildEtablissementKey_(type, nom, cp);
+        if (email && key && !index.has(key)) {
+          index.set(key, { email: email, source: 'Demandes' });
+          demandesCount++;
+        }
+      }
+    }
+  } catch (errDem) {
+    Logger.log('[construireIndexEmailsConnus_] Demandes error: ' + errDem);
+  }
+
+  return { index: index, stats: { clients: clientsCount, demandes: demandesCount } };
+}
+
+/**
  * Provisionne la base des etablissements desservis en important:
  * - les clients existants (type Pharmacie)
  * - les demandes de tournee (EHPAD / Residence / Foyer)
@@ -268,6 +335,68 @@ function provisionnerBaseEtablissements(options) {
   }
   applyEtablissementsValidations_(ss, sheet);
 
+  let emailsUpdate = null;
+  try {
+    emailsUpdate = completerEmailsBaseEtablissements({ ss: ss, sheet: sheet, indices: indices });
+  } catch (errEmails) {
+    Logger.log('[provisionnerBaseEtablissements] Email sync failed: ' + errEmails);
+  }
+
   const totalLignes = Math.max(0, sheet.getLastRow() - 1);
-  return { ok: true, added: lignesAAjouter.length, total: totalLignes, existing: clefs.size };
+  return {
+    ok: true,
+    added: lignesAAjouter.length,
+    total: totalLignes,
+    existing: clefs.size,
+    emailsUpdated: emailsUpdate && typeof emailsUpdate.updated === 'number' ? emailsUpdate.updated : 0
+  };
+}
+
+/**
+ * Complete les emails manquants dans Base_Etablissements depuis Clients/Demandes.
+ * @param {{ss?:GoogleAppsScript.Spreadsheet.Spreadsheet,sheet?:GoogleAppsScript.Spreadsheet.Sheet,indices?:Object,emailIndex?:{index:Map,stats:Object}}=} options
+ * @returns {{ok:boolean,updated:number,total:number,sourceEmails:{clients:number,demandes:number}}}
+ */
+function completerEmailsBaseEtablissements(options) {
+  const opts = options || {};
+  const ss = opts.ss || SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
+  const sheet = opts.sheet || ensureEtablissementsSheet_(ss);
+  const headers = getEtablissementsHeaders_();
+  const indices = opts.indices || obtenirIndicesEnTetes(sheet, headers);
+  const emailIndexData = opts.emailIndex || construireIndexEmailsConnus_(ss);
+  const emailIndex = emailIndexData.index || new Map();
+  const stats = emailIndexData.stats || { clients: 0, demandes: 0 };
+
+  const data = sheet.getDataRange().getValues();
+  const idxType = indices[COLONNE_TYPE_ETAB];
+  const idxNom = indices[COLONNE_NOM_ETAB];
+  const idxCp = indices[COLONNE_CODE_POSTAL_ETAB];
+  const idxEmail = indices[COLONNE_EMAIL_ETAB];
+  const idxSource = indices[COLONNE_SOURCE_ETAB];
+  const idxMaj = indices[COLONNE_DERNIERE_MAJ_ETAB];
+
+  let updated = 0;
+  const now = new Date();
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (normalizeEmailSafe_(row[idxEmail])) {
+      continue;
+    }
+    const key = buildEtablissementKey_(row[idxType], row[idxNom], row[idxCp]);
+    const candidate = key ? emailIndex.get(key) : null;
+    if (candidate && candidate.email) {
+      const sheetRow = i + 1;
+      sheet.getRange(sheetRow, idxEmail + 1).setValue(candidate.email);
+      if (typeof idxSource === 'number' && !row[idxSource] && candidate.source) {
+        sheet.getRange(sheetRow, idxSource + 1).setValue(candidate.source);
+      }
+      if (typeof idxMaj === 'number') {
+        sheet.getRange(sheetRow, idxMaj + 1).setValue(now);
+      }
+      updated++;
+    }
+  }
+
+  return { ok: true, updated: updated, total: Math.max(0, data.length - 1), sourceEmails: stats };
 }

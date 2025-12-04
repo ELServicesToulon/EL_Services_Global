@@ -27,6 +27,7 @@ function onOpen(e) {
     .addItem('Verifier l installation (Setup Master)', 'menuVerifierInstallation')
     .addItem('Completer les onglets requis (Setup Master)', 'setupSheetsMaster')
     .addItem('Initialiser base etablissements desservis', 'menuProvisionnerBaseEtablissements')
+    .addItem('Completer les emails base etablissements', 'menuCompleterEmailsBaseEtablissements')
     .addSeparator()
     .addItem("Importer Etablissements (Pharmacies, EHPADs...)", "importerTousLesTypesPourCodesPostauxRetrait")
     .addSeparator()
@@ -151,6 +152,21 @@ function menuProvisionnerBaseEtablissements() {
     const ajout = res && typeof res.added === 'number' ? res.added : 0;
     const total = res && typeof res.total === 'number' ? res.total : 0;
     ui.alert('Base etablissements', `Ajouts: ${ajout}\nTotal lignes (hors entete): ${total}`, ui.ButtonSet.OK);
+  } catch (err) {
+    ui.alert('Erreur', err && err.message ? err.message : String(err), ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Menu: complete les emails manquants dans Base_Etablissements.
+ */
+function menuCompleterEmailsBaseEtablissements() {
+  const ui = SpreadsheetApp.getUi();
+  try {
+    const res = completerEmailsBaseEtablissements();
+    const maj = res && typeof res.updated === 'number' ? res.updated : 0;
+    const total = res && typeof res.total === 'number' ? res.total : 0;
+    ui.alert('Emails Base etablissements', `Emails ajoutes: ${maj}\nTotal lignes (hors entete): ${total}`, ui.ButtonSet.OK);
   } catch (err) {
     ui.alert('Erreur', err && err.message ? err.message : String(err), ui.ButtonSet.OK);
   }
