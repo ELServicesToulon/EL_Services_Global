@@ -294,3 +294,65 @@ function enrichirTelephonesPlaces() {
 function test_GooglePlaces() {
   GooglePlacesService.importerEtablissements("Pharmacie 83000 Toulon", "Pharmacie");
 }
+
+/**
+ * Importe les etablissements pour une liste de codes postaux (ou depuis Codes_Postaux_Retrait si vide).
+ * @param {Array<string|{codePostal:string,commune?:string}>} codes Liste explicite; si vide, lit l'onglet Codes_Postaux_Retrait.
+ * @param {string} type Type d'etablissement (ex: "Pharmacie").
+ * @param {{sleepMs?:number}=} options Options (pause entre appels).
+ * @returns {string} Rapport agregat (ex: "30 ajoutes. (3 requetes)")
+ */
+function importerEtablissementsParCodesPostaux(codes, type, options) {
+  var sleepMs = (options && options.sleepMs) || 250;
+  var typeFinal = type || "Pharmacie";
+  var liste = [];
+
+  // Si aucune liste fournie, on tente de lire Codes_Postaux_Retrait
+  if (!Array.isArray(codes) || codes.length === 0) {
+    try {
+      if (typeof obtenirCodesPostauxRetraitAvecCommunes === "function") {
+        liste = obtenirCodesPostauxRetraitAvecCommunes({ forceRefresh: true });
+      } else if (typeof obtenirCodesPostauxRetrait === "function") {
+        liste = obtenirCodesPostauxRetrait({ forceRefresh: true }).map(function(cp) {
+          return { codePostal: cp, commune: "" };
+        });
+      }
+    } catch (_err) {
+      // On laissera le cas d'absence gerer plus bas
+    }
+  } else {
+    liste = codes.map(function(entry) {
+      if (entry && typeof entry === "object") {
+        return { codePostal: entry.codePostal || entry.cp || entry.code || "", commune: entry.commune || entry.ville || entry.libelle || "" };
+      }
+      return { codePostal: entry, commune: "" };
+    });
+  }
+
+  if (!Array.isArray(liste) || liste.length === 0) {
+    throw new Error("Aucun code postal fourni ou disponible dans Codes_Postaux_Retrait.");
+  }
+
+  var totalAjoutes = 0;
+  var requetes = 0;
+
+  liste.forEach(function(item) {
+    var cp = String(item.codePostal || "").trim();
+    if (!cp) return;
+    var communePart = item.commune ? (" " + String(item.commune).trim()) : "";
+    var query = typeFinal + " " + cp + communePart;
+    var res = GooglePlacesService.importerEtablissements(query, typeFinal);
+    var match = String(res || "").match(/(\d+)\s+ajoute/);
+    if (match && match[1]) {
+      totalAjoutes += Number(match[1]);
+    }
+    requetes++;
+    if (sleepMs > 0) {
+      Utilities.sleep(sleepMs);
+    }
+  });
+
+  var rapport = totalAjoutes + " ajoutes. (" + requetes + " requetes)";
+  Logger.log(rapport);
+  return rapport;
+}
