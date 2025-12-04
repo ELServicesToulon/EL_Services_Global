@@ -7,7 +7,7 @@
  * Le nom de la fonction qui doit etre executee par le declencheur.
  * @const {string}
  */
-const FONCTION_A_DECLENCHER = 'checkBatteryHealth';
+const FONCTION_A_DECLENCHER = 'genererRapportTesla';
 
 /**
  * Installe deux declencheurs quotidiens (07h et 19h) pour surveiller la batterie Tesla.
