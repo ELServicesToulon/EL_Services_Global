@@ -7,10 +7,11 @@
 
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
 // Liste ordonnée des modèles à tenter : du plus léger/rapide au plus performant
-// 1. gemini-1.5-flash : Rapide, économique (modèle par défaut)
-// 2. gemini-1.5-pro   : Plus performant, contexte plus large (si flash échoue)
-// 3. gemini-pro       : Legacy fallback
-const GEMINI_MODELS = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+// 1. gemini-2.0-flash : Plus récent, très performant (recommandé)
+// 2. gemini-1.5-flash : Rapide, économique (fallback)
+// 3. gemini-1.5-pro   : Plus performant, contexte plus large
+// 4. gemini-pro       : Legacy fallback
+const GEMINI_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
 
 const CHAT_ASSISTANT_HISTORY_LIMIT = 10;
 const CHAT_ASSISTANT_SYSTEM_PROMPT = 'Assistant pour pharmaciens en EHPAD; réponses concises; pas de données personnelles.';
