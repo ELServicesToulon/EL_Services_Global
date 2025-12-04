@@ -19,12 +19,14 @@ function getEtablissementsHeaders_() {
     COLONNE_CONTACT_ETAB,
     COLONNE_TELEPHONE_ETAB,
     COLONNE_EMAIL_ETAB,
+    COLONNE_SITE_WEB_ETAB,
     COLONNE_JOURS_ETAB,
     COLONNE_PLAGE_ETAB,
     COLONNE_SOURCE_ETAB,
     COLONNE_STATUT_ETAB,
     COLONNE_DERNIERE_MAJ_ETAB,
-    COLONNE_NOTE_ETAB
+    COLONNE_NOTE_ETAB,
+    COLONNE_PLACE_ID_ETAB
   ];
 }
 
@@ -252,12 +254,14 @@ function provisionnerBaseEtablissements(options) {
       item.contact || '',
       item.telephone || '',
       item.email || '',
+      item.siteWeb || '',
       item.jours || '',
       item.plage || '',
       item.source || '',
       true,
       new Date(),
-      item.note || ''
+      item.note || '',
+      item.placeId || ''
     ]);
   }
 
@@ -399,4 +403,291 @@ function completerEmailsBaseEtablissements(options) {
   }
 
   return { ok: true, updated: updated, total: Math.max(0, data.length - 1), sourceEmails: stats };
+}
+
+// =================================================================
+//              IMPORT GOOGLE PLACES (fusion Service_GooglePlaces)
+// =================================================================
+
+const GOOGLE_PLACES_DETAILS_FIELDS = 'formatted_phone_number,website,url';
+
+function googlePlacesGetApiKey_() {
+  if (typeof Config !== 'undefined' && typeof Config.getMapsApiKey === 'function') {
+    return Config.getMapsApiKey();
+  }
+  if (typeof getMapsApiKey === 'function') {
+    return getMapsApiKey();
+  }
+  throw new Error('Maps_API_KEY manquant dans la configuration.');
+}
+
+function googlePlacesParseAddress_(formattedAddress) {
+  const result = { cp: '', ville: '' };
+  if (!formattedAddress) return result;
+  const match = String(formattedAddress).match(/(\d{5})\s+([^,]+)/);
+  if (match) {
+    result.cp = match[1];
+    result.ville = match[2].trim().replace(/, France$/, '').trim();
+  }
+  return result;
+}
+
+function googlePlacesFetchDetails_(placeId, apiKey) {
+  if (!placeId) return {};
+  try {
+    const url = 'https://maps.googleapis.com/maps/api/place/details/json'
+      + '?place_id=' + encodeURIComponent(placeId)
+      + '&fields=' + encodeURIComponent(GOOGLE_PLACES_DETAILS_FIELDS)
+      + '&language=fr'
+      + '&key=' + apiKey;
+    const resp = UrlFetchApp.fetch(url);
+    const json = JSON.parse(resp.getContentText() || '{}');
+    if (json.status === 'OK' && json.result) {
+      return {
+        phone: json.result.formatted_phone_number || '',
+        website: json.result.website || '',
+        url: json.result.url || ''
+      };
+    }
+  } catch (e) {
+    Logger.log('Erreur details API pour ' + placeId + ': ' + e);
+  }
+  return {};
+}
+
+function googlePlacesGetSheetContext_() {
+  const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
+  const sheet = ensureEtablissementsSheet_(ss);
+  const headers = getEtablissementsHeaders_();
+  const indices = obtenirIndicesEnTetes(sheet, headers);
+  return { ss: ss, sheet: sheet, headers: headers, indices: indices };
+}
+
+function googlePlacesImporterEtablissements_(query, typeEtablissement) {
+  const apiKey = googlePlacesGetApiKey_();
+  if (!apiKey) {
+    throw new Error('Cle API Google Maps manquante.');
+  }
+  const typeFinal = typeEtablissement || 'Pharmacie';
+  const { sheet, headers, indices } = googlePlacesGetSheetContext_();
+
+  const existingKeys = new Set();
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const cle = buildEtablissementKey_(row[indices[COLONNE_TYPE_ETAB]], row[indices[COLONNE_NOM_ETAB]], row[indices[COLONNE_CODE_POSTAL_ETAB]]);
+    if (cle) {
+      existingKeys.add(cle);
+    }
+  }
+
+  const searchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
+    + '?query=' + encodeURIComponent(query)
+    + '&region=fr'
+    + '&language=fr'
+    + '&key=' + apiKey;
+  const response = UrlFetchApp.fetch(searchUrl);
+  const json = JSON.parse(response.getContentText() || '{}');
+  if (json.status !== 'OK' && json.status !== 'ZERO_RESULTS') {
+    throw new Error('Erreur API Places : ' + json.status + ' - ' + (json.error_message || ''));
+  }
+
+  const results = Array.isArray(json.results) ? json.results : [];
+  if (results.length === 0) {
+    return '0 ajoutes.';
+  }
+
+  const newRows = [];
+  const now = new Date();
+
+  results.forEach(function(place) {
+    const parsed = googlePlacesParseAddress_(place.formatted_address || '');
+    const cp = normaliserCodePostal(parsed.cp);
+    if (!cp) return;
+    const key = buildEtablissementKey_(typeFinal, place.name, cp);
+    if (!key || existingKeys.has(key)) return;
+
+    const details = place.place_id ? googlePlacesFetchDetails_(place.place_id, apiKey) : {};
+    const row = new Array(headers.length).fill('');
+    row[indices[COLONNE_TYPE_ETAB]] = typeFinal;
+    row[indices[COLONNE_NOM_ETAB]] = place.name || '';
+    row[indices[COLONNE_ADRESSE_ETAB]] = place.formatted_address || '';
+    row[indices[COLONNE_CODE_POSTAL_ETAB]] = cp;
+    row[indices[COLONNE_VILLE_ETAB]] = parsed.ville || '';
+    row[indices[COLONNE_TELEPHONE_ETAB]] = details.phone || '';
+    row[indices[COLONNE_SITE_WEB_ETAB]] = details.website || '';
+    row[indices[COLONNE_SOURCE_ETAB]] = 'GoogleAPI';
+    row[indices[COLONNE_STATUT_ETAB]] = true;
+    row[indices[COLONNE_DERNIERE_MAJ_ETAB]] = now;
+    if (place.place_id) {
+      row[indices[COLONNE_NOTE_ETAB]] = 'PlaceID: ' + place.place_id;
+      row[indices[COLONNE_PLACE_ID_ETAB]] = place.place_id;
+    }
+    if (details.url) {
+      const existingNote = row[indices[COLONNE_NOTE_ETAB]] || '';
+      row[indices[COLONNE_NOTE_ETAB]] = (existingNote ? existingNote + ' | ' : '') + 'URL: ' + details.url;
+    }
+
+    newRows.push(row);
+    existingKeys.add(key);
+    if (place.place_id) {
+      Utilities.sleep(150);
+    }
+  });
+
+  if (newRows.length) {
+    sheet.getRange(sheet.getLastRow() + 1, 1, newRows.length, headers.length).setValues(newRows);
+  }
+  return (newRows.length || 0) + ' ajoutes.';
+}
+
+/**
+ * Importe des etablissements via Google Places (texte libre).
+ * @param {string} query
+ * @param {string} typeEtablissement
+ * @returns {string}
+ */
+function importerEtablissements(query, typeEtablissement) {
+  return googlePlacesImporterEtablissements_(query, typeEtablissement);
+}
+
+/**
+ * Enrichit les lignes possedant un PlaceID (telephone, site web).
+ * @returns {string}
+ */
+function enrichirDetails() {
+  return enrichirDetailsBaseEtablissements_();
+}
+
+function enrichirDetailsBaseEtablissements_() {
+  const apiKey = googlePlacesGetApiKey_();
+  const { sheet, indices } = googlePlacesGetSheetContext_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 'Vide';
+
+  const data = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+  let updatedCount = 0;
+
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    const phone = String(row[indices[COLONNE_TELEPHONE_ETAB]] || '').trim();
+    const site = String(row[indices[COLONNE_SITE_WEB_ETAB]] || '').trim();
+    let placeId = String(row[indices[COLONNE_PLACE_ID_ETAB]] || '').trim();
+    const note = String(row[indices[COLONNE_NOTE_ETAB]] || '');
+
+    if (!placeId && note.indexOf('PlaceID:') > -1) {
+      const match = note.match(/PlaceID:\s*([A-Za-z0-9_\-]+)/);
+      if (match) placeId = match[1];
+    }
+
+    if (placeId && (!phone || !site)) {
+      const details = googlePlacesFetchDetails_(placeId, apiKey);
+      if (details.phone && !phone) {
+        sheet.getRange(i + 2, indices[COLONNE_TELEPHONE_ETAB] + 1).setValue(details.phone);
+        updatedCount++;
+      }
+      if (details.website && !site) {
+        sheet.getRange(i + 2, indices[COLONNE_SITE_WEB_ETAB] + 1).setValue(details.website);
+        updatedCount++;
+      }
+      Utilities.sleep(150);
+    }
+  }
+  return updatedCount + ' fiches mises a jour.';
+}
+
+/**
+ * Importe les etablissements pour une liste de codes postaux (ou depuis Codes_Postaux_Retrait si vide).
+ * @param {Array<string|{codePostal:string,commune?:string}>} codes
+ * @param {string} type
+ * @param {{sleepMs?:number}=} options
+ * @returns {string}
+ */
+function importerEtablissementsParCodesPostaux(codes, type, options) {
+  const sleepMs = (options && options.sleepMs) || 250;
+  const typeFinal = type || 'Pharmacie';
+  let liste = [];
+
+  if (!Array.isArray(codes) || codes.length === 0) {
+    try {
+      if (typeof obtenirCodesPostauxRetraitAvecCommunes === 'function') {
+        liste = obtenirCodesPostauxRetraitAvecCommunes({ forceRefresh: true });
+      } else if (typeof obtenirCodesPostauxRetrait === 'function') {
+        liste = obtenirCodesPostauxRetrait({ forceRefresh: true }).map(function(cp) {
+          return { codePostal: cp, commune: '' };
+        });
+      }
+    } catch (_err) {}
+  } else {
+    liste = codes.map(function(entry) {
+      if (entry && typeof entry === 'object') {
+        return { codePostal: entry.codePostal || entry.cp || entry.code || '', commune: entry.commune || entry.ville || entry.libelle || '' };
+      }
+      return { codePostal: entry, commune: '' };
+    });
+  }
+
+  if (!Array.isArray(liste) || liste.length === 0) {
+    throw new Error('Aucun code postal fourni ou disponible dans Codes_Postaux_Retrait.');
+  }
+
+  let totalAjoutes = 0;
+  let requetes = 0;
+
+  liste.forEach(function(item) {
+    const cp = String(item.codePostal || '').trim();
+    if (!cp) return;
+    const communePart = item.commune ? (' ' + String(item.commune).trim()) : '';
+    const query = typeFinal + ' ' + cp + communePart;
+    const res = importerEtablissements(query, typeFinal);
+    const match = String(res || '').match(/(\d+)\s+ajoute/);
+    if (match && match[1]) {
+      totalAjoutes += Number(match[1]);
+    }
+    requetes++;
+    if (sleepMs > 0) {
+      Utilities.sleep(sleepMs);
+    }
+  });
+
+  const rapport = totalAjoutes + ' ajoutes. (' + requetes + ' requetes)';
+  Logger.log(rapport);
+  return rapport;
+}
+
+/**
+ * Importe les etablissements pour les types definis (Pharmacie, EHPAD, etc.) 
+ * en se basant sur la liste de l'onglet Codes_Postaux_Retrait.
+ * @returns {string}
+ */
+function importerTousLesTypesPourCodesPostauxRetrait() {
+  const typesAImporter = ['Pharmacie', 'EHPAD', 'Residence Senior', 'Foyer de Vie'];
+  let totalAjoutes = 0;
+  let totalRequetes = 0;
+  const rapports = [];
+
+  typesAImporter.forEach(function(type) {
+    Logger.log('Debut de l import pour le type : ' + type);
+    const rapportPartiel = importerEtablissementsParCodesPostaux([], type);
+    const matchAjoutes = String(rapportPartiel || '').match(/(\d+)\s+ajoute/);
+    const matchRequetes = String(rapportPartiel || '').match(/\((\d+)\s+requete/);
+
+    if (matchAjoutes && matchAjoutes[1]) {
+      totalAjoutes += parseInt(matchAjoutes[1], 10);
+    }
+    if (matchRequetes && matchRequetes[1]) {
+      totalRequetes += parseInt(matchRequetes[1], 10);
+    }
+    rapports.push(type + ': ' + rapportPartiel);
+    Logger.log('Fin de l import pour le type : ' + type + '. Rapport: ' + rapportPartiel);
+  });
+
+  const rapportFinal = 'Importation terminee. Total ajoutes: ' + totalAjoutes + ' (' + totalRequetes + ' requetes au total).\n\nDetails:\n' + rapports.join('\n');
+  Logger.log(rapportFinal);
+  try {
+    const ui = SpreadsheetApp.getUi();
+    ui.alert('Rapport d importation', rapportFinal, ui.ButtonSet.OK);
+  } catch (_errUi) {}
+
+  return rapportFinal;
 }
