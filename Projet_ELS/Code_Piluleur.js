@@ -169,12 +169,9 @@ function processChatRequest(request) {
     var aiResult = null;
     try {
       var contextMessages = [];
-      if (context) {
-        contextMessages.push({
-          role: 'assistant',
-          content: "Contexte interface utilisateur : " + context
-        });
-      }
+      // On ne pousse pas le contexte ici comme message 'assistant' car cela briserait l'alternance User/Model attendue par Gemini.
+      // Le contexte est deja inclus dans le prompt utilisateur ci-dessous.
+
       var prompt = [
         "Tu es l'assistant EL Services integre sur le site public. Reponds en francais avec une reponse courte et actionable.",
         "Si l'utilisateur demande une reservation ou une aide logistique, guide-le en une ou deux etapes claires.",
