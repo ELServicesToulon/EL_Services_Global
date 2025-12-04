@@ -86,11 +86,6 @@ var GooglePlacesService = {
         var parsedAddress = GooglePlacesService._parseAddress(place.formatted_address || "");
         var uniqueKey = (String(place.name || "") + "_" + String(parsedAddress.cp || "")).toLowerCase().replace(/\s/g, "");
 
-        Logger.log("Adresse formatee: " + place.formatted_address);
-        Logger.log("Adresse analysee: CP=" + parsedAddress.cp + ", Ville=" + parsedAddress.ville);
-        Logger.log("Cle unique: " + uniqueKey);
-        Logger.log("Deja existant: " + existingKeys.has(uniqueKey));
-
         // Ignore si pas de CP ou deja present
         if (!parsedAddress.cp || existingKeys.has(uniqueKey)) return;
 
@@ -258,21 +253,16 @@ var GooglePlacesService = {
   _parseAddress: function(formattedAddress) {
     var result = { cp: "", ville: "" };
     if (!formattedAddress) return result;
-    var match = String(formattedAddress).match(/(\d{5})\s+(.+?),/);
-    if (match && match.length >= 3) {
+    
+    // Regex pour capturer un CP a 5 chiffres et la ville qui le suit.
+    // Ex: ", 83110 Sanary-sur-Mer"
+    var match = String(formattedAddress).match(/(\d{5})\s+([^,]+)/);
+    
+    if (match) {
       result.cp = match[1];
-      result.ville = match[2].trim();
-    } else {
-      var parts = String(formattedAddress).split(",");
-      if (parts.length >= 2) {
-         var cityPart = parts[parts.length - 2].trim();
-         var cpMatch = cityPart.match(/\d{5}/);
-         if (cpMatch) {
-           result.cp = cpMatch[0];
-           result.ville = cityPart.replace(cpMatch[0], "").trim();
-         }
-      }
+      result.ville = match[2].trim().replace(/, France$/, '').trim();
     }
+    
     return result;
   }
 };
