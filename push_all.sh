@@ -4,7 +4,7 @@
 
 set -e # Exit immediately if a command exits with a non-zero status.
 
-PROJECT_DIRS=("Projet_ELS")
+PROJECT_DIRS=("Projet_ELS" "App_Livreur" "App_Resideur")
 
 for dir in "${PROJECT_DIRS[@]}"; do
   echo "Pushing project in $dir..."
