@@ -300,6 +300,8 @@ function getPageHandler_(page) {
       return handlePiluleurPage_;
     case 'cgv':
       return handleCgvPage_;
+    case 'regles':
+      return handleReglesPage_;
     case 'accueil':
     case 'home':
     case 'index':
@@ -411,6 +413,13 @@ function handleCgvPage_() {
   templateCgv.brandingLogoPublicUrl = BRANDING_LOGO_PUBLIC_URL;
   return templateCgv.evaluate()
     .setTitle(NOM_ENTREPRISE + ' | CGV')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
+}
+
+function handleReglesPage_() {
+  const template = HtmlService.createTemplateFromFile('Regles_Utilisation');
+  return template.evaluate()
+    .setTitle(NOM_ENTREPRISE + ' | Règles d\'utilisation')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
 }
 
