@@ -8,8 +8,69 @@ var MobileAPI_Config = {
   // Remplacer par les IDs réels ou utiliser PropertiesService
   ID_SPREADSHEET_DATA: PropertiesService.getScriptProperties().getProperty("ID_FEUILLE_CALCUL"),
   NOM_ONGLET_ETABLISSEMENTS: "Base_Etablissements",
-  NOM_ONGLET_TRACE: "TRACE_Livraisons"
+  NOM_ONGLET_TRACE: "TRACE_Livraisons",
+  ID_CALENDRIER: PropertiesService.getScriptProperties().getProperty("ID_CALENDRIER")
 };
+
+/**
+ * Récupère les réservations du jour depuis Google Calendar.
+ * Sert à afficher la "Feuille de route" au chauffeur.
+ * @return {Object} {status: "success", data: Array}
+ */
+function api_getDailyReservations() {
+  try {
+    var calId = MobileAPI_Config.ID_CALENDRIER;
+    if (!calId) {
+      // Fallback si ID_CALENDRIER n'est pas dans les Props mais accessible via config globale simulée ou erreur
+      throw new Error("ID_CALENDRIER non défini dans les ScriptProperties.");
+    }
+
+    var cal = CalendarApp.getCalendarById(calId);
+    if (!cal) {
+      throw new Error("Calendrier introuvable avec ID: " + calId);
+    }
+
+    var now = new Date();
+    var startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    var endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+    var events = cal.getEvents(startOfDay, endOfDay);
+    var reservations = [];
+
+    // Formatage des événements pour l'UI
+    for (var i = 0; i < events.length; i++) {
+      var evt = events[i];
+      var title = evt.getTitle();
+
+      // On filtre pour ne garder que ce qui ressemble à une réservation ELS
+      // (ex: "Réservation EL Services - NomClient")
+      // Ou on prend tout si c'est le calendrier dédié.
+
+      reservations.push({
+        id: evt.getId(),
+        title: title,
+        startTime: Utilities.formatDate(evt.getStartTime(), Session.getScriptTimeZone(), "HH:mm"),
+        endTime: Utilities.formatDate(evt.getEndTime(), Session.getScriptTimeZone(), "HH:mm"),
+        description: evt.getDescription() || "",
+        location: evt.getLocation() || ""
+      });
+    }
+
+    return {
+      status: "success",
+      date: Utilities.formatDate(now, Session.getScriptTimeZone(), "dd/MM/yyyy"),
+      count: reservations.length,
+      data: reservations
+    };
+
+  } catch (e) {
+    console.error("Erreur api_getDailyReservations: " + e.toString());
+    return {
+      status: "error",
+      message: e.toString()
+    };
+  }
+}
 
 /**
  * Récupère la liste complète des établissements avec leurs coordonnées GPS

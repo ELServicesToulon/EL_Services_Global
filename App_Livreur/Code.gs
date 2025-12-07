@@ -23,6 +23,10 @@ function rpc_loadData() {
   return api_getEtablissementsGPS();
 }
 
+function rpc_getDailyReservations() {
+  return api_getDailyReservations();
+}
+
 function rpc_sendReport(data) {
   return api_saveLivraisonReport(data);
 }

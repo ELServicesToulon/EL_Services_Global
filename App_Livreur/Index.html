@@ -52,6 +52,42 @@
         margin-bottom: 20px;
       }
 
+      /* Liste des réservations */
+      #reservations-container {
+        width: 100%;
+        max-width: 600px;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .resa-card {
+        background-color: #222;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .resa-time {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2196f3;
+        margin-right: 15px;
+      }
+      .resa-details {
+        flex-grow: 1;
+      }
+      .resa-title {
+        font-size: 1rem;
+        color: white;
+      }
+      .resa-desc {
+        font-size: 0.8rem;
+        color: #aaa;
+      }
+
       /* Carte Etablissement Détecté */
       .card-etablissement {
         background-color: #2c2c2c;
@@ -158,6 +194,14 @@
 
       <div id="gps-info">Recherche satellite...</div>
 
+      <!-- Section Réservations -->
+      <div id="reservations-container">
+        <h3 style="color:#888; border-bottom:1px solid #333; padding-bottom:5px;">TOURNÉES DU JOUR</h3>
+        <div id="reservations-list">
+            <p style="color:#555; font-style:italic;">Chargement des réservations...</p>
+        </div>
+      </div>
+
       <div id="card-display" class="card-etablissement">
         <h1>En transit</h1>
         <p>Approchez-vous d'un point de livraison...</p>
@@ -197,10 +241,42 @@
       window.onload = function() {
         console.log("App Démarrée");
         loadEstablishments();
+        loadReservations();
         startGPS();
       };
 
       // CHARGEMENT DES DONNÉES
+      function loadReservations() {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            const container = document.getElementById('reservations-list');
+            if (res.status === 'success' && res.data.length > 0) {
+              container.innerHTML = "";
+              res.data.forEach(r => {
+                // Nettoyage description pour affichage court
+                let shortDesc = r.description.replace(/<[^>]*>?/gm, ''); // Strip HTML
+                if (shortDesc.length > 50) shortDesc = shortDesc.substring(0, 50) + "...";
+
+                container.innerHTML += `
+                  <div class="resa-card">
+                    <div class="resa-time">${r.startTime}</div>
+                    <div class="resa-details">
+                      <div class="resa-title">${r.title}</div>
+                      <div class="resa-desc">${shortDesc}</div>
+                    </div>
+                  </div>
+                `;
+              });
+            } else {
+              container.innerHTML = `<p style="color:#555">Aucune tournée prévue aujourd'hui (${res.date || ''}).</p>`;
+            }
+          })
+          .withFailureHandler(function(e) {
+            document.getElementById('reservations-list').innerText = "Erreur chargement agenda.";
+          })
+          .rpc_getDailyReservations();
+      }
+
       function loadEstablishments() {
         document.getElementById('gps-info').innerText = "Chargement base de données...";
         google.script.run
