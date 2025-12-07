@@ -16,15 +16,10 @@ function include(filename) {
 }
 
 /**
- * Pont vers le Backend Central (Projet_ELS)
- * Dans une architecture réelle, App_Livreur serait une librairie liée ou ferait des appels API.
- * Ici, pour simplifier le code "copier-coller", je simule l'appel local,
- * MAIS ces fonctions devraient appeler la librairie "Projet_ELS" si liée.
+ * Pont vers le Backend
+ * Ces fonctions appellent la logique métier définie dans Backend_Handler.gs
  */
 function rpc_loadData() {
-  // Simulation : Appel de la fonction définie dans PARTIE 1.
-  // Si les fichiers sont dans le même projet (Monorepo global), cela fonctionne direct.
-  // Sinon, utiliser : return Projet_ELS.api_getEtablissementsGPS();
   return api_getEtablissementsGPS();
 }
 
