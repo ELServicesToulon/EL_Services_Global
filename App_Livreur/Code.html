@@ -1,22 +1,16 @@
-/**
- * Logique client (JavaScript) pour l'application Livreur.
- * Ce code est inclus via l'appel `<?!= include('Code'); ?>` dans Index.html.
- */
+<!-- Logique client (JavaScript) pour l'application Livreur.
+     Ce fichier est inclus via <?!= include('Code'); ?> dans Index.html. -->
 <script>
   // Variables globales (remplacez par l'email réel après authentification)
   const CHAUFFEUR_EMAIL = 'maning2@hotmail.com'; // À remplacer par un mécanisme d'authentification réel
   const CHAUFFEUR_ID = 'LIV-101'; // À remplacer par l'ID réel après authentification
 
-  /**
-   * Initialise l'application en chargeant les tournées.
-   */
+  // Initialise l'application en chargeant les tournées.
   function initApp() {
     loadTournees();
   }
 
-  /**
-   * Appelle le serveur pour obtenir la liste des tournées.
-   */
+  // Appelle le serveur pour obtenir la liste des tournées.
   function loadTournees() {
     google.script.run
       .withSuccessHandler(renderTournees)
@@ -24,24 +18,14 @@
       .getListeTournees(CHAUFFEUR_EMAIL);
   }
 
-  /**
-   * Gère les erreurs du côté serveur.
-   * @param {string} error L'objet d'erreur.
-   */
+  // Gère les erreurs côté serveur.
   function handleError(error) {
     console.error("Erreur serveur :", error);
     const listDiv = document.getElementById('tournees-list');
     listDiv.innerHTML = `<p style="color: red; text-align: center;">Erreur de chargement: ${error.message || error.toString()}</p>`;
   }
   
-  /**
-   * Envoie les données de statut de livraison au serveur.
-   * @param {string} tourneeId L'ID de la tournée (Event ID).
-   * @param {string} livraisonId L'ID unique de l'arrêt.
-   * @param {string} status Le nouveau statut (e.g., 'Livrée', 'Problème').
-   * @param {string} note La note ou anomalie.
-   * @param {string} arretDivId L'ID du div d'arrêt dans l'interface pour la mise à jour.
-   */
+  // Envoie les données de statut de livraison au serveur.
   function updateLivraisonStatus(tourneeId, livraisonId, status, note, arretDivId) {
     const payload = {
       tournee_id: tourneeId,
@@ -68,5 +52,4 @@
       .withFailureHandler(handleError)
       .enregistrerStatutLivraison(payload);
   }
-
 </script>
