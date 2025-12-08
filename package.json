@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "codex": "^0.2.3",
+    "dotenv": "^17.2.3",
+    "openai": "^6.10.0"
+  },
+  "name": "el_services_global",
+  "version": "1.0.0",
+  "description": "",
+  "main": "siret_fix.tmp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ELServicesToulon/EL_Services_Global.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ELServicesToulon/EL_Services_Global/issues"
+  },
+  "homepage": "https://github.com/ELServicesToulon/EL_Services_Global#readme"
+}
