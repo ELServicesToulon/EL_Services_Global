@@ -1,96 +1,29 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title><?= pageTitle ?></title>
-  <?!= include('Tesla_Livreur_CSS'); ?>
-</head>
-<body class="tesla-app">
-  <header class="hero">
-    <div class="hero-left">
-      <p class="eyebrow">ELS Livreur</p>
-      <h1>Tesla Junyper</h1>
-      <p class="subtitle">Etat batterie + autonomie en temps reel, concu pour l'ecran Tesla et mobile.</p>
-    </div>
-    <div class="hero-actions">
-      <button id="btn-refresh" class="btn primary">Rafraichir</button>
-      <button id="btn-force" class="btn ghost">Reveil Tessie</button>
-    </div>
-  </header>
+<html>
+  <head>
+    <base target="_top">
+    <title>ELS - Tesla Livreur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    
+    <?!= include('Tesla_Livreur_CSS'); ?>
 
-  <main class="layout">
-    <section class="grid">
-      <article class="card battery">
-        <div class="card-header">
-          <span class="pill">Batterie</span>
-          <span id="status-tag" class="pill pill-muted">--</span>
-        </div>
-        <div class="battery-level">
-          <span id="battery-level">--</span><span class="unit">%</span>
-        </div>
-        <div class="battery-bar">
-          <div id="battery-bar-fill"></div>
-        </div>
-        <p id="battery-threshold" class="hint"></p>
-      </article>
+    <style>
+      /* Assurer une taille minimale pour le toucher sur les boutons et inputs */
+      button, input[type="text"], input[type="number"], textarea, select {
+        min-height: 44px; 
+      }
+      /* Supprimer l'apparence native des menus déroulants s'ils sont problématiques */
+      select {
+          -webkit-appearance: none; 
+          appearance: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tesla-app-container">
+      <h1>Chargement de la Tournée Tesla...</h1>
+      </div>
 
-      <article class="card range">
-        <div class="card-header">
-          <span class="pill">Autonomie estimee</span>
-          <span class="pill pill-muted">Trajets</span>
-        </div>
-        <div class="range-value">
-          <span id="range-km">--</span>
-          <span class="unit">km</span>
-        </div>
-        <p class="hint">Valeur fournie par Tessie (conversion en km).</p>
-      </article>
-
-      <article class="card charge">
-        <div class="card-header">
-          <span class="pill">Charge</span>
-          <span id="plug-state" class="pill pill-muted">--</span>
-        </div>
-        <div class="charge-grid">
-          <div class="metric">
-            <p class="label">Statut</p>
-            <p id="charge-state" class="value">--</p>
-          </div>
-          <div class="metric">
-            <p class="label">Plein dans</p>
-            <p id="minutes-full" class="value">--</p>
-          </div>
-        </div>
-        <p class="hint">Indique si le cable est detecte et l'estimation Tessie.</p>
-      </article>
-
-      <article class="card advice">
-        <div class="card-header">
-          <span class="pill">Brief chauffeur</span>
-        </div>
-        <p id="advice-text" class="advice-text">En attente de donnees Tesla...</p>
-        <ul class="meta-list">
-          <li>
-            <span>Derniere mise a jour</span>
-            <strong id="last-update">--</strong>
-          </li>
-          <li>
-            <span>Seuil alerte</span>
-            <strong id="threshold">--%</strong>
-          </li>
-          <li>
-            <span>Source</span>
-            <strong id="source-tag">--</strong>
-          </li>
-        </ul>
-      </article>
-    </section>
-  </main>
-
-  <div id="error-banner" class="error-banner hidden"></div>
-  <div id="toast" class="toast hidden"></div>
-
-  <?!= include('Tesla_Livreur_JS'); ?>
-</body>
+    <?!= include('Tesla_Livreur_JS'); ?>
+  </body>
 </html>
