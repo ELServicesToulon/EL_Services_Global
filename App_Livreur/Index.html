@@ -2,7 +2,7 @@
 <html>
   <head>
     <base target="_top">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>EL Services Livreur</title>
     <style>
       body {
@@ -44,11 +44,11 @@
       }
       .arret-status {
         font-weight: bold;
-        color: #d32f2f;
+        color: #d32f2f; /* Rouge par défaut */
         margin-top: 5px;
       }
-      .status-Livrée { color: #388e3c; }
-      .status-À_livrer { color: #fbc02d; }
+      .status-Livrée { color: #388e3c; } /* Vert */
+      .status-À_livrer { color: #fbc02d; } /* Jaune */
 
       .input-group {
         margin-top: 10px;
@@ -56,19 +56,23 @@
         flex-direction: column;
         gap: 5px;
       }
+      
+      /* CORRECTION TESLA: Augmentation de la cible tactile pour la fiabilité */
       .input-group button, .input-group textarea, .input-group input[type="submit"] {
         padding: 8px;
         border-radius: 4px;
         border: 1px solid #ccc;
+        min-height: 44px; /* Taille minimale recommandée pour le tactile */
       }
+      
       .btn-ras {
-        background-color: #4CAF50;
+        background-color: #4CAF50; /* Vert */
         color: white;
         border: none;
         cursor: pointer;
       }
       .btn-submit {
-        background-color: #1976d2;
+        background-color: #1976d2; /* Bleu */
         color: white;
         border: none;
         cursor: pointer;
@@ -82,13 +86,20 @@
       }
       .note-field {
         resize: vertical;
-        min-height: 40px;
+        min-height: 44px; /* Ajusté à 44px */
       }
       .loading {
         text-align: center;
         padding: 20px;
         font-size: 1.2em;
         color: #004d40;
+      }
+      
+      /* Si le "menu déroulant" était un élément sélecteur (&lt;select&gt;), le CSS suivant est essentiel */
+      select {
+          -webkit-appearance: none; /* Désactive le style natif iOS/Android qui peut bugger */
+          appearance: none;
+          padding-right: 30px; /* Espace pour une flèche custom si nécessaire */
       }
     </style>
   </head>
@@ -109,7 +120,7 @@
       // Création de la liste des tournées et de leurs arrêts
       function renderTournees(tournees) {
         const listDiv = document.getElementById('tournees-list');
-        listDiv.innerHTML = '';
+        listDiv.innerHTML = ''; // Nettoyer la liste
 
         if (tournees.length === 0) {
           listDiv.innerHTML = '<p style="text-align: center; color: #777;">Aucune tournée trouvée pour aujourd\'hui.</p>';
@@ -157,7 +168,7 @@
             noteTextarea.id = `note-${arret.livraison_id}`;
             noteTextarea.className = 'note-field';
             noteTextarea.placeholder = 'Note / Anomalie (optionnel)';
-            noteTextarea.value = arret.note || '';
+            noteTextarea.value = arret.note || ''; // Pré-remplir avec la note existante
             inputGroup.appendChild(noteTextarea);
 
             // Bouton Soumettre avec Note/Anomalie
@@ -185,10 +196,12 @@
         if (arretDiv) {
           const statusSpan = arretDiv.querySelector('.arret-status span');
           if (statusSpan) {
+            // Mise à jour de la classe pour la couleur
             const oldClasses = Array.from(arretDiv.querySelector('.arret-status').classList).filter(c => c.startsWith('status-'));
             arretDiv.querySelector('.arret-status').classList.remove(...oldClasses);
             arretDiv.querySelector('.arret-status').classList.add(`status-${newStatus.replace(/[^a-zA-Z0-9]/g, '_')}`);
             
+            // Mise à jour du texte
             statusSpan.textContent = newStatus;
           }
           alert(`Statut mis à jour pour l'arrêt ${arretId} : ${newStatus}`);
