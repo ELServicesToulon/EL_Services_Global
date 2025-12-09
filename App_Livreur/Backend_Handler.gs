@@ -96,12 +96,115 @@ function enregistrerStatutLivraison(data) {
 
     sheet.appendRow(values);
 
-    return { success: true, message: "Statut de livraison enregistré." };
+    // Validation de l'établissement et calcul de distance
+    let validationInfo = {
+      match: false,
+      distance: null,
+      etab_adresse: "Non trouvée",
+      message: "Etablissement non trouvé dans la base."
+    };
+
+    if (data.etablissement_nom && data.gps_lat && data.gps_lng) {
+      const etabData = getEstablishmentData(data.etablissement_nom);
+      if (etabData) {
+        validationInfo.etab_adresse = etabData.adresse;
+
+        if (etabData.lat && etabData.lng) {
+          const dist = calculateDistance(data.gps_lat, data.gps_lng, etabData.lat, etabData.lng);
+          validationInfo.distance = Math.round(dist);
+
+          if (dist <= 100) {
+            validationInfo.match = true;
+            validationInfo.message = "Position validée (distance: " + Math.round(dist) + "m)";
+          } else {
+            validationInfo.match = false;
+            validationInfo.message = "Attention: Vous êtes à " + Math.round(dist) + "m de l'établissement.";
+          }
+        } else {
+             validationInfo.message = "Coordonnées GPS de l'établissement manquantes en base.";
+        }
+      }
+    } else if (!data.gps_lat || !data.gps_lng) {
+        validationInfo.message = "Position GPS du livreur non reçue.";
+    }
+
+    return {
+      success: true,
+      message: "Statut de livraison enregistré.",
+      validation: validationInfo
+    };
 
   } catch (e) {
     Logger.log("Erreur dans enregistrerStatutLivraison: " + e.toString());
     return { success: false, message: "Erreur serveur lors de l'enregistrement: " + e.toString() };
   }
+}
+
+/**
+ * Récupère les données d'un établissement depuis la base.
+ * @param {string} nom Le nom de l'établissement.
+ * @return {Object|null} Les données (adresse, lat, lng) ou null si non trouvé.
+ */
+function getEstablishmentData(nom) {
+  const data = getSheetData("Base_Etablissements");
+  if (!data || data.length < 2) return null;
+
+  const headers = data[0].map(h => String(h).toLowerCase().trim());
+  const nomIndex = headers.findIndex(h => h.includes("nom") || h === "etablissement");
+  const adresseIndex = headers.findIndex(h => h === "adresse" || h.includes("rue"));
+  const cpIndex = headers.findIndex(h => h.includes("code postal") || h === "cp");
+  const villeIndex = headers.findIndex(h => h === "ville" || h === "commune");
+  const latIndex = headers.findIndex(h => h.includes("lat"));
+  const lngIndex = headers.findIndex(h => h.includes("long") || h.includes("lng"));
+
+  if (nomIndex === -1) return null;
+
+  // Recherche approximative (case insensitive)
+  const targetName = nom.toLowerCase().trim();
+
+  // On parcourt les lignes (data[1] à data[length-1])
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const rowName = String(row[nomIndex] || "").toLowerCase().trim();
+
+    // Correspondance exacte ou partielle forte
+    if (rowName === targetName || (rowName.includes(targetName) && targetName.length > 5)) {
+      const adresse = (adresseIndex > -1 ? row[adresseIndex] : "") + " " +
+                      (cpIndex > -1 ? row[cpIndex] : "") + " " +
+                      (villeIndex > -1 ? row[villeIndex] : "");
+
+      return {
+        nom: row[nomIndex],
+        adresse: adresse.trim(),
+        lat: latIndex > -1 ? row[latIndex] : null,
+        lng: lngIndex > -1 ? row[lngIndex] : null
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * Calcule la distance entre deux points GPS (Haversine).
+ * @param {number} lat1 Latitude point 1.
+ * @param {number} lon1 Longitude point 1.
+ * @param {number} lat2 Latitude point 2.
+ * @param {number} lon2 Longitude point 2.
+ * @return {number} Distance en mètres.
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; // Rayon de la terre en mètres
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+  const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
 }
 
 

@@ -101,6 +101,60 @@
           appearance: none;
           padding-right: 30px; /* Espace pour une flèche custom si nécessaire */
       }
+
+      /* Styles Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 85%;
+        max-width: 400px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .modal-header {
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+        color: #004d40;
+      }
+      .modal-body {
+        margin-bottom: 20px;
+        font-size: 0.95em;
+        line-height: 1.4;
+      }
+      .modal-footer {
+        text-align: right;
+      }
+      .validation-ok {
+        color: #388e3c;
+        font-weight: bold;
+      }
+      .validation-warning {
+        color: #fbc02d;
+        font-weight: bold;
+      }
+      .validation-error {
+        color: #d32f2f;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -111,6 +165,19 @@
     <div class="container">
       <div id="tournees-list">
         <div class="loading">Chargement des tournées...</div>
+      </div>
+    </div>
+
+    <!-- Modal de validation -->
+    <div id="validationModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">Confirmation de Livraison</div>
+        <div id="modal-body" class="modal-body">
+          <!-- Contenu dynamique -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn-submit" onclick="closeModal()">Fermer</button>
+        </div>
       </div>
     </div>
 
@@ -156,31 +223,60 @@
        * @param {string} status Le nouveau statut (e.g., 'Livrée', 'Problème').
        * @param {string} note La note ou anomalie.
        * @param {string} arretDivId L'ID du div d'arrêt dans l'interface pour la mise à jour.
+       * @param {string} etablissementNom Le nom de l'établissement pour la validation.
        */
-      function updateLivraisonStatus(tourneeId, livraisonId, status, note, arretDivId) {
+      function updateLivraisonStatus(tourneeId, livraisonId, status, note, arretDivId, etablissementNom) {
+        // Obtenir la position GPS avant d'envoyer
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              sendData(tourneeId, livraisonId, status, note, arretDivId, etablissementNom, position.coords.latitude, position.coords.longitude);
+            },
+            (error) => {
+              console.warn("Erreur géolocalisation:", error);
+              // On envoie quand même sans GPS
+              sendData(tourneeId, livraisonId, status, note, arretDivId, etablissementNom, '', '');
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          );
+        } else {
+          sendData(tourneeId, livraisonId, status, note, arretDivId, etablissementNom, '', '');
+        }
+      }
+
+      function sendData(tourneeId, livraisonId, status, note, arretDivId, etablissementNom, lat, lng) {
         const payload = {
           tournee_id: tourneeId,
           livraison_id: livraisonId,
-          ehpad_id: livraisonId, // Simplification: on utilise l'ID de livraison comme ID d'établissement pour la traçabilité
+          ehpad_id: livraisonId,
           chauffeur_id: CHAUFFEUR_ID,
           status: status,
           anomalie_code: status === 'Livrée' ? 'RAS' : 'ANOMALIE',
           anomalie_note: note,
-          // Ajout des coordonnées GPS réelles si l'API de géolocalisation était active
-          gps_lat: '', 
-          gps_lng: '',
-          app_version: '1.0'
+          gps_lat: lat,
+          gps_lng: lng,
+          etablissement_nom: etablissementNom,
+          app_version: '1.1'
         };
+
+        const loadingModal = document.getElementById('validationModal');
+        const modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = '<p>Enregistrement en cours...</p>';
+        loadingModal.style.display = 'flex'; // Utiliser flex pour centrer avec le CSS ajouté
 
         google.script.run
           .withSuccessHandler((response) => {
             if (response.success) {
-              updateUI(arretDivId, status);
+              updateUI(arretDivId, status, response.validation);
             } else {
+              closeModal();
               alert("Erreur lors de l'enregistrement: " + response.message);
             }
           })
-          .withFailureHandler(handleError)
+          .withFailureHandler((e) => {
+            closeModal();
+            handleError(e);
+          })
           .enregistrerStatutLivraison(payload);
       }
 
@@ -229,7 +325,7 @@
             btnRas.textContent = 'Marquer RAS (Rien À Signaler)';
             btnRas.onclick = () => {
               document.getElementById(`note-${arret.livraison_id}`).value = 'RAS';
-              updateLivraisonStatus(tournee.event_id, arret.livraison_id, 'Livrée', 'RAS', `arret-${arret.livraison_id}`);
+              updateLivraisonStatus(tournee.event_id, arret.livraison_id, 'Livrée', 'RAS', `arret-${arret.livraison_id}`, arret.nom);
             };
             inputGroup.appendChild(btnRas);
 
@@ -248,7 +344,7 @@
             btnSubmit.onclick = () => {
               const note = document.getElementById(`note-${arret.livraison_id}`).value;
               const status = note.toUpperCase().includes('RAS') ? 'Livrée' : 'Problème';
-              updateLivraisonStatus(tournee.event_id, arret.livraison_id, status, note, `arret-${arret.livraison_id}`);
+              updateLivraisonStatus(tournee.event_id, arret.livraison_id, status, note, `arret-${arret.livraison_id}`, arret.nom);
             };
             inputGroup.appendChild(btnSubmit);
 
@@ -261,7 +357,7 @@
       }
       
       // Fonction pour mettre à jour l'affichage après l'enregistrement
-      function updateUI(arretId, newStatus) {
+      function updateUI(arretId, newStatus, validation) {
         const arretDiv = document.getElementById(arretId);
         if (arretDiv) {
           const statusSpan = arretDiv.querySelector('.arret-status span');
@@ -274,8 +370,31 @@
             // Mise à jour du texte
             statusSpan.textContent = newStatus;
           }
-          alert(`Statut mis à jour pour l'arrêt ${arretId} : ${newStatus}`);
+
+          // Affichage du modal détaillé
+          const modalBody = document.getElementById('modal-body');
+          let validationHtml = '';
+
+          if (validation) {
+            let colorClass = validation.match ? 'validation-ok' : (validation.distance > 1000 ? 'validation-error' : 'validation-warning');
+
+            validationHtml = `
+              <p><strong>Action:</strong> Statut mis à jour vers "${newStatus}"</p>
+              <hr>
+              <p><strong>Etablissement:</strong> ${validation.etab_adresse || 'Adresse inconnue'}</p>
+              <p class="${colorClass}"><strong>Validation GPS:</strong> ${validation.message}</p>
+            `;
+          } else {
+             validationHtml = `<p>Statut mis à jour : ${newStatus}</p>`;
+          }
+
+          modalBody.innerHTML = validationHtml;
+          document.getElementById('validationModal').style.display = 'flex';
         }
+      }
+
+      function closeModal() {
+        document.getElementById('validationModal').style.display = 'none';
       }
 
       // Initialisation après le chargement du corps
