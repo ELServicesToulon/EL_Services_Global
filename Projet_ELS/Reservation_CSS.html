@@ -1677,5 +1677,54 @@ body.theme-ultra.els-ui-theming .dialog {
   .jour-calendrier.desactive { color: var(--muted); }
   .champ-formulaire { border-color: var(--muted); }
 }
+
+/* --- SECTION TESLA REFERRAL --- */
+.section--tesla-referral {
+  width: 100%;
+  padding: 0 clamp(24px, 4vw, 48px) clamp(24px, 4vw, 48px);
+  box-sizing: border-box;
+}
+
+.carte--tesla {
+  background: linear-gradient(135deg, #fff 0%, #f7f9fc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-left: 4px solid #e82127; /* Tesla Red */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tesla-content h3 {
+  color: #e82127;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tesla-content p {
+  margin: 0.5em 0;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.btn-tesla {
+  background-color: #e82127;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s, transform 0.2s;
+  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(232, 33, 39, 0.25);
+}
+
+.btn-tesla:hover {
+  background-color: #b91c1f;
+  transform: translateY(-2px);
+  box-shadow: 6px 16px rgba(232, 33, 39, 0.35);
+}
 </style>
 
