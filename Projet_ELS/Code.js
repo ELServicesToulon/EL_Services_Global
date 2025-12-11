@@ -389,7 +389,7 @@ function handleInfosPage_() {
 }
 
 function handleMentionsPage_() {
-  if (isFlagEnabled_('LEGAL_NOTICE_LINK_ENABLED')) {
+  if (LEGAL_NOTICE_LINK_ENABLED) {
     const templateMentions = HtmlService.createTemplateFromFile('Mentions_Legales');
     return templateMentions.evaluate()
       .setTitle('Mentions légales')
