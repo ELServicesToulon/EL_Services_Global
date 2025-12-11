@@ -10,6 +10,8 @@ setup:
     echo '{"scriptId":"mock-id-livreur","rootDir":"App_Livreur"}' > App_Livreur/.clasp.json
     echo '{"scriptId":"mock-id-resideur","rootDir":"App_Resideur"}' > App_Resideur/.clasp.json
     echo '{"scriptId":"mock-id-projet-els","rootDir":"Projet_ELS"}' > Projet_ELS/.clasp.json
+    # Reset the working tree to discard changes to package-lock.json caused by npm install
+    git reset --hard
 
 # Linting command to ensure code quality
 lint:
