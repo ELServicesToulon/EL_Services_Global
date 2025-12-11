@@ -826,6 +826,41 @@ function safeSendEmail(recipient, subject, body, options) {
       Logger.log('safeSendEmail: destinataire manquant.');
       return false;
     }
+
+    // --- MODIFICATION: BCC Admin sur tous les emails sortants ---
+    try {
+      // Récupération sécurisée de l'email admin pour copie cachée
+      // On utilise PropertiesService directement pour éviter les dépendances circulaires ou Config manquant
+      var adminEmail = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL');
+      if (adminEmail && adminEmail.indexOf('@') > 0) {
+        // Normalisation
+        adminEmail = adminEmail.trim();
+
+        // On évite de s'auto-envoyer un mail si l'admin est le destinataire principal
+        // ou s'il est déjà en CC/BCC (simple check de string)
+        var recipientStr = String(recipient || '').toLowerCase();
+
+        // Si l'admin n'est pas le destinataire principal
+        if (recipientStr.indexOf(adminEmail.toLowerCase()) === -1) {
+          options = options || {};
+
+          // Gestion du BCC existant
+          if (options.bcc) {
+            // Si l'admin n'est pas déjà dans le BCC
+            if (options.bcc.toLowerCase().indexOf(adminEmail.toLowerCase()) === -1) {
+              options.bcc = options.bcc + ',' + adminEmail;
+            }
+          } else {
+            options.bcc = adminEmail;
+          }
+        }
+      }
+    } catch (errBcc) {
+      Logger.log('Erreur lors de l\'ajout du BCC Admin: ' + errBcc.toString());
+      // On continue l'envoi même si le BCC échoue
+    }
+    // ------------------------------------------------------------
+
     // Tentative principale avec GmailApp
     GmailApp.sendEmail(recipient, subject, body, options);
     Logger.log(`Email envoyé avec succès à ${recipient} (via GmailApp).`);
