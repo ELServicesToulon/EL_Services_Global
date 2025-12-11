@@ -1,74 +1,66 @@
 <script>
   /**
    * PiluleurManager - Gestionnaire de l'Assistant Contextuel
-   * Gère la position de la gélule, le contexte et la communication
+   * Implements the logic for the new React-based design using Vanilla JS.
    */
   const PiluleurManager = {
-    // État interne
+    // State
     state: {
       isOpen: false,
       currentContext: 'Général',
       lastClickX: 0,
       lastClickY: 0,
-      isDragging: false
+      isTyping: false
     },
 
-    // Elements DOM (initialisés dans init)
+    // DOM Elements
     dom: {},
 
     /**
-     * Initialisation principale
+     * Initialization
      */
     init: function() {
-      // Référencement des éléments DOM
-      this.dom.container = document.getElementById('els-piluleur-container');
-      this.dom.window = document.getElementById('piluleur-window');
-      this.dom.input = document.getElementById('chat-input');
+      // DOM References
+      this.dom.chatWindowInner = document.querySelector('#chat-window > div');
+      this.dom.fabContainer = document.getElementById('chat-fab-container');
       this.dom.messages = document.getElementById('chat-messages');
+      this.dom.input = document.getElementById('chat-input');
+      this.dom.sendBtn = document.getElementById('send-btn');
       this.dom.contextIndicator = document.getElementById('context-indicator');
-      this.dom.label = document.getElementById('piluleur-label');
 
-      // Écouteur global pour le positionnement et le contexte
+      // Global Context Listener
       document.addEventListener('click', (e) => this.handleGlobalClick(e));
 
-      console.log("💊 Piluleur (Assistant ELS) initialisé.");
+      console.log("💊 Piluleur (Assistant ELS) initialized.");
 
-      // Message de bienvenue automatique
-      this.addMessage('assistant', "Bonjour Emmanuel. Je suis prêt à vous assister. Cliquez sur une section pour que je cible ma réponse.");
+      // Initial Welcome Message
+      this.addMessage('model', "Bonjour ! Je suis l'assistant EL Services. Cliquez sur une zone de l'écran pour que je puisse vous aider contextuellement, ou posez-moi simplement votre question ci-dessous.");
     },
 
     /**
-     * Gère les clics globaux sur la page
-     * 1. Détecte le contexte (ex: clic sur un tableau de facture)
-     * 2. Déplace la gélule à proximité (si le chat est fermé)
+     * Handles global clicks for context detection.
      */
     handleGlobalClick: function(e) {
-      // Ignorer si clic DANS le piluleur
-      if (this.dom.container.contains(e.target)) return;
+      // Ignore clicks inside the widget
+      if (document.getElementById('els-piluleur-container').contains(e.target)) return;
 
       this.state.lastClickX = e.clientX;
       this.state.lastClickY = e.clientY;
 
-      // 1. Détection du contexte
+      // Detect Context
       const newContext = this.detectContext(e.target);
       if (newContext !== this.state.currentContext) {
         this.state.currentContext = newContext;
         this.updateContextUI();
       }
-
-      // 2. Déplacement de la gélule (Seulement si chat fermé pour ne pas gêner)
-      if (!this.state.isOpen) {
-        this.moveCapsuleNear(e.clientX, e.clientY);
-      }
     },
 
     /**
-     * Logique de détection de contexte basée sur le DOM
+     * Context detection logic.
      */
     detectContext: function(target) {
       let context = 'Général';
 
-      // Recherche des indices dans les parents
       if (target.closest('#reservation-form') || target.closest('.reservation-step')) {
         context = 'Réservation';
       } else if (target.closest('#facturation-table') || target.closest('.facture-row')) {
@@ -84,107 +76,115 @@
     },
 
     /**
-     * Met à jour l'UI avec le nouveau contexte
+     * Updates the UI based on current context.
      */
     updateContextUI: function() {
-      if(this.dom.contextIndicator) {
-        this.dom.contextIndicator.innerText = "Contexte : " + this.state.currentContext;
-        // Animation légère pour signaler le changement
-        this.dom.contextIndicator.style.color = '#D32F2F';
-        setTimeout(() => this.dom.contextIndicator.style.color = '#666', 1000);
-      }
-
-      // Met à jour le texte de la gélule
-      if(this.dom.label) {
-          this.dom.label.innerText = (this.state.currentContext === 'Général') ? 'Aide' : 'Aide ici';
+      if (this.dom.contextIndicator) {
+        this.dom.contextIndicator.innerText = this.state.currentContext;
+        // Small flash animation
+        this.dom.contextIndicator.classList.add('text-red-700');
+        setTimeout(() => this.dom.contextIndicator.classList.remove('text-red-700'), 500);
       }
     },
 
     /**
-     * Déplace la gélule à une position ergonomique près du clic
-     */
-    moveCapsuleNear: function(x, y) {
-      // Dimensions de la fenêtre
-      const winW = window.innerWidth;
-      const winH = window.innerHeight;
-
-      // Marges de sécurité
-      const margin = 20;
-      const capsuleW = 100; // approx
-      const capsuleH = 44;
-
-      // Position cible : 50px à droite et 20px en bas du clic
-      let targetX = x + 40;
-      let targetY = y + 20;
-
-      // Correction débordement Droite
-      if (targetX + capsuleW > winW) targetX = x - capsuleW - 20;
-      // Correction débordement Bas
-      if (targetY + capsuleH > winH) targetY = y - capsuleH - 20;
-
-      // Application
-      this.dom.container.style.left = targetX + 'px';
-      this.dom.container.style.top = targetY + 'px';
-      this.dom.container.style.bottom = 'auto'; // Désactiver le bottom initial
-      this.dom.container.style.right = 'auto';
-    },
-
-    /**
-     * Ouvre/Ferme le chat
+     * Toggles the chat window.
      */
     toggleChat: function() {
       this.state.isOpen = !this.state.isOpen;
-
-      if (this.state.isOpen) {
-        this.dom.window.classList.remove('hidden');
-        // Focus sur l'input
-        setTimeout(() => this.dom.input.focus(), 300);
-        // Message d'accueil contextuel si vide
-        if (this.dom.messages.children.length <= 1) { // 1 car message système
-             // On pourrait ajouter un message automatique ici
-        }
-      } else {
-        this.dom.window.classList.add('hidden');
-      }
+      this.renderState();
     },
 
     closeChat: function() {
       this.state.isOpen = false;
-      this.dom.window.classList.add('hidden');
+      this.renderState();
     },
 
     /**
-     * Gestion de la touche Entrée
+     * Updates DOM classes based on state.isOpen
+     */
+    renderState: function() {
+      if (this.state.isOpen) {
+        // Show Window
+        this.dom.chatWindowInner.classList.remove('scale-90', 'opacity-0', 'translate-y-10', 'h-0');
+        this.dom.chatWindowInner.classList.add('scale-100', 'opacity-100', 'translate-y-0');
+
+        // Hide FAB
+        this.dom.fabContainer.classList.add('translate-y-20', 'opacity-0');
+        this.dom.fabContainer.classList.remove('translate-y-0', 'opacity-100');
+
+        setTimeout(() => this.dom.input.focus(), 300);
+      } else {
+        // Hide Window
+        this.dom.chatWindowInner.classList.add('scale-90', 'opacity-0', 'translate-y-10', 'h-0');
+        this.dom.chatWindowInner.classList.remove('scale-100', 'opacity-100', 'translate-y-0');
+
+        // Show FAB
+        this.dom.fabContainer.classList.remove('translate-y-20', 'opacity-0');
+        this.dom.fabContainer.classList.add('translate-y-0', 'opacity-100');
+      }
+    },
+
+    /**
+     * Handles Enter key in input.
      */
     handleInputKey: function(e) {
-      if (e.key === 'Enter') this.sendMessage();
+      // Enable/Disable button based on input
+      this.updateSendButtonState();
+
+      if (e.key === 'Enter') {
+        this.sendMessage();
+      }
+    },
+
+    updateSendButtonState: function() {
+        const val = this.dom.input.value.trim();
+        if (val && !this.state.isTyping) {
+            this.dom.sendBtn.classList.remove('bg-gray-300', 'scale-95', 'cursor-not-allowed');
+            this.dom.sendBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'scale-100');
+            this.dom.sendBtn.disabled = false;
+        } else {
+            this.dom.sendBtn.classList.add('bg-gray-300', 'scale-95', 'cursor-not-allowed');
+            this.dom.sendBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'scale-100');
+            this.dom.sendBtn.disabled = true;
+        }
     },
 
     /**
-     * Envoi du message au backend
+     * Sends the message.
      */
     sendMessage: function() {
       const text = this.dom.input.value.trim();
-      if (!text) return;
+      if (!text || this.state.isTyping) return;
 
-      // 1. Afficher message utilisateur
+      // Add user message
       this.addMessage('user', text);
       this.dom.input.value = '';
+      this.updateSendButtonState();
 
-      // Indicateur de chargement
-      const loadingId = this.addLoadingIndicator();
+      // Set typing state
+      this.state.isTyping = true;
+      this.updateSendButtonState();
+      const typingId = this.addTypingIndicator();
 
-      // 2. Appel Backend avec le contexte
-      // Note: On suppose que la fonction 'processChatRequest' existe dans Code_Piluleur.js
-      // Sinon, il faudra l'ajouter.
+      // Call Backend
       google.script.run
         .withSuccessHandler((response) => {
-          this.removeMessage(loadingId);
-          this.addMessage('assistant', response.text || "Je n'ai pas compris.");
+          this.removeMessage(typingId);
+          this.state.isTyping = false;
+          this.updateSendButtonState();
+
+          if (response && response.text) {
+              this.addMessage('model', response.text);
+          } else {
+              this.addMessage('model', "Je n'ai pas reçu de réponse valide.");
+          }
         })
         .withFailureHandler((err) => {
-          this.removeMessage(loadingId);
-          this.addMessage('system', "Erreur de connexion : " + err.message);
+          this.removeMessage(typingId);
+          this.state.isTyping = false;
+          this.updateSendButtonState();
+          this.addMessage('model', "Erreur : " + err.message);
         })
         .processChatRequest({
             message: text,
@@ -194,23 +194,45 @@
     },
 
     /**
-     * Ajoute un message visuel
+     * Adds a message to the UI.
+     * role: 'user' | 'model'
      */
-    addMessage: function(type, text) {
+    addMessage: function(role, text) {
       const div = document.createElement('div');
-      div.className = `message ${type}`;
-      div.innerHTML = `<div class="message-content">${text}</div>`;
+      div.className = `flex flex-col ${role === 'user' ? 'items-end' : 'items-start'} animate-fade-in`;
+
+      const bubbleClass = role === 'user'
+        ? 'bg-white border border-gray-200 text-gray-800 rounded-tr-none'
+        : 'bg-white border-l-4 border-l-red-500 text-gray-700 rounded-tl-none italic';
+
+      const label = role === 'user' ? 'Vous' : 'ELS';
+
+      div.innerHTML = `
+         <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm leading-relaxed ${bubbleClass}">
+            ${text}
+         </div>
+         <span class="text-[10px] text-gray-400 mt-1 px-1">${label}</span>
+      `;
+
       this.dom.messages.appendChild(div);
       this.scrollToBottom();
-      return div.id = 'msg-' + Date.now();
+      return div;
     },
 
-    addLoadingIndicator: function() {
-      const id = 'loading-' + Date.now();
+    addTypingIndicator: function() {
+      const id = 'typing-' + Date.now();
       const div = document.createElement('div');
       div.id = id;
-      div.className = 'message assistant';
-      div.innerHTML = `<div class="message-content"><i>Réflexion en cours...</i></div>`;
+      div.className = "flex items-start animate-fade-in";
+      div.innerHTML = `
+        <div class="bg-white border-l-4 border-l-red-500 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
+            <div class="flex space-x-1">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+            </div>
+         </div>
+      `;
       this.dom.messages.appendChild(div);
       this.scrollToBottom();
       return id;
@@ -226,9 +248,18 @@
     }
   };
 
-  // Démarrage au chargement de la page
+  // Initialize on load
   window.addEventListener('load', () => {
-    // Petit délai pour laisser le temps au DOM principal de se charger
     setTimeout(() => PiluleurManager.init(), 500);
   });
 </script>
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+</style>

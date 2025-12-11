@@ -1,43 +1,82 @@
-<div id="els-piluleur-container" class="piluleur-container">
+<!-- Load Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    corePlugins: {
+      preflight: false,
+    }
+  }
+</script>
+<!-- Load Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <div id="piluleur-capsule" class="piluleur-capsule" onclick="PiluleurManager.toggleChat()">
-    <div class="capsule-part red">
-      <span class="capsule-icon">💊</span>
-    </div>
-    <div class="capsule-part white">
-      <span id="piluleur-label" class="capsule-text">Aide</span>
-    </div>
-    <div id="piluleur-badge" class="piluleur-badge" style="display:none;">0</div>
-  </div>
+<div id="els-piluleur-container" class="font-sans">
 
-  <div id="piluleur-window" class="piluleur-window hidden">
+  <!-- Chat Window -->
+  <div id="chat-window" class="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
+     <div
+        class="pointer-events-auto bg-white rounded-2xl shadow-2xl w-full sm:w-[380px] mb-4 overflow-hidden transition-all duration-300 origin-bottom-right transform scale-90 opacity-0 translate-y-10 h-0 border border-gray-100"
+        style="max-height: 80vh;"
+     >
+        <!-- Header -->
+        <div class="bg-red-600 text-white p-4 flex justify-between items-center shadow-md">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                <h3 class="font-bold text-sm tracking-wide">Assistant ELS</h3>
+            </div>
+            <button
+                onclick="PiluleurManager.closeChat()"
+                class="hover:bg-red-700 p-1 rounded transition-colors text-white/80 hover:text-white cursor-pointer"
+            >
+                <span class="material-icons text-sm">close</span>
+            </button>
+        </div>
 
-    <div class="chat-header">
-      <div class="header-info">
-        <span class="status-indicator online"></span>
-        <span id="chat-header-title">Assistant ELS</span>
-      </div>
-      <button class="close-btn" onclick="PiluleurManager.closeChat()">×</button>
-    </div>
+        <!-- Messages Area -->
+        <div id="chat-messages" class="p-4 h-96 overflow-y-auto bg-gray-50 space-y-4">
+            <!-- Messages will be injected here -->
+        </div>
 
-    <div id="chat-messages" class="chat-messages">
-      <div class="message system">
-        <div class="message-content">
-          Bonjour ! Je suis l'assistant EL Services. Cliquez sur une zone de l'écran pour que je puisse vous aider contextuellement.
+        <!-- Input Area -->
+        <div class="p-3 bg-white border-t border-gray-100">
+            <div class="relative">
+                <span id="context-indicator" class="absolute -top-6 left-0 text-[10px] font-bold text-red-500 uppercase tracking-wider pl-1">Général</span>
+                <div class="flex items-center gap-2">
+                    <input
+                        id="chat-input"
+                        type="text"
+                        placeholder="Posez votre question..."
+                        onkeydown="PiluleurManager.handleInputKey(event)"
+                        class="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all text-gray-700"
+                    />
+                    <button
+                        id="send-btn"
+                        onclick="PiluleurManager.sendMessage()"
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-md transition-all bg-red-600 hover:bg-red-700 scale-100 cursor-pointer"
+                    >
+                        <span class="material-icons text-lg">send</span>
+                    </button>
+                </div>
+            </div>
         </div>
       </div>
-    </div>
+  </div>
 
-    <div class="chat-input-area">
-      <div id="context-indicator" class="context-tag">Général</div>
-
-      <div class="input-wrapper">
-        <input type="text" id="chat-input" placeholder="Posez votre question..." onkeypress="PiluleurManager.handleInputKey(event)">
-        <button id="send-btn" onclick="PiluleurManager.sendMessage()">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
-      </div>
-    </div>
+  <!-- Floating Action Button -->
+  <div id="chat-fab-container" class="fixed bottom-6 right-6 z-50 pointer-events-auto transition-transform duration-300 translate-y-0 opacity-100">
+     <button
+        onclick="PiluleurManager.toggleChat()"
+        class="group flex items-center gap-2 bg-white rounded-full pl-1 pr-5 py-1 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer"
+     >
+        <div class="w-10 h-10 bg-gradient-to-tr from-red-500 to-red-600 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+            <span class="material-icons">medical_services</span>
+        </div>
+        <span class="font-bold text-gray-700 text-sm tracking-wide">AIDE</span>
+     </button>
   </div>
 
 </div>
+
+<!-- Include JS and CSS Logic -->
+<?!= include('Piluleur_CSS'); ?>
+<?!= include('Piluleur_JS'); ?>
