@@ -168,7 +168,10 @@ function getEstablishmentData(nom) {
     const rowName = String(row[nomIndex] || "").toLowerCase().trim();
 
     // Correspondance exacte ou partielle forte
-    if (rowName === targetName || (rowName.includes(targetName) && targetName.length > 5)) {
+    // On vérifie aussi si le nom de l'établissement en base est inclus dans le nom cible (ex: "Tamaris" dans "Tamaris / SELARL...")
+    if (rowName === targetName ||
+       (rowName.includes(targetName) && targetName.length > 5) ||
+       (targetName.includes(rowName) && rowName.length > 3)) {
       const adresse = (adresseIndex > -1 ? row[adresseIndex] : "") + " " +
                       (cpIndex > -1 ? row[cpIndex] : "") + " " +
                       (villeIndex > -1 ? row[villeIndex] : "");
