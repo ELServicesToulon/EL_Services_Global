@@ -1,253 +1,30 @@
 <style>
-  /* --- Variables & Animations --- */
-  :root {
-    --els-red: #D32F2F; /* Rouge ELS */
-    --els-white: #FFFFFF;
-    --els-dark: #333333;
-    --els-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    --capsule-width: 100px;
-    --capsule-height: 44px;
+  /* Scoped Reset for Tailwind without Preflight */
+  #els-piluleur-container * {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
   }
 
-  /* Conteneur principal flottant (position absolue gérée par JS) */
-  .piluleur-container {
-    position: fixed;
-    z-index: 9999;
-    /* Position par défaut en bas à droite */
-    bottom: 30px;
-    right: 30px;
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Effet ressort */
-    font-family: 'Roboto', 'Segoe UI', sans-serif;
-  }
-
-  /* --- 1. La Gélule (Déclencheur) --- */
-  .piluleur-capsule {
-    width: var(--capsule-width);
-    height: var(--capsule-height);
-    border-radius: 22px; /* Moitié de la hauteur pour arrondi parfait */
-    display: flex;
-    cursor: pointer;
-    box-shadow: var(--els-shadow);
-    transition: transform 0.2s ease;
-    overflow: hidden; /* Pour que les enfants ne dépassent pas */
-    border: 2px solid white; /* Contour propre */
-  }
-
-  .piluleur-capsule:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-  }
-
-  .capsule-part {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-  }
-
-  .capsule-part.red {
-    background-color: var(--els-red);
-    color: white;
-  }
-
-  .capsule-part.white {
-    background-color: var(--els-white);
-    color: var(--els-red);
-  }
-
-  .capsule-icon {
-    font-size: 1.2rem;
-  }
-
-  .capsule-text {
-    font-weight: 700;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-  }
-
-  .piluleur-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: #FFC107;
-    color: #333;
-    font-size: 10px;
-    font-weight: bold;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
-  }
-
-  /* --- 2. Fenêtre de Chat --- */
-  .piluleur-window {
-    position: absolute;
-    bottom: 60px; /* Juste au dessus de la gélule */
-    right: 0;
-    width: 320px;
-    height: 400px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    opacity: 1;
-    transform: scale(1);
-    transform-origin: bottom right;
-    transition: all 0.3s ease;
-    border: 1px solid #eee;
-  }
-
-  .piluleur-window.hidden {
-    opacity: 0;
-    transform: scale(0);
-    pointer-events: none;
-  }
-
-  .chat-header {
-    background: var(--els-red);
-    color: white;
-    padding: 12px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .header-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-  }
-
-  .status-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #4CAF50; /* Vert connecté */
-    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-  }
-
-  .close-btn {
-    background: none;
+  #els-piluleur-container button {
+    background: transparent;
     border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    line-height: 1;
     padding: 0;
-  }
-
-  .chat-messages {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    background-color: #f9f9f9;
-    font-size: 0.95rem;
-  }
-
-  .message {
-    margin-bottom: 10px;
-    max-width: 85%;
-    clear: both;
-    animation: fadeIn 0.3s;
-  }
-
-  .message.system {
-    width: 100%;
-    max-width: 100%;
-    text-align: center;
-    color: #666;
-    font-size: 0.85rem;
-    margin: 15px 0;
-    font-style: italic;
-  }
-
-  .message.user {
-    float: right;
-  }
-
-  .message.user .message-content {
-    background-color: var(--els-red);
-    color: white;
-    border-radius: 15px 15px 2px 15px;
-  }
-
-  .message.assistant {
-    float: left;
-  }
-
-  .message.assistant .message-content {
-    background-color: white;
-    color: var(--els-dark);
-    border: 1px solid #e0e0e0;
-    border-radius: 15px 15px 15px 2px;
-  }
-
-  .message-content {
-    padding: 10px 14px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    word-wrap: break-word;
-  }
-
-  .chat-input-area {
-    padding: 10px;
-    border-top: 1px solid #eee;
-    background: white;
-  }
-
-  .context-tag {
-    font-size: 10px;
-    color: var(--els-red);
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-  }
-
-  .input-wrapper {
-    display: flex;
-    gap: 8px;
-  }
-
-  #chat-input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  #chat-input:focus {
-    border-color: var(--els-red);
-  }
-
-  #send-btn {
-    background-color: var(--els-red);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     cursor: pointer;
-    transition: background 0.2s;
   }
 
-  #send-btn:hover {
-    background-color: #B71C1C;
+  /* Custom scrollbar */
+  #chat-messages::-webkit-scrollbar {
+    width: 6px;
   }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+  #chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  #chat-messages::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+  #chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
   }
 </style>
