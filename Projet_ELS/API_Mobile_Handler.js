@@ -75,6 +75,11 @@ function api_getEtablissementsGPS() {
  */
 function api_saveLivraisonReport(reportData) {
   try {
+    if (!reportData) {
+      console.error("api_saveLivraisonReport appelé sans données (reportData est undefined)");
+      return { status: "error", message: "Paramètre reportData manquant" };
+    }
+
     var ss = SpreadsheetApp.openById(MobileAPI_Config.ID_SPREADSHEET_DATA);
     var sheet = ss.getSheetByName(MobileAPI_Config.NOM_ONGLET_TRACE);
 
