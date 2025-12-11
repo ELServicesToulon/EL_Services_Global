@@ -379,7 +379,7 @@ function handleDebugPage_(e) {
 }
 
 function handleInfosPage_() {
-  if (isFlagEnabled_('PRIVACY_LINK_ENABLED')) {
+  if (PRIVACY_LINK_ENABLED) {
     const templateInfos = HtmlService.createTemplateFromFile('Infos_confidentialite');
     return templateInfos.evaluate()
       .setTitle('Infos & confidentialité')
