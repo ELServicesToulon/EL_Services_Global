@@ -1,26 +1,28 @@
 {
-  "dependencies": {
-    "codex": "^0.2.3",
-    "dotenv": "^17.2.3",
-    "openai": "^6.10.0"
-  },
   "name": "el_services_global",
   "version": "1.0.0",
-  "description": "",
-  "main": "siret_fix.tmp.js",
+  "description": "Repository for EL Services Global Google Apps Script projects",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx playwright test",
+    "lint": "eslint .",
+    "push": "clasp push"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ELServicesToulon/EL_Services_Global.git"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/ELServicesToulon/EL_Services_Global/issues"
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "openai": "^4.0.0"
   },
-  "homepage": "https://github.com/ELServicesToulon/EL_Services_Global#readme"
+  "devDependencies": {
+    "@google/clasp": "^2.4.2",
+    "@playwright/test": "^1.40.0",
+    "eslint": "^8.56.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-googleappsscript": "^1.0.5",
+    "playwright": "^1.40.0",
+    "typescript": "^5.3.3"
+  }
 }

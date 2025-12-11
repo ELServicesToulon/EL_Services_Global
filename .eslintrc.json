@@ -1,0 +1,36 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true,
+        "googleappsscript/googleappsscript": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": [
+        "googleappsscript"
+    ],
+    "rules": {
+        "no-unused-vars": "warn",
+        "no-undef": "off"
+    },
+    "globals": {
+        "SpreadsheetApp": "readonly",
+        "Logger": "readonly",
+        "Utilities": "readonly",
+        "DriveApp": "readonly",
+        "FormApp": "readonly",
+        "PropertiesService": "readonly",
+        "HtmlService": "readonly",
+        "ContentService": "readonly",
+        "Session": "readonly",
+        "UrlFetchApp": "readonly",
+        "Maps": "readonly",
+        "GmailApp": "readonly",
+        "CalendarApp": "readonly",
+        "LockService": "readonly"
+    }
+}
