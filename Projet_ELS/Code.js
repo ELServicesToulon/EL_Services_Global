@@ -29,6 +29,7 @@ function onOpen(e) {
     .addItem('Initialiser base etablissements desservis', 'menuProvisionnerBaseEtablissements')
     .addItem('Completer les emails base etablissements', 'menuCompleterEmailsBaseEtablissements')
     .addItem('Auditer et enrichir base etablissements', 'auditBaseEtablissement')
+    .addItem('Completer les noms de communes', 'menuCompleterCommunes')
     .addSeparator()
     .addItem("Importer Etablissements (Pharmacies, EHPADs...)", "importerTousLesTypesPourCodesPostauxRetrait")
     .addSeparator()
