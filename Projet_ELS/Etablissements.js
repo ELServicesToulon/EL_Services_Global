@@ -169,6 +169,29 @@ function extractCodePostalFromAddress_(adresse) {
 }
 
 /**
+ * Nettoie l'adresse en supprimant le code postal.
+ * @param {string} fullAddress
+ * @param {string} postalCode
+ * @returns {string}
+ */
+function cleanAddress_(fullAddress, postalCode) {
+  if (!fullAddress) return '';
+  let clean = String(fullAddress);
+  if (postalCode) {
+    const regex = new RegExp('\\b' + postalCode + '\\b', 'g');
+    clean = clean.replace(regex, '');
+  }
+  return clean
+    .replace(/\s+/g, ' ')
+    .replace(/ ,/g, ',')
+    .replace(/, \s*,/g, ',')
+    .trim()
+    .replace(/^,/, '')
+    .replace(/,$/, '')
+    .trim();
+}
+
+/**
  * Nettoie et valide un email.
  * @param {string} value
  * @returns {string}
@@ -276,7 +299,7 @@ function provisionnerBaseEtablissements(options) {
     lignesAAjouter.push([
       typeNorm,
       nom,
-      item.adresse || '',
+      cleanAddress_(item.adresse, code),
       code,
       item.ville || '',
       item.contact || '',
@@ -539,7 +562,7 @@ function googlePlacesImporterEtablissements_(query, typeEtablissement) {
     const row = new Array(headers.length).fill('');
     row[indices[COLONNE_TYPE_ETAB]] = typeFinal;
     row[indices[COLONNE_NOM_ETAB]] = place.name || '';
-    row[indices[COLONNE_ADRESSE_ETAB]] = place.formatted_address || '';
+    row[indices[COLONNE_ADRESSE_ETAB]] = cleanAddress_(place.formatted_address, cp);
     row[indices[COLONNE_CODE_POSTAL_ETAB]] = cp;
     row[indices[COLONNE_VILLE_ETAB]] = parsed.ville || '';
     row[indices[COLONNE_TELEPHONE_ETAB]] = details.phone || '';
