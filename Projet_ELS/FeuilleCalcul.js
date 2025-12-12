@@ -111,25 +111,52 @@ function obtenirInfosClientParEmail(email) {
     const feuilleClients = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_CLIENTS);
     if (!feuilleClients) return null;
 
-    const headerRow = feuilleClients.getRange(1, 1, 1, Math.max(1, feuilleClients.getLastColumn())).getValues()[0];
+    // OPTIMISATION: Une seule lecture de la feuille (DataRange) pour récupérer en-têtes ET données.
+    // Cela évite 2 appels API supplémentaires (getRange pour header, et implicite dans obtenirIndicesEnTetes).
+    const donnees = feuilleClients.getDataRange().getValues();
+    if (!donnees || donnees.length === 0) return null;
+
+    const headerRow = donnees[0];
     const headerTrimmed = headerRow.map(function (h) { return String(h || '').trim(); });
+
+    // Vérification et ajout des colonnes manquantes (si nécessaire)
+    // Note: Dans 99% des cas, ces colonnes existent, donc on économise les appels d'écriture/lecture.
     if (headerTrimmed.indexOf(COLONNE_RESIDENT_CLIENT) === -1) {
       feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_RESIDENT_CLIENT);
+      headerRow.push(COLONNE_RESIDENT_CLIENT); // Mise à jour locale pour les indices
     }
     if (headerTrimmed.indexOf(COLONNE_ID_CLIENT) === -1) {
       feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_ID_CLIENT);
+      headerRow.push(COLONNE_ID_CLIENT);
     }
     if (headerTrimmed.indexOf(COLONNE_CODE_POSTAL_CLIENT) === -1) {
       feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_CODE_POSTAL_CLIENT);
+      headerRow.push(COLONNE_CODE_POSTAL_CLIENT);
     }
     if (headerTrimmed.indexOf(COLONNE_TELEPHONE_CLIENT) === -1) {
       feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_TELEPHONE_CLIENT);
+      headerRow.push(COLONNE_TELEPHONE_CLIENT);
     }
 
     const enTetesRequis = ["Email", "Raison Sociale", "Adresse", COLONNE_TELEPHONE_CLIENT, "SIRET", COLONNE_CODE_POSTAL_CLIENT, COLONNE_TYPE_REMISE_CLIENT, COLONNE_VALEUR_REMISE_CLIENT, COLONNE_NB_TOURNEES_OFFERTES, COLONNE_RESIDENT_CLIENT, COLONNE_ID_CLIENT];
-    const indices = obtenirIndicesEnTetes(feuilleClients, enTetesRequis);
     
-    const donnees = feuilleClients.getDataRange().getValues();
+    // Calcul des indices localement pour éviter l'appel à obtenirIndicesEnTetes qui relit la feuille
+    const indices = {};
+    const enTetesManquants = enTetesRequis.filter(reqHeader => {
+      const index = headerRow.findIndex(h => String(h).trim() === reqHeader);
+      if (index !== -1) {
+        indices[reqHeader] = index;
+        return false;
+      }
+      return true;
+    });
+
+    if (enTetesManquants.length > 0) {
+      // Si des en-têtes requis manquent (ex: Raison Sociale), on ne peut pas lire correctement.
+      Logger.log(`Colonnes manquantes dans obtenirInfosClientParEmail: ${enTetesManquants.join(', ')}`);
+      // Fallback ou erreur silencieuse pour éviter le crash dur si la structure est corrompue
+    }
+
     const emailNorm = String(email || '').trim().toLowerCase();
     let ligneClient = null;
     let indexLigne = -1;
