@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+
+    /* Scrollbar */
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-transparent font-sans antialiased">
+
+  <div id="piluleur-root" class="fixed bottom-4 right-4 z-50 flex flex-col items-end">
+
+    <div id="chat-window" class="hidden flex-col bg-white w-[360px] h-[500px] rounded-2xl shadow-2xl border border-gray-100 overflow-hidden mb-4 transition-all transform origin-bottom-right">
+
+      <div class="bg-gradient-to-r from-blue-700 to-blue-600 p-4 flex justify-between items-center text-white shadow-md">
+        <div class="flex items-center gap-3">
+          <div class="p-1.5 bg-white/20 rounded-full backdrop-blur-sm">
+            <span class="material-icons text-lg">smart_toy</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm">Assistant EL Services</h3>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              <span class="text-[10px] opacity-90 font-medium">En ligne</span>
+            </div>
+          </div>
+        </div>
+        <button onclick="toggleChat()" class="hover:bg-white/20 p-1 rounded-full transition-colors cursor-pointer">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50 scrollbar-hide">
+        <div class="flex flex-col items-start animate-fade-in">
+          <div class="bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm max-w-[90%]">
+            Bonjour ! Je peux organiser vos livraisons, retours pharmacie ou ajuster vos tournées. Comment puis-je vous aider ?
+          </div>
+          <span class="text-[10px] text-gray-400 mt-1 ml-2">Assistant</span>
+        </div>
+      </div>
+
+      <div class="p-3 bg-white border-t border-gray-100">
+        <form onsubmit="sendMessage(event)" class="relative flex items-center gap-2">
+          <input type="text" id="user-input" placeholder="Ex: Ramasse EHPAD Les Oliviers..."
+                 class="w-full bg-gray-100 text-gray-800 text-sm rounded-full pl-4 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-400">
+          <button type="submit" id="send-btn" class="absolute right-1.5 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-sm transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-icons text-sm block">send</span>
+          </button>
+        </form>
+        <div class="text-center mt-2">
+           <span class="text-[10px] text-gray-400 flex justify-center items-center gap-1">
+             <span class="material-icons text-[10px]">lock</span> Sécurisé par Gemini 1.5
+           </span>
+        </div>
+      </div>
+    </div>
+
+    <button id="fab-btn" onclick="toggleChat()" class="group flex items-center gap-3 bg-blue-700 text-white pl-4 pr-2 py-2 rounded-full shadow-lg hover:bg-blue-800 hover:shadow-xl transition-all transform hover:-translate-y-1">
+      <span class="font-bold text-sm tracking-wide">AIDE LOGISTIQUE</span>
+      <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:rotate-12 transition-transform">
+        <span class="material-icons">chat</span>
+      </div>
+    </button>
+
+  </div>
+
+  <script>
+    // --- Logique Frontend ---
+
+    let isChatOpen = false;
+
+    function toggleChat() {
+      isChatOpen = !isChatOpen;
+      const windowEl = document.getElementById('chat-window');
+      const fabEl = document.getElementById('fab-btn');
+
+      if (isChatOpen) {
+        windowEl.classList.remove('hidden');
+        fabEl.classList.add('hidden');
+        setTimeout(() => document.getElementById('user-input').focus(), 100);
+      } else {
+        windowEl.classList.add('hidden');
+        fabEl.classList.remove('hidden');
+      }
+    }
+
+    function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      // 1. Affiche le message utilisateur
+      addMessage('user', text);
+      input.value = '';
+      setLoading(true);
+
+      // 2. Détection sommaire du contexte (ex: via l'URL ou titre de page si accessible)
+      const context = document.title || 'Inconnu';
+
+      // 3. Appel Backend
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .processChatRequest({ message: text, context: context });
+    }
+
+    function onSuccess(response) {
+      setLoading(false);
+      if (response && response.text) {
+        addMessage('bot', response.text);
+      }
+    }
+
+    function onFailure(error) {
+      setLoading(false);
+      addMessage('bot', "Erreur de connexion. Veuillez réessayer.");
+      console.error(error);
+    }
+
+    function addMessage(role, text) {
+      const container = document.getElementById('messages-container');
+      const div = document.createElement('div');
+
+      const isUser = role === 'user';
+      div.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in`;
+
+      div.innerHTML = `
+        <div class="${isUser ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-gray-100 text-gray-700 rounded-tl-none'} rounded-2xl px-4 py-2.5 shadow-sm text-sm max-w-[85%] leading-relaxed">
+          ${text.replace(/\n/g, '<br>')}
+        </div>
+        <span class="text-[10px] text-gray-400 mt-1 ${isUser ? 'mr-2' : 'ml-2'}">${isUser ? 'Vous' : 'Assistant'}</span>
+      `;
+
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function setLoading(isLoading) {
+      const btn = document.getElementById('send-btn');
+      btn.disabled = isLoading;
+
+      const container = document.getElementById('messages-container');
+      const existingLoader = document.getElementById('typing-loader');
+
+      if (isLoading && !existingLoader) {
+        const loader = document.createElement('div');
+        loader.id = 'typing-loader';
+        loader.className = 'flex items-center gap-1 ml-4 mt-2 animate-fade-in';
+        loader.innerHTML = `
+          <div class="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
+          <div class="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+          <div class="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+        `;
+        container.appendChild(loader);
+        container.scrollTop = container.scrollHeight;
+      } else if (!isLoading && existingLoader) {
+        existingLoader.remove();
+      }
+    }
+  </script>
+</body>
+</html>
