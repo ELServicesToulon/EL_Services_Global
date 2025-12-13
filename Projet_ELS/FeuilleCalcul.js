@@ -39,30 +39,69 @@ function enregistrerOuMajClient(donneesClient) {
     const feuilleClients = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_CLIENTS);
     if (!feuilleClients) throw new Error("La feuille 'Clients' est introuvable.");
 
-    const headerRow = feuilleClients.getRange(1, 1, 1, Math.max(1, feuilleClients.getLastColumn())).getValues()[0];
+    // OPTIMISATION: Une seule lecture complète au lieu de getRange(header) + getDataRange().
+    let donneesFeuille = feuilleClients.getDataRange().getValues();
+
+    // Gestion cas feuille vide
+    if (!donneesFeuille || donneesFeuille.length === 0) {
+      donneesFeuille = [[]]; // Au moins une ligne pour l'en-tête (même vide)
+    }
+
+    const headerRow = donneesFeuille[0];
     const headerTrimmed = headerRow.map(function (h) { return String(h || '').trim(); });
-    if (headerTrimmed.indexOf(COLONNE_RESIDENT_CLIENT) === -1) {
-      feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_RESIDENT_CLIENT);
+
+    // Suivi des colonnes ajoutées pour mettre à jour l'en-tête en mémoire
+    let colonnesAjoutees = false;
+    let nextColumnIndex = headerRow.length;
+
+    // Helper pour ajouter une colonne si manquante
+    function assurerColonne(nomColonne) {
+      if (headerTrimmed.indexOf(nomColonne) === -1) {
+        feuilleClients.getRange(1, nextColumnIndex + 1).setValue(nomColonne);
+        headerRow.push(nomColonne); // Mise à jour locale
+        headerTrimmed.push(nomColonne); // Mise à jour locale
+        nextColumnIndex++;
+        colonnesAjoutees = true;
+      }
     }
-    if (headerTrimmed.indexOf(COLONNE_ID_CLIENT) === -1) {
-      feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_ID_CLIENT);
-    }
-    if (headerTrimmed.indexOf(COLONNE_CODE_POSTAL_CLIENT) === -1) {
-      feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_CODE_POSTAL_CLIENT);
-    }
-    if (headerTrimmed.indexOf(COLONNE_TELEPHONE_CLIENT) === -1) {
-      feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_TELEPHONE_CLIENT);
-    }
+
+    assurerColonne(COLONNE_RESIDENT_CLIENT);
+    assurerColonne(COLONNE_ID_CLIENT);
+    assurerColonne(COLONNE_CODE_POSTAL_CLIENT);
+    assurerColonne(COLONNE_TELEPHONE_CLIENT);
 
     const enTetesRequis = ["Email", "Raison Sociale", "Adresse", COLONNE_TELEPHONE_CLIENT, "SIRET", COLONNE_CODE_POSTAL_CLIENT, COLONNE_TYPE_REMISE_CLIENT, COLONNE_VALEUR_REMISE_CLIENT, COLONNE_NB_TOURNEES_OFFERTES, COLONNE_RESIDENT_CLIENT, COLONNE_ID_CLIENT];
-    const indices = obtenirIndicesEnTetes(feuilleClients, enTetesRequis);
-    const donneesFeuille = feuilleClients.getDataRange().getValues();
-    const indexLigneClient = donneesFeuille.findIndex(ligne => String(ligne[indices["Email"]]).toLowerCase() === emailNormalise.toLowerCase());
+
+    // Calcul des indices localement (évite obtenirIndicesEnTetes qui fait un appel API)
+    const indices = {};
+    enTetesRequis.forEach(reqHeader => {
+      const index = headerRow.findIndex(h => String(h).trim() === reqHeader);
+      if (index !== -1) {
+        indices[reqHeader] = index;
+      } else {
+        // Ne devrait pas arriver grâce à assurerColonne pour les optionnels,
+        // ou suppose que les obligatoires sont là.
+        Logger.log(`Colonne manquante inattendue: ${reqHeader}`);
+      }
+    });
+
+    // Recherche du client
+    // Note: si colonnesAjoutees = true, les lignes existantes dans donneesFeuille n'ont pas la nouvelle colonne dans leur tableau JS.
+    // Ce n'est pas grave pour la recherche car on cherche sur "Email" qui existe forcément.
+    const indexLigneClient = donneesFeuille.findIndex(ligne => String(ligne[indices["Email"]] || '').toLowerCase() === emailNormalise.toLowerCase());
 
     if (indexLigneClient !== -1) { // Mise à jour
-      const ligneAjour = donneesFeuille[indexLigneClient];
+      // Attention: ligneAjour peut être plus courte que headerRow si des colonnes ont été ajoutées.
+      const ligneExistante = donneesFeuille[indexLigneClient];
+      // On crée une copie ou on étend le tableau pour matcher la longueur actuelle du header
+      const ligneAjour = new Array(headerRow.length).fill('');
+      for(let k=0; k < ligneExistante.length; k++) {
+        ligneAjour[k] = ligneExistante[k];
+      }
+
       const idExistant = String(ligneAjour[indices[COLONNE_ID_CLIENT]] || '').trim();
       const clientId = idExistant || calculerIdentifiantClient(emailNormalise);
+
       ligneAjour[indices["Email"]] = emailNormalise;
       ligneAjour[indices["Raison Sociale"]] = donneesClient.nom || '';
       ligneAjour[indices["Adresse"]] = donneesClient.adresse || '';
@@ -74,12 +113,16 @@ function enregistrerOuMajClient(donneesClient) {
       ligneAjour[indices[COLONNE_NB_TOURNEES_OFFERTES]] = donneesClient.nbTourneesOffertes !== undefined ? donneesClient.nbTourneesOffertes : 0;
       ligneAjour[indices[COLONNE_RESIDENT_CLIENT]] = donneesClient.resident === true;
       ligneAjour[indices[COLONNE_ID_CLIENT]] = clientId;
+
+      // indexLigneClient est basé sur donneesFeuille qui inclut le header (index 0).
+      // Donc la ligne de données est à indexLigneClient + 1 dans la feuille (1-based).
       feuilleClients.getRange(indexLigneClient + 1, 1, 1, ligneAjour.length).setValues([ligneAjour]);
       donneesClient.clientId = clientId;
       return { isNew: false, clientId: clientId };
     } else { // Création
       const clientId = calculerIdentifiantClient(emailNormalise);
-      const nouvelleLigne = new Array(feuilleClients.getLastColumn()).fill('');
+      // Utiliser headerRow.length pour la nouvelle ligne
+      const nouvelleLigne = new Array(headerRow.length).fill('');
       nouvelleLigne[indices["Email"]] = emailNormalise;
       nouvelleLigne[indices["Raison Sociale"]] = donneesClient.nom || '';
       nouvelleLigne[indices["Adresse"]] = donneesClient.adresse || '';
@@ -91,6 +134,7 @@ function enregistrerOuMajClient(donneesClient) {
       nouvelleLigne[indices[COLONNE_NB_TOURNEES_OFFERTES]] = donneesClient.nbTourneesOffertes !== undefined ? donneesClient.nbTourneesOffertes : 0;
       nouvelleLigne[indices[COLONNE_RESIDENT_CLIENT]] = donneesClient.resident === true;
       nouvelleLigne[indices[COLONNE_ID_CLIENT]] = clientId;
+
       feuilleClients.appendRow(nouvelleLigne);
       donneesClient.clientId = clientId;
       return { isNew: true, clientId: clientId };
@@ -500,4 +544,3 @@ function obtenirPlagesBloqueesPourDate(date) {
 function rechercherClientParEmail(email) {
   return obtenirInfosClientParEmail(email);
 }
-
