@@ -1,28 +1,26 @@
 {
-  "name": "el_services_global",
+  "name": "el-services-global",
   "version": "1.0.0",
-  "description": "Repository for EL Services Global Google Apps Script projects",
+  "description": "Solution complète de gestion logistique pour EL Services (Livraison, Pharmacie, EHPAD).",
   "scripts": {
-    "test": "npx playwright test",
-    "lint": "eslint .",
-    "push": "clasp push"
+    "test": "playwright test",
+    "lint": "eslint ."
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ELServicesToulon/EL_Services_Global.git"
-  },
-  "license": "ISC",
-  "dependencies": {
-    "dotenv": "^16.3.1",
-    "openai": "^4.0.0"
-  },
+  "keywords": [
+    "google-apps-script",
+    "logistics",
+    "delivery",
+    "healthcare"
+  ],
+  "author": "EL Services",
+  "license": "UNLICENSED",
   "devDependencies": {
     "@google/clasp": "^2.4.2",
     "@playwright/test": "^1.40.0",
     "eslint": "^8.56.0",
-    "eslint-config-google": "^0.14.0",
-    "eslint-plugin-googleappsscript": "^1.0.5",
-    "playwright": "^1.40.0",
-    "typescript": "^5.3.3"
+    "google-apps-script": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
