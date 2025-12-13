@@ -32,6 +32,11 @@ function formatDateLongueFr(date, options = {}) {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&apos;','"':'&quot;'}[c]));
+}
+
 function telechargerPdfDepuisBase64(base64Data, fileName, mimeType) {
   if (!base64Data) return;
   const safeName = fileName || 'devis.pdf';
@@ -223,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const email = emailConnexionInput.value.trim();
                 if (email) {
                     const unlock = lockButton(formulaireConnexionClient.querySelector('button[type="submit"]'));
-                    validerEtChargerClient(email, unlock);
+                    demanderLienConnexion(email, unlock);
                 }
             });
         }
@@ -364,6 +369,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 basculerIndicateurChargement(false);
             })
             .obtenirReservationsClient(email, signatureExp, signatureSig);
+    }
+
+    function demanderLienConnexion(email, unlock) {
+        basculerIndicateurChargement(true);
+        if (erreurConnexionDiv) {
+            erreurConnexionDiv.classList.add('hidden');
+            erreurConnexionDiv.textContent = '';
+        }
+
+        google.script.run
+            .withSuccessHandler(response => {
+                basculerIndicateurChargement(false);
+                unlock && unlock();
+
+                if (response.success) {
+                    if (formulaireConnexionClient) {
+                        formulaireConnexionClient.innerHTML = `
+                            <div class="message-succes" style="text-align: center; padding: 20px;">
+                                <p style="font-size: 1.1em; margin-bottom: 10px;"><strong>Lien envoyé !</strong></p>
+                                <p>Veuillez consulter votre boîte de réception (${escapeHTML(email)})<br>pour accéder à votre espace client.</p>
+                                <p class="u-mt-10" style="font-size: 0.9em; color: #666;">Le lien est valide pendant 7 jours.</p>
+                                <button class="btn btn-secondaire btn--client u-mt-15" onclick="location.reload()">Retour</button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    afficherErreurConnexion(response.error || "Impossible d'envoyer le lien.");
+                }
+            })
+            .withFailureHandler(err => {
+                basculerIndicateurChargement(false);
+                unlock && unlock();
+                afficherErreurConnexion("Erreur de communication.");
+                logError(err);
+            })
+            .envoyerLienEspaceClient(email);
     }
 
     /**
