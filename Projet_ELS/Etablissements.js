@@ -125,7 +125,7 @@ function applyEtablissementsValidations_(ss, sheet) {
     const codesRange = codesSheet.getRange('A2:A');
     const cpValidation = SpreadsheetApp.newDataValidation()
       .requireValueInRange(codesRange, true)
-      .setAllowInvalid(false)
+      .setAllowInvalid(true)
       .build();
     sheet.getRange(2, headerMap[COLONNE_CODE_POSTAL_ETAB] + 1, maxRows, 1).setDataValidation(cpValidation);
   }
@@ -522,6 +522,7 @@ function googlePlacesImporterEtablissements_(query, typeEtablissement) {
   }
   const typeFinal = typeEtablissement || 'Pharmacie';
   const { sheet, headers, indices } = googlePlacesGetSheetContext_();
+  const codesDesservis = new Set(obtenirCodesPostauxRetrait({ forceRefresh: true }) || []);
 
   const existingKeys = new Set();
   const data = sheet.getDataRange().getValues();
@@ -556,6 +557,8 @@ function googlePlacesImporterEtablissements_(query, typeEtablissement) {
     const parsed = googlePlacesParseAddress_(place.formatted_address || '');
     const cp = normaliserCodePostal(parsed.cp);
     if (!cp) return;
+    if (codesDesservis.size > 0 && !codesDesservis.has(cp)) return;
+
     const key = buildEtablissementKey_(typeFinal, place.name, cp);
     if (!key || existingKeys.has(key)) return;
 
