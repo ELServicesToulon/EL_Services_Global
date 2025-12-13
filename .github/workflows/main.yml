@@ -66,6 +66,12 @@ jobs:
       run: |
         echo '{"scriptId":"'"$SCRIPT_ID_LIVREUR"'","rootDir":"./App_Livreur"}' > App_Livreur/.clasp.json
 
+    - name: Create .clasp.json for App_Resideur
+      env:
+        SCRIPT_ID_RESIDEUR: ${{ secrets.SCRIPT_ID_RESIDEUR }}
+      run: |
+        echo '{"scriptId":"'"$SCRIPT_ID_RESIDEUR"'","rootDir":"./App_Resideur"}' > App_Resideur/.clasp.json
+
     - name: Login to Clasp
       env:
         CLASP_TOKEN: ${{ secrets.CLASP_TOKEN }}
@@ -80,4 +86,9 @@ jobs:
     - name: Push App_Livreur
       run: |
         cd App_Livreur
+        clasp push -f
+
+    - name: Push App_Resideur
+      run: |
+        cd App_Resideur
         clasp push -f

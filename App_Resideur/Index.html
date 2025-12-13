@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>Tableau de Bord ELS</title>
+  <style>
+    /* Reset & Base */
+    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; color: #1f2937; margin: 0; padding: 0; }
+    h1, h2, h3 { margin: 0; font-weight: 600; }
+
+    /* Layout */
+    .app-container { display: flex; flex-direction: column; min-height: 100vh; }
+    .header { background-color: #0f766e; color: white; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .main-content { padding: 20px; flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+
+    /* Navigation */
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
+    .nav-btn { background: none; border: none; padding: 10px 20px; cursor: pointer; font-size: 1rem; color: #4b5563; border-radius: 6px; transition: all 0.2s; }
+    .nav-btn:hover { background-color: #e0f2f1; color: #0f766e; }
+    .nav-btn.active { background-color: #0f766e; color: white; }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Cards (KPI) */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .kpi-value { font-size: 2rem; font-weight: bold; color: #0f766e; margin-top: 10px; }
+    .kpi-label { color: #6b7280; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Tables */
+    .table-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    th { background-color: #f9fafb; color: #374151; font-weight: 600; font-size: 0.9rem; }
+    tr:hover { background-color: #f9fafb; }
+    .status-badge { display: inline-block; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+    .status-ok { background-color: #d1fae5; color: #065f46; }
+    .status-warn { background-color: #fef3c7; color: #92400e; }
+    .status-err { background-color: #fee2e2; color: #991b1b; }
+
+    /* Utilities */
+    .loader { text-align: center; padding: 40px; color: #6b7280; }
+    .btn-action { background-color: #0f766e; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    .search-bar { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <header class="header">
+    <div style="font-size:1.25rem; font-weight:bold;">EL Services | Dashboard</div>
+    <div style="font-size:0.9rem;">Admin/Supervision</div>
+  </header>
+
+  <main class="main-content">
+
+    <nav class="nav-tabs">
+      <button class="nav-btn active" onclick="app.showTab('overview')">Vue d'ensemble</button>
+      <button class="nav-btn" onclick="app.showTab('tournees')">Tournées</button>
+      <button class="nav-btn" onclick="app.showTab('codes')">Codes Accès</button>
+    </nav>
+
+    <!-- TAB: Overview -->
+    <section id="tab-overview" class="section active">
+      <div class="kpi-grid">
+        <div class="card">
+          <div class="kpi-label">Livraisons (Récent)</div>
+          <div class="kpi-value" id="kpi-total">--</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Taux Anomalie</div>
+          <div class="kpi-value" id="kpi-taux">--%</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Statut Système</div>
+          <div class="kpi-value" style="color:#10b981; font-size:1.5rem;">Opérationnel</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Activité Récente</h3>
+        <p style="color:#666; margin-top:10px;">Chargement des logs...</p>
+      </div>
+    </section>
+
+    <!-- TAB: Tournées -->
+    <section id="tab-tournees" class="section">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h2>Supervision Tournées</h2>
+          <button class="btn-action" onclick="app.loadTournees()">Actualiser</button>
+        </div>
+        <input type="text" class="search-bar" placeholder="Rechercher (Client, Ville...)" onkeyup="app.filterTable('table-tournees', this.value)">
+
+        <div class="table-container">
+          <table id="table-tournees">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Détails</th>
+                <th>Statut</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-tournees">
+              <tr><td colspan="5" class="loader">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: Codes -->
+    <section id="tab-codes" class="section">
+       <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h2>Référentiel Codes</h2>
+          <button class="btn-action" onclick="app.loadCodes()">Actualiser</button>
+        </div>
+        <input type="text" class="search-bar" placeholder="Rechercher un code..." onkeyup="app.filterTable('table-codes', this.value)">
+
+        <div class="table-container">
+          <table id="table-codes">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Actif</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-codes">
+              <tr><td colspan="4" class="loader">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const app = {
+    init: function() {
+      this.loadKPI();
+      // On charge les autres onglets à la demande ou en background
+      setTimeout(() => this.loadTournees(), 500);
+      setTimeout(() => this.loadCodes(), 1000);
+    },
+
+    showTab: function(tabId) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      document.getElementById('tab-' + tabId).classList.add('active');
+      // Trouver le bouton qui appelle cette fonction (approximatif)
+      // En vrai app, on lierait par ID, ici on simplifie
+      const btns = document.querySelectorAll('.nav-btn');
+      if (tabId === 'overview') btns[0].classList.add('active');
+      if (tabId === 'tournees') btns[1].classList.add('active');
+      if (tabId === 'codes') btns[2].classList.add('active');
+    },
+
+    loadKPI: function() {
+      google.script.run
+        .withSuccessHandler(data => {
+          if (data.error) return;
+          document.getElementById('kpi-total').textContent = data.totalLivraisons;
+          const tauxEl = document.getElementById('kpi-taux');
+          tauxEl.textContent = data.tauxAnomalie + '%';
+          tauxEl.style.color = data.tauxAnomalie > 5 ? '#dc2626' : '#0f766e';
+        })
+        .withFailureHandler(console.error)
+        .getKpiData();
+    },
+
+    loadTournees: function() {
+      const tbody = document.getElementById('tbody-tournees');
+      tbody.innerHTML = '<tr><td colspan="5" class="loader">Actualisation...</td></tr>';
+
+      google.script.run
+        .withSuccessHandler(data => {
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Aucune donnée.</td></tr>';
+            return;
+          }
+
+          let html = '';
+          data.forEach(row => {
+            // Adaptation aux clés brutes renvoyées par le backend (headers du sheet)
+            // On essaie de deviner les clés courantes ou on utilise des valeurs par défaut
+            const date = row['Date'] || row['date'] || '';
+            const client = row['Client (Raison S. Client)'] || row['Client'] || 'Inconnu';
+            const details = row['Détails'] || row['Details'] || '';
+            const statut = row['Statut'] || row['Status'] || 'N/A';
+
+            let badgeClass = 'status-ok';
+            if (String(statut).toLowerCase().includes('probl')) badgeClass = 'status-err';
+            else if (String(statut).toLowerCase().includes('attente')) badgeClass = 'status-warn';
+
+            // Conversion date si objet
+            let dateStr = date;
+            if (dateStr && dateStr.toString().includes('T')) dateStr = new Date(dateStr).toLocaleDateString();
+
+            html += `
+              <tr>
+                <td>${dateStr}</td>
+                <td><strong>${client}</strong></td>
+                <td style="font-size:0.9em;color:#555;">${details.substring(0, 50)}...</td>
+                <td><span class="status-badge ${badgeClass}">${statut}</span></td>
+                <td><button class="btn-action" onclick="alert('Détails: ${client}')">Voir</button></td>
+              </tr>
+            `;
+          });
+          tbody.innerHTML = html;
+        })
+        .withFailureHandler(e => {
+          tbody.innerHTML = `<tr><td colspan="5" style="color:red">Erreur: ${e.message}</td></tr>`;
+        })
+        .getSupervisionTournees();
+    },
+
+    loadCodes: function() {
+      const tbody = document.getElementById('tbody-codes');
+
+      google.script.run
+        .withSuccessHandler(data => {
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun code.</td></tr>';
+            return;
+          }
+          let html = '';
+          data.forEach(row => {
+            const code = row['Code'] || '';
+            const type = row['Type'] || '';
+            const desc = row['Description'] || '';
+            const actif = row['Actif'] === 1 || row['Actif'] === 'TRUE' || row['Actif'] === true;
+
+            html += `
+              <tr>
+                <td style="font-family:monospace;font-weight:bold;">${code}</td>
+                <td>${type}</td>
+                <td>${desc}</td>
+                <td><span class="status-badge ${actif ? 'status-ok' : 'status-err'}">${actif ? 'Oui' : 'Non'}</span></td>
+              </tr>
+            `;
+          });
+          tbody.innerHTML = html;
+        })
+        .withFailureHandler(console.error)
+        .getCodesAccess();
+    },
+
+    filterTable: function(tableId, query) {
+      const filter = query.toUpperCase();
+      const table = document.getElementById(tableId);
+      const tr = table.getElementsByTagName("tr");
+
+      for (let i = 1; i < tr.length; i++) {
+        const row = tr[i];
+        const txtValue = row.textContent || row.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      }
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => app.init());
+</script>
+
+</body>
+</html>
