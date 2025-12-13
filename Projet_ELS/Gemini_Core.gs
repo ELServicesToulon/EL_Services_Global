@@ -17,7 +17,7 @@ function callGeminiFlash(systemInstruction, userPrompt, temperature) {
       throw new Error("Clé API Gemini non configurée (GEMINI_API_KEY).");
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${GEMINI_API_KEY}`;
 
     const payload = {
       "contents": [
