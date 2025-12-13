@@ -2,8 +2,6 @@
 //                 CHAT PILULEUR (BACKEND UNIFIÉ)
 // =================================================================
 
-// Configuration stable pour la prod
-const GEMINI_MODEL_ID = 'gemini-1.5-flash-002'; // Version stable "pinned"
 const CHAT_SHEET_NAME = 'Chat_History'; // Assure-toi que cet onglet existe
 
 /**
@@ -26,11 +24,7 @@ function processChatRequest(data) {
     const userMessage = data.message;
     const context = data.context || 'Général';
 
-    // 1. Récupération de la clé API
-    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
-    if (!apiKey) return { text: "Erreur : Clé API Gemini non configurée." };
-
-    // 2. Définition du Prompt Système (Ton Commercial & Logistique)
+    // 1. Définition du Prompt Système (Ton Commercial & Logistique)
     const systemPrompt = `
       Rôle : Tu es "EL-Assistant", l'IA logistique de EL Services à Toulon.
       Utilisateur : Un professionnel de santé (Infirmier, Pharmacien).
@@ -47,44 +41,19 @@ function processChatRequest(data) {
       - Si tu as besoin d'une date ou d'une heure, demande-la.
     `;
 
-    // 3. Construction de l'appel API
-    const payload = {
-      "contents": [
-        { "role": "user", "parts": [{ "text": systemPrompt }] }, // Injection du système comme premier message user (astuce v1beta)
-        { "role": "model", "parts": [{ "text": "Bien reçu. Je suis prêt à optimiser la logistique." }] },
-        { "role": "user", "parts": [{ "text": userMessage }] }
-      ],
-      "generationConfig": {
-        "temperature": 0.3,
-        "maxOutputTokens": 350
-      }
-    };
+    // 2. Appel standardisé via Gemini_Core
+    const aiText = callGeminiFlash(systemPrompt, userMessage, 0.3);
 
-    // 4. Appel UrlFetch
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${apiKey}`;
-    const options = {
-      method: 'post',
-      contentType: 'application/json',
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    };
-
-    const response = UrlFetchApp.fetch(url, options);
-    const json = JSON.parse(response.getContentText());
-
-    if (json.candidates && json.candidates.length > 0) {
-      const aiText = json.candidates[0].content.parts[0].text;
-
-      // (Optionnel) Sauvegarder dans le Spreadsheet ici via une fonction logChat()
-      logChatToSheet(userMessage, aiText);
-
-      return { text: aiText };
-    } else {
-      return { text: "Désolé, je rencontre une surcharge momentanée." };
+    // 3. Sauvegarde (Optionnel)
+    // On ne loggue pas les erreurs techniques explicites renvoyées par le connecteur (commencent par "Erreur IA")
+    if (!aiText.startsWith("Erreur IA")) {
+       logChatToSheet(userMessage, aiText);
     }
 
+    return { text: aiText };
+
   } catch (e) {
-    Logger.log("Erreur Gemini: " + e.toString());
+    Logger.log("Erreur processChatRequest: " + e.toString());
     return { text: "Erreur technique : " + e.message };
   }
 }
