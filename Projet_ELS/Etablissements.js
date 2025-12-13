@@ -309,6 +309,7 @@ function provisionnerBaseEtablissements(options) {
       item.jours || '',
       item.plage || '',
       item.source || '',
+      '', // COLONNE_PHARMACIE_REFERENTE
       true,
       new Date(),
       item.note || '',
