@@ -111,7 +111,7 @@ function applyEtablissementsValidations_(ss, sheet) {
 
   const typeValidation = SpreadsheetApp.newDataValidation()
     .requireValueInList(ETABLISSEMENT_TYPES, true)
-    .setAllowInvalid(false)
+    .setAllowInvalid(true)
     .build();
   sheet.getRange(2, headerMap[COLONNE_TYPE_ETAB] + 1, maxRows, 1).setDataValidation(typeValidation);
 
@@ -125,7 +125,7 @@ function applyEtablissementsValidations_(ss, sheet) {
     const codesRange = codesSheet.getRange('A2:A');
     const cpValidation = SpreadsheetApp.newDataValidation()
       .requireValueInRange(codesRange, true)
-      .setAllowInvalid(false)
+      .setAllowInvalid(true)
       .build();
     sheet.getRange(2, headerMap[COLONNE_CODE_POSTAL_ETAB] + 1, maxRows, 1).setDataValidation(cpValidation);
   }
