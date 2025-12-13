@@ -231,7 +231,8 @@ function updateTeslaDashboard_(data) {
 }
 
 /**
- * Tache planifiee : verifie la sante de la batterie et envoie un email si seuil critique.
+ * Tache planifiee : verifie la sante de la batterie par rapport a la tournee de DEMAIN
+ * et envoie un email si seuil critique ou autonomie insuffisante.
  * @param {Object=} dataOptional Donnees deja recuperees (optionnel)
  */
 function checkBatteryHealth(dataOptional) {
@@ -243,21 +244,48 @@ function checkBatteryHealth(dataOptional) {
     return;
   }
 
-  if (data.batteryLevel < configTesla.SEUIL_ALERTE && data.chargingState !== 'Charging') {
+  // 1. Estimation du besoin pour demain
+  var needForTomorrow = calculateTomorrowDistance_();
+  var safetyMargin = 1.2; // +20%
+  var requiredRange = Math.round(needForTomorrow * safetyMargin);
+
+  Logger.log('Besoin estime demain: ' + needForTomorrow + ' km. Autonomie requise (+20%): ' + requiredRange + ' km. Actuel: ' + data.rangeKm + ' km.');
+
+  var isCritical = false;
+  var alertReason = "";
+
+  // Cas 1 : Batterie sous le seuil minimal absolu (ex: 20%)
+  if (data.batteryLevel < configTesla.SEUIL_ALERTE) {
+    isCritical = true;
+    alertReason = "Niveau de batterie critique (< " + configTesla.SEUIL_ALERTE + "%)";
+  }
+  // Cas 2 : Autonomie insuffisante pour la tournee de demain
+  else if (data.rangeKm < requiredRange) {
+    isCritical = true;
+    alertReason = "Autonomie insuffisante pour la tournée de demain (" + requiredRange + " km requis)";
+  }
+
+  // Envoi de l'alerte si critique ET pas en charge
+  if (isCritical && data.chargingState !== 'Charging') {
     if (!configTesla.EMAIL_ALERTE) {
       Logger.log('Alerte batterie non envoyee : EMAIL_ALERTE manquant.');
       return;
     }
 
-    var subject = 'ALERTE BATTERIE TESLA : ' + data.batteryLevel + '%';
+    var subject = 'ALERTE FLOTTE : ' + alertReason;
     var body = 'Bonjour Emmanuel,\n\n' +
-               'Niveau de batterie critique detecte sur la Tesla Model Y.\n' +
-               '---------------------------------------\n' +
+               'Attention, un probleme d\'energie est detecte pour les operations a venir.\n\n' +
+               'DETAILS VEHICULE :\n' +
+               '------------------\n' +
                '- Niveau actuel : ' + data.batteryLevel + '%\n' +
-               '- Autonomie estimee : ' + data.rangeKm + ' km\n' +
-               '- Statut : ' + data.chargingState + '\n' +
-               '---------------------------------------\n\n' +
-               'Action requise : branche le vehicule pour assurer les livraisons.\n\n' +
+               '- Autonomie : ' + data.rangeKm + ' km\n' +
+               '- Statut : ' + data.chargingState + ' (NON BRANCHE)\n\n' +
+               'PREVISIONS DEMAIN :\n' +
+               '-------------------\n' +
+               '- Km estimes : ' + needForTomorrow + ' km\n' +
+               '- Besoins securises : ' + requiredRange + ' km (+20%)\n\n' +
+               'ACTION REQUISE IMMEDIATEMENT :\n' +
+               '>>> BRANCHER LE VEHICULE <<<\n\n' +
                'Assistant ELS';
 
     try {
@@ -271,7 +299,68 @@ function checkBatteryHealth(dataOptional) {
       Logger.log("Erreur lors de l'envoi de l'email d'alerte : " + e.toString());
     }
   } else {
-    Logger.log('Sante batterie OK (>= ' + configTesla.SEUIL_ALERTE + '% ou en charge).');
+    Logger.log('Sante batterie OK pour demain.');
+  }
+}
+
+/**
+ * Calcule l'estimation kilometrique pour la tournee de demain.
+ * Base sur le nombre de reservations dans la feuille 'Réservations'.
+ * Hypothese simplifiee : 40km de base + 5km par reservation.
+ * @return {number} Distance estimee en km.
+ */
+function calculateTomorrowDistance_() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    // Utilise le nom de feuille defini dans Config ou par defaut 'Réservations'
+    var sheetName = (typeof Config !== 'undefined' && Config.SHEET_RESERVATIONS) ? Config.SHEET_RESERVATIONS : 'Réservations';
+    var sheet = ss.getSheetByName(sheetName);
+
+    if (!sheet) {
+      Logger.log("Feuille Reservations introuvable pour calcul distance.");
+      return 40; // Valeur par defaut securitaire
+    }
+
+    var data = sheet.getDataRange().getValues();
+    if (data.length < 2) return 40; // Pas de donnees
+
+    // Determination de la date de "Demain" (sans heure)
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    var tomorrowString = Utilities.formatDate(tomorrow, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+
+    // Index des colonnes (A adapter selon la structure reelle, ici hypothese standard)
+    // On suppose que la date est en colonne A (index 0) ou B (index 1) - scan rapide
+    // Dans ELS, la date est souvent colonne A (Date)
+    var colDateIndex = 0;
+
+    var countReservations = 0;
+
+    // On saute l'en-tete
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var rowDate = row[colDateIndex];
+
+      if (rowDate instanceof Date) {
+        var rowDateString = Utilities.formatDate(rowDate, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+        if (rowDateString === tomorrowString) {
+          countReservations++;
+        }
+      }
+    }
+
+    // Modele de calcul : Base journaliere (aller-retour entrepot) + detour par client
+    // Base fixe : 40 km (Toulon periph)
+    // Par client : +5 km (moyenne urbaine)
+    var estimatedKm = 40 + (countReservations * 5);
+
+    Logger.log("Estimation pour demain (" + tomorrowString + ") : " + countReservations + " reservations -> " + estimatedKm + " km.");
+
+    return estimatedKm;
+
+  } catch (e) {
+    Logger.log("Erreur calculateTomorrowDistance_: " + e.toString());
+    return 50; // Valeur par defaut en cas d'erreur
   }
 }
 
