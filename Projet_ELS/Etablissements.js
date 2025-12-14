@@ -47,7 +47,7 @@ function normalizeEtablissementType_(rawType) {
   if (value.indexOf('foyer') !== -1) return 'Foyer de Vie';
   if (value.indexOf('residence') !== -1 || value.indexOf('senior') !== -1) return 'Residence Senior';
   if (Array.isArray(ETABLISSEMENT_TYPES)) {
-    const direct = ETABLISSEMENT_TYPES.find(function(t) { return t && t.toLowerCase() === value; });
+    const direct = ETABLISSEMENT_TYPES.find(function (t) { return t && t.toLowerCase() === value; });
     if (direct) return direct;
   }
   return '';
@@ -87,8 +87,8 @@ function ensureEtablissementsSheet_(ss) {
   } else {
     const firstRow = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), headers.length))
       .getValues()[0]
-      .map(function(v) { return String(v || '').trim(); });
-    const missing = headers.filter(function(h) { return firstRow.indexOf(h) === -1; });
+      .map(function (v) { return String(v || '').trim(); });
+    const missing = headers.filter(function (h) { return firstRow.indexOf(h) === -1; });
     if (missing.length) {
       sheet.getRange(1, sheet.getLastColumn() + 1, 1, missing.length).setValues([missing]);
     }
@@ -106,7 +106,7 @@ function ensureEtablissementsSheet_(ss) {
 function applyEtablissementsValidations_(ss, sheet) {
   const headers = getEtablissementsHeaders_();
   const headerMap = {};
-  headers.forEach(function(h, idx) { headerMap[h] = idx; });
+  headers.forEach(function (h, idx) { headerMap[h] = idx; });
   const maxRows = Math.max(1, sheet.getMaxRows() - 1);
 
   const typeValidation = SpreadsheetApp.newDataValidation()
@@ -558,7 +558,7 @@ function googlePlacesImporterEtablissements_(query, typeEtablissement) {
   const newRows = [];
   const now = new Date();
 
-  results.forEach(function(place) {
+  results.forEach(function (place) {
     const parsed = googlePlacesParseAddress_(place.formatted_address || '');
     const cp = normaliserCodePostal(parsed.cp);
     if (!cp) return;
@@ -671,13 +671,13 @@ function importerEtablissementsParCodesPostaux(codes, type, options) {
       if (typeof obtenirCodesPostauxRetraitAvecCommunes === 'function') {
         liste = obtenirCodesPostauxRetraitAvecCommunes({ forceRefresh: true });
       } else if (typeof obtenirCodesPostauxRetrait === 'function') {
-        liste = obtenirCodesPostauxRetrait({ forceRefresh: true }).map(function(cp) {
+        liste = obtenirCodesPostauxRetrait({ forceRefresh: true }).map(function (cp) {
           return { codePostal: cp, commune: '' };
         });
       }
-    } catch (_err) {}
+    } catch (_err) { }
   } else {
-    liste = codes.map(function(entry) {
+    liste = codes.map(function (entry) {
       if (entry && typeof entry === 'object') {
         return { codePostal: entry.codePostal || entry.cp || entry.code || '', commune: entry.commune || entry.ville || entry.libelle || '' };
       }
@@ -692,7 +692,7 @@ function importerEtablissementsParCodesPostaux(codes, type, options) {
   let totalAjoutes = 0;
   let requetes = 0;
 
-  liste.forEach(function(item) {
+  liste.forEach(function (item) {
     const cp = String(item.codePostal || '').trim();
     if (!cp) return;
     const communePart = item.commune ? (' ' + String(item.commune).trim()) : '';
@@ -724,20 +724,25 @@ function importerTousLesTypesPourCodesPostauxRetrait() {
   let totalRequetes = 0;
   const rapports = [];
 
-  typesAImporter.forEach(function(type) {
+  typesAImporter.forEach(function (type) {
     Logger.log('Debut de l import pour le type : ' + type);
-    const rapportPartiel = importerEtablissementsParCodesPostaux([], type);
-    const matchAjoutes = String(rapportPartiel || '').match(/(\d+)\s+ajoute/);
-    const matchRequetes = String(rapportPartiel || '').match(/\((\d+)\s+requete/);
+    try {
+      const rapportPartiel = importerEtablissementsParCodesPostaux([], type);
+      const matchAjoutes = String(rapportPartiel || '').match(/(\d+)\s+ajoute/);
+      const matchRequetes = String(rapportPartiel || '').match(/\((\d+)\s+requete/);
 
-    if (matchAjoutes && matchAjoutes[1]) {
-      totalAjoutes += parseInt(matchAjoutes[1], 10);
+      if (matchAjoutes && matchAjoutes[1]) {
+        totalAjoutes += parseInt(matchAjoutes[1], 10);
+      }
+      if (matchRequetes && matchRequetes[1]) {
+        totalRequetes += parseInt(matchRequetes[1], 10);
+      }
+      rapports.push(type + ': ' + rapportPartiel);
+      Logger.log('Fin de l import pour le type : ' + type + '. Rapport: ' + rapportPartiel);
+    } catch (e) {
+      Logger.log('ERREUR Import pour le type ' + type + ': ' + e.message);
+      rapports.push(type + ': ERREUR (' + e.message + ')');
     }
-    if (matchRequetes && matchRequetes[1]) {
-      totalRequetes += parseInt(matchRequetes[1], 10);
-    }
-    rapports.push(type + ': ' + rapportPartiel);
-    Logger.log('Fin de l import pour le type : ' + type + '. Rapport: ' + rapportPartiel);
   });
 
   const rapportFinal = 'Importation terminee. Total ajoutes: ' + totalAjoutes + ' (' + totalRequetes + ' requetes au total).\n\nDetails:\n' + rapports.join('\n');
@@ -745,7 +750,7 @@ function importerTousLesTypesPourCodesPostauxRetrait() {
   try {
     const ui = SpreadsheetApp.getUi();
     ui.alert('Rapport d importation', rapportFinal, ui.ButtonSet.OK);
-  } catch (_errUi) {}
+  } catch (_errUi) { }
 
   return rapportFinal;
 }

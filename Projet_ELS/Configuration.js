@@ -38,7 +38,7 @@ const TAUX_TVA = 0.20;
 const DELAI_PAIEMENT_JOURS = 5;
 
 /** @const {string} ID du dossier Drive contenant les factures (retombe sur archives). */
-const FACTURES_FOLDER_ID = (function() {
+const FACTURES_FOLDER_ID = (function () {
   try { return getSecret('ID_DOSSIER_FACTURES'); }
   catch (e) { return getSecret('ID_DOSSIER_ARCHIVES'); }
 })();
@@ -57,7 +57,7 @@ const BRANDING = Object.freeze({
 });
 
 /** @const {string|null} ID du fichier Drive utilisé comme logo sur les factures (optionnel). */
-const FACTURE_LOGO_FILE_ID = (function() {
+const FACTURE_LOGO_FILE_ID = (function () {
   try {
     const id = getSecret('ID_LOGO_FACTURE');
     return id || BRANDING_LOGO_FILE_ID || null;
@@ -344,7 +344,7 @@ const FLAGS = Object.freeze({
   adminSlotsPngEnabled: ADMIN_SLOTS_PNG_ENABLED,
   tarifsDetailleEnabled: TARIFS_DETAILLE_ENABLED,
   forfaitResidentEnabled: FORFAIT_RESIDENT_ENABLED
-  ,residentAffiliationRequired: RESIDENT_AFFILIATION_REQUIRED
+  , residentAffiliationRequired: RESIDENT_AFFILIATION_REQUIRED
 });
 
 
@@ -397,7 +397,7 @@ function buildPricingRulesV2FromTarifs_() {
 
   // Construit les totaux cumulés pour le type Normal à partir de TARIFS.Normal
   // stopTotals[0] est ignoré, l'indexation logique commence à 1 pour lisibilité.
-  var buildStopTotals = function(base) {
+  var buildStopTotals = function (base) {
     base = Number(base) || 0;
     var totals = [];
     var acc = base;
@@ -418,10 +418,10 @@ function buildPricingRulesV2FromTarifs_() {
   var returnFee = (supplements.length ? Number(supplements[0]) : lastSupp) || 0;
 
   // Calcule les stopTotals pour un type en décalant seulement la base
-  var deriveFromNormal = function(typeBase) {
+  var deriveFromNormal = function (typeBase) {
     typeBase = Number(typeBase) || 0;
     var delta = typeBase - (Number(normal.base) || 0);
-    var totals = stopTotalsNormal.map(function(v){ return Number(v) + delta; });
+    var totals = stopTotalsNormal.map(function (v) { return Number(v) + delta; });
     return Object.freeze({
       stopTotals: Object.freeze(totals),
       extraStopIncrement: extraInc,
@@ -591,7 +591,7 @@ function getMapsApiKey() {
  * Il interdit les valeurs en dur pour la sécurité et la maintenabilité.
  * * @author Dev EL Services
  */
-var Config = (function() {
+var Config = (function () {
   var _cache = null;
 
   function _loadCache() {
@@ -638,7 +638,7 @@ var Config = (function() {
   }
 
   return {
-    get: function(key) { return _get(key); },
+    get: function (key) { return _get(key); },
     set: _set,
 
     // Identifiants Dossiers & Fichiers
@@ -667,7 +667,7 @@ var Config = (function() {
     get GEMINI_API_KEY() { return _get("GEMINI_API_KEY"); },
     get ELS_SHARED_SECRET() { return _get("ELS_SHARED_SECRET"); },
     get TRACE_SECRET() { return _get("TRACE_SECRET"); },
-    getMapsApiKey: function() {
+    getMapsApiKey: function () {
       try {
         // Privilégie la fonction globale si elle existe (compatibilité legacy).
         if (typeof globalThis !== 'undefined' && typeof globalThis.getMapsApiKey === 'function') {
@@ -686,7 +686,7 @@ var Config = (function() {
       return key;
     },
 
-    getSpreadsheetId: function() {
+    getSpreadsheetId: function () {
       var id = _getOrDefault("ID_FEUILLE_CALCUL", "");
       if (!id && typeof getSecret === 'function') {
         try {
@@ -735,7 +735,7 @@ var Config = (function() {
      * Vérifie si la configuration minimale est présente.
      * @return {boolean} True si les clés critiques sont là.
      */
-    isValid: function() {
+    isValid: function () {
       _loadCache();
       var criticalKeys = ["ID_DOSSIER_FACTURES", "NOM_ENTREPRISE", "ADMIN_EMAIL"];
       for (var i = 0; i < criticalKeys.length; i++) {
@@ -786,7 +786,8 @@ function SETUP_INIT_PROPERTIES() {
     "ID_MODELE_FACTURE": "1dceBMePjZhpSALkt2_wVxRM-2DtK9LGjEXS0qMqnZRo",
     "SIRET": "48091306000020",
     "ID_LOGO_FACTURE": "1p10Rb3QBn3tUUs2M5zNiQzPn1YxnoPIW",
-    "ID_FEUILLE_CALCUL": "1AzWdQQ4UEq0Fvr_iTpDY5TiXn55ij30_okIxIG5p_OM"
+    "ID_FEUILLE_CALCUL": "1AzWdQQ4UEq0Fvr_iTpDY5TiXn55ij30_okIxIG5p_OM",
+    "Maps_API_KEY": "AIza..." // À CONFIGURER
   };
 
   try {

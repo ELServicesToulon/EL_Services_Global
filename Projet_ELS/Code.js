@@ -34,7 +34,9 @@ function onOpen(e) {
     .addSeparator()
     .addItem("Nettoyer l'onglet Facturation", 'nettoyerOngletFacturation')
     .addItem('Reparer entetes Facturation', 'reparerEntetesFacturation')
-    .addItem('Normaliser entetes Facturation', 'normaliserEntetesFacturation');
+    .addItem('Normaliser entetes Facturation', 'normaliserEntetesFacturation')
+    .addSeparator()
+    .addItem('Corriger SIRET Clients', 'corrigerSiretClients');
 
   // Ajout du menu Admin DB s'il n'est pas déjà appelé via onOpen_Setup (dépend de l'ordre de chargement)
   // On laisse Setup_Database.js gérer son propre menu si nécessaire, mais on peut l'ajouter ici aussi
