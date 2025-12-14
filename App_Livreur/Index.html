@@ -334,6 +334,7 @@
             noteTextarea.id = `note-${arret.livraison_id}`;
             noteTextarea.className = 'note-field';
             noteTextarea.placeholder = 'Note / Anomalie (optionnel)';
+            noteTextarea.setAttribute('aria-label', `Note ou anomalie pour ${arret.nom}`);
             noteTextarea.value = arret.note || ''; // Pré-remplir avec la note existante
             inputGroup.appendChild(noteTextarea);
 
