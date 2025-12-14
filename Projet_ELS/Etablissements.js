@@ -433,6 +433,7 @@ function completerEmailsBaseEtablissements(options) {
 
   let updated = 0;
   const now = new Date();
+  let dataChanged = false;
 
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
@@ -442,16 +443,21 @@ function completerEmailsBaseEtablissements(options) {
     const key = buildEtablissementKey_(row[idxType], row[idxNom], row[idxCp]);
     const candidate = key ? emailIndex.get(key) : null;
     if (candidate && candidate.email) {
-      const sheetRow = i + 1;
-      sheet.getRange(sheetRow, idxEmail + 1).setValue(candidate.email);
+      // Mise à jour en mémoire
+      row[idxEmail] = candidate.email;
       if (typeof idxSource === 'number' && !row[idxSource] && candidate.source) {
-        sheet.getRange(sheetRow, idxSource + 1).setValue(candidate.source);
+        row[idxSource] = candidate.source;
       }
       if (typeof idxMaj === 'number') {
-        sheet.getRange(sheetRow, idxMaj + 1).setValue(now);
+        row[idxMaj] = now;
       }
       updated++;
+      dataChanged = true;
     }
+  }
+
+  if (dataChanged) {
+    sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
   }
 
   return { ok: true, updated: updated, total: Math.max(0, data.length - 1), sourceEmails: stats };
