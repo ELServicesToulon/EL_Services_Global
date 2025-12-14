@@ -12,11 +12,32 @@
  * Point d'entrée de l'application Web.
  */
 function doGet(e) {
-  // On peut ajouter une sécurité ici (token, etc.) si besoin.
+  // Sécurisation basique via clé d'accès (Stockée dans Script Properties)
+  // Si la clé n'est pas fournie ou invalide, on ne charge pas les données sensibles.
+  // Le frontend gérera l'affichage du formulaire de login.
+
   return HtmlService.createTemplateFromFile('Index').evaluate()
       .setTitle('Tableau de Bord ELS')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
       .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+/**
+ * Vérifie la clé d'accès fournie par le client.
+ * @param {string} key La clé à vérifier.
+ * @return {boolean} True si valide.
+ */
+function verifyAccessKey(key) {
+  const props = PropertiesService.getScriptProperties();
+  const validKey = props.getProperty('RESIDEUR_ACCESS_KEY');
+
+  // Si aucune clé n'est configurée, on considère que c'est ouvert (ou bloqué par défaut selon politique)
+  // Pour la sécurité, si pas de clé configurée, on bloque tout sauf si mode DEV explicite.
+  if (!validKey) {
+    return false; // Sécurité par défaut: fermé si non configuré
+  }
+
+  return key === validKey;
 }
 
 /**
@@ -30,10 +51,9 @@ function include(filename) {
  * Récupère l'ID du Spreadsheet depuis la config ou les propriétés.
  */
 function getSpreadsheetId() {
-  // Priorité : Script Properties > Config.js > Hardcoded (à éviter)
   const props = PropertiesService.getScriptProperties();
   let id = props.getProperty('DB_SPREADSHEET') || props.getProperty('ID_FEUILLE_CALCUL');
-  
+
   if (!id && typeof Config !== 'undefined' && Config.IDS) {
     id = Config.IDS.DB_SPREADSHEET;
   }
@@ -55,93 +75,103 @@ function getSheetData(sheetName) {
 }
 
 /**
+ * Wrapper sécurisé pour les appels API.
+ * Vérifie la clé avant de retourner les données.
+ */
+function secureCall(key, callback) {
+  if (!verifyAccessKey(key)) {
+    return { error: "Accès refusé. Clé invalide.", authRequired: true };
+  }
+  return callback();
+}
+
+/**
  * API: Récupère les indicateurs clés (KPI).
+ * @param {string} key Clé d'accès.
  * @returns {Object} { totalTours, tauxAnomalie, satisfaction }
  */
-function getKpiData() {
-  try {
-    const data = getSheetData('TRACE_Livraisons'); // Suppose que cette feuille existe
-    if (!data || data.length < 2) {
-      return { totalTours: 0, tauxAnomalie: 0, topAnomalies: [] };
-    }
-
-    const headers = data[0].map(h => String(h).toLowerCase());
-    const idxStatus = headers.indexOf('status'); // ou 'statut'
-    const idxNote = headers.indexOf('anomalie_note');
-
-    // Stats basiques sur les 100 dernières lignes pour la perf
-    const recentData = data.slice(1).slice(-100);
-    const total = recentData.length;
-    let anomalies = 0;
-
-    recentData.forEach(row => {
-      const status = idxStatus > -1 ? String(row[idxStatus]).toLowerCase() : '';
-      if (status.includes('problème') || status.includes('anomalie') || status.includes('echec')) {
-        anomalies++;
+function getKpiData(key) {
+  return secureCall(key, () => {
+    try {
+      const data = getSheetData('TRACE_Livraisons');
+      if (!data || data.length < 2) {
+        return { totalTours: 0, tauxAnomalie: 0, topAnomalies: [] };
       }
-    });
 
-    const taux = total > 0 ? Math.round((anomalies / total) * 100) : 0;
+      const headers = data[0].map(h => String(h).toLowerCase());
+      const idxStatus = headers.indexOf('status');
 
-    return {
-      totalLivraisons: total,
-      tauxAnomalie: taux,
-      // Placeholder pour d'autres stats
-    };
+      const recentData = data.slice(1).slice(-100);
+      const total = recentData.length;
+      let anomalies = 0;
 
-  } catch (e) {
-    Logger.log("Erreur KPI: " + e.toString());
-    return { error: e.message };
-  }
+      recentData.forEach(row => {
+        const status = idxStatus > -1 ? String(row[idxStatus]).toLowerCase() : '';
+        if (status.includes('problème') || status.includes('anomalie') || status.includes('echec')) {
+          anomalies++;
+        }
+      });
+
+      const taux = total > 0 ? Math.round((anomalies / total) * 100) : 0;
+
+      return {
+        totalLivraisons: total,
+        tauxAnomalie: taux,
+      };
+
+    } catch (e) {
+      Logger.log("Erreur KPI: " + e.toString());
+      return { error: e.message };
+    }
+  });
 }
 
 /**
  * API: Récupère les tournées récentes pour supervision.
+ * @param {string} key Clé d'accès.
  * @returns {Array} Liste des tournées.
  */
-function getSupervisionTournees() {
-  try {
-    // On lit 'Facturation' (qui sert de source pour les réservations/tournées dans ce projet)
-    const data = getSheetData('Facturation');
-    if (!data || data.length < 2) return [];
+function getSupervisionTournees(key) {
+  return secureCall(key, () => {
+    try {
+      const data = getSheetData('Facturation');
+      if (!data || data.length < 2) return [];
 
-    const headers = data[0];
-    const rows = data.slice(1);
+      const headers = data[0];
+      const rows = data.slice(1);
 
-    // Mapping simple (à adapter selon les vrais en-têtes)
-    // On suppose: Date, Client, Statut, Détails
-    // On prend les 50 dernières
-    return rows.slice(-50).reverse().map(row => {
-      // On fait un mapping positionnel "best effort" ou on cherche les index
-      // Pour l'exemple, on retourne un objet générique basé sur les headers
-      let obj = {};
-      headers.forEach((h, i) => {
-        obj[h] = row[i];
+      return rows.slice(-50).reverse().map(row => {
+        let obj = {};
+        headers.forEach((h, i) => {
+          obj[h] = row[i];
+        });
+        return obj;
       });
-      return obj;
-    });
-  } catch (e) {
-    return [];
-  }
+    } catch (e) {
+      return [];
+    }
+  });
 }
 
 /**
  * API: Récupère les codes d'accès.
+ * @param {string} key Clé d'accès.
  * @returns {Array} Liste des codes.
  */
-function getCodesAccess() {
-  try {
-    // Si une feuille 'CodesRef' existe
-    const data = getSheetData('CodesRef');
-    if (!data || data.length < 2) return [];
+function getCodesAccess(key) {
+  return secureCall(key, () => {
+    try {
+      const data = getSheetData('CodesRef');
+      if (!data || data.length < 2) return [];
 
-    const headers = data[0];
-    return data.slice(1).map(row => {
-      let obj = {};
-      headers.forEach((h, i) => obj[h] = row[i]);
-      return obj;
-    });
-  } catch (e) {
-    return []; // Pas de feuille CodesRef
-  }
+      const headers = data[0];
+      return data.slice(1).map(row => {
+        let obj = {};
+        headers.forEach((h, i) => obj[h] = row[i]);
+        return obj;
+      });
+    } catch (e) {
+      return [];
+    }
+  });
 }

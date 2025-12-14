@@ -46,14 +46,33 @@
     .loader { text-align: center; padding: 40px; color: #6b7280; }
     .btn-action { background-color: #0f766e; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
     .search-bar { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; }
+
+    /* Login Screen */
+    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
+    .login-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 320px; }
+    .login-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }
+    .login-btn { width: 100%; padding: 12px; background-color: #0f766e; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+    .login-btn:hover { background-color: #0d5f5a; }
   </style>
 </head>
 <body>
 
-<div class="app-container">
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2 style="text-align:center; color:#0f766e; margin-top:0;">Accès Résident</h2>
+    <p style="text-align:center; color:#666; font-size:0.9rem;">Veuillez entrer votre clé d'accès.</p>
+    <input type="password" id="access-key" class="login-input" placeholder="Clé d'accès">
+    <button class="login-btn" onclick="app.login()">Valider</button>
+    <p id="login-error" style="color:#dc2626; text-align:center; display:none; margin-top:10px; font-size:0.9rem;"></p>
+  </div>
+</div>
+
+<!-- APP CONTENT -->
+<div id="app-content" class="app-container" style="display:none;">
   <header class="header">
     <div style="font-size:1.25rem; font-weight:bold;">EL Services | Dashboard</div>
-    <div style="font-size:0.9rem;">Admin/Supervision</div>
+    <div style="font-size:0.9rem;">Admin/Supervision <button class="btn-action" style="margin-left:10px; background:#0d5f5a;" onclick="app.logout()">Sortir</button></div>
   </header>
 
   <main class="main-content">
@@ -147,7 +166,63 @@
 
 <script>
   const app = {
+    key: null,
+
     init: function() {
+      // Check for key in localStorage
+      const storedKey = localStorage.getItem('resideur_key');
+      if (storedKey) {
+        this.key = storedKey;
+        this.verifyAndLoad();
+      } else {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('app-content').style.display = 'none';
+      }
+    },
+
+    login: function() {
+      const input = document.getElementById('access-key');
+      this.key = input.value.trim();
+      if (!this.key) return;
+
+      this.verifyAndLoad();
+    },
+
+    logout: function() {
+      localStorage.removeItem('resideur_key');
+      location.reload();
+    },
+
+    verifyAndLoad: function() {
+      document.getElementById('login-error').style.display = 'none';
+
+      // Test d'un appel simple pour vérifier la clé
+      google.script.run
+        .withSuccessHandler(data => {
+          if (data.authRequired || data.error) {
+            this.handleAuthError();
+          } else {
+            // Success
+            localStorage.setItem('resideur_key', this.key);
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'flex';
+            this.loadAllData();
+          }
+        })
+        .withFailureHandler(e => this.handleAuthError())
+        .getKpiData(this.key);
+    },
+
+    handleAuthError: function() {
+      localStorage.removeItem('resideur_key');
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('app-content').style.display = 'none';
+      const err = document.getElementById('login-error');
+      err.textContent = "Clé invalide ou accès refusé.";
+      err.style.display = 'block';
+    },
+
+    loadAllData: function() {
       this.loadKPI();
       // On charge les autres onglets à la demande ou en background
       setTimeout(() => this.loadTournees(), 500);
@@ -159,8 +234,6 @@
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
       document.getElementById('tab-' + tabId).classList.add('active');
-      // Trouver le bouton qui appelle cette fonction (approximatif)
-      // En vrai app, on lierait par ID, ici on simplifie
       const btns = document.querySelectorAll('.nav-btn');
       if (tabId === 'overview') btns[0].classList.add('active');
       if (tabId === 'tournees') btns[1].classList.add('active');
@@ -177,7 +250,7 @@
           tauxEl.style.color = data.tauxAnomalie > 5 ? '#dc2626' : '#0f766e';
         })
         .withFailureHandler(console.error)
-        .getKpiData();
+        .getKpiData(this.key);
     },
 
     loadTournees: function() {
@@ -193,8 +266,6 @@
 
           let html = '';
           data.forEach(row => {
-            // Adaptation aux clés brutes renvoyées par le backend (headers du sheet)
-            // On essaie de deviner les clés courantes ou on utilise des valeurs par défaut
             const date = row['Date'] || row['date'] || '';
             const client = row['Client (Raison S. Client)'] || row['Client'] || 'Inconnu';
             const details = row['Détails'] || row['Details'] || '';
@@ -204,7 +275,6 @@
             if (String(statut).toLowerCase().includes('probl')) badgeClass = 'status-err';
             else if (String(statut).toLowerCase().includes('attente')) badgeClass = 'status-warn';
 
-            // Conversion date si objet
             let dateStr = date;
             if (dateStr && dateStr.toString().includes('T')) dateStr = new Date(dateStr).toLocaleDateString();
 
@@ -223,7 +293,7 @@
         .withFailureHandler(e => {
           tbody.innerHTML = `<tr><td colspan="5" style="color:red">Erreur: ${e.message}</td></tr>`;
         })
-        .getSupervisionTournees();
+        .getSupervisionTournees(this.key);
     },
 
     loadCodes: function() {
@@ -254,7 +324,7 @@
           tbody.innerHTML = html;
         })
         .withFailureHandler(console.error)
-        .getCodesAccess();
+        .getCodesAccess(this.key);
     },
 
     filterTable: function(tableId, query) {

@@ -1,5 +1,7 @@
 const SHEET_TRACE = "TRACE_Livraisons";
 const SHEET_RESERVATIONS = "Réservations";
+const SHEET_USERS = "Users";
+const SHEET_AUDIT = "AuditLog"; // New Audit Sheet
 
 /**
  * Récupère les propriétés de configuration.
@@ -42,6 +44,117 @@ function getSheetData(sheetName) {
 }
 
 /**
+ * Ajoute une entrée dans le log d'audit.
+ * @param {string} action Action effectuée (ex: LOGIN_SUCCESS, LOGIN_FAIL).
+ * @param {string} user Utilisateur concerné (ex: email).
+ * @param {string} details Détails supplémentaires.
+ */
+function logAudit(action, user, details) {
+  const config = getConfig();
+  const ssId = config.ID_FEUILLE_CALCUL;
+  if (!ssId) return;
+
+  try {
+    const ss = SpreadsheetApp.openById(ssId);
+    let sheet = ss.getSheetByName(SHEET_AUDIT);
+
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_AUDIT);
+      sheet.appendRow(['Timestamp', 'Action', 'Utilisateur', 'Cible', 'Details']);
+    }
+
+    sheet.appendRow([new Date(), action, user, 'App_Livreur', details]);
+  } catch(e) {
+    console.error("Audit log failed: " + e.toString());
+  }
+}
+
+/**
+ * Vérifie les identifiants du livreur.
+ * @param {string} email
+ * @param {string} pin
+ * @return {Object} {success: boolean, user: Object, message: string}
+ */
+function verifierConnexion(email, pin) {
+  const data = getSheetData(SHEET_USERS);
+  if (!data || data.length < 2) {
+    return { success: false, message: "Base utilisateurs indisponible" };
+  }
+
+  const headers = data[0].map(h => String(h).toLowerCase());
+  const idxEmail = headers.indexOf('email');
+  const idxPin = headers.indexOf('pin');
+  const idxNom = headers.indexOf('nom');
+  const idxRole = headers.indexOf('role');
+
+  if (idxEmail === -1) return { success: false, message: "Structure Users invalide" };
+
+  const targetEmail = String(email || '').trim().toLowerCase();
+  const targetPin = String(pin || '').trim();
+
+  const userRow = data.slice(1).find(row => String(row[idxEmail] || '').toLowerCase() === targetEmail);
+
+  if (!userRow) {
+    logAudit('LOGIN_FAIL', targetEmail, 'Utilisateur inconnu');
+    return { success: false, message: "Utilisateur inconnu" };
+  }
+
+  // Vérification PIN (si activé)
+  if (idxPin !== -1) {
+    const storedPin = String(userRow[idxPin] || '').trim();
+    if (storedPin !== targetPin) {
+       logAudit('LOGIN_FAIL', targetEmail, 'Mauvais PIN');
+       return { success: false, message: "PIN incorrect" };
+    }
+  }
+
+  logAudit('LOGIN_SUCCESS', targetEmail, 'Connexion réussie');
+  return {
+    success: true,
+    user: {
+      email: userRow[idxEmail],
+      nom: idxNom !== -1 ? userRow[idxNom] : 'Chauffeur',
+      role: idxRole !== -1 ? userRow[idxRole] : 'Livreur'
+    }
+  };
+}
+
+/**
+ * Traite un lot de mises à jour (Sync).
+ * @param {Array<Object>} payloads Liste des objets de statut à enregistrer.
+ * @return {Object} Résultat global {success: boolean, processed: number, errors: Array}
+ */
+function syncDonnees(payloads) {
+  if (!Array.isArray(payloads)) {
+    return { success: false, message: "Format de données invalide" };
+  }
+
+  let processed = 0;
+  let errors = [];
+
+  // Traitement séquentiel
+  payloads.forEach(item => {
+    try {
+      const res = enregistrerStatutLivraison(item);
+      if (res.success) {
+        processed++;
+      } else {
+        errors.push({ id: item.livraison_id, msg: res.message });
+      }
+    } catch (e) {
+      errors.push({ id: item.livraison_id, msg: e.toString() });
+    }
+  });
+
+  return {
+    success: true,
+    processed: processed,
+    total: payloads.length,
+    errors: errors
+  };
+}
+
+/**
  * Enregistre une nouvelle ligne de trace dans la feuille TRACE_Livraisons.
  * @param {Object} data Les données à enregistrer.
  * @param {string} data.tournee_id L'ID de la tournée (Event ID du calendrier).
@@ -57,7 +170,7 @@ function getSheetData(sheetName) {
 function enregistrerStatutLivraison(data) {
   const config = getConfig();
   const ssId = config.ID_FEUILLE_CALCUL;
-  const traceSheetName = config.SHEET_TRACE_LIVRAISON || SHEET_TRACE; // Assurez-vous d'avoir SHEET_TRACE_LIVRAISON dans les propriétés si besoin
+  const traceSheetName = config.SHEET_TRACE_LIVRAISON || SHEET_TRACE;
   
   if (!ssId) {
     return { success: false, message: "ID_FEUILLE_CALCUL non configuré." };
@@ -65,10 +178,17 @@ function enregistrerStatutLivraison(data) {
 
   try {
     const ss = SpreadsheetApp.openById(ssId);
-    const sheet = ss.getSheetByName(traceSheetName);
+    let sheet = ss.getSheetByName(traceSheetName);
 
+    // Création à la volée si inexistant (Fail-safe)
     if (!sheet) {
-      return { success: false, message: `Feuille non trouvée: ${traceSheetName}` };
+      sheet = ss.insertSheet(traceSheetName);
+      sheet.appendRow([
+        'ts_iso', 'tournee_id', 'livraison_id', 'ehpad_id', 'patient_hash',
+        'chauffeur_id', 'status', 'anomalie_code', 'anomalie_note',
+        'app_version', 'device_id', 'by_user', 'gps_lat', 'gps_lng',
+        'photo_url', 'signature_hash'
+      ]);
     }
 
     const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -213,21 +333,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 /**
  * Récupère la liste des tournées d'un livreur pour la journée.
- * Note: Cette fonction est un stub et devrait être implémentée
- * pour communiquer avec le calendrier ou la feuille de réservations de Projet_ELS.
- *
- * Pour l'instant, on retourne un exemple statique.
- * @param {string} chauffeurEmail L'email du chauffeur.
- * @return {Array<Object>} La liste des tournées.
  */
 function getListeTournees(chauffeurEmail) {
-  // En l'absence de la connexion Calendrier réelle pour cette démo, on utilise un stub.
-  // En production, cette fonction irait chercher les événements/réservations
-  // assignés à 'chauffeurEmail' pour la journée.
-  // Pour le test, on filtre sur la raison sociale "Pharmacie de Portissol" ou "Tamaris" si l'email correspond
-  // à l'un des emails de client dans Clients.csv pour simuler une tournée active.
-  
-  const reservationsData = getSheetData("Facturation"); // Utiliser Facturation comme source de Réservations
+  const reservationsData = getSheetData("Facturation");
   if (reservationsData.length === 0) {
     Logger.log("Aucune donnée de facturation trouvée.");
     return [];
@@ -256,49 +364,39 @@ function getListeTournees(chauffeurEmail) {
     if (dateCell instanceof Date) {
       rowDateStr = dateCell.toLocaleDateString('fr-FR');
     } else if (typeof dateCell === 'string') {
-       // Tenter de parser si c'est une chaîne, par exemple "02/12/2025 10:45:00"
       const datePart = dateCell.split(' ')[0];
       if (datePart) {
-        // Simple vérification de la date formatée: DD/MM/YYYY
         rowDateStr = datePart;
       }
     }
     
-    // Simuler l'assignation du livreur: Ici, on considère que toutes les tournées
-    // non livrées du jour sont potentiellement pour le livreur connecté.
-    // L'implémentation réelle nécessiterait une colonne 'Chauffeur ID' dans la feuille de Facturation
-    // ou de lire l'agenda du chauffeur.
+    // Filtrage simple pour la démo: tout ce qui n'est pas 'Livrée' aujourd'hui
+    // TODO: Filtrer par chauffeurEmail quand la colonne sera dispo
     return rowDateStr === today && row[STATUT_COL] !== 'Livrée';
     
   }).map((row, index) => {
     const details = row[DETAILS_COL] || "";
-    // Extraire le nombre d'arrêts supplémentaires pour simuler les arrêts détaillés.
-    // Ex: "Tournée de 120min (6 arrêt(s) total(s) (dont 5 supp. + retour), retour: oui)"
     const match = details.match(/\((\d+)\s+arr.t\(s\)\s+total\(s\)/);
-    const totalArrets = match ? parseInt(match[1], 10) : 1; // Au moins 1 arrêt (le client principal)
+    const totalArrets = match ? parseInt(match[1], 10) : 1;
     
-    // Créer une liste d'arrêts pour la vue du livreur
     const arrets = [];
     arrets.push({
       livraison_id: row[ID_RESERVATION_COL] + "-main",
       nom: row[CLIENT_NOM_COL] || "Client Principal",
-      adresse: "Adresse Principale (à récupérer via un lookup client)",
+      adresse: "Adresse Principale",
       type_arret: "Client Principal"
     });
     
     for (let i = 1; i < totalArrets; i++) {
       arrets.push({
         livraison_id: row[ID_RESERVATION_COL] + "-supp" + i,
-        nom: `Arrêt Supplémentaire #${i} (à déterminer)`,
-        adresse: `Adresse Arrêt Supp #${i} (à déterminer)`,
+        nom: `Arrêt Supplémentaire #${i}`,
+        adresse: `Adresse Arrêt Supp #${i}`,
         type_arret: "Supplémentaire"
       });
     }
 
-    // Récupérer les données de traçage existantes pour cet ID Réservation
     const traces = getTracesForTournee(row[EVENT_ID_COL] || row[ID_RESERVATION_COL]);
-    
-    // Mettre à jour les arrêts avec les statuts et notes déjà enregistrés
     arrets.forEach(arret => {
         const existingTrace = traces.find(t => t.livraison_id === arret.livraison_id);
         arret.status = existingTrace ? existingTrace.status : 'À livrer';
@@ -319,8 +417,6 @@ function getListeTournees(chauffeurEmail) {
 
 /**
  * Récupère les traces de livraison pour une tournée donnée.
- * @param {string} tourneeId L'ID de la tournée.
- * @return {Array<Object>} Les traces de livraison.
  */
 function getTracesForTournee(tourneeId) {
   const config = getConfig();
@@ -349,8 +445,6 @@ function getTracesForTournee(tourneeId) {
 
 /**
  * Interface pour la Web App (GET).
- * @param {Object} e L'événement de requête.
- * @return {GoogleAppsScript.HTML.HtmlOutput} La page HTML.
  */
 function doGet(e) {
   return HtmlService.createTemplateFromFile('Index').evaluate()
@@ -358,11 +452,6 @@ function doGet(e) {
       .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
 
-/**
- * Ajoute les fichiers HTML inclus (JS/CSS).
- * @param {string} filename Le nom du fichier HTML à inclure.
- * @return {string} Le contenu HTML.
- */
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
