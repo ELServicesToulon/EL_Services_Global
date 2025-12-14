@@ -92,12 +92,15 @@ function api_saveLivraisonReport(reportData) {
     var timestamp = new Date();
 
     // Nettoyage des données entrantes
-    var noteFinale = (reportData.statut === "RAS") ? "RAS" : (reportData.note || "Aucune note");
+    var noteInput = (reportData.statut === "RAS") ? "RAS" : (reportData.note || "Aucune note");
+    // Sentinel: Sanitize to prevent Formula Injection (CSV Injection)
+    var noteFinale = sanitizeInputForSheets_(noteInput);
+    var etablissementIdSafe = sanitizeInputForSheets_(reportData.etablissementId || "Inconnu");
 
     sheet.appendRow([
       timestamp,
       reportData.livreurId,
-      reportData.etablissementId || "Inconnu",
+      etablissementIdSafe,
       reportData.statut, // "RAS" ou "ANOMALIE" ou "NOTE"
       noteFinale,
       reportData.lat,
@@ -110,4 +113,19 @@ function api_saveLivraisonReport(reportData) {
     console.error("Erreur api_saveLivraisonReport: " + e.toString());
     return { status: "error", message: e.toString() };
   }
+}
+
+/**
+ * Nettoie une chaîne pour empêcher l'injection de formules dans Google Sheets.
+ * @param {string} input La chaîne à nettoyer.
+ * @return {string} La chaîne sécurisée.
+ */
+function sanitizeInputForSheets_(input) {
+  if (!input) return "";
+  var str = String(input);
+  // Si la chaîne commence par =, +, - ou @, on ajoute une apostrophe pour forcer le texte.
+  if (/^[=+\-@]/.test(str)) {
+    return "'" + str;
+  }
+  return str;
 }
