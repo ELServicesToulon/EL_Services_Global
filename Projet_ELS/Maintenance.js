@@ -1073,3 +1073,74 @@ function deduplicateReservations(remove = false) {
     return [];
   }
 }
+
+// =================================================================
+//                      5. CORRECTION DE DONNÉES
+// =================================================================
+
+/**
+ * Corrige les numéros de SIRET invalides dans la feuille "Clients".
+ * Remplace les valeurs "undefined" ou vides pour les comptes "Pro" par "A VERIFIER".
+ */
+function corrigerSiretClients() {
+  logAdminAction("Correction SIRET", "Démarré");
+  try {
+    const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
+    var sheet = ss.getSheetByName(SHEET_CLIENTS);
+    
+    if (!sheet) {
+      throw new Error("La feuille 'Clients' est introuvable.");
+    }
+
+    var dataRange = sheet.getDataRange();
+    var values = dataRange.getValues();
+    
+    var headers = values[0];
+    var siretColIndex = headers.indexOf('SIRET');
+    var accountTypeColIndex = headers.indexOf('TypeCompte'); // Supposons que cette colonne existe pour cibler les "Pro"
+    
+    if (siretColIndex === -1) {
+      throw new Error("La colonne 'SIRET' est introuvable dans la feuille 'Clients'.");
+    }
+    
+    var correctedCount = 0;
+    // Boucle à partir de la deuxième ligne (index 1) pour ignorer les en-têtes
+    for (var i = 1; i < values.length; i++) {
+      var row = values[i];
+      // Si accountTypeColIndex n'est pas trouvé, on considère toutes les lignes comme potentiellement "Pro"
+      var isProAccount = (accountTypeColIndex === -1) || (row[accountTypeColIndex] === 'Pro');
+      var currentSiret = row[siretColIndex];
+      
+      // Cible les comptes "Pro" où le SIRET est manquant, null, undefined ou une chaîne vide.
+      // Vérifie aussi la chaine littérale "undefined" qui peut provenir d'imports mal formés.
+      if (isProAccount && (currentSiret === undefined || currentSiret === null || currentSiret === '' || String(currentSiret) === 'undefined')) {
+        values[i][siretColIndex] = 'A VERIFIER';
+        correctedCount++;
+      }
+    }
+    
+    if (correctedCount > 0) {
+      dataRange.setValues(values);
+      var msg = "Correction terminée. " + correctedCount + " numéro(s) de SIRET mis à jour.";
+      Logger.log(msg);
+      logAdminAction("Correction SIRET", msg);
+      SpreadsheetApp.getUi().alert("Correction terminée", msg, SpreadsheetApp.getUi().ButtonSet.OK);
+    } else {
+      var msg = "Aucun numéro de SIRET n'a nécessité de correction.";
+      Logger.log(msg);
+      SpreadsheetApp.getUi().alert("Aucune correction nécessaire", msg, SpreadsheetApp.getUi().ButtonSet.OK);
+    }
+    
+  } catch (e) {
+    Logger.log("Erreur lors de la correction des SIRETs : " + e.message);
+    logAdminAction("Correction SIRET", "Erreur: " + e.message);
+    SpreadsheetApp.getUi().alert("Erreur", "La correction a échoué : " + e.message, SpreadsheetApp.getUi().ButtonSet.OK);
+  }
+}
+
+/**
+ * Handler menu: lance la correction des SIRET.
+ */
+function menuCorrigerSiret() {
+  corrigerSiretClients();
+}
