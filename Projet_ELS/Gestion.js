@@ -329,7 +329,7 @@ function obtenirReservationsClient(emailClient, exp, sig) {
     }
     const feuille = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_FACTURATION);
     const indices = getFacturationHeaderIndices_(feuille, ["Date", "Client (Email)", "Event ID", "Détails", "Client (Raison S. Client)", "ID Réservation", "Montant"]).indices;
-    
+
     const donnees = feuille.getDataRange().getValues();
     const maintenant = new Date();
 
@@ -338,7 +338,7 @@ function obtenirReservationsClient(emailClient, exp, sig) {
         if (String(ligne[indices["Client (Email)"]]).trim().toLowerCase() !== emailNorm) {
           return null;
         }
-        
+
         const dateSheet = new Date(ligne[indices["Date"]]);
         if (isNaN(dateSheet.getTime()) || dateSheet < maintenant) {
           return null;
@@ -357,7 +357,7 @@ function obtenirReservationsClient(emailClient, exp, sig) {
             Logger.log(`Avertissement: L'événement Calendar (ID: ${eventId}) pour la réservation ${ligne[indices["ID Réservation"]]} est introuvable. La durée sera estimée.`);
           }
         }
-        
+
         const details = String(ligne[indices["Détails"]]);
         const matchTotal = details.match(/(\d+)\s*arrêt\(s\)\s*total\(s\)/);
         const matchSup = details.match(/(\d+)\s*arrêt\(s\)\s*sup/);
@@ -366,9 +366,9 @@ function obtenirReservationsClient(emailClient, exp, sig) {
         const nbSupp = Math.max(0, totalStops - 1);
 
         if (!dateFin) {
-            const totalArretsCalcules = nbSupp + (retour ? 1 : 0);
-            const dureeEstimee = DUREE_BASE + (totalArretsCalcules * DUREE_ARRET_SUP);
-            dateFin = new Date(dateDebut.getTime() + dureeEstimee * 60000);
+          const totalArretsCalcules = nbSupp + (retour ? 1 : 0);
+          const dureeEstimee = DUREE_BASE + (totalArretsCalcules * DUREE_ARRET_SUP);
+          dateFin = new Date(dateDebut.getTime() + dureeEstimee * 60000);
         }
 
         const totalArretsCalculesPourKm = nbSupp + (retour ? 1 : 0);
@@ -386,16 +386,173 @@ function obtenirReservationsClient(emailClient, exp, sig) {
           km: km
         };
 
-      } catch (e) { 
+      } catch (e) {
         Logger.log(`Erreur de traitement d'une ligne de réservation pour ${emailClient}: ${e.toString()}`);
-        return null; 
+        return null;
       }
     }).filter(Boolean);
-      
+
+    // --- LOGIQUE POUR ETABLISSEMENT (POINT DE LIVRAISON) ---
+    // Si le client est aussi un établissement (identifié par email dans les traces),
+    // on ajoute les réservations qui le concernent (via ehpad_id dans TRACE_Livraisons).
+    const tracesEtab = getTracesForEtablissement_(emailNorm);
+    if (tracesEtab && tracesEtab.length > 0) {
+      const eventIdsEtab = [...new Set(tracesEtab.map(t => t.tournee_id))];
+      // On filtre ceux qu'on a déjà trouvés
+      const existingEventIds = new Set(reservations.map(r => r.eventId));
+
+      const missingEventIds = eventIdsEtab.filter(eid => eid && !existingEventIds.has(eid));
+
+      if (missingEventIds.length > 0) {
+        // On doit parcourir la feuille facturation pour retrouver ces réservations par Event ID
+        const indicesEvent = indices["Event ID"];
+
+        donnees.slice(1).forEach(ligne => {
+          const eid = String(ligne[indicesEvent]).trim();
+          if (missingEventIds.includes(eid)) {
+            // C'est une réservation pour cet établissement (déduite par traces)
+            // On l'ajoute.
+            try {
+              const dateSheet = new Date(ligne[indices["Date"]]);
+              if (isNaN(dateSheet.getTime()) || dateSheet < maintenant) return;
+
+              let dateDebut = dateSheet;
+              let dateFin;
+
+              if (eid) {
+                try {
+                  const evenementRessource = Calendar.Events.get(getSecret('ID_CALENDRIER'), eid);
+                  dateDebut = new Date(evenementRessource.start.dateTime || evenementRessource.start.date);
+                  dateFin = new Date(evenementRessource.end.dateTime || evenementRessource.end.date);
+                } catch (err) { }
+              }
+
+              const details = String(ligne[indices["Détails"]]);
+              const matchTotal = details.match(/(\d+)\s*arrêt\(s\)\s*total\(s\)/);
+              const matchSup = details.match(/(\d+)\s*arrêt\(s\)\s*sup/);
+              const totalStops = matchTotal ? parseInt(matchTotal[1], 10) : (matchSup ? parseInt(matchSup[1], 10) + 1 : 1);
+              const retour = details.includes('retour: oui');
+              const nbSupp = Math.max(0, totalStops - 1);
+
+              if (!dateFin) {
+                const totalArretsCalcules = nbSupp + (retour ? 1 : 0);
+                const dureeEstimee = DUREE_BASE + (totalArretsCalcules * DUREE_ARRET_SUP);
+                dateFin = new Date(dateDebut.getTime() + dureeEstimee * 60000);
+              }
+              const totalArretsCalculesPourKm = nbSupp + (retour ? 1 : 0);
+              const km = KM_BASE + (totalArretsCalculesPourKm * KM_ARRET_SUP);
+
+              reservations.push({
+                id: ligne[indices["ID Réservation"]],
+                eventId: eid,
+                start: dateDebut.toISOString(),
+                end: dateFin.toISOString(),
+                details: details + " (Livraison Etablissement)",
+                clientName: ligne[indices["Client (Raison S. Client)"]], // Le payeur
+                amount: 0, // On cache le montant car l'établissement destinataire n'est pas le payeur
+                resident: (indices["Resident"] !== undefined && indices["Resident"] !== -1) ? (ligne[indices["Resident"]] === true) : false,
+                km: km,
+                isDestinataire: true
+              });
+
+            } catch (e) { }
+          }
+        });
+      }
+    }
+
+    // --- AJOUT TRACES SUIVI LIVRAISON ---
+    reservations.forEach(r => {
+      if (r.eventId) {
+        const traces = getTracesForEvent_(r.eventId);
+        if (traces && traces.length > 0) {
+          // On trie par date
+          traces.sort((a, b) => new Date(a.ts_iso) - new Date(b.ts_iso));
+          const last = traces[traces.length - 1];
+          r.tracking = {
+            status: last.status,
+            lastUpdate: last.ts_iso,
+            anomalie: last.anomalie_code || null,
+            history: traces.map(t => ({ status: t.status, time: t.ts_iso }))
+          };
+        }
+      }
+    });
+
     return { success: true, reservations: reservations };
   } catch (e) {
     Logger.log(`Erreur critique dans obtenirReservationsClient pour ${emailClient}: ${e.stack}`);
     return { success: false, error: e && e.message ? e.message : "Une erreur est survenue." };
+  }
+}
+
+/**
+ * Récupère les traces pour un événement (Tournée) donné.
+ * @param {string} eventId
+ */
+function getTracesForEvent_(eventId) {
+  if (!eventId) return [];
+  try {
+    const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
+    const sheet = ss.getSheetByName("TRACE_Livraisons");
+    if (!sheet) return [];
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return [];
+    const headers = data[0].map(h => String(h).toLowerCase().trim().replace(/ /g, '_'));
+    const idxTournee = headers.indexOf('tournee_id');
+    if (idxTournee === -1) return [];
+
+    const results = [];
+    const mapRow = (row) => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = row[i]);
+      return obj;
+    };
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idxTournee]) === String(eventId)) {
+        results.push(mapRow(data[i]));
+      }
+    }
+    return results;
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * Récupère les traces impliquant un établissement (via email/ehpad_id).
+ */
+function getTracesForEtablissement_(email) {
+  if (!email) return [];
+  try {
+    const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
+    const sheet = ss.getSheetByName("TRACE_Livraisons");
+    if (!sheet) return [];
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return [];
+    const headers = data[0].map(h => String(h).toLowerCase().trim().replace(/ /g, '_'));
+    const idxEhpad = headers.indexOf('ehpad_id');
+    const idxTournee = headers.indexOf('tournee_id');
+
+    if (idxEhpad === -1 || idxTournee === -1) return [];
+
+    const results = [];
+    const mapRow = (row) => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = row[i]);
+      return obj;
+    };
+
+    for (let i = 1; i < data.length; i++) {
+      const val = String(data[i][idxEhpad]).trim().toLowerCase();
+      if (val === email || val.includes(email)) {
+        results.push(mapRow(data[i]));
+      }
+    }
+    return results;
+  } catch (e) {
+    return [];
   }
 }
 
@@ -791,7 +948,7 @@ function envoyerFactureClient(emailClient, numeroFacture, exp, sig) {
         replyTo: EMAIL_ENTREPRISE
       }
     );
-  return { success: true };
+    return { success: true };
   } catch (e) {
     Logger.log('Erreur dans envoyerFactureClient: ' + e.stack);
     return { success: false, error: e.message };
@@ -875,7 +1032,7 @@ function mettreAJourDetailsReservation(idReservation, totalStops, emailClient, e
       Logger.log(`Événement ${idEvenement} introuvable pour modification. Seule la feuille de calcul sera mise à jour.`);
       ressourceEvenement = null;
     }
-    
+
     const typeCourse = typeof idxType === 'number' && idxType !== -1 ? String(ligneDonnees[idxType] || '').trim().toLowerCase() : '';
     const estUrgent = typeCourse === 'urgent';
     const estSamedi = typeCourse === 'samedi' || dateDebutOriginale.getDay() === 6;
