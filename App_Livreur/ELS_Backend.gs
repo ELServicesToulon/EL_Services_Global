@@ -373,7 +373,7 @@ function doGet(e) {
  * @return {string} Le contenu HTML.
  */
 function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+  return HtmlService.createTemplateFromFile(filename).evaluate().getContent();
 }
 
 /**
