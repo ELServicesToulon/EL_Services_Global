@@ -274,19 +274,19 @@ function checkBatteryHealth(dataOptional) {
 
     var subject = 'ALERTE FLOTTE : ' + alertReason;
     var body = 'Bonjour Emmanuel,\n\n' +
-               'Attention, un probleme d\'energie est detecte pour les operations a venir.\n\n' +
-               'DETAILS VEHICULE :\n' +
-               '------------------\n' +
-               '- Niveau actuel : ' + data.batteryLevel + '%\n' +
-               '- Autonomie : ' + data.rangeKm + ' km\n' +
-               '- Statut : ' + data.chargingState + ' (NON BRANCHE)\n\n' +
-               'PREVISIONS DEMAIN :\n' +
-               '-------------------\n' +
-               '- Km estimes : ' + needForTomorrow + ' km\n' +
-               '- Besoins securises : ' + requiredRange + ' km (+20%)\n\n' +
-               'ACTION REQUISE IMMEDIATEMENT :\n' +
-               '>>> BRANCHER LE VEHICULE <<<\n\n' +
-               'Assistant ELS';
+      'Attention, un probleme d\'energie est detecte pour les operations a venir.\n\n' +
+      'DETAILS VEHICULE :\n' +
+      '------------------\n' +
+      '- Niveau actuel : ' + data.batteryLevel + '%\n' +
+      '- Autonomie : ' + data.rangeKm + ' km\n' +
+      '- Statut : ' + data.chargingState + ' (NON BRANCHE)\n\n' +
+      'PREVISIONS DEMAIN :\n' +
+      '-------------------\n' +
+      '- Km estimes : ' + needForTomorrow + ' km\n' +
+      '- Besoins securises : ' + requiredRange + ' km (+20%)\n\n' +
+      'ACTION REQUISE IMMEDIATEMENT :\n' +
+      '>>> BRANCHER LE VEHICULE <<<\n\n' +
+      'Assistant ELS';
 
     try {
       MailApp.sendEmail({
@@ -376,7 +376,7 @@ function logTeslaHistory(dataOptional) {
 
     if (!sheet) {
       sheet = ss.insertSheet(sheetName);
-      sheet.appendRow(['Date', 'Heure', 'Batterie %', 'Autonomie Km', 'Statut', 'Branche ?', 'Localisation']);
+      sheet.appendRow(['Date', 'Heure', 'Batterie %', 'Autonomie Km', 'Statut', 'Branche ?', 'Localisation', 'Odomètre']);
       sheet.setFrozenRows(1);
     }
 
@@ -391,7 +391,8 @@ function logTeslaHistory(dataOptional) {
         data.rangeKm,
         data.chargingState,
         data.isPlugged ? 'Oui' : 'Non',
-        data.address || ''
+        data.address || '',
+        data.odometer || 0
       ]);
     }
   } catch (e) {
@@ -468,3 +469,207 @@ function buildTeslaAdvice_(status, threshold) {
 
   return 'Vehicule pret pour la tournee.';
 }
+
+/**
+ * ==============================================================================
+ * MODULE DE SUIVI DES COUTS (TESLA)
+ * ==============================================================================
+ */
+
+// Configuration des coûts
+var TESLA_COUT_KM = 0.20; // €/km (Electricité + Pneus + Usure)
+var TESLA_ASSURANCE_MOIS = 90; // €/mois
+var TESLA_PARKING_MOIS = 100; // €/mois
+var TESLA_ENTRETIEN_ANNEE = 600; // €/an
+
+/**
+ * Crée le dossier de suivi dans le dossier Drive spécifié.
+ * Folder ID: 144qdIbP-njNmy-m6F425s6WxRjntN4yb
+ */
+function createTeslaReportsFolder() {
+  var parentId = '144qdIbP-njNmy-m6F425s6WxRjntN4yb';
+  try {
+    var parentFolder = DriveApp.getFolderById(parentId);
+    var folderName = "Suivi_Couts_Tesla";
+
+    var folders = parentFolder.getFoldersByName(folderName);
+    var targetFolder;
+
+    if (folders.hasNext()) {
+      targetFolder = folders.next();
+      Logger.log("Dossier existant trouvé: " + targetFolder.getUrl());
+    } else {
+      targetFolder = parentFolder.createFolder(folderName);
+      Logger.log("Nouveau dossier créé: " + targetFolder.getUrl());
+    }
+    return targetFolder;
+  } catch (e) {
+    Logger.log("Erreur lors de la création du dossier Drive: " + e.toString());
+    return null;
+  }
+}
+
+/**
+ * Calcule et enregistre les couts de la journée (ou de la veille).
+ * A appeler via un trigger quotidien.
+ * @param {Date=} dateOptionnelle Date à traiter (défaut: hier).
+ */
+function traiterCoutsJournaliersTesla(dateOptionnelle) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetName = 'Tesla_Couts';
+  var sheet = ss.getSheetByName(sheetName);
+
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    var headers = [
+      'Date',
+      'Client',
+      'Km_Jour_Total',
+      'Km_Impute_Client',
+      'Cout_Variable_Client',
+      'Cout_Fixe_Client',
+      'Cout_Total_Client',
+      'Type_Frais'
+    ];
+    sheet.appendRow(headers);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#f3f3f3');
+    sheet.setFrozenRows(1);
+  }
+
+  var targetDate = dateOptionnelle || new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+  var dateStr = Utilities.formatDate(targetDate, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+
+  Logger.log("Traitement des coûts pour la date : " + dateStr);
+
+  var kmParcourus = getDailyKmFromHistory_(targetDate);
+  if (kmParcourus <= 0) {
+    kmParcourus = calculateEstimatedDistanceForDate_(targetDate);
+  }
+
+  Logger.log("Kilometrage retenu : " + kmParcourus + " km");
+
+  var clients = getClientsServedOnDate_(targetDate);
+  var nbClients = clients.length;
+
+  if (nbClients === 0) {
+    clients = ['STRUCTURE_INTERNE'];
+    nbClients = 1;
+  }
+
+  var coutAssuranceJour = TESLA_ASSURANCE_MOIS / 30;
+  var coutParkingJour = TESLA_PARKING_MOIS / 30;
+  var coutEntretienJour = TESLA_ENTRETIEN_ANNEE / 365;
+  var totalFixeJour = coutAssuranceJour + coutParkingJour + coutEntretienJour;
+
+  var totalVariableJour = kmParcourus * TESLA_COUT_KM;
+
+  var partFixeParClient = totalFixeJour / nbClients;
+  var partVariableParClient = totalVariableJour / nbClients;
+  var kmParClient = kmParcourus / nbClients;
+
+  clients.forEach(function (client) {
+    sheet.appendRow([
+      targetDate,
+      client,
+      kmParcourus,
+      kmParClient,
+      partVariableParClient,
+      partFixeParClient,
+      partVariableParClient + partFixeParClient,
+      "Quotidien"
+    ]);
+  });
+
+  Logger.log("Coûts enregistrés pour " + dateStr);
+}
+
+/**
+ * Récupère le kilométrage parcouru (Max - Min de la journée) via 'Suivi_Tesla'.
+ */
+function getDailyKmFromHistory_(dateObj) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  try {
+    var sheet = ss.getSheetByName('Suivi_Tesla');
+    if (!sheet) return 0;
+
+    var dateStr = Utilities.formatDate(dateObj, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+    var data = sheet.getDataRange().getValues();
+
+    var minOdo = -1;
+    var maxOdo = -1;
+
+    for (var i = 1; i < data.length; i++) {
+      var rawDate = data[i][0];
+      var rDateStr = rawDate;
+      if (rawDate instanceof Date) {
+        rDateStr = Utilities.formatDate(rawDate, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+      }
+
+      if (rDateStr === dateStr) {
+        var odo = parseFloat(data[i][7]); // Colonne H (index 7) odomètre
+        if (!isNaN(odo) && odo > 0) {
+          if (minOdo === -1 || odo < minOdo) minOdo = odo;
+          if (maxOdo === -1 || odo > maxOdo) maxOdo = odo;
+        }
+      }
+    }
+
+    if (minOdo > 0 && maxOdo > 0) {
+      return maxOdo - minOdo;
+    }
+  } catch (e) {
+    Logger.log("Erreur getDailyKmFromHistory_: " + e);
+  }
+  return 0;
+}
+
+/**
+ * Estime la distance si pas de télémétrie.
+ */
+function calculateEstimatedDistanceForDate_(dateObj) {
+  var clients = getClientsServedOnDate_(dateObj);
+  var nb = clients.length;
+  if (nb === 0) return 0;
+  return 40 + (nb * 5);
+}
+
+/**
+ * Récupère les clients uniques livrés.
+ */
+function getClientsServedOnDate_(dateObj) {
+  var clients = [];
+  var dateStr = Utilities.formatDate(dateObj, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Réservations');
+
+  if (!sheet) return [];
+
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var idxDate = -1;
+  var idxClient = -1;
+
+  for (var j = 0; j < headers.length; j++) {
+    var h = String(headers[j]).toLowerCase();
+    if (h === 'date') idxDate = j;
+    if (h.indexOf('client') !== -1 && h.indexOf('raison') !== -1) idxClient = j;
+    if (idxClient === -1 && h.indexOf('client') !== -1) idxClient = j;
+  }
+
+  if (idxDate === -1 || idxClient === -1) return [];
+
+  for (var i = 1; i < data.length; i++) {
+    var rDate = data[i][idxDate];
+    if (rDate instanceof Date) {
+      var rDateStr = Utilities.formatDate(rDate, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+      if (rDateStr === dateStr) {
+        var cName = String(data[i][idxClient]).trim();
+        if (cName && clients.indexOf(cName) === -1) {
+          clients.push(cName);
+        }
+      }
+    }
+  }
+  return clients;
+}
+
