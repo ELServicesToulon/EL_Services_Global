@@ -96,12 +96,14 @@ function api_saveLivraisonReport(reportData) {
     // Sentinel: Sanitize to prevent Formula Injection (CSV Injection)
     var noteFinale = sanitizeInputForSheets_(noteInput);
     var etablissementIdSafe = sanitizeInputForSheets_(reportData.etablissementId || "Inconnu");
+    var livreurIdSafe = sanitizeInputForSheets_(reportData.livreurId || "Inconnu");
+    var statutSafe = sanitizeInputForSheets_(reportData.statut || "Inconnu");
 
     sheet.appendRow([
       timestamp,
-      reportData.livreurId,
+      livreurIdSafe,
       etablissementIdSafe,
-      reportData.statut, // "RAS" ou "ANOMALIE" ou "NOTE"
+      statutSafe, // "RAS" ou "ANOMALIE" ou "NOTE"
       noteFinale,
       reportData.lat,
       reportData.lng
@@ -123,8 +125,8 @@ function api_saveLivraisonReport(reportData) {
 function sanitizeInputForSheets_(input) {
   if (!input) return "";
   var str = String(input);
-  // Si la chaîne commence par =, +, - ou @, on ajoute une apostrophe pour forcer le texte.
-  if (/^[=+\-@]/.test(str)) {
+  // Si la chaîne commence par =, +, - ou @, ou tab/newline, on ajoute une apostrophe pour forcer le texte.
+  if (/^[=+\-@\t\r]/.test(str)) {
     return "'" + str;
   }
   return str;
