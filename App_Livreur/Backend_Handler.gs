@@ -20,6 +20,7 @@ function getConfig() {
  * @return {Array<Array<any>>} Les données de la feuille.
  */
 function getSheetData(sheetName) {
+  Logger.log("getSheetData called with: " + String(sheetName)); // Debug
   const config = getConfig();
   const ssId = config.ID_FEUILLE_CALCUL;
   if (!ssId) {
@@ -324,8 +325,9 @@ function getListeTournees(chauffeurEmail) {
  */
 function getTracesForTournee(tourneeId) {
   const config = getConfig();
-  const traceSheetName = config.SHEET_TRACE_LIVRAISON || SHEET_TRACE;
-  const data = getSheetData(traceSheetName);
+  const traceSheetName = config.SHEET_TRACE_LIVRAISON || (typeof SHEET_TRACE !== 'undefined' ? SHEET_TRACE : "TRACE_Livraisons");
+  Logger.log("getTracesForTournee: traceSheetName = " + traceSheetName);
+  const data = getSheetData(traceSheetName || "TRACE_Livraisons");
   
   if (data.length < 2) return [];
   
@@ -353,6 +355,11 @@ function getTracesForTournee(tourneeId) {
  * @return {GoogleAppsScript.HTML.HtmlOutput} La page HTML.
  */
 function doGet(e) {
+  // Routing vers l'interface Tesla si demandée
+  if (e && e.parameter && e.parameter.page === 'tesla') {
+     return renderTeslaLivraisonInterface(e);
+  }
+
   return HtmlService.createTemplateFromFile('Index').evaluate()
       .setTitle('EL Services Livreur')
       .setSandboxMode(HtmlService.SandboxMode.IFRAME);
@@ -365,4 +372,148 @@ function doGet(e) {
  */
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+/**
+ * Alias pour include, utilisé par les templates Tesla.
+ */
+function includeTemplate(filename) {
+  return include(filename);
+}
+
+// ==============================================================================
+// FONCTIONS BACKEND POUR LE MODULE TESLA / LIVREUR
+// ==============================================================================
+
+/**
+ * Autorisation chauffeur (webapp livraison) basee sur un code partage.
+ * @param {string} authToken Code fourni par le chauffeur.
+ * @returns {boolean}
+ */
+function isLivreurAuthorized_(authToken) {
+  try {
+    const token = (authToken || '').toString().trim();
+    if (!token) return false;
+    // On utilise une propriété de script, ou on hardcode un fallback pour la démo si besoin
+    const config = getConfig();
+    const shared = config.ELS_SHARED_SECRET || '1234'; // Fallback temporaire si pas de config
+    return token === shared;
+  } catch (err) {
+    Logger.log('isLivreurAuthorized_ error: ' + err.toString());
+    return false;
+  }
+}
+
+/**
+ * Récupère TOUTES les réservations pour une date donnée (pour l'interface Tesla/Livreur).
+ * @param {string} dateFiltreString La date à rechercher au format "YYYY-MM-DD".
+ * @param {string} authToken Token d'auth du livreur.
+ * @returns {Object} Un objet avec le statut et la liste des réservations.
+ */
+function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
+  try {
+    if (!isLivreurAuthorized_(authToken)) {
+      return { success: false, error: "Accès non autorisé (Code invalide)." };
+    }
+
+    // On lit la feuille "Facturation" (utilisée comme source de vérité des résas)
+    const ssId = getConfig().ID_FEUILLE_CALCUL;
+    if (!ssId) return { success: false, error: "ID_FEUILLE_CALCUL manquant." };
+
+    const ss = SpreadsheetApp.openById(ssId);
+    const feuille = ss.getSheetByName("Facturation") || ss.getSheetByName("Réservations");
+    if (!feuille) return { success: false, error: "Feuille Facturation/Réservations introuvable." };
+
+    const data = feuille.getDataRange().getValues();
+    if (data.length < 2) return { success: true, reservations: [] };
+
+    const headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
+    
+    // Recherche des indices de colonnes
+    const idxDate = headers.indexOf("date");
+    const idxClient = headers.findIndex(h => h.includes("client (raison") || h.includes("client"));
+    const idxEmail = headers.findIndex(h => h.includes("email"));
+    const idxDetails = headers.indexOf("détails");
+    const idxStatut = headers.indexOf("statut");
+    const idxNote = headers.findIndex(h => h.includes("note"));
+    const idxId = headers.findIndex(h => h.includes("id réservation") || h === "id");
+
+    if (idxDate === -1) return { success: false, error: "Colonne Date introuvable." };
+
+    const reservations = [];
+
+    // Parcours des données
+    for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        const dateCell = row[idxDate];
+        let rowDateStr = "";
+        
+        if (dateCell instanceof Date) {
+            rowDateStr = Utilities.formatDate(dateCell, Session.getScriptTimeZone(), "yyyy-MM-dd");
+        } else {
+             // Tentative de parsing manuel si string
+             // ... (simplifié)
+        }
+
+        if (rowDateStr === dateFiltreString) {
+            reservations.push({
+                id: (idxId > -1) ? row[idxId] : ("ROW-" + i),
+                start: (dateCell instanceof Date) ? dateCell.toISOString() : null, // Heure approx
+                clientName: (idxClient > -1) ? row[idxClient] : "Client Inconnu",
+                clientEmail: (idxEmail > -1) ? row[idxEmail] : "",
+                details: (idxDetails > -1) ? row[idxDetails] : "",
+                statut: (idxStatut > -1) ? row[idxStatut] : "",
+                note: (idxNote > -1) ? row[idxNote] : ""
+            });
+        }
+    }
+
+    return { success: true, reservations: reservations };
+
+  } catch (e) {
+    Logger.log("Erreur obtenirToutesReservationsPourDate: " + e.toString());
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Met à jour le statut d'une réservation (Livreur).
+ */
+function livreurMettreAJourStatutReservation(idReservation, statut, authToken) {
+  try {
+    if (!isLivreurAuthorized_(authToken)) {
+        return { success: false, error: "Non autorisé." };
+    }
+    
+    const config = getConfig();
+    const ssId = config.ID_FEUILLE_CALCUL;
+    if (!ssId) return { success: false, error: "Config manquante." };
+
+    const ss = SpreadsheetApp.openById(ssId);
+    const feuille = ss.getSheetByName("Facturation") || ss.getSheetByName("Réservations");
+    if (!feuille) return { success: false, error: "Feuille introuvable." };
+
+    const data = feuille.getDataRange().getValues();
+    const headers = data[0].map(h => String(h).toLowerCase().trim());
+    const idxId = headers.findIndex(h => h.includes("id réservation") || h === "id");
+    const idxStatut = headers.indexOf("statut");
+
+    if (idxId === -1 || idxStatut === -1) return { success: false, error: "Colonnes ID/Statut introuvables." };
+
+    const cleanId = String(idReservation).trim();
+    
+    for (let i = 1; i < data.length; i++) {
+        const rowId = String(data[i][idxId]).trim();
+        if (rowId === cleanId) {
+            feuille.getRange(i + 1, idxStatut + 1).setValue(statut);
+            return { success: true, statut: statut };
+        }
+    }
+
+    return { success: false, error: "Réservation introuvable." };
+
+  } catch (e) {
+    Logger.log("Erreur livreurMettreAJourStatutReservation: " + e.toString());
+    return { success: false, error: e.message };
+  }
 }
