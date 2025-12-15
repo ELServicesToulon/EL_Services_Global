@@ -360,7 +360,9 @@ function doGet(e) {
      return renderTeslaLivraisonInterface(e);
   }
 
-  return HtmlService.createTemplateFromFile('Index').evaluate()
+  var template = HtmlService.createTemplateFromFile('Index');
+  template.pageTitle = 'EL Services Livreur'; // Correction: Définition de pageTitle requis par le template
+  return template.evaluate()
       .setTitle('EL Services Livreur')
       .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
