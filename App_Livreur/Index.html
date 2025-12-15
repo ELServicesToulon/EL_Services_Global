@@ -1,405 +1,128 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>EL Services Livreur</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f4;
-      }
-      .container {
-        padding: 15px;
-      }
-      .header {
-        background-color: #004d40;
-        color: white;
-        padding: 15px;
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .tournee-card {
-        background-color: white;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .tournee-header {
-        background-color: #00796b;
-        color: white;
-        padding: 10px;
-        border-radius: 8px 8px 0 0;
-        font-weight: bold;
-      }
-      .arret-details {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-      }
-      .arret-details:last-child {
-        border-bottom: none;
-      }
-      .arret-status {
-        font-weight: bold;
-        color: #d32f2f; /* Rouge par défaut */
-        margin-top: 5px;
-      }
-      .status-Livrée { color: #388e3c; } /* Vert */
-      .status-À_livrer { color: #fbc02d; } /* Jaune */
+<html lang="fr">
 
-      .input-group {
-        margin-top: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-      
-      /* CORRECTION TESLA: Augmentation de la cible tactile pour la fiabilité */
-      .input-group button, .input-group textarea, .input-group input[type="submit"] {
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        min-height: 44px; /* Taille minimale recommandée pour le tactile */
-      }
-      
-      .btn-ras {
-        background-color: #4CAF50; /* Vert */
-        color: white;
-        border: none;
-        cursor: pointer;
-      }
-      .btn-submit {
-        background-color: #1976d2; /* Bleu */
-        color: white;
-        border: none;
-        cursor: pointer;
-        margin-top: 10px;
-      }
-      .btn-ras:hover {
-        background-color: #45a049;
-      }
-      .btn-submit:hover {
-        background-color: #1565c0;
-      }
-      .note-field {
-        resize: vertical;
-        min-height: 44px; /* Ajusté à 44px */
-      }
-      .loading {
-        text-align: center;
-        padding: 20px;
-        font-size: 1.2em;
-        color: #004d40;
-      }
-      
-      /* Si le "menu déroulant" était un élément sélecteur (&lt;select&gt;), le CSS suivant est essentiel */
-      select {
-          -webkit-appearance: none; /* Désactive le style natif iOS/Android qui peut bugger */
-          appearance: none;
-          padding-right: 30px; /* Espace pour une flèche custom si nécessaire */
-      }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>
+        <?= pageTitle ?>
+    </title>
+    <?!= includeTemplate('Tesla_Livraison_CSS'); ?>
+</head>
 
-      /* Styles Modal */
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.5);
-        align-items: center;
-        justify-content: center;
-      }
-      .modal-content {
-        background-color: #fefefe;
-        margin: auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 85%;
-        max-width: 400px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-      .modal-header {
-        font-weight: bold;
-        font-size: 1.1em;
-        margin-bottom: 10px;
-        color: #004d40;
-      }
-      .modal-body {
-        margin-bottom: 20px;
-        font-size: 0.95em;
-        line-height: 1.4;
-      }
-      .modal-footer {
-        text-align: right;
-      }
-      .validation-ok {
-        color: #388e3c;
-        font-weight: bold;
-      }
-      .validation-warning {
-        color: #fbc02d;
-        font-weight: bold;
-      }
-      .validation-error {
-        color: #d32f2f;
-        font-weight: bold;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      Application Livreur ELS
-    </div>
-
-    <div class="container">
-      <div id="tournees-list">
-        <div class="loading">Chargement des tournées...</div>
-      </div>
-    </div>
-
-    <!-- Modal de validation -->
-    <div id="validationModal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">Confirmation de Livraison</div>
-        <div id="modal-body" class="modal-body">
-          <!-- Contenu dynamique -->
+<body class="tesla-app tesla-livraison">
+    <header class="hero">
+        <div class="hero-left">
+            <p class="eyebrow">Tesla Livraison</p>
+            <h1>Check autonomie & batterie</h1>
+            <p class="subtitle">Brief instantane pour les tournees ELS, optimise ecran Tesla + mobile.</p>
         </div>
-        <div class="modal-footer">
-          <button class="btn-submit" onclick="closeModal()">Fermer</button>
+        <div class="hero-actions">
+            <button id="btn-refresh" class="btn primary">Rafraichir</button>
+            <button id="btn-force" class="btn ghost">Reveil Tessie</button>
         </div>
-      </div>
-    </div>
+    </header>
 
-    <script>
-      // Variables globales (remplacez par l'email réel après authentification)
-      // NOTE DU DEVELOPPEUR: Ces valeurs sont en dur (CHAUFFEUR_EMAIL, CHAUFFEUR_ID)
-      // et doivent IMPERATIVEMENT être remplacées par un mécanisme de PropertiesService
-      // et d'authentification SECURISEE (OAuth, Token) pour respecter la Règle 2.
-      const CHAUFFEUR_EMAIL = 'maning2@hotmail.com'; // À remplacer par un mécanisme d'authentification réel
-      const CHAUFFEUR_ID = 'LIV-101'; // À remplacer par l'ID réel après authentification
+    <main class="layout">
+        <section class="grid">
+            <article class="card battery">
+                <div class="card-header">
+                    <span class="pill">Batterie</span>
+                    <span id="status-tag" class="pill pill-muted">--</span>
+                </div>
+                <div class="battery-level">
+                    <span id="battery-level">--</span><span class="unit">%</span>
+                </div>
+                <div class="battery-bar">
+                    <div id="battery-bar-fill"></div>
+                </div>
+                <p id="battery-threshold" class="hint"></p>
+            </article>
 
-      /**
-       * Initialise l'application en chargeant les tournées.
-       */
-      function initApp() {
-        loadTournees();
-      }
+            <article class="card range">
+                <div class="card-header">
+                    <span class="pill">Autonomie estimee</span>
+                    <span class="pill pill-muted">Livraisons</span>
+                </div>
+                <div class="range-value">
+                    <span id="range-km">--</span>
+                    <span class="unit">km</span>
+                </div>
+                <p class="hint">Valeur Tessie convertie en km.</p>
+            </article>
 
-      /**
-       * Appelle le serveur pour obtenir la liste des tournées.
-       */
-      function loadTournees() {
-        google.script.run
-          .withSuccessHandler(renderTournees)
-          .withFailureHandler(handleError)
-          .getListeTournees(CHAUFFEUR_EMAIL);
-      }
+            <article class="card charge">
+                <div class="card-header">
+                    <span class="pill">Charge</span>
+                    <span id="plug-state" class="pill pill-muted">--</span>
+                </div>
+                <div class="charge-grid">
+                    <div class="metric">
+                        <p class="label">Statut</p>
+                        <p id="charge-state" class="value">--</p>
+                    </div>
+                    <div class="metric">
+                        <p class="label">Plein dans</p>
+                        <p id="minutes-full" class="value">--</p>
+                    </div>
+                </div>
+                <p class="hint">Indique si le cable est detecte et l'estimation Tessie.</p>
+            </article>
 
-      /**
-       * Gère les erreurs du côté serveur.
-       * @param {string} error L'objet d'erreur.
-       */
-      function handleError(error) {
-        console.error("Erreur serveur :", error);
-        const listDiv = document.getElementById('tournees-list');
-        listDiv.innerHTML = `<p style="color: red; text-align: center;">Erreur de chargement: ${error.message || error.toString()}</p>`;
-      }
-      
-      /**
-       * Envoie les données de statut de livraison au serveur.
-       * @param {string} tourneeId L'ID de la tournée (Event ID).
-       * @param {string} livraisonId L'ID unique de l'arrêt.
-       * @param {string} status Le nouveau statut (e.g., 'Livrée', 'Problème').
-       * @param {string} note La note ou anomalie.
-       * @param {string} arretDivId L'ID du div d'arrêt dans l'interface pour la mise à jour.
-       * @param {string} etablissementNom Le nom de l'établissement pour la validation.
-       */
-      function updateLivraisonStatus(tourneeId, livraisonId, status, note, arretDivId, etablissementNom) {
-        // Obtenir la position GPS avant d'envoyer
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              sendData(tourneeId, livraisonId, status, note, arretDivId, etablissementNom, position.coords.latitude, position.coords.longitude);
-            },
-            (error) => {
-              console.warn("Erreur géolocalisation:", error);
-              // On envoie quand même sans GPS
-              sendData(tourneeId, livraisonId, status, note, arretDivId, etablissementNom, '', '');
-            },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-          );
-        } else {
-          sendData(tourneeId, livraisonId, status, note, arretDivId, etablissementNom, '', '');
-        }
-      }
+            <article class="card advice">
+                <div class="card-header">
+                    <span class="pill">Brief chauffeur</span>
+                </div>
+                <p id="advice-text" class="advice-text">En attente de donnees Tesla...</p>
+                <ul class="meta-list">
+                    <li>
+                        <span>Derniere mise a jour</span>
+                        <strong id="last-update">--</strong>
+                    </li>
+                    <li>
+                        <span>Seuil alerte</span>
+                        <strong id="threshold">--%</strong>
+                    </li>
+                    <li>
+                        <span>Source</span>
+                        <strong id="source-tag">--</strong>
+                    </li>
+                </ul>
+            </article>
+        </section>
 
-      function sendData(tourneeId, livraisonId, status, note, arretDivId, etablissementNom, lat, lng) {
-        const payload = {
-          tournee_id: tourneeId,
-          livraison_id: livraisonId,
-          ehpad_id: livraisonId,
-          chauffeur_id: CHAUFFEUR_ID,
-          status: status,
-          anomalie_code: status === 'Livrée' ? 'RAS' : 'ANOMALIE',
-          anomalie_note: note,
-          gps_lat: lat,
-          gps_lng: lng,
-          etablissement_nom: etablissementNom,
-          app_version: '1.1'
-        };
+        <section class="card deliveries">
+            <div class="deliveries-head">
+                <div>
+                    <p class="pill pill-muted">Livraisons</p>
+                    <h2>Courses chauffeur</h2>
+                </div>
+                <div class="deliveries-actions">
+                    <input type="date" id="livreur-date" class="input-compact">
+                    <input type="password" id="livreur-code" class="input-compact" placeholder="Code chauffeur">
+                    <button id="livreur-save-code" class="btn ghost">Enregistrer</button>
+                    <button id="livreur-refresh" class="btn primary">Rafraichir</button>
+                </div>
+            </div>
+            <div class="deliveries-subhead">
+                <p class="hint" id="livreur-hint">Saisir le code chauffeur pour charger les courses du jour.</p>
+                <div class="status-legend">
+                    <span class="status-badge planned">Prévue</span>
+                    <span class="status-badge running">En cours</span>
+                    <span class="status-badge done">Livrée</span>
+                    <span class="status-badge cancel">Annulée</span>
+                </div>
+            </div>
+            <div id="livraisons-liste" class="deliveries-list">
+                <p class="hint">Aucune donnée chargée.</p>
+            </div>
+        </section>
+    </main>
 
-        const loadingModal = document.getElementById('validationModal');
-        const modalBody = document.getElementById('modal-body');
-        modalBody.innerHTML = '<p>Enregistrement en cours...</p>';
-        loadingModal.style.display = 'flex'; // Utiliser flex pour centrer avec le CSS ajouté
+    <div id="error-banner" class="error-banner hidden"></div>
+    <div id="toast" class="toast hidden"></div>
 
-        google.script.run
-          .withSuccessHandler((response) => {
-            if (response.success) {
-              updateUI(arretDivId, status, response.validation);
-            } else {
-              closeModal();
-              alert("Erreur lors de l'enregistrement: " + response.message);
-            }
-          })
-          .withFailureHandler((e) => {
-            closeModal();
-            handleError(e);
-          })
-          .enregistrerStatutLivraison(payload);
-      }
+    <?!= includeTemplate('Tesla_Livraison_JS'); ?>
+</body>
 
-    </script>
-
-    <script>
-      // Création de la liste des tournées et de leurs arrêts
-      function renderTournees(tournees) {
-        const listDiv = document.getElementById('tournees-list');
-        listDiv.innerHTML = ''; // Nettoyer la liste
-
-        if (tournees.length === 0) {
-          listDiv.innerHTML = '<p style="text-align: center; color: #777;">Aucune tournée trouvée pour aujourd\'hui.</p>';
-          return;
-        }
-
-        tournees.forEach((tournee, index) => {
-          const card = document.createElement('div');
-          card.className = 'tournee-card';
-
-          const header = document.createElement('div');
-          header.className = 'tournee-header';
-          header.textContent = `Tournée: ${tournee.client_nom} (${tournee.arrets.length} arrêts)`;
-          card.appendChild(header);
-
-          tournee.arrets.forEach((arret, arretIndex) => {
-            const arretDiv = document.createElement('div');
-            arretDiv.className = 'arret-details';
-            arretDiv.id = `arret-${arret.livraison_id}`;
-
-            const nomArret = document.createElement('strong');
-            nomArret.textContent = `${arret.nom} (${arret.type_arret})`;
-            arretDiv.appendChild(nomArret);
-
-            const statusP = document.createElement('p');
-            statusP.className = `arret-status status-${arret.status.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            statusP.innerHTML = `Statut actuel: <span>${arret.status}</span>`;
-            arretDiv.appendChild(statusP);
-
-            const inputGroup = document.createElement('div');
-            inputGroup.className = 'input-group';
-
-            // Bouton RAS
-            const btnRas = document.createElement('button');
-            btnRas.className = 'btn-ras';
-            btnRas.textContent = 'Marquer RAS (Rien À Signaler)';
-            btnRas.onclick = () => {
-              document.getElementById(`note-${arret.livraison_id}`).value = 'RAS';
-              updateLivraisonStatus(tournee.event_id, arret.livraison_id, 'Livrée', 'RAS', `arret-${arret.livraison_id}`, arret.nom);
-            };
-            inputGroup.appendChild(btnRas);
-
-            // Champ de Note
-            const noteTextarea = document.createElement('textarea');
-            noteTextarea.id = `note-${arret.livraison_id}`;
-            noteTextarea.className = 'note-field';
-            noteTextarea.placeholder = 'Note / Anomalie (optionnel)';
-            noteTextarea.setAttribute('aria-label', `Note ou anomalie pour ${arret.nom}`);
-            noteTextarea.value = arret.note || ''; // Pré-remplir avec la note existante
-            inputGroup.appendChild(noteTextarea);
-
-            // Bouton Soumettre avec Note/Anomalie
-            const btnSubmit = document.createElement('button');
-            btnSubmit.className = 'btn-submit';
-            btnSubmit.textContent = 'Soumettre Note / Anomalie';
-            btnSubmit.onclick = () => {
-              const note = document.getElementById(`note-${arret.livraison_id}`).value;
-              const status = note.toUpperCase().includes('RAS') ? 'Livrée' : 'Problème';
-              updateLivraisonStatus(tournee.event_id, arret.livraison_id, status, note, `arret-${arret.livraison_id}`, arret.nom);
-            };
-            inputGroup.appendChild(btnSubmit);
-
-            arretDiv.appendChild(inputGroup);
-            card.appendChild(arretDiv);
-          });
-
-          listDiv.appendChild(card);
-        });
-      }
-      
-      // Fonction pour mettre à jour l'affichage après l'enregistrement
-      function updateUI(arretId, newStatus, validation) {
-        const arretDiv = document.getElementById(arretId);
-        if (arretDiv) {
-          const statusSpan = arretDiv.querySelector('.arret-status span');
-          if (statusSpan) {
-            // Mise à jour de la classe pour la couleur
-            const oldClasses = Array.from(arretDiv.querySelector('.arret-status').classList).filter(c => c.startsWith('status-'));
-            arretDiv.querySelector('.arret-status').classList.remove(...oldClasses);
-            arretDiv.querySelector('.arret-status').classList.add(`status-${newStatus.replace(/[^a-zA-Z0-9]/g, '_')}`);
-            
-            // Mise à jour du texte
-            statusSpan.textContent = newStatus;
-          }
-
-          // Affichage du modal détaillé
-          const modalBody = document.getElementById('modal-body');
-          let validationHtml = '';
-
-          if (validation) {
-            let colorClass = validation.match ? 'validation-ok' : (validation.distance > 1000 ? 'validation-error' : 'validation-warning');
-
-            validationHtml = `
-              <p><strong>Action:</strong> Statut mis à jour vers "${newStatus}"</p>
-              <hr>
-              <p><strong>Etablissement:</strong> ${validation.etab_adresse || 'Adresse inconnue'}</p>
-              <p class="${colorClass}"><strong>Validation GPS:</strong> ${validation.message}</p>
-            `;
-          } else {
-             validationHtml = `<p>Statut mis à jour : ${newStatus}</p>`;
-          }
-
-          modalBody.innerHTML = validationHtml;
-          document.getElementById('validationModal').style.display = 'flex';
-        }
-      }
-
-      function closeModal() {
-        document.getElementById('validationModal').style.display = 'none';
-      }
-
-      // Initialisation après le chargement du corps
-      document.addEventListener('DOMContentLoaded', initApp);
-    </script>
-  </body>
 </html>
