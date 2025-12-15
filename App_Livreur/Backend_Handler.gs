@@ -480,6 +480,7 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
  * Met à jour le statut d'une réservation (Livreur).
  */
 function livreurMettreAJourStatutReservation(idReservation, statut, authToken) {
+  // ... (existing implementation) ...
   try {
     if (!isLivreurAuthorized_(authToken)) {
         return { success: false, error: "Non autorisé." };
@@ -515,5 +516,47 @@ function livreurMettreAJourStatutReservation(idReservation, statut, authToken) {
   } catch (e) {
     Logger.log("Erreur livreurMettreAJourStatutReservation: " + e.toString());
     return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Traite une livraison complète : mise à jour statut + log trace GPS.
+ */
+function traiterLivraisonComplete(data) {
+  try {
+      // 1. Mise à jour du statut dans la feuille de gestion
+      const updateResult = livreurMettreAJourStatutReservation(data.livraison_id, data.status, data.authToken);
+      if (!updateResult.success) {
+          Logger.log("Echec mise à jour statut: " + updateResult.error);
+          // On continue quand même pour la trace, ou on stop ?
+          // Mieux vaut logger la trace meme si le statut échoue (preuve de passage)
+      }
+
+      // 2. Enregistrement de la trace GPS
+      // Adaptation des données pour enregistrerStatutLivraison
+      // Data attendu: tournee_id, livraison_id, ehpad_id, chauffeur_id, status, anomalie_note, gps_lat, gps_lng...
+      const traceResult = enregistrerStatutLivraison({
+          tournee_id: data.tournee_id || "", 
+          livraison_id: data.livraison_id,
+          ehpad_id: data.client_id || data.livraison_id, // Fallback
+          chauffeur_id: "LIVREUR-APP", // Identité générique si pas dispo
+          status: data.status,
+          anomalie_note: data.note || "",
+          anomalie_code: data.status === 'Livrée' ? 'RAS' : 'ANOMALIE',
+          gps_lat: data.gps_lat,
+          gps_lng: data.gps_lng,
+          etablissement_nom: data.client_nom, // Pour validation distance
+          app_version: 'Tesla_Mix_1.0'
+      });
+
+      return { 
+          success: true, 
+          update: updateResult, 
+          trace: traceResult 
+      };
+
+  } catch (e) {
+      Logger.log("Erreur traiterLivraisonComplete: " + e.toString());
+      return { success: false, error: e.message };
   }
 }

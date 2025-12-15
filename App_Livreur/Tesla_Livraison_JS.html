@@ -70,7 +70,7 @@
                     const id = card ? card.dataset.id : '';
                     const statut = btn.getAttribute('data-statut');
                     if (id && statut) {
-                        mettreAJourStatut(id, statut);
+                        mettreAJourStatut(id, statut, card);
                     }
                 });
             }
@@ -153,7 +153,7 @@
             const note = resa.note || '';
             const id = resa.id || '';
             return `
-      <div class="livraison-item" data-id="${echapperHtml(id)}">
+      <div class="livraison-item" data-id="${echapperHtml(id)}" data-client="${echapperHtml(client)}">
         <div class="livraison-top">
           <div class="livraison-main">${echapperHtml(heure)} · ${echapperHtml(details)}</div>
           <span class="status-badge ${echapperHtml(statutClasse)}">${echapperHtml(statut)}</span>
@@ -187,13 +187,40 @@
             return 'planned';
         }
 
-        function mettreAJourStatut(id, statut) {
+        function mettreAJourStatut(id, statut, cardElement) {
             if (!verifierToken()) return;
+
+            const clientNom = cardElement ? cardElement.dataset.client : "";
+
+            // Tentative de géolocalisation avant envoi
+            if (navigator.geolocation) {
+                mettreHint('Acquisition GPS...');
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => envoyerAuServeur(id, statut, clientNom, pos.coords.latitude, pos.coords.longitude),
+                    (err) => {
+                        console.warn("GPS Fail:", err);
+                        envoyerAuServeur(id, statut, clientNom, '', '');
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                envoyerAuServeur(id, statut, clientNom, '', '');
+            }
+        }
+
+        function envoyerAuServeur(id, statut, clientNom, lat, lng) {
+            mettreHint('Enregistrement...');
             google.script.run
                 .withSuccessHandler((res) => {
                     if (res && res.success) {
                         chargerCourses(false);
-                        mettreHint('Statut mis à jour.');
+                        const msg = res.trace && res.trace.validation && res.trace.validation.message
+                            ? ("Statut OK. " + res.trace.validation.message)
+                            : 'Statut mis à jour.';
+                        mettreHint(msg);
+                        if (res.trace && res.trace.validation && !res.trace.validation.match && lat) {
+                            alert("Alert GPS: " + (res.trace.validation.message || "Distance importante"));
+                        }
                     } else {
                         afficherVide(res && res.error ? res.error : 'Mise à jour impossible.');
                     }
@@ -201,7 +228,14 @@
                 .withFailureHandler((err) => {
                     afficherVide('Erreur Apps Script: ' + (err && err.message ? err.message : 'inconnue'));
                 })
-                .livreurMettreAJourStatutReservation(id, statut, state.token);
+                .traiterLivraisonComplete({
+                    livraison_id: id,
+                    status: statut,
+                    authToken: state.token,
+                    client_nom: clientNom,
+                    gps_lat: lat,
+                    gps_lng: lng
+                });
         }
 
         function echapperHtml(texte) {
