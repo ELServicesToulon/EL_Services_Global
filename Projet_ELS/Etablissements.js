@@ -104,56 +104,69 @@ function ensureEtablissementsSheet_(ss) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  */
 function applyEtablissementsValidations_(ss, sheet) {
-  const headers = getEtablissementsHeaders_();
-  const headerMap = {};
-  headers.forEach(function (h, idx) { headerMap[h] = idx; });
   const maxRows = Math.max(1, sheet.getMaxRows() - 1);
 
-  const typeValidation = SpreadsheetApp.newDataValidation()
-    .requireValueInList(ETABLISSEMENT_TYPES, true)
-    .setAllowInvalid(true)
-    .build();
-  sheet.getRange(2, headerMap[COLONNE_TYPE_ETAB] + 1, maxRows, 1).setDataValidation(typeValidation);
+  // Lecture dynamique des en-tetes pour eviter les decalages
+  const headerRow = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0];
+  const indices = {};
+  headerRow.forEach(function (h, i) {
+    if (h) indices[String(h).trim()] = i;
+  });
 
-  const statusValidation = SpreadsheetApp.newDataValidation()
-    .requireCheckbox()
-    .build();
-  sheet.getRange(2, headerMap[COLONNE_STATUT_ETAB] + 1, maxRows, 1).setDataValidation(statusValidation);
-
-  const codesSheet = ss.getSheetByName(SHEET_CODES_POSTAUX_RETRAIT);
-  if (codesSheet) {
-    const codesRange = codesSheet.getRange('A2:A');
-    const cpValidation = SpreadsheetApp.newDataValidation()
-      .requireValueInRange(codesRange, true)
+  if (indices[COLONNE_TYPE_ETAB] !== undefined) {
+    const typeValidation = SpreadsheetApp.newDataValidation()
+      .requireValueInList(ETABLISSEMENT_TYPES, true)
       .setAllowInvalid(true)
       .build();
-    sheet.getRange(2, headerMap[COLONNE_CODE_POSTAL_ETAB] + 1, maxRows, 1).setDataValidation(cpValidation);
+    sheet.getRange(2, indices[COLONNE_TYPE_ETAB] + 1, maxRows, 1).setDataValidation(typeValidation);
+  }
+
+  if (indices[COLONNE_STATUT_ETAB] !== undefined) {
+    const statusValidation = SpreadsheetApp.newDataValidation()
+      .requireCheckbox()
+      .build();
+    sheet.getRange(2, indices[COLONNE_STATUT_ETAB] + 1, maxRows, 1).setDataValidation(statusValidation);
+  }
+
+  if (indices[COLONNE_CODE_POSTAL_ETAB] !== undefined) {
+    const codesSheet = ss.getSheetByName(SHEET_CODES_POSTAUX_RETRAIT);
+    if (codesSheet) {
+      const codesRange = codesSheet.getRange('A2:A');
+      const cpValidation = SpreadsheetApp.newDataValidation()
+        .requireValueInRange(codesRange, true)
+        .setAllowInvalid(true)
+        .build();
+      sheet.getRange(2, indices[COLONNE_CODE_POSTAL_ETAB] + 1, maxRows, 1).setDataValidation(cpValidation);
+    }
   }
 
   // Validation dynamique pour la colonne Pharmacie Référente
-  if (headerMap[COLONNE_PHARMACIE_REFERENTE] !== undefined) {
-    const data = sheet.getDataRange().getValues();
-    const idxType = headerMap[COLONNE_TYPE_ETAB];
-    const idxNom = headerMap[COLONNE_NOM_ETAB];
-    const pharmacies = [];
+  if (indices[COLONNE_PHARMACIE_REFERENTE] !== undefined) {
+    const idxType = indices[COLONNE_TYPE_ETAB];
+    const idxNom = indices[COLONNE_NOM_ETAB];
 
-    // Récupérer la liste des pharmacies existantes
-    for (let i = 1; i < data.length; i++) {
-      if (normalizeEtablissementType_(data[i][idxType]) === 'Pharmacie') {
-        const nom = String(data[i][idxNom] || '').trim();
-        if (nom) pharmacies.push(nom);
+    if (idxType !== undefined && idxNom !== undefined) {
+      const data = sheet.getDataRange().getValues();
+      const pharmacies = [];
+
+      // Récupérer la liste des pharmacies existantes
+      for (let i = 1; i < data.length; i++) {
+        if (normalizeEtablissementType_(data[i][idxType]) === 'Pharmacie') {
+          const nom = String(data[i][idxNom] || '').trim();
+          if (nom) pharmacies.push(nom);
+        }
       }
-    }
 
-    // Trier et dédoublonner
-    const uniquePharmacies = [...new Set(pharmacies)].sort();
+      // Trier et dédoublonner
+      const uniquePharmacies = [...new Set(pharmacies)].sort();
 
-    if (uniquePharmacies.length > 0) {
-      const phValidation = SpreadsheetApp.newDataValidation()
-        .requireValueInList(uniquePharmacies, true)
-        .setAllowInvalid(true) // Permettre de laisser vide ou saisie libre si nouvelle
-        .build();
-      sheet.getRange(2, headerMap[COLONNE_PHARMACIE_REFERENTE] + 1, maxRows, 1).setDataValidation(phValidation);
+      if (uniquePharmacies.length > 0) {
+        const phValidation = SpreadsheetApp.newDataValidation()
+          .requireValueInList(uniquePharmacies, true)
+          .setAllowInvalid(true)
+          .build();
+        sheet.getRange(2, indices[COLONNE_PHARMACIE_REFERENTE] + 1, maxRows, 1).setDataValidation(phValidation);
+      }
     }
   }
 }
@@ -174,14 +187,20 @@ function extractCodePostalFromAddress_(adresse) {
  * @param {string} postalCode
  * @returns {string}
  */
-function cleanAddress_(fullAddress, postalCode) {
+function cleanAddress_(fullAddress, postalCode, city) {
   if (!fullAddress) return '';
   let clean = String(fullAddress);
   if (postalCode) {
     const regex = new RegExp('\\b' + postalCode + '\\b', 'g');
     clean = clean.replace(regex, '');
   }
+  if (city) {
+    const escapedCity = city.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regexCity = new RegExp('\\b' + escapedCity + '\\b', 'gi');
+    clean = clean.replace(regexCity, '');
+  }
   return clean
+    .replace(/, France$/i, '')
     .replace(/\s+/g, ' ')
     .replace(/ ,/g, ',')
     .replace(/, \s*,/g, ',')
@@ -299,7 +318,7 @@ function provisionnerBaseEtablissements(options) {
     lignesAAjouter.push([
       typeNorm,
       nom,
-      cleanAddress_(item.adresse, code),
+      cleanAddress_(item.adresse, code, item.ville),
       code,
       item.ville || '',
       item.contact || '',
@@ -569,7 +588,7 @@ function googlePlacesImporterEtablissements_(query, typeEtablissement) {
     const row = new Array(headers.length).fill('');
     row[indices[COLONNE_TYPE_ETAB]] = typeFinal;
     row[indices[COLONNE_NOM_ETAB]] = place.name || '';
-    row[indices[COLONNE_ADRESSE_ETAB]] = cleanAddress_(place.formatted_address, cp);
+    row[indices[COLONNE_ADRESSE_ETAB]] = cleanAddress_(place.formatted_address, cp, parsed.ville);
     row[indices[COLONNE_CODE_POSTAL_ETAB]] = cp;
     row[indices[COLONNE_VILLE_ETAB]] = parsed.ville || '';
     row[indices[COLONNE_TELEPHONE_ETAB]] = details.phone || '';
