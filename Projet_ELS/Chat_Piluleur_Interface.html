@@ -162,22 +162,51 @@
       // Gère l'action "Ouverture de Modale"
       if (response && response.action === 'open_reservation_modal') {
         console.log("Action reçue du Chatbot :", response.action, response.data);
-        
-        // Tente d'accéder à la fonction globale d'ouverture de modale (si on est dans l'admin)
+        const data = response.data || {};
+
+        // Fonction locale d'ouverture (ADMIN)
         if (typeof ouvrirModaleAjout === 'function') {
            ouvrirModaleAjout();
-           // TODO: Pré-remplir les champs avec response.data si la fonction ouvrirModaleAjout le permet
+           return;
+        }
+
+        // Fonction locale d'ouverture (CLIENT)
+        if (typeof ouvrirConfigurationTournee === 'function') {
+            const date = data.date || new Date().toISOString().split('T')[0];
+            ouvrirConfigurationTournee(date);
+            return;
+        }
+
+        // Tentative d'accès via window.parent (si iframe)
+        try {
+            if (window.parent) {
+                 // Parent ADMIN
+                 if (typeof window.parent.ouvrirModaleAjout === 'function') {
+                     window.parent.ouvrirModaleAjout();
+                     return;
+                 }
+                 // Parent CLIENT
+                 if (typeof window.parent.ouvrirConfigurationTournee === 'function') {
+                     const date = data.date || new Date().toISOString().split('T')[0];
+                     window.parent.ouvrirConfigurationTournee(date);
+                     return;
+                 }
+            }
+        } catch(e) { console.warn("Impossible d'accéder au parent", e); }
+        
+        // Fallback ultime : Event + Scroll vers calendrier
+        window.dispatchEvent(new CustomEvent('els-chat-action', { detail: response }));
+        
+        // Si on est sur la page de réservation mais que la fonction n'est pas trouvée (cas étrange), on scroll
+        const calendar = document.getElementById('vue-calendrier');
+        if (calendar) {
+            calendar.scrollIntoView({ behavior: 'smooth' });
         } else {
-           // Si la fonction n'est pas accessible directement, on emet un évènement
-           // que le scope parent peut écouter
-           window.dispatchEvent(new CustomEvent('els-chat-action', { detail: response }));
-           
-           // Tentative d'accès via window.parent si iframe
-           try {
-             if (window.parent && typeof window.parent.ouvrirModaleAjout === 'function') {
-               window.parent.ouvrirModaleAjout();
-             }
-           } catch(e) { console.warn("Impossible d'accéder au parent", e); }
+            // Try parent scroll
+             try {
+                const parentCalendar = window.parent.document.getElementById('vue-calendrier');
+                if (parentCalendar) parentCalendar.scrollIntoView({ behavior: 'smooth' });
+             } catch(e) {}
         }
       }
     }
