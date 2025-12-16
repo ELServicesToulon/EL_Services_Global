@@ -2790,4 +2790,45 @@
     transform: translateY(-2px);
     box-shadow: 6px 16px rgba(232, 33, 39, 0.35);
   }
+
+  /* --- BACK TO TOP BUTTON --- */
+  .btn-back-to-top {
+    position: fixed;
+    bottom: 24px;
+    left: 24px; /* Left aligned to avoid conflict with chat widget */
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--card, #fff);
+    border: 1px solid var(--muted);
+    color: var(--violet);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: transform 0.2s, opacity 0.2s, visibility 0.2s;
+  }
+
+  .btn-back-to-top:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    background: var(--violet);
+    color: #fff;
+    border-color: var(--violet);
+  }
+
+  .btn-back-to-top:focus {
+    outline: 3px solid var(--bleu);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.3);
+  }
+
+  .btn-back-to-top.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
+  }
 </style>
