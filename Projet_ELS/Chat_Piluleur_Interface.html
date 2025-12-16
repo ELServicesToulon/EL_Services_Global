@@ -122,6 +122,9 @@
       btn.disabled = !input.value.trim();
     }
 
+    // Historique des messages côté client
+    const chatHistory = [];
+
     function sendMessage(e) {
       e.preventDefault();
       const input = document.getElementById('user-input');
@@ -133,21 +136,49 @@
       input.value = '';
       input.style.height = 'auto'; // Reset height
       setLoading(true);
+      
+      // Stocke dans l'historique
+      chatHistory.push({ role: 'user', text: text });
 
       // 2. Détection sommaire du contexte (ex: via l'URL ou titre de page si accessible)
       const context = document.title || 'Inconnu';
 
-      // 3. Appel Backend
+      // 3. Appel Backend avec l'historique
       google.script.run
         .withSuccessHandler(onSuccess)
         .withFailureHandler(onFailure)
-        .processChatRequest({ message: text, context: context });
+        .processChatRequest({ message: text, context: context, history: chatHistory });
     }
 
     function onSuccess(response) {
       setLoading(false);
+      
+      // Affiche le texte du bot
       if (response && response.text) {
         addMessage('bot', response.text);
+        chatHistory.push({ role: 'model', text: response.text });
+      }
+      
+      // Gère l'action "Ouverture de Modale"
+      if (response && response.action === 'open_reservation_modal') {
+        console.log("Action reçue du Chatbot :", response.action, response.data);
+        
+        // Tente d'accéder à la fonction globale d'ouverture de modale (si on est dans l'admin)
+        if (typeof ouvrirModaleAjout === 'function') {
+           ouvrirModaleAjout();
+           // TODO: Pré-remplir les champs avec response.data si la fonction ouvrirModaleAjout le permet
+        } else {
+           // Si la fonction n'est pas accessible directement, on emet un évènement
+           // que le scope parent peut écouter
+           window.dispatchEvent(new CustomEvent('els-chat-action', { detail: response }));
+           
+           // Tentative d'accès via window.parent si iframe
+           try {
+             if (window.parent && typeof window.parent.ouvrirModaleAjout === 'function') {
+               window.parent.ouvrirModaleAjout();
+             }
+           } catch(e) { console.warn("Impossible d'accéder au parent", e); }
+        }
       }
     }
 

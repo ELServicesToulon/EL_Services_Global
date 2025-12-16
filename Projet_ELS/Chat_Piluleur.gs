@@ -16,41 +16,78 @@ function renderChatPiluleur() {
 
 /**
  * Point d'entrée principal appelé par le Front-end
- * @param {string} userMessage - Le message de l'utilisateur
- * @param {Array} history - Historique de la session locale (optionnel)
+ * @param {object} data - Contient {message, context, history}
  */
 function processChatRequest(data) {
   try {
     const userMessage = data.message;
     const context = data.context || 'Général';
+    const history = data.history || []; // Tableau d'objets {role: 'user'|'model', text: '...'}
 
-    // 1. Définition du Prompt Système (Ton Commercial & Logistique)
+    // 1. Construction de l'historique conversationnel pour le prompt (Contexte glissant)
+    // On garde les 10 derniers échanges pour avoir le contexte sans exploser les tokens
+    const recentHistory = history.slice(-10).map(h => `${h.role === 'user' ? 'Utilisateur' : 'Assistant'} : ${h.text}`).join('\n');
+
+    // 2. Définition du Prompt Système (Amélioré avec détection d'intention)
     const systemPrompt = `
       Rôle : Tu es "EL-Assistant", l'IA logistique de EL Services à Toulon.
-      Utilisateur : Un professionnel de santé (Infirmier, Pharmacien).
-      Contexte actuel de l'utilisateur : ${context}.
-
-      Tes Objectifs Prioritaires :
-      1. Aider à la prise de créneaux de livraison.
-      2. INCITATION (Upsell) : Si on parle de course simple, propose un arrêt supplémentaire.
-      3. LOGISTIQUE INVERSE : Propose systématiquement le "Retour Pharmacie" (glacières, ordonnances) à la fin d'une demande.
-
-      Règles :
-      - Réponse courte (max 3 phrases).
-      - Ton professionnel et serviable.
-      - Si tu as besoin d'une date ou d'une heure, demande-la.
+      Ton but est d'assister les pharmaciens/infirmiers.
+      
+      Contexte actuel : ${context}.
+      
+      RÈGLES CRITIQUES :
+      1. CONTEXTE : Tu DOIS prendre en compte l'historique de la conversation ci-dessous. Si l'utilisateur a déjà donné une date ou une heure, NE LA RE-DEMANDE PAS.
+      2. ACTION : Dès que l'utilisateur exprime clairement une intention de commande/réservation (même incomplète) ou s'il donne des détails (date, heure, nombre de caisses), tu DOIS proposer d'ouvrir le formulaire.
+      3. FORMAT DE RÉPONSE :
+         - Si tu as assez d'infos pour une réservation (ou si l'utilisateur le demande), ta réponse doit UNIQUEMENT contenir un objet JSON valide :
+           {"action": "open_reservation_modal", "text": "J'ouvre le formulaire pour vous.", "prefill": {"date": "...", "time": "...", "details": "..."}}
+         - Sinon, réponds simplement en texte pour demander les précisions manquantes.
+      
+      Historique de conversation :
+      ${recentHistory}
+      
+      Dernier message utilisateur : "${userMessage}"
+      
+      Réponds maintenant (Texte simple OU JSON finissant par } ):
     `;
 
-    // 2. Appel standardisé via Gemini_Core
-    const aiText = callGeminiFlash(systemPrompt, userMessage, 0.3);
-
-    // 3. Sauvegarde (Optionnel)
-    // On ne loggue pas les erreurs techniques explicites renvoyées par le connecteur (commencent par "Erreur IA")
-    if (!aiText.startsWith("Erreur IA")) {
-       logChatToSheet(userMessage, aiText);
+    // 3. Appel standardisé via Gemini_Core
+    // On passe un prompt combiné car callGeminiFlash attend un userPrompt string.
+    const fullResponse = callGeminiFlash(systemPrompt, `(Voir historique ci-dessus) Réponds à : ${userMessage}`, 0.4);
+    
+    // 4. Analyse de la réponse (JSON detection)
+    let finalResponse = { text: fullResponse, action: null };
+    
+    // Tentative de parsing JSON si la réponse ressemble à un objet
+    if (fullResponse.trim().startsWith('{') && fullResponse.trim().endsWith('}')) {
+      try {
+        const parsed = JSON.parse(fullResponse.trim());
+        finalResponse.text = parsed.text || "Action en cours...";
+        finalResponse.action = parsed.action;
+        finalResponse.data = parsed.prefill;
+      } catch (e) {
+        // Fallback si le JSON est malformé, on garde le texte brut
+        Logger.log("Failed to parse AI JSON: " + e.toString());
+      }
+    } else {
+        // Nettoyage Markdown éventuel du JSON
+        const jsonMatch = fullResponse.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch && jsonMatch[1]) {
+             try {
+                const parsed = JSON.parse(jsonMatch[1]);
+                finalResponse.text = parsed.text || "Action en cours...";
+                finalResponse.action = parsed.action;
+                finalResponse.data = parsed.prefill;
+             } catch(e) {}
+        }
     }
 
-    return { text: aiText };
+    // 5. Sauvegarde
+    if (!finalResponse.text.startsWith("Erreur IA")) {
+       logChatToSheet(userMessage, finalResponse.text);
+    }
+
+    return finalResponse;
 
   } catch (e) {
     Logger.log("Erreur processChatRequest: " + e.toString());
