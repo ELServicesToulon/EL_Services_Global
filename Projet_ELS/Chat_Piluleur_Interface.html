@@ -38,7 +38,7 @@
         </button>
       </div>
 
-      <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50 scrollbar-hide" aria-live="polite">
+      <div id="messages-container" class="flex-1 overflow-y-auto p-4 pb-8 space-y-3 bg-gray-50/50 scrollbar-hide" aria-live="polite">
         <div class="flex flex-col items-start animate-fade-in">
           <div class="bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm max-w-[90%]">
             Bonjour ! Je peux organiser vos livraisons, retours pharmacie ou ajuster vos tournées. Comment puis-je vous aider ?
@@ -98,12 +98,20 @@
 
       if (isChatOpen) {
         windowEl.classList.remove('hidden');
+        windowEl.style.display = 'flex'; // Force flex for the window
         fabEl.classList.add('hidden');
-        setTimeout(() => document.getElementById('user-input').focus(), 100);
-        updateSendButtonState(); // Ensure button state is correct when opening
+        fabEl.style.display = 'none'; // Force hide the FAB
+        setTimeout(() => {
+           document.getElementById('user-input').focus();
+           const container = document.getElementById('messages-container');
+           container.scrollTop = container.scrollHeight;
+        }, 100);
+        updateSendButtonState();
       } else {
         windowEl.classList.add('hidden');
+        windowEl.style.display = 'none';
         fabEl.classList.remove('hidden');
+        fabEl.style.display = 'flex'; // Restore flex for FAB
       }
     }
 
