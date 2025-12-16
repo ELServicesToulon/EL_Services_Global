@@ -147,6 +147,7 @@ function enregistrerStatutLivraison(data) {
  * @return {Object|null} Les données (adresse, lat, lng) ou null si non trouvé.
  */
 function getEstablishmentData(nom) {
+  if (!nom) return null;
   const data = getSheetData("Base_Etablissements");
   if (!data || data.length < 2) return null;
 
@@ -161,7 +162,7 @@ function getEstablishmentData(nom) {
   if (nomIndex === -1) return null;
 
   // Recherche approximative (case insensitive)
-  const targetName = nom.toLowerCase().trim();
+  const targetName = String(nom).toLowerCase().trim();
 
   // On parcourt les lignes (data[1] à data[length-1])
   for (let i = 1; i < data.length; i++) {
