@@ -1,0 +1,22 @@
+# Audit Schedule for Jules Agents
+# This file defines when each agent should run its audit based on local time.
+
+# Security Agent (Critical) - Runs first
+- Agent: Sentinel
+  Schedule: 02:00
+  Frequency: Daily
+
+# Performance Agent - Runs after security checks
+- Agent: Bolt
+  Schedule: 02:30
+  Frequency: Daily
+
+# UX/Design Agent - Runs less frequently as UI changes less
+- Agent: Palette
+  Schedule: 03:00
+  Frequency: MWF (Mon, Wed, Fri)
+
+# Documentation Agent - Weekly cleanup
+- Agent: Scribe
+  Schedule: 04:00
+  Frequency: Weekly (Sun)
