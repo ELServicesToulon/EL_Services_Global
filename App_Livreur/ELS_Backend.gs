@@ -397,11 +397,17 @@ function isLivreurAuthorized_(authToken) {
   try {
     const token = (authToken || '').toString().trim();
     if (!token) return false;
-    // On utilise une propriété de script, ou on hardcode un fallback pour la démo si besoin
+    // On utilise une propriété de script
     const config = getConfig();
-    const shared = config.ELS_SHARED_SECRET || '1234'; // Fallback temporaire
-    // Accepter aussi LIV-101 (ancien ID hardcodé) pour faciliter la transition
-    return token === shared || token === 'LIV-101';
+    const shared = config.ELS_SHARED_SECRET;
+
+    // Securité: Refuser l'accès si le secret n'est pas configuré
+    if (!shared || shared === "A_DEFINIR_DANS_PROPERTIES") {
+      Logger.log("ERREUR SECURITE: ELS_SHARED_SECRET non configuré.");
+      return false;
+    }
+
+    return token === shared;
   } catch (err) {
     Logger.log('isLivreurAuthorized_ error: ' + err.toString());
     return false;
