@@ -248,7 +248,11 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
         const dataTraces = sheetTraces.getDataRange().getValues();
         if (dataTraces.length > 1) {
           const headersT = dataTraces[0].map(h => String(h).toLowerCase().trim().replace(/ /g, '_'));
-          const idxTid = headersT.indexOf('tournee_id');
+          // Try to find the tournee_id column with various names
+          let idxTid = headersT.indexOf('tournee_id');
+          if (idxTid === -1) idxTid = headersT.indexOf('id_tournee');
+          if (idxTid === -1) idxTid = headersT.indexOf('id');
+
           if (idxTid !== -1) {
              const mapRowT = (row) => {
                const obj = {};
