@@ -772,7 +772,7 @@ function SETUP_INIT_PROPERTIES() {
     "ID_DOSSIER_FACTURES": "1IGMRLuYcBnGzjWS9StI6slZjnkz8fa84",
     "ADMIN_EMAIL": "elservicestoulon@gmail.com",
     "NOM_ENTREPRISE": "EL Services",
-    "GEMINI_API_KEY": "AIza...........secret", // ATTENTION: Remplace ceci par la vraie clé si tu ré-exécutes
+    "GEMINI_API_KEY": "REMPLACER_PAR_VOTRE_CLE", // À CONFIGURER DANS SCRIPT PROPERTIES
     "RIB_ENTREPRISE": "FR76 4061 8804 7600 0403 5757 187",
     "ID_DOSSIER_ARCHIVES": "1HLBar6IvpJgrG_lfyRSKwNwib6U__w9U",
     "ID_DOCUMENT_CGV": "13nClmRx-6jsSf3NLT05gHy5QCFFDqAL5nA97aYPEMh0",
@@ -787,7 +787,7 @@ function SETUP_INIT_PROPERTIES() {
     "SIRET": "48091306000020",
     "ID_LOGO_FACTURE": "1p10Rb3QBn3tUUs2M5zNiQzPn1YxnoPIW",
     "ID_FEUILLE_CALCUL": "1AzWdQQ4UEq0Fvr_iTpDY5TiXn55ij30_okIxIG5p_OM",
-    "Maps_API_KEY": "AIza..." // À CONFIGURER
+    "Maps_API_KEY": "REMPLACER_PAR_VOTRE_CLE" // À CONFIGURER
   };
 
   try {
