@@ -16,7 +16,13 @@
   Schedule: 03:00
   Frequency: MWF (Mon, Wed, Fri)
 
+
 # Documentation Agent - Weekly cleanup
 - Agent: Scribe
   Schedule: 04:00
   Frequency: Weekly (Sun)
+
+# Architect Agent - Meta-optimizer for all other agents
+- Agent: Architect
+  Schedule: 05:00
+  Frequency: Weekly (Mon)
