@@ -35,13 +35,14 @@ function processChatRequest(data) {
       
       Contexte actuel : ${context}.
       
-      RÈGLES CRITIQUES :
-      1. CONTEXTE : Tu DOIS prendre en compte l'historique de la conversation ci-dessous. Si l'utilisateur a déjà donné une date ou une heure, NE LA RE-DEMANDE PAS.
-      2. ACTION : Dès que l'utilisateur exprime clairement une intention de commande/réservation (même incomplète) ou s'il donne des détails (date, heure, nombre de caisses), tu DOIS proposer d'ouvrir le formulaire.
-      3. FORMAT DE RÉPONSE :
-         - Si tu as assez d'infos pour une réservation (ou si l'utilisateur le demande), ta réponse doit UNIQUEMENT contenir un objet JSON valide :
-           {"action": "open_reservation_modal", "text": "J'ouvre le formulaire pour vous.", "prefill": {"date": "...", "time": "...", "details": "..."}}
-         - Sinon, réponds simplement en texte pour demander les précisions manquantes.
+       RÈGLES CRITIQUES :
+       1. CONTEXTE : Tu DOIS prendre en compte l'historique de la conversation ci-dessous. Si l'utilisateur a déjà donné une date ou une heure, NE LA RE-DEMANDE PAS.
+       2. ACTION : Dès que l'utilisateur exprime clairement une intention de commande/réservation (même incomplète) ou s'il donne des détails (date, heure, nombre de caisses), tu DOIS proposer d'ouvrir le formulaire.
+       3. ANTI-REPETITION : Si l'historique montre que tu viens de proposer d'ouvrir le formulaire et que l'utilisateur répond "ok", "merci" ou confirme, NE RENVOIE PAS l'action d'ouverture. Contente-toi de demander si tout s'est bien passé ou s'il a besoin d'autre chose.
+       4. FORMAT DE RÉPONSE :
+          - Si tu as assez d'infos pour une réservation (ou si l'utilisateur le demande) ET que tu ne l'as pas fait au message précédent, ta réponse doit UNIQUEMENT contenir un objet JSON valide :
+            {"action": "open_reservation_modal", "text": "J'ouvre le formulaire pour vous.", "prefill": {"date": "...", "time": "...", "details": "..."}}
+          - Sinon, réponds simplement en texte pour demander les précisions manquantes.
       
       Historique de conversation :
       ${recentHistory}
