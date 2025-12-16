@@ -240,15 +240,41 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
     const indices = getFacturationHeaderIndices_(feuille, enTetesRequis).indices;
 
     const donnees = feuille.getDataRange().getValues();
-    
+
+    const tracesMap = {};
+    try {
+      const sheetTraces = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName("TRACE_Livraisons");
+      if (sheetTraces) {
+        const dataTraces = sheetTraces.getDataRange().getValues();
+        if (dataTraces.length > 1) {
+          const headersT = dataTraces[0].map(h => String(h).toLowerCase().trim().replace(/ /g, '_'));
+          const idxTid = headersT.indexOf('tournee_id');
+          if (idxTid !== -1) {
+             const mapRowT = (row) => {
+               const obj = {};
+               headersT.forEach((h, k) => obj[h] = row[k]);
+               return obj;
+             };
+             for (let i = 1; i < dataTraces.length; i++) {
+               const row = dataTraces[i];
+               const tid = String(row[idxTid]).trim();
+               if (!tid) continue;
+               if (!tracesMap[tid]) tracesMap[tid] = [];
+               tracesMap[tid].push(mapRowT(row));
+             }
+          }
+        }
+      }
+    } catch (e) {
+      Logger.log('Erreur chargement traces global: ' + e);
+    }
+
     const reservations = donnees.slice(1).map(ligne => {
-      // CORRECTION PRINCIPALE : On crée un objet Date complet dès le début
       const dateCell = ligne[indices["Date"]];
       if (!dateCell) return null;
       const dateHeureSheet = new Date(dateCell);
       if (isNaN(dateHeureSheet.getTime())) return null;
 
-      // On compare uniquement la partie "jour"
       const dateLigneFormattee = Utilities.formatDate(dateHeureSheet, Session.getScriptTimeZone(), "yyyy-MM-dd");
       
       if (dateLigneFormattee !== dateFiltreString) {
@@ -256,7 +282,7 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
       }
 
       try {
-        let dateDebutEvenement = dateHeureSheet; // On utilise la date complète du Sheet par défaut
+        let dateDebutEvenement = dateHeureSheet;
         let dateFinEvenement;
         
         const eventId = String(ligne[indices["Event ID"]]).trim();
@@ -266,7 +292,7 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
             dateDebutEvenement = new Date(evenementRessource.start.dateTime || evenementRessource.start.date);
             dateFinEvenement = new Date(evenementRessource.end.dateTime || evenementRessource.end.date);
           } catch (err) {
-            Logger.log(`Avertissement: Événement Calendar ${eventId} introuvable pour la résa ${ligne[indices["ID Réservation"]]}.`);
+            Logger.log("Avertissement: Événement Calendar " + eventId + " introuvable.");
           }
         }
         
@@ -279,6 +305,8 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
             ? parseInt(matchSup[1], 10)
             : 0;
         const retour = details.includes('retour: oui');
+
+        const listeArrets = eventId && tracesMap[eventId] ? tracesMap[eventId] : [];
         
         if (!dateFinEvenement) {
             const dureeEstimee = DUREE_BASE + ((arrets + (retour ? 1 : 0)) * DUREE_ARRET_SUP);
@@ -288,19 +316,19 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
         const km = KM_BASE + ((arrets + (retour ? 1 : 0)) * KM_ARRET_SUP);
         
         let infoRemise = '';
-        const typeRemiseAppliquee = String(ligne[indices["Type Remise Appliqu\u00e9e"]]).trim();
-        const valeurRemiseAppliquee = parseFloat(ligne[indices["Valeur Remise Appliqu\u00e9e"]]) || 0;
-        const tourneeOfferteAppliquee = ligne[indices["Tourn\u00e9e Offerte Appliqu\u00e9e"]] === true;
+        const typeRemiseAppliquee = String(ligne[indices["Type Remise Appliquée"]]).trim();
+        const valeurRemiseAppliquee = parseFloat(ligne[indices["Valeur Remise Appliquée"]]) || 0;
+        const tourneeOfferteAppliquee = ligne[indices["Tournée Offerte Appliquée"]] === true;
         const arretsOffertsAppliques = typeRemiseAppliquee === 'Arrets Offerts' ? valeurRemiseAppliquee : 0;
 
         if (tourneeOfferteAppliquee) {
             infoRemise = '(Offerte)';
         } else if (typeRemiseAppliquee === 'Pourcentage' && valeurRemiseAppliquee > 0) {
-            infoRemise = `(-${valeurRemiseAppliquee}%)`;
+            infoRemise = "(-" + valeurRemiseAppliquee + "%)";
         } else if (typeRemiseAppliquee === 'Montant Fixe' && valeurRemiseAppliquee > 0) {
-            infoRemise = `(-${valeurRemiseAppliquee}€)`;
+            infoRemise = "(-" + valeurRemiseAppliquee + "€)";
         } else if (typeRemiseAppliquee === 'Arrets Offerts' && valeurRemiseAppliquee > 0) {
-            infoRemise = `(${valeurRemiseAppliquee} arrêt(s) offert(s))`;
+            infoRemise = "(" + valeurRemiseAppliquee + " arrêt(s) offert(s))";
         }
 
         return {
@@ -319,19 +347,19 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
           typeRemise: typeRemiseAppliquee,
           valeurRemise: valeurRemiseAppliquee,
           tourneeOfferte: tourneeOfferteAppliquee,
-          arretsOfferts: arretsOffertsAppliques
+          arretsOfferts: arretsOffertsAppliques,
+          stops: listeArrets
         };
       } catch(e) { 
-        Logger.log(`Erreur de traitement d'une ligne de réservation admin : ${e.toString()}`);
+        Logger.log("Erreur processing reservation: " + e);
         return null; 
       }
     }).filter(Boolean);
 
     reservations.sort((a, b) => new Date(a.start) - new Date(b.start));
     return { success: true, reservations: reservations };
-
   } catch (e) {
-    Logger.log(`Erreur critique dans obtenirToutesReservationsPourDate: ${e.stack}`);
+    Logger.log("Erreur critique: " + e.stack);
     return { success: false, error: e.message };
   }
 }
@@ -1512,6 +1540,7 @@ function genererDevisPdfDepuisSelection() {
     ui.alert('Erreur Génération Devis', e.message, ui.ButtonSet.OK);
   }
 }
+
 
 
 

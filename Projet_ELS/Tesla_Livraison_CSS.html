@@ -129,4 +129,82 @@ body.tesla-livraison .card.advice {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.12);
 }
+
+/* --- Compact Vehicle Info --- */
+body.tesla-livraison .grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+body.tesla-livraison .card {
+  padding: 10px 12px;
+}
+
+body.tesla-livraison .card-header .pill {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+body.tesla-livraison .card .hint {
+  display: none;
+}
+
+body.tesla-livraison .battery-level {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+body.tesla-livraison .range-value {
+  font-size: 32px;
+}
+
+body.tesla-livraison .charge-grid .metric .label {
+  font-size: 11px;
+}
+
+body.tesla-livraison .charge-grid .metric .value {
+  font-size: 16px;
+}
+
+body.tesla-livraison .card.advice {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body.tesla-livraison .advice-text {
+  margin: 0;
+  font-size: 14px;
+  flex: 1;
+}
+
+body.tesla-livraison .meta-list {
+  display: flex;
+  gap: 8px;
+}
+
+body.tesla-livraison .meta-list li {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* --- Expanded Delivery Info --- */
+.arret-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin-top: 6px;
+  color: var(--fg-muted);
+  padding-left: 8px;
+  border-left: 2px solid var(--border);
+}
+
+.arret-nom {
+  color: var(--fg-primary);
+  font-weight: 500;
+}
 </style>
