@@ -1,26 +1,49 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <base target="_top">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     /* Animations */
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
 
     /* Scrollbar */
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
+
 <body class="bg-transparent font-sans antialiased">
 
   <div id="piluleur-root" class="fixed bottom-4 right-4 z-50 flex flex-col items-end">
 
-    <div id="chat-window" class="hidden flex-col bg-white w-[360px] h-[500px] rounded-2xl shadow-2xl border border-gray-100 overflow-hidden mb-4 transition-all transform origin-bottom-right">
+    <div id="chat-window"
+      class="hidden flex-col bg-white w-[360px] h-[500px] rounded-2xl shadow-2xl border border-gray-100 overflow-hidden mb-4 transition-all transform origin-bottom-right">
 
-      <div class="bg-gradient-to-r from-blue-700 to-blue-600 p-4 flex justify-between items-center text-white shadow-md">
+      <div
+        class="bg-gradient-to-r from-blue-700 to-blue-600 p-4 flex justify-between items-center text-white shadow-md">
         <div class="flex items-center gap-3">
           <div class="p-1.5 bg-white/20 rounded-full backdrop-blur-sm">
             <span class="material-icons text-lg">smart_toy</span>
@@ -33,15 +56,19 @@
             </div>
           </div>
         </div>
-        <button onclick="toggleChat()" class="hover:bg-white/20 p-1 rounded-full transition-colors cursor-pointer" aria-label="Fermer la discussion">
+        <button onclick="toggleChat()" class="hover:bg-white/20 p-1 rounded-full transition-colors cursor-pointer"
+          aria-label="Fermer la discussion">
           <span class="material-icons">close</span>
         </button>
       </div>
 
-      <div id="messages-container" class="flex-1 overflow-y-auto p-4 pb-8 space-y-3 bg-gray-50/50 scrollbar-hide" aria-live="polite">
+      <div id="messages-container" class="flex-1 overflow-y-auto p-4 pb-8 space-y-3 bg-gray-50/50 scrollbar-hide"
+        aria-live="polite">
         <div class="flex flex-col items-start animate-fade-in">
-          <div class="bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm max-w-[90%]">
-            Bonjour ! Je peux organiser vos livraisons, retours pharmacie ou ajuster vos tournées. Comment puis-je vous aider ?
+          <div
+            class="bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm max-w-[90%]">
+            Bonjour ! Je peux organiser vos livraisons, retours pharmacie ou ajuster vos tournées. Comment puis-je vous
+            aider ?
           </div>
           <span class="text-[10px] text-gray-400 mt-1 ml-2">Assistant</span>
         </div>
@@ -50,24 +77,26 @@
       <div class="p-3 bg-white border-t border-gray-100">
         <form onsubmit="sendMessage(event)" class="relative flex items-end gap-2">
           <textarea id="user-input" rows="1" placeholder="Ex: Ramasse EHPAD Les Oliviers..." aria-label="Votre message"
-                 oninput="autoResize(this); updateSendButtonState()"
-                 onkeydown="handleEnter(event)"
-                 class="w-full bg-gray-100 text-gray-800 text-sm rounded-3xl pl-4 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-400 resize-none overflow-hidden max-h-32"></textarea>
-          <button type="submit" id="send-btn" aria-label="Envoyer le message" title="Envoyer" disabled class="absolute right-1.5 bottom-1.5 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-sm transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+            oninput="autoResize(this); updateSendButtonState()" onkeydown="handleEnter(event)"
+            class="w-full bg-gray-100 text-gray-800 text-sm rounded-3xl pl-4 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-gray-400 resize-none overflow-hidden max-h-32"></textarea>
+          <button type="submit" id="send-btn" aria-label="Envoyer le message" title="Envoyer" disabled
+            class="absolute right-1.5 bottom-1.5 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-sm transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
             <span class="material-icons text-sm block">send</span>
           </button>
         </form>
         <div class="text-center mt-2">
-           <span class="text-[10px] text-gray-400 flex justify-center items-center gap-1">
-             <span class="material-icons text-[10px]">lock</span> Sécurisé par Gemini 1.5
-           </span>
+          <span class="text-[10px] text-gray-400 flex justify-center items-center gap-1">
+            <span class="material-icons text-[10px]">lock</span> Sécurisé par Gemini 1.5
+          </span>
         </div>
       </div>
     </div>
 
-    <button id="fab-btn" onclick="toggleChat()" class="group flex items-center gap-3 bg-blue-700 text-white pl-4 pr-2 py-2 rounded-full shadow-lg hover:bg-blue-800 hover:shadow-xl transition-all transform hover:-translate-y-1">
+    <button id="fab-btn" onclick="toggleChat()"
+      class="group flex items-center gap-3 bg-blue-700 text-white pl-4 pr-2 py-2 rounded-full shadow-lg hover:bg-blue-800 hover:shadow-xl transition-all transform hover:-translate-y-1">
       <span class="font-bold text-sm tracking-wide">AIDE LOGISTIQUE</span>
-      <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:rotate-12 transition-transform">
+      <div
+        class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:rotate-12 transition-transform">
         <span class="material-icons">chat</span>
       </div>
     </button>
@@ -102,9 +131,9 @@
         fabEl.classList.add('hidden');
         fabEl.style.display = 'none'; // Force hide the FAB
         setTimeout(() => {
-           document.getElementById('user-input').focus();
-           const container = document.getElementById('messages-container');
-           container.scrollTop = container.scrollHeight;
+          document.getElementById('user-input').focus();
+          const container = document.getElementById('messages-container');
+          container.scrollTop = container.scrollHeight;
         }, 100);
         updateSendButtonState();
       } else {
@@ -136,7 +165,7 @@
       input.value = '';
       input.style.height = 'auto'; // Reset height
       setLoading(true);
-      
+
       // Stocke dans l'historique
       chatHistory.push({ role: 'user', text: text });
 
@@ -152,13 +181,13 @@
 
     function onSuccess(response) {
       setLoading(false);
-      
+
       // Affiche le texte du bot
       if (response && response.text) {
         addMessage('bot', response.text);
         chatHistory.push({ role: 'model', text: response.text });
       }
-      
+
       // Gère l'action "Ouverture de Modale"
       if (response && response.action === 'open_reservation_modal') {
         console.log("Action reçue du Chatbot :", response.action, response.data);
@@ -166,47 +195,55 @@
 
         // Fonction locale d'ouverture (ADMIN)
         if (typeof ouvrirModaleAjout === 'function') {
-           ouvrirModaleAjout();
-           return;
+          ouvrirModaleAjout();
+          return;
         }
 
         // Fonction locale d'ouverture (CLIENT)
         if (typeof ouvrirConfigurationTournee === 'function') {
-            const date = data.date || new Date().toISOString().split('T')[0];
-            ouvrirConfigurationTournee(date);
-            return;
+          let date = data.date;
+          // Validation simple YYYY-MM-DD + validité Date
+          if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date).getTime())) {
+            console.warn("Date chatbot invalide/manquante :", date, ". Fallback = Aujourd'hui.");
+            date = new Date().toISOString().split('T')[0];
+          }
+          ouvrirConfigurationTournee(date);
+          return;
         }
 
         // Tentative d'accès via window.parent (si iframe)
         try {
-            if (window.parent) {
-                 // Parent ADMIN
-                 if (typeof window.parent.ouvrirModaleAjout === 'function') {
-                     window.parent.ouvrirModaleAjout();
-                     return;
-                 }
-                 // Parent CLIENT
-                 if (typeof window.parent.ouvrirConfigurationTournee === 'function') {
-                     const date = data.date || new Date().toISOString().split('T')[0];
-                     window.parent.ouvrirConfigurationTournee(date);
-                     return;
-                 }
+          if (window.parent) {
+            // Parent ADMIN
+            if (typeof window.parent.ouvrirModaleAjout === 'function') {
+              window.parent.ouvrirModaleAjout();
+              return;
             }
-        } catch(e) { console.warn("Impossible d'accéder au parent", e); }
-        
+            // Parent CLIENT
+            if (typeof window.parent.ouvrirConfigurationTournee === 'function') {
+              let date = data.date;
+              if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date).getTime())) {
+                date = new Date().toISOString().split('T')[0];
+              }
+              window.parent.ouvrirConfigurationTournee(date);
+              return;
+            }
+          }
+        } catch (e) { console.warn("Impossible d'accéder au parent", e); }
+
         // Fallback ultime : Event + Scroll vers calendrier
         window.dispatchEvent(new CustomEvent('els-chat-action', { detail: response }));
-        
+
         // Si on est sur la page de réservation mais que la fonction n'est pas trouvée (cas étrange), on scroll
         const calendar = document.getElementById('vue-calendrier');
         if (calendar) {
-            calendar.scrollIntoView({ behavior: 'smooth' });
+          calendar.scrollIntoView({ behavior: 'smooth' });
         } else {
-            // Try parent scroll
-             try {
-                const parentCalendar = window.parent.document.getElementById('vue-calendrier');
-                if (parentCalendar) parentCalendar.scrollIntoView({ behavior: 'smooth' });
-             } catch(e) {}
+          // Try parent scroll
+          try {
+            const parentCalendar = window.parent.document.getElementById('vue-calendrier');
+            if (parentCalendar) parentCalendar.scrollIntoView({ behavior: 'smooth' });
+          } catch (e) { }
         }
       }
     }
@@ -265,4 +302,5 @@
     }
   </script>
 </body>
+
 </html>
