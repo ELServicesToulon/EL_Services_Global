@@ -152,6 +152,16 @@
     const email = resa.clientEmail || '';
     const note = resa.note || '';
     const id = resa.id || '';
+    const stops = Array.isArray(resa.stops) ? resa.stops : [];
+    const stopsHtml = stops.length > 0 
+      ? stops.map(s => `
+          <div class="arret-item">
+            <span class="arret-nom">${echapperHtml(s.nom)}</span>
+            ${s.adresse ? `<span style="font-size:0.9em;opacity:0.8"> — ${echapperHtml(s.adresse)}</span>` : ''}
+          </div>
+        `).join('') 
+      : '';
+
     return `
       <div class="livraison-item" data-id="${echapperHtml(id)}">
         <div class="livraison-top">
@@ -160,6 +170,7 @@
         </div>
         <div class="livraison-meta">${echapperHtml(client)}${email ? ' — ' + echapperHtml(email) : ''}</div>
         ${note ? `<div class="livraison-note">${echapperHtml(note)}</div>` : ''}
+        ${stopsHtml ? `<div class="livraison-stops" style="margin-top:8px;">${stopsHtml}</div>` : ''}
         <div class="livraison-actions">
           <button class="btn small-ghost" data-statut="En cours">Départ</button>
           <button class="btn primary" data-statut="Livrée">Livrée</button>
