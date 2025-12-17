@@ -43,7 +43,7 @@ function importScriptProperties(properties, overwrite) {
   };
 
   for (const [key, value] of Object.entries(properties)) {
-    if (existingProps.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(existingProps, key)) {
       if (overwrite) {
         sp.setProperty(key, value);
         rapport.ecrasees.push(key);
@@ -80,7 +80,7 @@ function importSelectedProperties(sourceProperties, keys, overwrite) {
 
   const selectedProps = {};
   for (const key of keys) {
-    if (sourceProperties.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(sourceProperties, key)) {
       selectedProps[key] = sourceProperties[key];
     } else {
       Logger.log('AVERTISSEMENT: La clé "' + key + '" n\'existe pas dans les propriétés source.');
@@ -120,8 +120,8 @@ function diagnosticProperties() {
     'TRACE_SECRET'
   ];
 
-  const missing = required.filter(key => !existingProps.hasOwnProperty(key) || existingProps[key] === '');
-  const present = required.filter(key => existingProps.hasOwnProperty(key) && existingProps[key] !== '');
+  const missing = required.filter(key => !Object.prototype.hasOwnProperty.call(existingProps, key) || existingProps[key] === '');
+  const present = required.filter(key => Object.prototype.hasOwnProperty.call(existingProps, key) && existingProps[key] !== '');
 
   Logger.log('=== DIAGNOSTIC DES PROPRIÉTÉS SCRIPT ===');
   Logger.log('');
@@ -133,7 +133,7 @@ function diagnosticProperties() {
 
   if (present.length > 0) {
     Logger.log('✅ PROPRIÉTÉS PRÉSENTES (' + present.length + '):');
-    present.forEach(function(key) {
+    present.forEach(function (key) {
       const val = existingProps[key];
       const preview = val.length > 30 ? val.substring(0, 30) + '...' : val;
       Logger.log('  • ' + key + ' = ' + preview);
@@ -143,7 +143,7 @@ function diagnosticProperties() {
 
   if (missing.length > 0) {
     Logger.log('❌ PROPRIÉTÉS MANQUANTES (' + missing.length + '):');
-    missing.forEach(function(key) {
+    missing.forEach(function (key) {
       Logger.log('  • ' + key);
     });
     Logger.log('');
@@ -194,7 +194,7 @@ function checkMissingProperties() {
     'TRACE_SECRET'
   ];
 
-  const missing = required.filter(key => !existingProps.hasOwnProperty(key) || existingProps[key] === '');
+  const missing = required.filter(key => !Object.prototype.hasOwnProperty.call(existingProps, key) || existingProps[key] === '');
 
   if (missing.length > 0) {
     Logger.log('=== PROPRIÉTÉS MANQUANTES ===');
@@ -226,7 +226,7 @@ function compareProperties(sourceProps) {
 
   // Propriétés uniquement dans la source
   for (const key of Object.keys(sourceProps)) {
-    if (!destProps.hasOwnProperty(key)) {
+    if (!Object.prototype.hasOwnProperty.call(destProps, key)) {
       rapport.uniquementSource.push(key);
     } else {
       rapport.communes.push(key);
@@ -242,7 +242,7 @@ function compareProperties(sourceProps) {
 
   // Propriétés uniquement dans la destination
   for (const key of Object.keys(destProps)) {
-    if (!sourceProps.hasOwnProperty(key)) {
+    if (!Object.prototype.hasOwnProperty.call(sourceProps, key)) {
       rapport.uniquementDestination.push(key);
     }
   }
@@ -286,9 +286,9 @@ function DIAGNOSTIC_STANDALONE() {
   const missing = [];
   const present = [];
 
-  for (var i = 0; i < required.length; i++) {
+  for (let i = 0; i < required.length; i++) {
     var key = required[i];
-    if (all.hasOwnProperty(key) && all[key] !== '') {
+    if (Object.prototype.hasOwnProperty.call(all, key) && all[key] !== '') {
       present.push(key + ' ✓');
     } else {
       missing.push(key + ' ❌');
@@ -304,7 +304,7 @@ function DIAGNOSTIC_STANDALONE() {
 
   if (present.length > 0) {
     Logger.log('✅ PRÉSENTES:');
-    for (var i = 0; i < present.length; i++) {
+    for (let i = 0; i < present.length; i++) {
       Logger.log('  ' + present[i]);
     }
     Logger.log('');
@@ -312,7 +312,7 @@ function DIAGNOSTIC_STANDALONE() {
 
   if (missing.length > 0) {
     Logger.log('❌ MANQUANTES:');
-    for (var i = 0; i < missing.length; i++) {
+    for (let i = 0; i < missing.length; i++) {
       Logger.log('  ' + missing[i]);
     }
     Logger.log('');

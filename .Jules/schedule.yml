@@ -32,3 +32,8 @@
 - Agent: Admin
   Schedule: OnPush
   Frequency: Event-Based
+
+# Mechanic Agent - Code Repair & Quality
+- Agent: Mechanic
+  Schedule: OnDemand
+  Frequency: Event-Based
