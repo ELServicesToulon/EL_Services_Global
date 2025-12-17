@@ -10,11 +10,11 @@ $NodeExe = "node.exe"
 $scheduleContent = Get-Content "$RepoPath\.Jules\schedule.yml" -Raw
 # Simple parsing (regex) since we don't want to rely on a YAML parser lib in PS
 $regex = "(?ms)- Agent:\s*(\w+)\s*Schedule:\s*(\d{2}:\d{2})"
-$matches = [regex]::Matches($scheduleContent, $regex)
+$agentMatches = [regex]::Matches($scheduleContent, $regex)
 
-Write-Host "Found $($matches.Count) agent schedules."
+Write-Host "Found $($agentMatches.Count) agent schedules."
 
-foreach ($match in $matches) {
+foreach ($match in $agentMatches) {
     $AgentName = $match.Groups[1].Value
     $Time = $match.Groups[2].Value
     $TaskName = "Jules_Agent_$AgentName"
