@@ -140,7 +140,7 @@ function obtenirToutesReservationsAdmin() {
 
         let dateDebutEvenement = dateHeureSheet; // On utilise la date complète du Sheet par défaut
         let dateFinEvenement;
-        
+
         const eventId = String(ligne[indices["Event ID"]]).trim();
         if (eventId) {
           try {
@@ -169,7 +169,7 @@ function obtenirToutesReservationsAdmin() {
         }
 
         const km = KM_BASE + ((arrets + (retour ? 1 : 0)) * KM_ARRET_SUP);
-        
+
         let infoRemise = '';
         const typeRemiseAppliquee = String(ligne[indices["Type Remise Appliquée"]]).trim();
         const valeurRemiseAppliquee = parseFloat(ligne[indices["Valeur Remise Appliquée"]]) || 0;
@@ -204,14 +204,14 @@ function obtenirToutesReservationsAdmin() {
           tourneeOfferte: tourneeOfferteAppliquee,
           arretsOfferts: arretsOffertsAppliques
         };
-      } catch(e) { 
+      } catch (e) {
         Logger.log(`Erreur de traitement d'une ligne de réservation admin : ${e.toString()} sur la ligne avec ID ${ligne[indices["ID Réservation"]]}`);
-        return null; 
+        return null;
       }
     }).filter(Boolean);
 
     reservations.sort((a, b) => new Date(b.start) - new Date(a.start));
-    
+
     return { success: true, reservations: reservations };
   } catch (e) {
     Logger.log(`Erreur critique dans obtenirToutesReservationsAdmin: ${e.stack}`);
@@ -254,18 +254,18 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
           if (idxTid === -1) idxTid = headersT.indexOf('id');
 
           if (idxTid !== -1) {
-             const mapRowT = (row) => {
-               const obj = {};
-               headersT.forEach((h, k) => obj[h] = row[k]);
-               return obj;
-             };
-             for (let i = 1; i < dataTraces.length; i++) {
-               const row = dataTraces[i];
-               const tid = String(row[idxTid]).trim();
-               if (!tid) continue;
-               if (!tracesMap[tid]) tracesMap[tid] = [];
-               tracesMap[tid].push(mapRowT(row));
-             }
+            const mapRowT = (row) => {
+              const obj = {};
+              headersT.forEach((h, k) => obj[h] = row[k]);
+              return obj;
+            };
+            for (let i = 1; i < dataTraces.length; i++) {
+              const row = dataTraces[i];
+              const tid = String(row[idxTid]).trim();
+              if (!tid) continue;
+              if (!tracesMap[tid]) tracesMap[tid] = [];
+              tracesMap[tid].push(mapRowT(row));
+            }
           }
         }
       }
@@ -280,7 +280,7 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
       if (isNaN(dateHeureSheet.getTime())) return null;
 
       const dateLigneFormattee = Utilities.formatDate(dateHeureSheet, Session.getScriptTimeZone(), "yyyy-MM-dd");
-      
+
       if (dateLigneFormattee !== dateFiltreString) {
         return null;
       }
@@ -288,7 +288,7 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
       try {
         let dateDebutEvenement = dateHeureSheet;
         let dateFinEvenement;
-        
+
         const eventId = String(ligne[indices["Event ID"]]).trim();
         if (eventId) {
           try {
@@ -299,7 +299,7 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
             Logger.log("Avertissement: Événement Calendar " + eventId + " introuvable.");
           }
         }
-        
+
         const details = String(ligne[indices["Détails"]]);
         const matchTotal = details.match(/(\d+)\s*arrêt\(s\)\s*total\(s\)/);
         const matchSup = matchTotal ? null : details.match(/(\d+)\s*arrêt\(s\)\s*sup/);
@@ -311,14 +311,14 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
         const retour = details.includes('retour: oui');
 
         const listeArrets = eventId && tracesMap[eventId] ? tracesMap[eventId] : [];
-        
+
         if (!dateFinEvenement) {
-            const dureeEstimee = DUREE_BASE + ((arrets + (retour ? 1 : 0)) * DUREE_ARRET_SUP);
-            dateFinEvenement = new Date(dateDebutEvenement.getTime() + dureeEstimee * 60000);
+          const dureeEstimee = DUREE_BASE + ((arrets + (retour ? 1 : 0)) * DUREE_ARRET_SUP);
+          dateFinEvenement = new Date(dateDebutEvenement.getTime() + dureeEstimee * 60000);
         }
 
         const km = KM_BASE + ((arrets + (retour ? 1 : 0)) * KM_ARRET_SUP);
-        
+
         let infoRemise = '';
         const typeRemiseAppliquee = String(ligne[indices["Type Remise Appliquée"]]).trim();
         const valeurRemiseAppliquee = parseFloat(ligne[indices["Valeur Remise Appliquée"]]) || 0;
@@ -326,13 +326,13 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
         const arretsOffertsAppliques = typeRemiseAppliquee === 'Arrets Offerts' ? valeurRemiseAppliquee : 0;
 
         if (tourneeOfferteAppliquee) {
-            infoRemise = '(Offerte)';
+          infoRemise = '(Offerte)';
         } else if (typeRemiseAppliquee === 'Pourcentage' && valeurRemiseAppliquee > 0) {
-            infoRemise = "(-" + valeurRemiseAppliquee + "%)";
+          infoRemise = "(-" + valeurRemiseAppliquee + "%)";
         } else if (typeRemiseAppliquee === 'Montant Fixe' && valeurRemiseAppliquee > 0) {
-            infoRemise = "(-" + valeurRemiseAppliquee + "€)";
+          infoRemise = "(-" + valeurRemiseAppliquee + "€)";
         } else if (typeRemiseAppliquee === 'Arrets Offerts' && valeurRemiseAppliquee > 0) {
-            infoRemise = "(" + valeurRemiseAppliquee + " arrêt(s) offert(s))";
+          infoRemise = "(" + valeurRemiseAppliquee + " arrêt(s) offert(s))";
         }
 
         return {
@@ -354,9 +354,9 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
           arretsOfferts: arretsOffertsAppliques,
           stops: listeArrets
         };
-      } catch(e) { 
+      } catch (e) {
         Logger.log("Erreur processing reservation: " + e);
-        return null; 
+        return null;
       }
     }).filter(Boolean);
 
@@ -424,44 +424,44 @@ function livreurMettreAJourStatutReservation(idReservation, statut, authToken) {
  * @returns {Array<Object>} La liste des clients.
  */
 function obtenirTousLesClients() {
-    try {
-        const feuilleClients = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_CLIENTS);
-        if (!feuilleClients) return [];
+  try {
+    const feuilleClients = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_CLIENTS);
+    if (!feuilleClients) return [];
 
-        const headerRow = feuilleClients.getRange(1, 1, 1, Math.max(1, feuilleClients.getLastColumn())).getValues()[0];
-        const headerTrimmed = headerRow.map(function (h) { return String(h || '').trim(); });
-        if (headerTrimmed.indexOf(COLONNE_RESIDENT_CLIENT) === -1) {
-            feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_RESIDENT_CLIENT);
-        }
-        if (headerTrimmed.indexOf(COLONNE_ID_CLIENT) === -1) {
-            feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_ID_CLIENT);
-        }
-        if (headerTrimmed.indexOf(COLONNE_CODE_POSTAL_CLIENT) === -1) {
-            feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_CODE_POSTAL_CLIENT);
-        }
-        if (headerTrimmed.indexOf(COLONNE_TELEPHONE_CLIENT) === -1) {
-            feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_TELEPHONE_CLIENT);
-        }
-
-        const indices = obtenirIndicesEnTetes(feuilleClients, ["Email", "Raison Sociale", "Adresse", COLONNE_TELEPHONE_CLIENT, "SIRET", COLONNE_CODE_POSTAL_CLIENT, COLONNE_TYPE_REMISE_CLIENT, COLONNE_VALEUR_REMISE_CLIENT, COLONNE_NB_TOURNEES_OFFERTES, COLONNE_RESIDENT_CLIENT, COLONNE_ID_CLIENT]);
-        const donnees = feuilleClients.getDataRange().getValues();
-        return donnees.slice(1).map(ligne => ({
-            email: ligne[indices["Email"]],
-            nom: ligne[indices["Raison Sociale"]] || '',
-            adresse: ligne[indices["Adresse"]] || '',
-            telephone: String(ligne[indices[COLONNE_TELEPHONE_CLIENT]] || '').trim(),
-            siret: ligne[indices["SIRET"]] || '',
-            codePostal: ligne[indices[COLONNE_CODE_POSTAL_CLIENT]] || '',
-            typeRemise: ligne[indices[COLONNE_TYPE_REMISE_CLIENT]] || '',
-            valeurRemise: ligne[indices[COLONNE_VALEUR_REMISE_CLIENT]] || 0,
-            nbTourneesOffertes: ligne[indices[COLONNE_NB_TOURNEES_OFFERTES]] || 0,
-            resident: ligne[indices[COLONNE_RESIDENT_CLIENT]] === true,
-            clientId: ligne[indices[COLONNE_ID_CLIENT]] || ''
-        }));
-    } catch (e) {
-        Logger.log("Erreur dans obtenirTousLesClients: " + e.toString());
-        return [];
+    const headerRow = feuilleClients.getRange(1, 1, 1, Math.max(1, feuilleClients.getLastColumn())).getValues()[0];
+    const headerTrimmed = headerRow.map(function (h) { return String(h || '').trim(); });
+    if (headerTrimmed.indexOf(COLONNE_RESIDENT_CLIENT) === -1) {
+      feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_RESIDENT_CLIENT);
     }
+    if (headerTrimmed.indexOf(COLONNE_ID_CLIENT) === -1) {
+      feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_ID_CLIENT);
+    }
+    if (headerTrimmed.indexOf(COLONNE_CODE_POSTAL_CLIENT) === -1) {
+      feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_CODE_POSTAL_CLIENT);
+    }
+    if (headerTrimmed.indexOf(COLONNE_TELEPHONE_CLIENT) === -1) {
+      feuilleClients.getRange(1, feuilleClients.getLastColumn() + 1).setValue(COLONNE_TELEPHONE_CLIENT);
+    }
+
+    const indices = obtenirIndicesEnTetes(feuilleClients, ["Email", "Raison Sociale", "Adresse", COLONNE_TELEPHONE_CLIENT, "SIRET", COLONNE_CODE_POSTAL_CLIENT, COLONNE_TYPE_REMISE_CLIENT, COLONNE_VALEUR_REMISE_CLIENT, COLONNE_NB_TOURNEES_OFFERTES, COLONNE_RESIDENT_CLIENT, COLONNE_ID_CLIENT]);
+    const donnees = feuilleClients.getDataRange().getValues();
+    return donnees.slice(1).map(ligne => ({
+      email: ligne[indices["Email"]],
+      nom: ligne[indices["Raison Sociale"]] || '',
+      adresse: ligne[indices["Adresse"]] || '',
+      telephone: String(ligne[indices[COLONNE_TELEPHONE_CLIENT]] || '').trim(),
+      siret: ligne[indices["SIRET"]] || '',
+      codePostal: ligne[indices[COLONNE_CODE_POSTAL_CLIENT]] || '',
+      typeRemise: ligne[indices[COLONNE_TYPE_REMISE_CLIENT]] || '',
+      valeurRemise: ligne[indices[COLONNE_VALEUR_REMISE_CLIENT]] || 0,
+      nbTourneesOffertes: ligne[indices[COLONNE_NB_TOURNEES_OFFERTES]] || 0,
+      resident: ligne[indices[COLONNE_RESIDENT_CLIENT]] === true,
+      clientId: ligne[indices[COLONNE_ID_CLIENT]] || ''
+    }));
+  } catch (e) {
+    Logger.log("Erreur dans obtenirTousLesClients: " + e.toString());
+    return [];
+  }
 }
 
 /**
@@ -1024,7 +1024,7 @@ function genererFactures() {
       try {
         const clientInfos = mapClients.get(emailClient);
         if (!clientInfos) throw new Error(`Client ${emailClient} non trouvé.`);
-        
+
         const lignesFactureClient = facturesParClient[emailClient];
         const numFacture = `FACT-${new Date().getFullYear()}-${String(prochainNumFacture).padStart(4, '0')}`;
         const dateFacture = new Date();
@@ -1172,7 +1172,7 @@ function genererFactures() {
         corps.replaceText('{{rib_entreprise}}', getSecret('RIB_ENTREPRISE'));
         corps.replaceText('{{bic_entreprise}}', getSecret('BIC_ENTREPRISE'));
         corps.replaceText('{{delai_paiement}}', String(DELAI_PAIEMENT_JOURS));
-        
+
         const detectionBordereau = trouverTableBordereau(corps);
         if (detectionBordereau) {
           const tableBordereau = detectionBordereau.table;
@@ -1226,7 +1226,7 @@ function genererFactures() {
             }
           });
         } else {
-            throw new Error("Aucun tableau de bordereau valide trouvé. Vérifiez les en-têtes.");
+          throw new Error("Aucun tableau de bordereau valide trouvé. Vérifiez les en-têtes.");
         }
 
         doc.saveAndClose();
@@ -1252,7 +1252,7 @@ function genererFactures() {
 
     feuilleParams.getRange("B1").setValue(prochainNumFacture);
     logAdminAction("Génération Factures", `Succès pour ${compteurSucces} client(s). Erreurs: ${messagesErreurs.length}`);
-    
+
     const messageFinal = `${compteurSucces} facture(s) ont été générée(s) avec succès.\n\n` +
       `Prochaine étape :\n` +
       `1. Contrôlez les PDF dans le dossier Drive.\n` +
@@ -1287,6 +1287,61 @@ function envoyerFacturesControlees() {
     const idxMontant = idx['Montant'];
     const idxStatut = idx['Statut'];
     const idxNote = idx['Note Interne'];
+
+
+
+    const logoBlock = getLogoEmailBlockHtml();
+    const data = feuille.getDataRange().getValues();
+    let envoyees = 0;
+    let erreurs = [];
+
+    for (let r = 1; r < data.length; r++) {
+      const row = data[r];
+      const email = String(row[idx["Client (Email)"]] || '').trim();
+      const numero = String(row[idx["N° Facture"]] || '').trim();
+      const idPdf = String(row[idx["ID PDF"]] || '').trim();
+      const flag = (typeof idxAEnvoyer === 'number' && idxAEnvoyer !== -1) ? row[idxAEnvoyer] === true : true;
+      if (!email || !numero || !idPdf || !flag) continue;
+
+      try {
+        const fichier = DriveApp.getFileById(idPdf);
+        const pdfBlob = fichier.getAs(MimeType.PDF).setName(`${numero}.pdf`);
+        const montant = (typeof idxMontant === 'number' && idxMontant !== -1) ? parseFloat(row[idxMontant]) || 0 : null;
+        const sujet = `[${NOM_ENTREPRISE}] Facture ${numero}`;
+        const corps = [
+          logoBlock,
+          `<p>Bonjour,</p>`,
+          `<p>Veuillez trouver ci-joint votre facture <strong>${numero}</strong>${montant !== null ? ` d'un montant de <strong>${montant.toFixed(2)} €</strong>` : ''}.</p>`,
+          `<p>Merci pour votre confiance.<br/>${NOM_ENTREPRISE}</p>`
+        ].filter(Boolean).join('');
+
+        GmailApp.sendEmail(
+          email,
+          sujet,
+          'Votre facture est jointe à ce message.',
+          {
+            htmlBody: corps,
+            attachments: [pdfBlob],
+            replyTo: EMAIL_ENTREPRISE
+          }
+        );
+
+        if (typeof idxAEnvoyer === 'number' && idxAEnvoyer !== -1) feuille.getRange(r + 1, idxAEnvoyer + 1).setValue(false);
+        if (typeof idxStatut === 'number' && idxStatut !== -1) feuille.getRange(r + 1, idxStatut + 1).setValue('Envoyée');
+        envoyees++;
+      } catch (e) {
+        erreurs.push(`Ligne ${r + 1} (${numero}) : ${e.message}`);
+      }
+    }
+
+    ui.alert('Envoi des factures', `${envoyees} e-mail(s) envoyé(s).${erreurs.length ? "\nErreurs:\n" + erreurs.join("\n") : ''}`, ui.ButtonSet.OK);
+    logAdminAction('Envoi Factures', `Succès: ${envoyees}, Erreurs: ${erreurs.length}`);
+  } catch (e) {
+    Logger.log(`Erreur dans envoyerFacturesControlees: ${e.stack}`);
+    try { logAdminAction('Envoi Factures', `Échec: ${e.message}`); } catch (_e) { /* ignore */ }
+    SpreadsheetApp.getUi().alert('Erreur', e.message, ui.ButtonSet.OK);
+  }
+}
 
 /**
  * Archive les factures du mois précédent en déplaçant les fichiers PDF
@@ -1347,64 +1402,11 @@ function archiverFacturesDuMois() {
     }
 
     const msg = `Archivage (${libMois}) terminé. Déplacés: ${deplaces}, ignorés: ${ignores}, erreurs: ${erreurs}.`;
-    try { logAdminAction('Archivage factures mois précédent', msg); } catch (e) {}
+    try { logAdminAction('Archivage factures mois précédent', msg); } catch (e) { /* ignore */ }
     ui.alert('Archivage des factures', msg, ui.ButtonSet.OK);
   } catch (e) {
     Logger.log('Erreur critique dans archiverFacturesDuMois: ' + e.stack);
     ui.alert('Erreur', e.message, ui.ButtonSet.OK);
-  }
-}
-
-    const logoBlock = getLogoEmailBlockHtml();
-    const data = feuille.getDataRange().getValues();
-    let envoyees = 0;
-    let erreurs = [];
-
-    for (let r = 1; r < data.length; r++) {
-      const row = data[r];
-      const email = String(row[idx["Client (Email)"]] || '').trim();
-      const numero = String(row[idx["N° Facture"]] || '').trim();
-      const idPdf = String(row[idx["ID PDF"]] || '').trim();
-      const flag = (typeof idxAEnvoyer === 'number' && idxAEnvoyer !== -1) ? row[idxAEnvoyer] === true : true;
-      if (!email || !numero || !idPdf || !flag) continue;
-
-      try {
-        const fichier = DriveApp.getFileById(idPdf);
-        const pdfBlob = fichier.getAs(MimeType.PDF).setName(`${numero}.pdf`);
-        const montant = (typeof idxMontant === 'number' && idxMontant !== -1) ? parseFloat(row[idxMontant]) || 0 : null;
-        const sujet = `[${NOM_ENTREPRISE}] Facture ${numero}`;
-        const corps = [
-          logoBlock,
-          `<p>Bonjour,</p>`,
-          `<p>Veuillez trouver ci-joint votre facture <strong>${numero}</strong>${montant !== null ? ` d'un montant de <strong>${montant.toFixed(2)} €</strong>` : ''}.</p>`,
-          `<p>Merci pour votre confiance.<br/>${NOM_ENTREPRISE}</p>`
-        ].filter(Boolean).join('');
-
-        GmailApp.sendEmail(
-          email,
-          sujet,
-          'Votre facture est jointe à ce message.',
-          {
-            htmlBody: corps,
-            attachments: [pdfBlob],
-            replyTo: EMAIL_ENTREPRISE
-          }
-        );
-
-        if (typeof idxAEnvoyer === 'number' && idxAEnvoyer !== -1) feuille.getRange(r + 1, idxAEnvoyer + 1).setValue(false);
-        if (typeof idxStatut === 'number' && idxStatut !== -1) feuille.getRange(r + 1, idxStatut + 1).setValue('Envoyée');
-        envoyees++;
-      } catch (e) {
-        erreurs.push(`Ligne ${r + 1} (${numero}) : ${e.message}`);
-      }
-    }
-
-    ui.alert('Envoi des factures', `${envoyees} e-mail(s) envoyé(s).${erreurs.length ? "\nErreurs:\n" + erreurs.join("\n") : ''}`, ui.ButtonSet.OK);
-    logAdminAction('Envoi Factures', `Succès: ${envoyees}, Erreurs: ${erreurs.length}`);
-  } catch (e) {
-    Logger.log(`Erreur dans envoyerFacturesControlees: ${e.stack}`);
-    try { logAdminAction('Envoi Factures', `Échec: ${e.message}`); } catch (_e) {}
-    SpreadsheetApp.getUi().alert('Erreur', e.message, ui.ButtonSet.OK);
   }
 }
 /**
@@ -1481,7 +1483,7 @@ function genererDevisPdfDepuisSelection() {
     ['Date', 'Heure', 'Prestation', 'Montant (€)'].forEach(t => headerRow.appendTableCell(t).setBold(true));
     // Détection avantage résident
     let colResident = -1;
-    try { colResident = obtenirIndicesEnTetes(feuilleFacturation, ["Resident"])['Resident']; } catch(_e) { colResident = -1; }
+    try { colResident = obtenirIndicesEnTetes(feuilleFacturation, ["Resident"])['Resident']; } catch (_e) { colResident = -1; }
     const structureNom = String(values[0][idxNom] || '').trim();
     const residentDetect = colResident !== -1 ? values.some(r => r[colResident] === true) : lignes.some(l => /forfait\s*r[ée]sident/i.test(l.details));
     const avantageMontant = residentDetect ? 5 : 0;
@@ -1520,7 +1522,7 @@ function genererDevisPdfDepuisSelection() {
     dossierDevis.addFile(docFile);
     const pdfBlob = docFile.getAs(MimeType.PDF).setName(doc.getName() + '.pdf');
     const pdfFile = dossierDevis.createFile(pdfBlob);
-    try { logAdminAction('Génération Devis PDF', `${nomClient} <${emailClient}> - ${pdfFile.getName()}`); } catch (_e) {}
+    try { logAdminAction('Génération Devis PDF', `${nomClient} <${emailClient}> - ${pdfFile.getName()}`); } catch (_e) { /* ignore */ }
 
     // Ecrit l'ID du devis PDF dans la feuille Facturation (colonne "ID Devis").
     try {

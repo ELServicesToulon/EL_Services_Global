@@ -143,7 +143,7 @@ function computeChatPseudo(authorRef, options) {
  */
 function sanitizeMultiline(text, maxLength) {
   const limit = Number(maxLength) > 0 ? Number(maxLength) : 1000;
-  const raw = String(text || '').replace(/[\u0000-\u001F\u007F]/g, '').replace(/<[^>]*>/g, '');
+  const raw = String(text || '').replace(/[\x00-\x1F\u007F]/g, '').replace(/<[^>]*>/g, '');
   return raw.trim().substring(0, limit);
 }
 
@@ -155,7 +155,7 @@ function sanitizeMultiline(text, maxLength) {
  */
 function sanitizeScalar(value, maxLength) {
   const limit = Number(maxLength) > 0 ? Number(maxLength) : 255;
-  const raw = String(value || '').replace(/[\u0000-\u001F\u007F]/g, '');
+  const raw = String(value || '').replace(/[\x00-\x1F\u007F]/g, '');
   return raw.trim().substring(0, limit);
 }
 
@@ -432,7 +432,7 @@ function chatGetMessages(options) {
     let lastTimestamp = since;
 
     for (let i = 0; i < rows.length; i++) {
-      const [ts, threadId, authorType, _authorRef, authorPseudo, msg, visibleTo, status] = rows[i];
+      const [ts, threadId, authorType, , authorPseudo, msg, visibleTo, status] = rows[i];
       if (String(status || '').toLowerCase() !== 'active') {
         continue;
       }

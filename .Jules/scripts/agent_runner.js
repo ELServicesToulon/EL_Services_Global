@@ -9,6 +9,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { exec } = require('child_process');
 
 // --- Configuration ---
 const API_KEY = process.env.GEMINI_API_KEY;
@@ -31,13 +32,13 @@ function getProjectFiles() {
     // Basic implementation: Recursive read, ignoring .git, node_modules, etc.
     const files = [];
     const ignoreList = ['.git', 'node_modules', '.clasp.json', 'package-lock.json', '.Jules', 'reports'];
-    
+
     function scan(dir) {
         const items = fs.readdirSync(dir);
         for (const item of items) {
             const fullPath = path.join(dir, item);
             const relPath = path.relative(PROJECT_ROOT, fullPath);
-            
+
             if (ignoreList.some(i => relPath.includes(i))) continue;
 
             const stat = fs.statSync(fullPath);
@@ -55,6 +56,17 @@ function getProjectFiles() {
     return files.slice(0, MAX_CONTEXT_FILES); // Limit context window
 }
 
+async function getLintOutput() {
+    return new Promise((resolve) => {
+        console.log("Running diagnostics (npm run lint)...");
+        exec('npm run lint', { cwd: PROJECT_ROOT }, (error, stdout, stderr) => {
+            // Linting often fails (exit code 1) when finding errors, that's what we want.
+            // We combine stdout and stderr.
+            resolve(stdout + '\n' + stderr);
+        });
+    });
+}
+
 async function runAgent(agentName) {
     if (!API_KEY) {
         console.error("❌ ERREUR: La variable GEMINI_API_KEY n'est pas définie dans le fichier .env");
@@ -62,23 +74,63 @@ async function runAgent(agentName) {
     }
 
     console.log(`🤖 Agent ${agentName} starting...`);
-    
+
     const contextPrompt = getAgentConfig(agentName);
     const files = getProjectFiles();
-    
+
     // Construct Prompt
     let fullPrompt = `You are ${agentName}, an AI agent responsible for the following goals:\n\n${contextPrompt}\n\n`;
-    fullPrompt += `Here is the current codebase:\n\n`;
-    
-    files.forEach(f => {
-        fullPrompt += `--- FILE: ${f.path} ---\n${f.content}\n\n`;
+
+    // Special Mechanic Logic
+    let filesToReference = [];
+
+    if (agentName.toLowerCase() === 'mechanic') {
+        const lintOutput = await getLintOutput();
+        fullPrompt += `\n\n=== DIAGNOSTICS / ERROR LOGS ===\n${lintOutput}\n==============================\n\n`;
+
+        // Parse lint output to find relevant files
+        const specificFiles = new Set();
+        const lines = lintOutput.split('\n');
+        for (const line of lines) {
+            // Match paths like C:\... or just filenames
+            const match = line.match(/(?:[a-zA-Z]:[\\\/]|\/)[a-zA-Z0-9_\-\\\/.]+\.(js|ts|gs|html|css)/);
+            if (match) {
+                // Normalize path to relative
+                let rel = path.relative(PROJECT_ROOT, match[0]);
+                specificFiles.add(rel);
+            }
+        }
+
+        console.log(`Mechanic identified ${specificFiles.size} relevant files with errors.`);
+
+        filesToReference = files.filter(f => specificFiles.has(f.path));
+
+        // Fallback: If no files matched (parsing issue?), use top 10 files
+        if (filesToReference.length === 0) {
+            console.log("Warning: No specific files matched from lint output. Using limited subset.");
+            filesToReference = files.slice(0, 10);
+        }
+
+    } else {
+        filesToReference = files;
+    }
+
+    fullPrompt += `Here is the current codebase context (${filesToReference.length} files):\n\n`;
+
+    filesToReference.forEach(f => {
+        // Truncate huge files just in case
+        if (f.content.length > 30000) {
+            fullPrompt += `--- FILE: ${f.path} (TRUNCATED) ---\n${f.content.substring(0, 30000)}\n...[rest truncated]...\n\n`;
+        } else {
+            fullPrompt += `--- FILE: ${f.path} ---\n${f.content}\n\n`;
+        }
     });
-    
+
     fullPrompt += `\nBased on your instructions, analyze the code and generate a report in Markdown format. If everything is good, start with "✅ No issues found.". If there are issues, list them clearly with actionable steps.`;
 
     // Call Gemini
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const genAI = new GoogleGenerativeAI(API_KEY.trim());
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
@@ -88,10 +140,10 @@ async function runAgent(agentName) {
 
     // Save Report
     if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR);
-    
+
     const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
     const reportPath = path.join(REPORT_DIR, `${agentName}_${dateStr}.md`);
-    
+
     fs.writeFileSync(reportPath, reportText);
     console.log(`💾 Report saved to ${reportPath}`);
 }

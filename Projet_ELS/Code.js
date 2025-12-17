@@ -41,7 +41,7 @@ function onOpen(e) {
   // Ajout du menu Admin DB s'il n'est pas déjà appelé via onOpen_Setup (dépend de l'ordre de chargement)
   // On laisse Setup_Database.js gérer son propre menu si nécessaire, mais on peut l'ajouter ici aussi
   if (typeof onOpen_Setup === 'function') {
-      try { onOpen_Setup(); } catch(e){}
+    try { onOpen_Setup(); } catch (e) { /* ignore */ }
   }
 
   menuPrincipal
@@ -102,36 +102,36 @@ function doPost(e) {
 // =================================================================
 
 function registerRoutes_() {
-    // Admin
-    Router.add('admin', handleAdminPage_);
+  // Admin
+  Router.add('admin', handleAdminPage_);
 
-    // Livraison / Tesla
-    Router.add('livraison', handleLivraisonPage_);
-    Router.add('livreur', handleLivraisonPage_);
-    Router.add('tesla-livraison', handleLivraisonPage_);
-    Router.add('tesla_livraison', handleLivraisonPage_);
-    Router.add('tesla', handleTeslaLivreurPage_);
-    Router.add('tesla_livreur', handleTeslaLivreurPage_);
-    Router.add('tesla_juniper', handleTeslaLivreurPage_);
+  // Livraison / Tesla
+  Router.add('livraison', handleLivraisonPage_);
+  Router.add('livreur', handleLivraisonPage_);
+  Router.add('tesla-livraison', handleLivraisonPage_);
+  Router.add('tesla_livraison', handleLivraisonPage_);
+  Router.add('tesla', handleTeslaLivreurPage_);
+  Router.add('tesla_livreur', handleTeslaLivreurPage_);
+  Router.add('tesla_juniper', handleTeslaLivreurPage_);
 
-    // Gestion Client
-    Router.add('gestion', handleGestionPage_);
+  // Gestion Client
+  Router.add('gestion', handleGestionPage_);
 
-    // Debug & Infos
-    Router.add('debug', handleDebugPage_);
-    Router.add('infos', handleInfosPage_);
-    Router.add('mentions', handleMentionsPage_);
-    Router.add('cgv', handleCgvPage_);
-    Router.add('regles', handleReglesPage_);
+  // Debug & Infos
+  Router.add('debug', handleDebugPage_);
+  Router.add('infos', handleInfosPage_);
+  Router.add('mentions', handleMentionsPage_);
+  Router.add('cgv', handleCgvPage_);
+  Router.add('regles', handleReglesPage_);
 
-    // Piluleur
-    Router.add('piluleur', handlePiluleurPage_);
+  // Piluleur
+  Router.add('piluleur', handlePiluleurPage_);
 
-    // Accueil
-    Router.add('accueil', renderReservationInterface);
-    Router.add('home', renderReservationInterface);
-    Router.add('index', renderReservationInterface);
-    Router.add('reservation', renderReservationInterface);
+  // Accueil
+  Router.add('accueil', renderReservationInterface);
+  Router.add('home', renderReservationInterface);
+  Router.add('index', renderReservationInterface);
+  Router.add('reservation', renderReservationInterface);
 }
 
 // =================================================================
@@ -164,7 +164,7 @@ function handleLivraisonPage_(e) {
   return handleTeslaLivreurPage_(e);
 }
 
-function handleTeslaLivreurPage_(e) {
+function handleTeslaLivreurPage_(_e) {
   var template = HtmlService.createTemplateFromFile('Tesla_Livreur_Interface');
   template.pageTitle = 'Tesla Junyper - ELS';
   var output = template.evaluate().setTitle('Tesla Junyper - ELS');
@@ -172,31 +172,31 @@ function handleTeslaLivreurPage_(e) {
 }
 
 function handleGestionPage_(e) {
-    const params = e && e.parameter ? e.parameter : {};
+  const params = e && e.parameter ? e.parameter : {};
 
-    if (!isFlagEnabled_('CLIENT_PORTAL_ENABLED')) {
-        return creerReponseHtml('Espace client indisponible', 'Merci de votre compréhension.');
+  if (!isFlagEnabled_('CLIENT_PORTAL_ENABLED')) {
+    return creerReponseHtml('Espace client indisponible', 'Merci de votre compréhension.');
+  }
+
+  if (isFlagEnabled_('CLIENT_PORTAL_SIGNED_LINKS')) {
+    const email = params.email;
+    const exp = params.exp;
+    const sig = params.sig;
+
+    // Utilisation du nouveau module Auth
+    if (!Auth.verifyToken(email, exp, sig)) {
+      return creerReponseHtml('Lien invalide', 'Authentification requise pour accéder à l\'espace client.');
     }
+  }
 
-    if (isFlagEnabled_('CLIENT_PORTAL_SIGNED_LINKS')) {
-        const email = params.email;
-        const exp = params.exp;
-        const sig = params.sig;
-
-        // Utilisation du nouveau module Auth
-        if (!Auth.verifyToken(email, exp, sig)) {
-             return creerReponseHtml('Lien invalide', 'Authentification requise pour accéder à l\'espace client.');
-        }
-    }
-
-    const templateGestion = HtmlService.createTemplateFromFile('Client_Espace');
-    templateGestion.ADMIN_EMAIL = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL : '';
-    const embedMode = String(params.embed || '') === '1';
-    templateGestion.EMBED_MODE = embedMode;
-    const sortieGestion = templateGestion.evaluate().setTitle('Mon Espace Client');
-    return sortieGestion.setXFrameOptionsMode(
-        embedMode ? HtmlService.XFrameOptionsMode.ALLOWALL : HtmlService.XFrameOptionsMode.DEFAULT
-    );
+  const templateGestion = HtmlService.createTemplateFromFile('Client_Espace');
+  templateGestion.ADMIN_EMAIL = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL : '';
+  const embedMode = String(params.embed || '') === '1';
+  templateGestion.EMBED_MODE = embedMode;
+  const sortieGestion = templateGestion.evaluate().setTitle('Mon Espace Client');
+  return sortieGestion.setXFrameOptionsMode(
+    embedMode ? HtmlService.XFrameOptionsMode.ALLOWALL : HtmlService.XFrameOptionsMode.DEFAULT
+  );
 }
 
 function handleDebugPage_(e) {
@@ -238,7 +238,7 @@ function handlePiluleurPage_(e) {
   const imageUrl = params.imageUrl || null;
   // openPiluleurInterface doit être défini ailleurs (Chat_Piluleur.gs ou autre)
   if (typeof openPiluleurInterface === 'function') {
-      return openPiluleurInterface(imageId, imageUrl);
+    return openPiluleurInterface(imageId, imageUrl);
   }
   return HtmlService.createHtmlOutput('Module Piluleur introuvable');
 }
@@ -394,17 +394,17 @@ function hasFullAuthorization_(event) {
 }
 
 function menuGenererLienClient() {
-    const ui = SpreadsheetApp.getUi();
-    const emailResp = ui.prompt('Email client');
-    if (emailResp.getSelectedButton() !== ui.Button.OK) return;
-    const email = emailResp.getResponseText();
-    // Utilisation de Auth.generateToken
-    try {
-        const token = Auth.generateToken(email, 168*3600); // 1 semaine
-        ui.showModalDialog(HtmlService.createHtmlOutput(token.url).setWidth(600).setHeight(100), 'Lien');
-    } catch(e) {
-        ui.alert('Erreur: ' + e.message);
-    }
+  const ui = SpreadsheetApp.getUi();
+  const emailResp = ui.prompt('Email client');
+  if (emailResp.getSelectedButton() !== ui.Button.OK) return;
+  const email = emailResp.getResponseText();
+  // Utilisation de Auth.generateToken
+  try {
+    const token = Auth.generateToken(email, 168 * 3600); // 1 semaine
+    ui.showModalDialog(HtmlService.createHtmlOutput(token.url).setWidth(600).setHeight(100), 'Lien');
+  } catch (e) {
+    ui.alert('Erreur: ' + e.message);
+  }
 }
 
 // Les autres helpers du menu (menuVerifierInstallation, etc.) doivent être définis
@@ -437,7 +437,7 @@ function respondJson_(payload) {
 function safeToast_(message, title, seconds) {
   try {
     SpreadsheetApp.getActive().toast(message, title || '', seconds || 5);
-  } catch (_e) { }
+  } catch (_e) { /* ignore */ }
 }
 
 function isCallable_(name) {
@@ -449,7 +449,7 @@ function isFlagEnabled_(flagName) {
 }
 
 function ensureConfigurationValidated_() {
-    if (typeof validerConfiguration === 'function') validerConfiguration();
+  if (typeof validerConfiguration === 'function') validerConfiguration();
 }
 
 function safeCheckSetup_() {
