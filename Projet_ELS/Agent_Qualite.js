@@ -42,8 +42,18 @@ function generateWeeklyQualityReport() {
     var idxNote = headers.indexOf("Note");
 
     if (idxTime === -1 || idxStatut === -1) {
-      Logger.log("Colonnes Timestamp ou Statut manquantes.");
-      return "Colonnes Timestamp ou Statut manquantes dans la feuille.";
+      Logger.log("Colonnes Timestamp ou Statut manquantes. Tentative de réparation...");
+
+      if (repairTraceHeaders_(sheet)) {
+        data = sheet.getDataRange().getValues();
+        headers = data[0];
+        idxTime = headers.indexOf("Timestamp");
+        idxEtab = headers.indexOf("Etablissement");
+        idxStatut = headers.indexOf("Statut");
+        idxNote = headers.indexOf("Note");
+      } else {
+        return "Colonnes Timestamp ou Statut manquantes dans la feuille 'TRACE_Livraisons'.";
+      }
     }
 
     // 2. Filtrage (7 derniers jours + Anomalies)
@@ -123,4 +133,36 @@ function generateWeeklyQualityReport() {
     Logger.log("Erreur generateWeeklyQualityReport: " + e.toString());
     return "Erreur: " + e.toString();
   }
+}
+
+/**
+ * Tente de réparer les en-têtes de la feuille TRACE_Livraisons.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @return {boolean} True si une réparation a été effectuée.
+ */
+function repairTraceHeaders_(sheet) {
+  var headers = ["Timestamp", "Livreur", "Etablissement", "Statut", "Note", "GPS_Lat", "GPS_Lng"];
+  var lastRow = sheet.getLastRow();
+
+  // Cas 1: Feuille vide
+  if (lastRow === 0) {
+    sheet.appendRow(headers);
+    Logger.log("En-têtes ajoutés (feuille vide).");
+    return true;
+  }
+
+  var data = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+  // Cas 2: La première ligne semble être des données (pas "Timestamp" en première colonne)
+  // On insère une ligne avant.
+  if (data[0] !== "Timestamp") {
+    sheet.insertRowBefore(1);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    // Mise en forme optionnelle
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+    Logger.log("En-têtes insérés avant la première ligne de données.");
+    return true;
+  }
+
+  return false;
 }
