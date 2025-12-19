@@ -246,7 +246,7 @@ const EXTRA_ICONS_ENABLED = true;
 const ADMIN_DEVIS_PDF_ENABLED = true;
 // --- Drapeaux de Débogage et de Test ---
 /** @const {boolean} Affiche le sous-menu Debug et l'interface associée. */
-const DEBUG_MENU_ENABLED = true;
+const DEBUG_MENU_ENABLED = false;
 /** @const {boolean} Sert une version de démo de la page de réservation. */
 const DEMO_RESERVATION_ENABLED = false;
 /** @const {boolean} Active l'écriture des logs de facturation. */

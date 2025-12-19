@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  
+
   <? var appUrl = ScriptApp.getService().getUrl(); var nomService = NOM_ENTREPRISE; ?>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
+  <meta name="description"
+    content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
   <link rel="canonical" href="<?= appUrl ?>">
   <meta property="og:title" content="<?= nomService ?> | Tableau de Bord Administrateur">
-  <meta property="og:description" content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
+  <meta property="og:description"
+    content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
   <meta property="og:url" content="<?= appUrl ?>">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="<?= nomService ?> | Tableau de Bord Administrateur">
-  <meta name="twitter:description" content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
+  <meta name="twitter:description"
+    content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -62,7 +66,9 @@
     ]
   }
   </script>
-  <title><?= nomService ?> | Tableau de Bord Administrateur</title>
+  <title>
+    <?= nomService ?> | Tableau de Bord Administrateur
+  </title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,76 +79,78 @@
   <?!= include('charte'); ?>
   <?!= include('GoogleChartsStub'); ?>
 </head>
-<body data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>" data-brand-logo="<?= BRANDING_LOGO_PUBLIC_URL ?>">
 
-<!-- Sprite SVG caché (defs + symbols) -->
-<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
-  <?!= include('icons_sprite'); ?>
-  <defs>
-    <!-- Métal brossé -->
-    <linearGradient id="els-metal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0"  style="stop-color:#f2f4f7"/>
-      <stop offset=".5" style="stop-color:#dde3ea"/>
-      <stop offset="1"  style="stop-color:#f8fafc"/>
-    </linearGradient>
-    <!-- Filtre emboss (relief blister) -->
-    <filter id="els-emboss" x="-15%" y="-30%" width="130%" height="160%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
-      <feOffset in="blur" dx="0" dy="2" result="off1"/>
-      <feComposite in="off1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="innerShadow"/>
-      <feMerge>
-        <feMergeNode in="innerShadow"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
+<body data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>"
+  data-brand-logo="<?= BRANDING_LOGO_PUBLIC_URL ?>">
 
-    <!-- Gradient gélule, partie gauche violet->bleu -->
-    <linearGradient id="capsule-left" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0"   style="stop-color: var(--violet)"/>
-      <stop offset="1.0" style="stop-color: var(--blue)"/>
-    </linearGradient>
-    <!-- Couleur partie droite (var CSS) -->
-    <linearGradient id="capsule-right" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0"   style="stop-color: var(--capsule-right)"/>
-      <stop offset="1.0" style="stop-color: var(--capsule-right)"/>
-    </linearGradient>
+  <!-- Sprite SVG caché (defs + symbols) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <?!= include('icons_sprite'); ?>
+    <defs>
+      <!-- Métal brossé -->
+      <linearGradient id="els-metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" style="stop-color:#f2f4f7" />
+        <stop offset=".5" style="stop-color:#dde3ea" />
+        <stop offset="1" style="stop-color:#f8fafc" />
+      </linearGradient>
+      <!-- Filtre emboss (relief blister) -->
+      <filter id="els-emboss" x="-15%" y="-30%" width="130%" height="160%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
+        <feOffset in="blur" dx="0" dy="2" result="off1" />
+        <feComposite in="off1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="innerShadow" />
+        <feMerge>
+          <feMergeNode in="innerShadow" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
 
-    <!-- Symbol: blister (fond + cuvette) -->
-    <symbol id="els-blister" viewBox="0 0 166 122">
-      <defs>
-        <!-- motif diagonales douces -->
-        <pattern id="alu-tex" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
-          <rect width="12" height="12" fill="url(#els-metal)"/>
-          <rect x="0" y="0" width="12" height="2" fill="#cfd6de" opacity=".45"/>
-        </pattern>
-      </defs>
-      <!-- plaque -->
-      <rect x="0.5" y="0.5" width="165" height="121" rx="12" ry="12" fill="url(#alu-tex)" stroke="#d9e1ea" />
-      <!-- cuvette embossée -->
-      <g filter="url(#els-emboss)">
-        <rect x="18" y="26" width="130" height="70" rx="35" ry="35"
-              fill="rgba(255,255,255,0.7)" stroke="#cbd5e1" stroke-width="1"/>
-      </g>
-      <!-- halo -->
-      <rect x="16" y="24" width="134" height="74" rx="37" ry="37" fill="none" stroke="#ffffff" opacity=".55"/>
-    </symbol>
+      <!-- Gradient gélule, partie gauche violet->bleu -->
+      <linearGradient id="capsule-left" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" style="stop-color: var(--violet)" />
+        <stop offset="1.0" style="stop-color: var(--blue)" />
+      </linearGradient>
+      <!-- Couleur partie droite (var CSS) -->
+      <linearGradient id="capsule-right" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: var(--capsule-right)" />
+        <stop offset="1.0" style="stop-color: var(--capsule-right)" />
+      </linearGradient>
 
-    <!-- Symbol: capsule (moitié gauche dégradée, moitié droite variable) -->
-    <symbol id="els-capsule" viewBox="0 0 156 56">
-      <!-- body -->
-      <g>
-        <!-- droite -->
-        <path d="M78,4 h50 a24,24 0 0 1 24,24 a24,24 0 0 1 -24,24 h-50 z" fill="url(#capsule-right)"/>
-        <!-- gauche -->
-        <path d="M78,4 h-50 a24,24 0 0 0 -24,24 a24,24 0 0 0 24,24 h50 z" fill="url(#capsule-left)"/>
-        <!-- reflet doux -->
-        <ellipse cx="52" cy="18" rx="36" ry="10" fill="#fff" opacity=".35"/>
-        <ellipse cx="108" cy="38" rx="34" ry="8" fill="#000" opacity=".08"/>
-        <rect x="2.5" y="2.5" width="151" height="51" rx="26" ry="26" fill="none" stroke="#cbd5e1" opacity=".9"/>
-      </g>
-    </symbol>
-  </defs>
-</svg>
+      <!-- Symbol: blister (fond + cuvette) -->
+      <symbol id="els-blister" viewBox="0 0 166 122">
+        <defs>
+          <!-- motif diagonales douces -->
+          <pattern id="alu-tex" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+            <rect width="12" height="12" fill="url(#els-metal)" />
+            <rect x="0" y="0" width="12" height="2" fill="#cfd6de" opacity=".45" />
+          </pattern>
+        </defs>
+        <!-- plaque -->
+        <rect x="0.5" y="0.5" width="165" height="121" rx="12" ry="12" fill="url(#alu-tex)" stroke="#d9e1ea" />
+        <!-- cuvette embossée -->
+        <g filter="url(#els-emboss)">
+          <rect x="18" y="26" width="130" height="70" rx="35" ry="35" fill="rgba(255,255,255,0.7)" stroke="#cbd5e1"
+            stroke-width="1" />
+        </g>
+        <!-- halo -->
+        <rect x="16" y="24" width="134" height="74" rx="37" ry="37" fill="none" stroke="#ffffff" opacity=".55" />
+      </symbol>
+
+      <!-- Symbol: capsule (moitié gauche dégradée, moitié droite variable) -->
+      <symbol id="els-capsule" viewBox="0 0 156 56">
+        <!-- body -->
+        <g>
+          <!-- droite -->
+          <path d="M78,4 h50 a24,24 0 0 1 24,24 a24,24 0 0 1 -24,24 h-50 z" fill="url(#capsule-right)" />
+          <!-- gauche -->
+          <path d="M78,4 h-50 a24,24 0 0 0 -24,24 a24,24 0 0 0 24,24 h50 z" fill="url(#capsule-left)" />
+          <!-- reflet doux -->
+          <ellipse cx="52" cy="18" rx="36" ry="10" fill="#fff" opacity=".35" />
+          <ellipse cx="108" cy="38" rx="34" ry="8" fill="#000" opacity=".08" />
+          <rect x="2.5" y="2.5" width="151" height="51" rx="26" ry="26" fill="none" stroke="#cbd5e1" opacity=".9" />
+        </g>
+      </symbol>
+    </defs>
+  </svg>
 
   <div id="indicateur-chargement" class="indicateur-chargement-overlay hidden">
     <div class="spinner"></div>
@@ -153,30 +161,35 @@
   <div id="app-conteneur-principal">
     <header class="app-en-tete">
       <div class="app-logo-container" data-logo-slot>
-        <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+        <span class="app-logo--fallback" data-logo-fallback="true">
+          <?= nomService ?>
+        </span>
       </div>
       <h1 class="sr-only">Tableau de bord administrateur</h1>
       <p>Gestion et supervision des courses</p>
     </header>
 
     <div class="carte barre-outils">
-        <div class="selecteur-date">
-          <label for="date-livraison">Afficher les courses pour le :</label>
-          <input type="date" id="date-livraison" class="champ-formulaire">
+      <div class="selecteur-date">
+        <label for="date-livraison">Afficher les courses pour le :</label>
+        <input type="date" id="date-livraison" class="champ-formulaire">
+      </div>
+      <button id="btn-tout-voir" class="btn btn-secondaire">Toutes les courses</button>
+      <button id="btn-ajouter-reservation" class="btn btn-primaire">Ajouter une course</button>
+      <button id="btn-generer-lien-client" class="btn btn-secondaire">Lien espace client</button>
+      <button id="btn-agents-dashboard" class="btn btn-secondaire" style="background-color:#e2e8f0; color:#2d3748;">🤖
+        Agents</button>
+      <? if (typeof THEME_SELECTION_ENABLED !== 'undefined' && THEME_SELECTION_ENABLED) { ?>
+      <div class="theme-selector">
+        <button id="btn-theme" class="btn btn-secondaire hidden" aria-haspopup="true"
+          aria-expanded="false">Thème</button>
+        <div id="menu-theme" class="hidden" role="menu">
+          <button class="option-theme btn btn-secondaire" data-theme="clarte" role="menuitem">Clarté</button>
+          <button class="option-theme btn btn-secondaire" data-theme="nocturne" role="menuitem">Nocturne</button>
         </div>
-        <button id="btn-tout-voir" class="btn btn-secondaire">Toutes les courses</button>
-        <button id="btn-ajouter-reservation" class="btn btn-primaire">Ajouter une course</button>
-        <button id="btn-generer-lien-client" class="btn btn-secondaire">Lien espace client</button>
-        <? if (typeof THEME_SELECTION_ENABLED !== 'undefined' && THEME_SELECTION_ENABLED) { ?>
-          <div class="theme-selector">
-            <button id="btn-theme" class="btn btn-secondaire hidden" aria-haspopup="true" aria-expanded="false">Thème</button>
-            <div id="menu-theme" class="hidden" role="menu">
-              <button class="option-theme btn btn-secondaire" data-theme="clarte" role="menuitem">Clarté</button>
-              <button class="option-theme btn btn-secondaire" data-theme="nocturne" role="menuitem">Nocturne</button>
-            </div>
-          </div>
-        <? } ?>
-        <div id="ca-en-cours" class="hidden" role="status" aria-live="polite"></div>
+      </div>
+      <? } ?>
+      <div id="ca-en-cours" class="hidden" role="status" aria-live="polite"></div>
     </div>
 
     <main id="conteneur-app">
@@ -186,6 +199,7 @@
           <p>Veuillez sélectionner une date pour afficher les livraisons.</p>
         </div>
       </div>
+      <?!= include('Agent_Dashboard_Interface'); ?>
     </main>
 
   </div>
@@ -194,7 +208,9 @@
     <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
       <div class="modal__header">
         <div class="app-logo-container" data-logo-slot>
-          <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+          <span class="app-logo--fallback" data-logo-fallback="true">
+            <?= nomService ?>
+          </span>
         </div>
         <h2 id="dlg-title">Ajouter une course</h2>
       </div>
@@ -248,5 +264,5 @@
   <?!= include('Admin_JS'); ?>
   <?!= include('ElsLogo_Script'); ?>
 </body>
-</html>
 
+</html>

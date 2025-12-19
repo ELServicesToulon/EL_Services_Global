@@ -44,9 +44,16 @@ function onOpen(e) {
     try { onOpen_Setup(); } catch (e) { /* ignore */ }
   }
 
+  const menuAgents = ui.createMenu('🤖 Agents')
+    .addItem('Ouvrir Tableau de Bord (Sidebar)', 'openAgentSidebar')
+    .addSeparator()
+    .addItem('Lancer Agent Qualité (Hebdo)', 'menuRunQualite')
+    .addItem('Lancer Sentinel (Sécurité)', 'menuRunSentinel');
+
   menuPrincipal
     .addSubMenu(menuFacturation)
     .addSubMenu(menuMaintenance)
+    .addSubMenu(menuAgents)
     .addSeparator()
     .addItem('Rafraichir le menu', 'onOpen')
     .addToUi();
