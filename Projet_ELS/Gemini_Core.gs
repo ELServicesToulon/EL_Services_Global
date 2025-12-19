@@ -160,6 +160,94 @@ function _discoverAndSetBestModel(key) {
 }
 
 /**
+ * Generates an embedding vector for a single text.
+ * @param {string} text - The text to vectorize.
+ * @param {string} [model] - Optional model. Defaults to "text-embedding-004".
+ * @returns {number[]} The embedding vector (768 dimensions for 004).
+ */
+function getEmbedding(text, model) {
+  const GEMINI_API_KEY = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  if (!GEMINI_API_KEY) throw new Error("Clé API Gemini non configurée.");
+  
+  const modelToUse = model || "text-embedding-004";
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:embedContent?key=${GEMINI_API_KEY}`;
+  
+  const payload = {
+    "model": `models/${modelToUse}`,
+    "content": {
+      "parts": [{ "text": text }]
+    }
+  };
+
+  const options = {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+
+  const response = UrlFetchApp.fetch(endpoint, options);
+  const json = JSON.parse(response.getContentText());
+
+  if (json.embedding && json.embedding.values) {
+    return json.embedding.values;
+  } else {
+    throw new Error(`Erreur Embedding: ${response.getContentText()}`);
+  }
+}
+
+/**
+ * Generates embeddings for multiple text chunks in one API call (Batch).
+ * Highly recommended for indexing documents.
+ * @param {string[]} texts - Array of text chunks.
+ * @param {string} [model] - Optional model. Defaults to "text-embedding-004".
+ * @returns {Array<number[]>} Array of embedding vectors.
+ */
+function batchGetEmbeddings(texts, model) {
+  const GEMINI_API_KEY = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  if (!GEMINI_API_KEY) throw new Error("Clé API Gemini non configurée.");
+
+  const modelToUse = model || "text-embedding-004";
+  const BATCH_SIZE = 100;
+  const allEmbeddings = [];
+
+  for (let i = 0; i < texts.length; i += BATCH_SIZE) {
+    const currentBatch = texts.slice(i, i + BATCH_SIZE);
+    
+    // API Call for this batch
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:batchEmbedContents?key=${GEMINI_API_KEY}`;
+    const requests = currentBatch.map(t => ({
+      "model": `models/${modelToUse}`,
+      "content": {
+        "parts": [{ "text": t }]
+      }
+    }));
+    
+    const payload = { "requests": requests };
+    const options = {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    };
+    
+    // Adding a small pause to avoid rate limits if many batches
+    if (i > 0) Utilities.sleep(1000);
+
+    const response = UrlFetchApp.fetch(endpoint, options);
+    const json = JSON.parse(response.getContentText());
+
+    if (json.embeddings) {
+       json.embeddings.forEach(e => allEmbeddings.push(e.values));
+    } else {
+       throw new Error(`Erreur Batch Embedding (batch ${i}): ${response.getContentText()}`);
+    }
+  }
+  
+  return allEmbeddings;
+}
+
+/**
  * Utility function for the user to list all compatible models in the logs.
  */
 function listAvailableModels() {
