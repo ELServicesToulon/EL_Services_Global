@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <? var appUrl = ScriptApp.getService().getUrl(); var nomService = NOM_ENTREPRISE; ?>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
+  <meta name="description"
+    content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
   <link rel="canonical" href="<?= appUrl ?>">
   <meta property="og:title" content="<?= nomService ?> | Panneau de Débogage">
-  <meta property="og:description" content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
+  <meta property="og:description"
+    content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
   <meta property="og:url" content="<?= appUrl ?>">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="<?= nomService ?> | Panneau de Débogage">
-  <meta name="twitter:description" content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
+  <meta name="twitter:description"
+    content="Livraison pharmacie à domicile et EHPAD sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol.">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -61,35 +65,99 @@
     ]
   }
   </script>
-  <title><?= nomService ?> | Panneau de Débogage</title>
+  <title>
+    <?= nomService ?> | Panneau de Débogage
+  </title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-        body { font-family: Montserrat, sans-serif; margin: 20px; background-color: #0b0e13; color: #fff; }
-        .app-logo-container { display: flex; justify-content: center; align-items: center; margin: 0 0 20px; }
-        .app-logo-container svg,
-        .app-logo-container img { max-width: 200px; height: auto; }
-        h1 { color: #fff; }
-        .test-suite { background-color: #0f151f; border: 1px solid #1d2a3a; border-radius: 5px; padding: 15px; margin-bottom: 15px; }
-        button { background: linear-gradient(135deg, #8e44ad, #3498db); color: #fff; border: none; padding: 10px 18px; border-radius: 9999px; cursor: pointer; margin-right: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.18); transition: transform .08s ease, box-shadow .2s ease; }
-        button:hover { transform: translateY(-1px); }
-        button:focus { outline: 2px solid #3498db; outline-offset: 2px; }
-        button:active { transform: translateY(0); }
-        #results { margin-top: 20px; background-color: #101724; color: #fff; padding: 15px; border-radius: 5px; white-space: pre-wrap; font-family: monospace; height: 400px; overflow-y: scroll; }
-    </style>
+    body {
+      font-family: Montserrat, sans-serif;
+      margin: 20px;
+      background-color: #0b0e13;
+      color: #fff;
+    }
+
+    .app-logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 0 20px;
+    }
+
+    .app-logo-container svg,
+    .app-logo-container img {
+      max-width: 200px;
+      height: auto;
+    }
+
+    h1 {
+      color: #fff;
+    }
+
+    .test-suite {
+      background-color: #0f151f;
+      border: 1px solid #1d2a3a;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #8e44ad, #3498db);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 9999px;
+      cursor: pointer;
+      margin-right: 10px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+      transition: transform .08s ease, box-shadow .2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:focus {
+      outline: 2px solid #3498db;
+      outline-offset: 2px;
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    #results {
+      margin-top: 20px;
+      background-color: #101724;
+      color: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      height: 400px;
+      overflow-y: scroll;
+    }
+  </style>
   <?!= include('charte'); ?>
   <?!= include('GoogleChartsStub'); ?>
 </head>
-<body data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>" data-brand-logo="<?= BRANDING_LOGO_PUBLIC_URL ?>">
-    <div class="app-logo-container" data-logo-slot>
-      <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
-    </div>
-    <h1>Panneau de Débogage</h1>
+
+<body data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>"
+  data-brand-logo="<?= BRANDING_LOGO_PUBLIC_URL ?>">
+  <div class="app-logo-container" data-logo-slot>
+    <span class="app-logo--fallback" data-logo-fallback="true">
+      <?= nomService ?>
+    </span>
+  </div>
+  <h1>Panneau de Débogage</h1>
 
   <div class="test-suite">
     <h3>Tests Complets</h3>
-    <p>Lance l'ensemble des tests du back-office. Les résultats s'afficheront dans la console ci-dessous et dans les journaux Apps Script.</p>
+    <p>Lance l'ensemble des tests du back-office. Les résultats s'afficheront dans la console ci-dessous et dans les
+      journaux Apps Script.</p>
     <button id="btn-run-all">Lancer tous les tests</button>
   </div>
 
@@ -97,21 +165,50 @@
     <h3>Générer un lien Espace Client</h3>
     <p>Crée un lien signé pour accéder à l'espace client (admin requis).</p>
     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
-      <input type="email" id="email-client" placeholder="client@example.com" style="flex:1; min-width:260px; padding:8px; border-radius:6px; border:1px solid #1d2a3a; background:#0b0e13; color:#fff">
-      <input type="number" id="validite-heures" value="168" min="1" step="1" style="width:120px; padding:8px; border-radius:6px; border:1px solid #1d2a3a; background:#0b0e13; color:#fff">
+      <input type="email" id="email-client" placeholder="client@example.com"
+        style="flex:1; min-width:260px; padding:8px; border-radius:6px; border:1px solid #1d2a3a; background:#0b0e13; color:#fff">
+      <input type="number" id="validite-heures" value="168" min="1" step="1"
+        style="width:120px; padding:8px; border-radius:6px; border:1px solid #1d2a3a; background:#0b0e13; color:#fff">
       <button id="btn-generer">Générer</button>
     </div>
     <div id="zone-lien" style="margin-top:10px; display:none">
-      <input type="text" id="lien-resultat" readonly style="width:100%; padding:8px; border-radius:6px; border:1px solid #1d2a3a; background:#0b0e13; color:#fff">
+      <input type="text" id="lien-resultat" readonly
+        style="width:100%; padding:8px; border-radius:6px; border:1px solid #1d2a3a; background:#0b0e13; color:#fff">
       <div style="margin-top:8px"><button id="btn-copier">Copier</button></div>
     </div>
   </div>
-    
-    <div id="results">
-        Cliquez sur un bouton pour lancer les tests...
+
+  <div class="test-suite">
+    <h3>Base de Connaissance RAG (IA)</h3>
+    <p>Gérez la mémoire de l'assistant intelligent et testez ses connaissances.</p>
+
+    <div style="margin-bottom:15px; border-bottom:1px solid #1d2a3a; padding-bottom:15px;">
+      <h4 style="margin:0 0 10px 0">1. Indexation Drive</h4>
+      <p style="font-size:0.9em; color:#ccc; margin-bottom:10px">Scanne le dossier Drive pour mettre à jour la base de
+        connaissances.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+        <input type="text" id="drive-folder-id" value="144qdIbP-njNmy-m6F425s6WxRjntN4yb" placeholder="ID Dossier Drive"
+          style="flex:1; min-width:260px; padding:8px; border-radius:6px; border:1px solid #1d2a3a; background:#0b0e13; color:#fff">
+        <button id="btn-index-rag">Lancer l'Indexation</button>
+      </div>
     </div>
 
-    <script>
+    <div>
+      <h4 style="margin:0 0 10px 0">2. Test de Recherche</h4>
+      <p style="font-size:0.9em; color:#ccc; margin-bottom:10px">Vérifiez ce que l'IA trouve dans vos documents.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+        <input type="text" id="rag-query" placeholder="Posez une question à vos documents..."
+          style="flex:1; min-width:260px; padding:8px; border-radius:6px; border:1px solid #1d2a3a; background:#0b0e13; color:#fff">
+        <button id="btn-test-rag">Interroger</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="results">
+    Cliquez sur un bouton pour lancer une action...
+  </div>
+
+  <script>
     document.getElementById('btn-run-all').addEventListener('click', () => {
       document.getElementById('results').textContent = 'Lancement des tests... Veuillez patienter.';
       google.script.run
@@ -136,7 +233,7 @@
             zone.style.display = 'block';
             const input = document.getElementById('lien-resultat');
             input.value = res.url;
-            document.getElementById('results').textContent = 'Lien généré. Expire le ' + new Date(res.exp*1000).toLocaleString();
+            document.getElementById('results').textContent = 'Lien généré. Expire le ' + new Date(res.exp * 1000).toLocaleString();
           } else {
             document.getElementById('results').textContent = 'Échec de génération.';
           }
@@ -150,10 +247,45 @@
     document.getElementById('btn-copier').addEventListener('click', () => {
       const input = document.getElementById('lien-resultat');
       input.select();
-      try { document.execCommand('copy'); } catch (e) {}
+      try { document.execCommand('copy'); } catch (e) { }
     });
-    </script>
-    <?!= include('Render_JS'); ?>
+
+    // --- HANDLERS RAG ---
+
+    document.getElementById('btn-index-rag').addEventListener('click', () => {
+      const folderId = String(document.getElementById('drive-folder-id').value || '').trim();
+      if (!folderId) { document.getElementById('results').textContent = 'ID Dossier requis'; return; }
+
+      document.getElementById('results').textContent = "Lancement de l'indexation...\nCela peut prendre plusieurs minutes selon le nombre de fichiers.";
+
+      google.script.run
+        .withSuccessHandler(res => {
+          document.getElementById('results').textContent = "Résultat de l'indexation :\n----------------------\n" + res;
+        })
+        .withFailureHandler(err => {
+          document.getElementById('results').textContent = "Erreur d'indexation : " + err.message;
+        })
+        .indexDriveFolder(folderId);
+    });
+
+    document.getElementById('btn-test-rag').addEventListener('click', () => {
+      const query = String(document.getElementById('rag-query').value || '').trim();
+      if (!query) { document.getElementById('results').textContent = 'Question requise'; return; }
+
+      document.getElementById('results').textContent = 'Réflexion en cours...';
+
+      google.script.run
+        .withSuccessHandler(res => {
+          document.getElementById('results').textContent = "Réponse de l'IA :\n-----------------\n" + res;
+        })
+        .withFailureHandler(err => {
+          document.getElementById('results').textContent = "Erreur : " + err.message;
+        })
+        .askElesBot(query);
+    });
+  </script>
+  <?!= include('Render_JS'); ?>
   <?!= include('ElsLogo_Script'); ?>
 </body>
+
 </html>
