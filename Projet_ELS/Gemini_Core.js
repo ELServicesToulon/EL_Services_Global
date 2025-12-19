@@ -34,7 +34,7 @@ function callGeminiFlash(systemInstruction, userPrompt, temperature) {
       // Trigger automatic maintenance to find a new valid model.
       if (apiError.message && (apiError.message.includes("404") || apiError.message.includes("not found"))) {
         Logger.log(`Model ${modelVersion} failed (404). Initiating automatic maintenance to find a valid Flash model...`);
-        
+
         const newModel = _discoverAndSetBestModel(GEMINI_API_KEY);
         if (newModel) {
           Logger.log(`Maintenance successful. Retrying with new model: ${newModel}`);
@@ -58,47 +58,47 @@ function callGeminiFlash(systemInstruction, userPrompt, temperature) {
  * Internal function to make the actual HTTP request.
  */
 function _generateContentRequest(model, key, systemInstruction, userPrompt, temperature) {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 
-    const payload = {
-      "contents": [
-        {
-          "role": "user",
-          "parts": [{ "text": userPrompt }]
-        }
-      ],
-      "generationConfig": {
-        "temperature": temperature !== undefined ? temperature : 0.3
+  const payload = {
+    "contents": [
+      {
+        "role": "user",
+        "parts": [{ "text": String(userPrompt || "") }]
       }
+    ],
+    "generationConfig": {
+      "temperature": temperature !== undefined ? temperature : 0.3
+    }
+  };
+
+  if (systemInstruction) {
+    payload.systemInstruction = {
+      "parts": [{ "text": systemInstruction }]
     };
+  }
 
-    if (systemInstruction) {
-      payload.systemInstruction = {
-        "parts": [{ "text": systemInstruction }]
-      };
-    }
+  const options = {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
 
-    const options = {
-      method: 'post',
-      contentType: 'application/json',
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    };
+  const response = UrlFetchApp.fetch(endpoint, options);
+  const responseCode = response.getResponseCode();
+  const json = JSON.parse(response.getContentText());
 
-    const response = UrlFetchApp.fetch(endpoint, options);
-    const responseCode = response.getResponseCode();
-    const json = JSON.parse(response.getContentText());
+  if (responseCode !== 200) {
+    const errorMsg = json.error ? json.error.message : response.getContentText();
+    throw new Error(`Erreur API (${responseCode}): ${errorMsg}`);
+  }
 
-    if (responseCode !== 200) {
-       const errorMsg = json.error ? json.error.message : response.getContentText();
-       throw new Error(`Erreur API (${responseCode}): ${errorMsg}`);
-    }
-
-    if (json.candidates && json.candidates.length > 0 && json.candidates[0].content && json.candidates[0].content.parts) {
-      return json.candidates[0].content.parts[0].text;
-    } else {
-      return "Désolé, l'IA n'a pas renvoyé de contenu.";
-    }
+  if (json.candidates && json.candidates.length > 0 && json.candidates[0].content && json.candidates[0].content.parts) {
+    return json.candidates[0].content.parts[0].text;
+  } else {
+    return "Désolé, l'IA n'a pas renvoyé de contenu.";
+  }
 }
 
 /**
@@ -109,12 +109,12 @@ function _discoverAndSetBestModel(key) {
   try {
     const listEndpoint = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
     const response = UrlFetchApp.fetch(listEndpoint, { muteHttpExceptions: true });
-    
+
     if (response.getResponseCode() !== 200) {
       Logger.log("Failed to list models: " + response.getContentText());
       return null;
     }
-    
+
     const json = JSON.parse(response.getContentText());
     if (!json.models) return null;
 
@@ -122,10 +122,10 @@ function _discoverAndSetBestModel(key) {
     // We prefer models that do NOT have a specific date version for longevity (aliases), 
     // unless only date versions are available.
     // Prioritize 'gemini-2.0-flash', then 'gemini-1.5-flash', etc.
-    
-    const candidates = json.models.filter(m => 
-      m.name.toLowerCase().includes("flash") && 
-      m.supportedGenerationMethods && 
+
+    const candidates = json.models.filter(m =>
+      m.name.toLowerCase().includes("flash") &&
+      m.supportedGenerationMethods &&
       m.supportedGenerationMethods.includes("generateContent")
     );
 
@@ -134,26 +134,26 @@ function _discoverAndSetBestModel(key) {
     // Sort strategy: 
     // 1. Prefer newer major versions (2.5 > 2.0 > 1.5)
     // 2. Prefer stable aliases (no numeric suffix like -001) over specific versions
-    
+
     candidates.sort((a, b) => {
       // Simple heuristic: compare names. 
       // Reverse alphabetical might work for versions (2.0 > 1.5), 
       // but we need to handle '-001' vs no suffix.
-      return b.name.localeCompare(a.name); 
+      return b.name.localeCompare(a.name);
     });
-    
+
     // Pick the top one
     // Note: models names are like "models/gemini-1.5-flash". We need just the last part.
     const bestModelFull = candidates[0].name; // e.g. "models/gemini-2.0-flash"
     const bestModelName = bestModelFull.replace("models/", "");
 
     Logger.log("Auto-discovered best model: " + bestModelName);
-    
+
     // Cache it
     PropertiesService.getScriptProperties().setProperty("GEMINI_MODEL_VERSION", bestModelName);
-    
+
     return bestModelName;
-  } catch(e) {
+  } catch (e) {
     Logger.log("Error in model discovery: " + e.toString());
     return null;
   }
@@ -168,14 +168,14 @@ function _discoverAndSetBestModel(key) {
 function getEmbedding(text, model) {
   const GEMINI_API_KEY = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
   if (!GEMINI_API_KEY) throw new Error("Clé API Gemini non configurée.");
-  
+
   const modelToUse = model || "text-embedding-004";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:embedContent?key=${GEMINI_API_KEY}`;
-  
+
   const payload = {
     "model": `models/${modelToUse}`,
     "content": {
-      "parts": [{ "text": text }]
+      "parts": [{ "text": String(text || "") }]
     }
   };
 
@@ -192,7 +192,8 @@ function getEmbedding(text, model) {
   if (json.embedding && json.embedding.values) {
     return json.embedding.values;
   } else {
-    throw new Error(`Erreur Embedding: ${response.getContentText()}`);
+    // Cas où l'API renvoie autre chose ou pas de values
+    throw new Error(`Erreur Embedding: Pas de 'values' dans la réponse. JSON: ${JSON.stringify(json)}`);
   }
 }
 
@@ -213,7 +214,7 @@ function batchGetEmbeddings(texts, model) {
 
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
     const currentBatch = texts.slice(i, i + BATCH_SIZE);
-    
+
     // API Call for this batch
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:batchEmbedContents?key=${GEMINI_API_KEY}`;
     const requests = currentBatch.map(t => ({
@@ -222,7 +223,7 @@ function batchGetEmbeddings(texts, model) {
         "parts": [{ "text": t }]
       }
     }));
-    
+
     const payload = { "requests": requests };
     const options = {
       method: 'post',
@@ -230,7 +231,7 @@ function batchGetEmbeddings(texts, model) {
       payload: JSON.stringify(payload),
       muteHttpExceptions: true
     };
-    
+
     // Adding a small pause to avoid rate limits if many batches
     if (i > 0) Utilities.sleep(1000);
 
@@ -238,12 +239,12 @@ function batchGetEmbeddings(texts, model) {
     const json = JSON.parse(response.getContentText());
 
     if (json.embeddings) {
-       json.embeddings.forEach(e => allEmbeddings.push(e.values));
+      json.embeddings.forEach(e => allEmbeddings.push(e.values));
     } else {
-       throw new Error(`Erreur Batch Embedding (batch ${i}): ${response.getContentText()}`);
+      throw new Error(`Erreur Batch Embedding (batch ${i}): ${response.getContentText()}`);
     }
   }
-  
+
   return allEmbeddings;
 }
 
@@ -256,17 +257,17 @@ function listAvailableModels() {
     Logger.log("Clé API non trouvée.");
     return;
   }
-  
+
   const listEndpoint = `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`;
   const response = UrlFetchApp.fetch(listEndpoint);
   const json = JSON.parse(response.getContentText());
-  
+
   Logger.log("--- Liste des Modèles Disponibles ---");
   json.models.forEach(m => {
     Logger.log(`Nom: ${m.name} | Version: ${m.version} | Méthodes: ${m.supportedGenerationMethods}`);
   });
   Logger.log("-------------------------------------");
-  
+
   const current = PropertiesService.getScriptProperties().getProperty("GEMINI_MODEL_VERSION") || DEFAULT_MODEL;
   Logger.log("Modèle actuellement configuré : " + current);
 }
