@@ -1,221 +1,242 @@
 ﻿<script>
-/**
- * =================================================================
- * MODULE JAVASCRIPT - TABLEAU DE BORD ADMIN
- * =================================================================
- */
+    /**
+     * =================================================================
+     * MODULE JAVASCRIPT - TABLEAU DE BORD ADMIN
+     * =================================================================
+     */
 
-/**
- * Journalise un avertissement avec le préfixe [ELS].
- * @param {...*} args Contenu à journaliser.
- */
-function logWarn(...args) {
-  console.warn('[ELS]', ...args);
-}
-
-/**
- * Journalise une erreur avec le préfixe [ELS].
- * @param {...*} args Contenu à journaliser.
- */
-function logError(...args) {
-  console.error('[ELS]', ...args);
-}
-function formatDateAvecJourFr(date, options = {}) {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
-  const baseOptions = { weekday: 'long', day: 'numeric', month: 'long' };
-  const opts = Object.assign({}, baseOptions, options);
-  const formatted = date.toLocaleDateString('fr-FR', opts);
-  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-}
-const ADMIN_OPTIMISTIC_CREATION_ENABLED = <?!= ADMIN_OPTIMISTIC_CREATION_ENABLED ?>;
-const SVG_NS = 'http://www.w3.org/2000/svg';
-const ADMIN_CONFIG = window.ADMIN_CONFIG || {};
-const EURO_FORMATTER = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
-function formatEuro(value) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return '';
-  return EURO_FORMATTER.format(amount);
-}
-
-function telechargerPdfDepuisBase64(base64Data, fileName, mimeType) {
-  if (!base64Data) return;
-  const safeName = fileName || 'devis.pdf';
-  const type = mimeType || 'application/pdf';
-  try {
-    const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    /**
+     * Journalise un avertissement avec le préfixe [ELS].
+     * @param {...*} args Contenu à journaliser.
+     */
+    function logWarn(...args) {
+        console.warn('[ELS]', ...args);
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = safeName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error('Echec téléchargement devis PDF', err);
-    try {
-      window.open(`data:${type};base64,${base64Data}`, '_blank');
-    } catch (_ignored) {}
-  }
-}
 
-function openModal() {
-  document.body.classList.add('is-modal-open');
-  const modal = document.getElementById('modale-action');
-  if (modal) modal.hidden = false;
-  const firstInput = modal?.querySelector('input, select, textarea, button');
-  if (firstInput) firstInput.focus({ preventScroll: true });
+    /**
+     * Journalise une erreur avec le préfixe [ELS].
+     * @param {...*} args Contenu à journaliser.
+     */
+    function logError(...args) {
+        console.error('[ELS]', ...args);
+    }
+    function formatDateAvecJourFr(date, options = {}) {
+        if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+        const baseOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+        const opts = Object.assign({}, baseOptions, options);
+        const formatted = date.toLocaleDateString('fr-FR', opts);
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }
+    const ADMIN_OPTIMISTIC_CREATION_ENABLED = <?!= ADMIN_OPTIMISTIC_CREATION_ENABLED ?>;
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const ADMIN_CONFIG = window.ADMIN_CONFIG || {};
+    const EURO_FORMATTER = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+    function formatEuro(value) {
+        const amount = Number(value);
+        if (!Number.isFinite(amount)) return '';
+        return EURO_FORMATTER.format(amount);
+    }
+
+    function telechargerPdfDepuisBase64(base64Data, fileName, mimeType) {
+        if (!base64Data) return;
+        const safeName = fileName || 'devis.pdf';
+        const type = mimeType || 'application/pdf';
+        try {
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = safeName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Echec téléchargement devis PDF', err);
+            try {
+                window.open(`data:${type};base64,${base64Data}`, '_blank');
+            } catch (_ignored) { }
+        }
+    }
+
+    function openModal() {
+        document.body.classList.add('is-modal-open');
+        const modal = document.getElementById('modale-action');
+        if (modal) modal.hidden = false;
+        const firstInput = modal?.querySelector('input, select, textarea, button');
+        if (firstInput) firstInput.focus({ preventScroll: true });
   <? if (ADMIN_SLOTS_PNG_ENABLED) { ?>
-  google.script.run.withSuccessHandler(renderSlots).withFailureHandler(logError).obtenirStatutCreneaux();
+            google.script.run.withSuccessHandler(renderSlots).withFailureHandler(logError).obtenirStatutCreneaux();
   <? } ?>
 }
 
-function closeModal() {
-  document.body.classList.remove('is-modal-open');
-  const modal = document.getElementById('modale-action');
-  if (modal) modal.hidden = true;
-}
-<? if (ADMIN_SLOTS_PNG_ENABLED) { ?>
-function renderSlots(slots){
-  const row = document.getElementById('slotsRow');
-  if(!row) return;
-  row.innerHTML = "";
-
-  slots.forEach(s=>{
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = `slot-btn ${s.status === 'taken' ? 'is-taken' : s.status === 'urgent' ? 'is-urgent' : 'is-free'}`;
-    btn.setAttribute('aria-pressed','false');
-    btn.dataset.time = s.time;
-
-    const icon = creerSlotIcon(s.status);
-
-    const time = document.createElement('span');
-    time.className = 'time';
-    time.textContent = s.label || s.time.replace(':','h');
-
-    btn.appendChild(icon);
-    btn.appendChild(time);
-
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.slot-btn[aria-pressed="true"]').forEach(b=>b.setAttribute('aria-pressed','false'));
-      btn.setAttribute('aria-pressed','true');
-      document.getElementById('champ-horaire')?.value = btn.dataset.time;
-    });
-
-    row.appendChild(btn);
-  });
-}
-
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.slot-btn');
-  if (!btn) return;
-  const pressed = btn.getAttribute('aria-pressed') === 'true';
-  document.querySelectorAll('.slot-btn[aria-pressed="true"]').forEach(b => b.setAttribute('aria-pressed', 'false'));
-  btn.setAttribute('aria-pressed', String(!pressed));
-});
-
-function markUrgentSlots(delayMin = 60) {
-  const now = new Date();
-  document.querySelectorAll('.slot-btn').forEach(btn => {
-    const [h, m] = (btn.dataset.time || '').split(':').map(Number);
-    if (Number.isFinite(h) && Number.isFinite(m)) {
-      const t = new Date(now); t.setHours(h, m, 0, 0);
-      const diff = (t - now) / 60000;
-      btn.classList.toggle('is-urgent', diff >= 0 && diff <= delayMin);
+    function closeModal() {
+        document.body.classList.remove('is-modal-open');
+        const modal = document.getElementById('modale-action');
+        if (modal) modal.hidden = true;
     }
-  });
-}
+<? if (ADMIN_SLOTS_PNG_ENABLED) { ?>
+        function renderSlots(slots) {
+            const row = document.getElementById('slotsRow');
+            if (!row) return;
+            row.innerHTML = "";
+
+            slots.forEach(s => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `slot-btn ${s.status === 'taken' ? 'is-taken' : s.status === 'urgent' ? 'is-urgent' : 'is-free'}`;
+                btn.setAttribute('aria-pressed', 'false');
+                btn.dataset.time = s.time;
+
+                const icon = creerSlotIcon(s.status);
+
+                const time = document.createElement('span');
+                time.className = 'time';
+                time.textContent = s.label || s.time.replace(':', 'h');
+
+                btn.appendChild(icon);
+                btn.appendChild(time);
+
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.slot-btn[aria-pressed="true"]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+                    btn.setAttribute('aria-pressed', 'true');
+                    document.getElementById('champ-horaire')?.value = btn.dataset.time;
+                });
+
+                row.appendChild(btn);
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.slot-btn');
+            if (!btn) return;
+            const pressed = btn.getAttribute('aria-pressed') === 'true';
+            document.querySelectorAll('.slot-btn[aria-pressed="true"]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+            btn.setAttribute('aria-pressed', String(!pressed));
+        });
+
+        function markUrgentSlots(delayMin = 60) {
+            const now = new Date();
+            document.querySelectorAll('.slot-btn').forEach(btn => {
+                const [h, m] = (btn.dataset.time || '').split(':').map(Number);
+                if (Number.isFinite(h) && Number.isFinite(m)) {
+                    const t = new Date(now); t.setHours(h, m, 0, 0);
+                    const diff = (t - now) / 60000;
+                    btn.classList.toggle('is-urgent', diff >= 0 && diff <= delayMin);
+                }
+            });
+        }
 // Exemple : urgents dans l'heure
 // markUrgentSlots(60);
 <? } ?>
 
-function creerSlotIcon(status){
-  const iconId = status === 'taken'
-    ? 'icone-boite-scellee'
-    : status === 'urgent'
-      ? 'icone-livraison'
-      : 'icone-gelule';
-  const svg = document.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('class', 'icon slot-icon');
-  svg.setAttribute('viewBox', '0 0 48 48');
-  svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-hidden', 'true');
-  svg.setAttribute('focusable', 'false');
-  const use = document.createElementNS(SVG_NS, 'use');
-  use.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `#${iconId}`);
-  use.setAttribute('href', `#${iconId}`);
-  svg.appendChild(use);
-  return svg;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Références aux éléments du DOM ---
-    const indicateurChargement = document.getElementById('indicateur-chargement');
-    const champDate = document.getElementById('date-livraison');
-    const contenuReservations = document.getElementById('contenu-reservations');
-    const titreReservations = document.getElementById('titre-reservations');
-    const btnAjouterReservation = document.getElementById('btn-ajouter-reservation');
-    const btnToutVoir = document.getElementById('btn-tout-voir');
-    const btnGenererLienClient = document.getElementById('btn-generer-lien-client');
-    const modale = document.getElementById('modale-action');
-    const contenuModale = document.getElementById('contenu-modale-wrapper');
-    const caEnCours = document.getElementById('ca-en-cours');
-    const missingPropsBanner = document.getElementById('missing-props-banner');
-
-    // --- Variables d'état ---
-    let toutesLesReservationsAffichees = [];
-    let tousLesClients = [];
-    let vueActuelle = 'date'; // NOUVEAU: pour savoir quelle vue rafraîchir ('date' ou 'toutes')
-    let isSubmitting = false;
-
-    function formatCourseLabel(dureeMin, totalStops, isReturn){
-      const extra = Math.max((Number(totalStops)||0)-1, 0);
-      return `Tournée de ${dureeMin}min (${totalStops} arrêt(s) total(s) (dont ${extra} supp.), retour: ${isReturn ? "oui" : "non"})`;
-    }
-
-    google.script.run.withSuccessHandler(res => {
-        if (res && Array.isArray(res.missingProps) && res.missingProps.length > 0 && missingPropsBanner) {
-            const items = res.missingProps.map(p => `<li>${escapeHTML(p)}</li>`).join('');
-            renderHTML(missingPropsBanner, `<strong>Configuration manquante :</strong><ul>${items}</ul>`);
-            missingPropsBanner.classList.remove('hidden');
+        function creerSlotIcon(status) {
+            const iconId = status === 'taken'
+                ? 'icone-boite-scellee'
+                : status === 'urgent'
+                    ? 'icone-livraison'
+                    : 'icone-gelule';
+            const svg = document.createElementNS(SVG_NS, 'svg');
+            svg.setAttribute('class', 'icon slot-icon');
+            svg.setAttribute('viewBox', '0 0 48 48');
+            svg.setAttribute('role', 'img');
+            svg.setAttribute('aria-hidden', 'true');
+            svg.setAttribute('focusable', 'false');
+            const use = document.createElementNS(SVG_NS, 'use');
+            use.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `#${iconId}`);
+            use.setAttribute('href', `#${iconId}`);
+            svg.appendChild(use);
+            return svg;
         }
-    }).withFailureHandler(logError).checkSetup_ELS();
 
-    /**
-     * Initialise le tableau de bord.
-     */
-    function initialiser() {
-        const aujourdhui = new Date().toISOString().split('T')[0];
-        
-        if (champDate) {
-            champDate.value = aujourdhui;
-            champDate.addEventListener('change', () => chargerReservationsParDate(champDate.value));
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Références aux éléments du DOM ---
+        const indicateurChargement = document.getElementById('indicateur-chargement');
+        const champDate = document.getElementById('date-livraison');
+        const contenuReservations = document.getElementById('contenu-reservations');
+        const titreReservations = document.getElementById('titre-reservations');
+        const btnAjouterReservation = document.getElementById('btn-ajouter-reservation');
+        const btnToutVoir = document.getElementById('btn-tout-voir');
+        const btnGenererLienClient = document.getElementById('btn-generer-lien-client');
+        const modale = document.getElementById('modale-action');
+        const contenuModale = document.getElementById('contenu-modale-wrapper');
+        const caEnCours = document.getElementById('ca-en-cours');
+        const missingPropsBanner = document.getElementById('missing-props-banner');
+
+        // --- Variables d'état ---
+        let toutesLesReservationsAffichees = [];
+        let tousLesClients = [];
+        let vueActuelle = 'date'; // NOUVEAU: pour savoir quelle vue rafraîchir ('date' ou 'toutes')
+        let isSubmitting = false;
+
+        function formatCourseLabel(dureeMin, totalStops, isReturn) {
+            const extra = Math.max((Number(totalStops) || 0) - 1, 0);
+            return `Tournée de ${dureeMin}min (${totalStops} arrêt(s) total(s) (dont ${extra} supp.), retour: ${isReturn ? "oui" : "non"})`;
         }
-        
-        btnToutVoir?.addEventListener('click', chargerToutesReservationsAdmin);
-        btnAjouterReservation?.addEventListener('click', ouvrirModaleAjout);
-        btnGenererLienClient?.addEventListener('click', ouvrirModaleLienClient);
 
-        chargerClients(() => {
-            chargerReservationsParDate(aujourdhui);
-        });
-    }
+        google.script.run.withSuccessHandler(res => {
+            if (res && Array.isArray(res.missingProps) && res.missingProps.length > 0 && missingPropsBanner) {
+                const items = res.missingProps.map(p => `<li>${escapeHTML(p)}</li>`).join('');
+                renderHTML(missingPropsBanner, `<strong>Configuration manquante :</strong><ul>${items}</ul>`);
+                missingPropsBanner.classList.remove('hidden');
+            }
+        }).withFailureHandler(logError).checkSetup_ELS();
+
+        /**
+         * Initialise le tableau de bord.
+         */
+        function initialiser() {
+            const aujourdhui = new Date().toISOString().split('T')[0];
+
+            if (champDate) {
+                champDate.value = aujourdhui;
+                champDate.addEventListener('change', () => {
+                    document.getElementById('agent-dashboard-view')?.classList.add('hidden');
+                    document.getElementById('liste-reservations')?.classList.remove('hidden');
+                    chargerReservationsParDate(champDate.value);
+                });
+            }
+
+            btnToutVoir?.addEventListener('click', () => {
+                document.getElementById('agent-dashboard-view')?.classList.add('hidden');
+                document.getElementById('liste-reservations')?.classList.remove('hidden');
+                chargerToutesReservationsAdmin();
+            });
+            btnAjouterReservation?.addEventListener('click', ouvrirModaleAjout);
+            btnGenererLienClient?.addEventListener('click', ouvrirModaleLienClient);
+
+            document.getElementById('btn-agents-dashboard')?.addEventListener('click', () => {
+                const vResa = document.getElementById('liste-reservations');
+                const vAgents = document.getElementById('agent-dashboard-view');
+                if (vAgents && vAgents.classList.contains('hidden')) {
+                    vResa?.classList.add('hidden');
+                    vAgents.classList.remove('hidden');
+                    if (window.initAgentDashboard) window.initAgentDashboard();
+                } else {
+                    vAgents?.classList.add('hidden');
+                    vResa?.classList.remove('hidden');
+                }
+            });
+
+            chargerClients(() => {
+                chargerReservationsParDate(aujourdhui);
+            });
+        }
 
 
-    /**
-     * Ouvre une modale pour générer un lien signé vers l'espace client.
-     */
-    function ouvrirModaleLienClient() {
-        const optionsClient = tousLesClients.map(c => `<option value="${escapeHTML(c.email)}">${escapeHTML(c.nom)} (${escapeHTML(c.email)})</option>`).join('');
-        if (!contenuModale) return;
-        renderHTML(contenuModale, `
+        /**
+         * Ouvre une modale pour générer un lien signé vers l'espace client.
+         */
+        function ouvrirModaleLienClient() {
+            const optionsClient = tousLesClients.map(c => `<option value="${escapeHTML(c.email)}">${escapeHTML(c.nom)} (${escapeHTML(c.email)})</option>`).join('');
+            if (!contenuModale) return;
+            renderHTML(contenuModale, `
             <h3 id="modale-titre">Générer un lien espace client</h3>
             <div class="groupe-formulaire"><label for="select-client-lien">Client</label><select id="select-client-lien" class="champ-formulaire"><option value="">-- Sélectionner --</option>${optionsClient}</select></div>
             <div class="groupe-formulaire"><label>Email</label><input type="email" id="champ-email-lien" class="champ-formulaire" placeholder="client@example.com"></div>
@@ -228,197 +249,197 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" id="btn-copier-lien" class="btn btn-secondaire">Copier</button>
             </div>
         `);
-        openModal();
-        attacherEcouteursModaleLienClient();
-    }
+            openModal();
+            attacherEcouteursModaleLienClient();
+        }
 
-    function attacherEcouteursModaleLienClient() {
-        const selectClient = document.getElementById('select-client-lien');
-        const emailInput = document.getElementById('champ-email-lien');
-        const heuresInput = document.getElementById('champ-heures-validite');
-        const btnGenerer = document.getElementById('btn-generer-lien');
-        const zoneResultat = document.getElementById('resultat-lien');
-        const champLien = document.getElementById('champ-lien-resultat');
-        const btnCopier = document.getElementById('btn-copier-lien');
+        function attacherEcouteursModaleLienClient() {
+            const selectClient = document.getElementById('select-client-lien');
+            const emailInput = document.getElementById('champ-email-lien');
+            const heuresInput = document.getElementById('champ-heures-validite');
+            const btnGenerer = document.getElementById('btn-generer-lien');
+            const zoneResultat = document.getElementById('resultat-lien');
+            const champLien = document.getElementById('champ-lien-resultat');
+            const btnCopier = document.getElementById('btn-copier-lien');
 
-        selectClient?.addEventListener('change', () => {
-            const c = tousLesClients.find(x => x.email === selectClient.value);
-            if (c) emailInput.value = c.email;
-        });
+            selectClient?.addEventListener('change', () => {
+                const c = tousLesClients.find(x => x.email === selectClient.value);
+                if (c) emailInput.value = c.email;
+            });
 
-        btnGenerer?.addEventListener('click', () => {
-            const email = (emailInput?.value || '').trim();
-            const heures = parseInt(heuresInput?.value || '168', 10);
-            if (!email) { afficherErreur('Email requis.'); return; }
-            basculerIndicateurChargement(true);
-            google.script.run
-                .withSuccessHandler(res => {
-                    basculerIndicateurChargement(false);
-                    if (res && res.url) {
-                        zoneResultat?.classList.remove('hidden');
-                        if (champLien) {
-                            champLien.value = res.url;
-                            try {
-                                if (navigator.clipboard && navigator.clipboard.writeText) {
-                                    navigator.clipboard.writeText(res.url).then(() => afficherNotification('Lien copié dans le presse-papiers.'));
-                                }
-                            } catch (e) { /* fallback below */ }
+            btnGenerer?.addEventListener('click', () => {
+                const email = (emailInput?.value || '').trim();
+                const heures = parseInt(heuresInput?.value || '168', 10);
+                if (!email) { afficherErreur('Email requis.'); return; }
+                basculerIndicateurChargement(true);
+                google.script.run
+                    .withSuccessHandler(res => {
+                        basculerIndicateurChargement(false);
+                        if (res && res.url) {
+                            zoneResultat?.classList.remove('hidden');
+                            if (champLien) {
+                                champLien.value = res.url;
+                                try {
+                                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                                        navigator.clipboard.writeText(res.url).then(() => afficherNotification('Lien copié dans le presse-papiers.'));
+                                    }
+                                } catch (e) { /* fallback below */ }
+                            }
+                        } else {
+                            afficherErreur('Impossible de générer le lien.');
                         }
+                    })
+                    .withFailureHandler(afficherErreur)
+                    .genererLienEspaceClient(email, heures);
+            });
+
+            btnCopier?.addEventListener('click', () => {
+                if (!champLien) return;
+                champLien.select();
+                try {
+                    document.execCommand('copy');
+                    afficherNotification('Lien copié dans le presse-papiers.');
+                } catch (e) {
+                    afficherErreur('Copie impossible. Sélectionnez et copiez manuellement.');
+                }
+            });
+        }
+
+        /**
+         * Charge les réservations pour une date donnée.
+         */
+        function chargerReservationsParDate(dateString) {
+            if (!dateString) return;
+            vueActuelle = 'date'; // Mémorise la vue
+            basculerIndicateurChargement(true);
+
+            if (contenuReservations) renderMessage(contenuReservations, 'Chargement des courses...');
+            const date = new Date(dateString + "T00:00:00");
+            if (titreReservations) {
+                const dateFormatee = formatDateAvecJourFr(date);
+                titreReservations.textContent = dateFormatee ? `Courses du ${dateFormatee}` : `Courses du ${dateString}`;
+            }
+
+            google.script.run
+                .withSuccessHandler(reponse => {
+                    basculerIndicateurChargement(false);
+                    if (reponse.success) {
+                        toutesLesReservationsAffichees = reponse.reservations;
+                        afficherReservations(toutesLesReservationsAffichees, false);
+                        mettreAJourCAEnCours();
                     } else {
-                        afficherErreur('Impossible de générer le lien.');
+                        afficherErreur(reponse.error);
                     }
                 })
                 .withFailureHandler(afficherErreur)
-                .genererLienEspaceClient(email, heures);
-        });
-
-        btnCopier?.addEventListener('click', () => {
-            if (!champLien) return;
-            champLien.select();
-            try {
-                document.execCommand('copy');
-                afficherNotification('Lien copié dans le presse-papiers.');
-            } catch (e) {
-                afficherErreur('Copie impossible. Sélectionnez et copiez manuellement.');
-            }
-        });
-    }
-
-    /**
-     * Charge les réservations pour une date donnée.
-     */
-    function chargerReservationsParDate(dateString) {
-        if (!dateString) return;
-        vueActuelle = 'date'; // Mémorise la vue
-        basculerIndicateurChargement(true);
-        
-        if (contenuReservations) renderMessage(contenuReservations, 'Chargement des courses...');
-        const date = new Date(dateString + "T00:00:00");
-        if (titreReservations) {
-            const dateFormatee = formatDateAvecJourFr(date);
-            titreReservations.textContent = dateFormatee ? `Courses du ${dateFormatee}` : `Courses du ${dateString}`;
+                .obtenirToutesReservationsPourDate(dateString);
         }
 
-        google.script.run
-            .withSuccessHandler(reponse => {
-                basculerIndicateurChargement(false);
-                if (reponse.success) {
-                    toutesLesReservationsAffichees = reponse.reservations;
-                    afficherReservations(toutesLesReservationsAffichees, false);
-                    mettreAJourCAEnCours();
-                } else {
-                    afficherErreur(reponse.error);
-                }
-            })
-            .withFailureHandler(afficherErreur)
-            .obtenirToutesReservationsPourDate(dateString);
-    }
+        /**
+         * Charge TOUTES les réservations.
+         */
+        function chargerToutesReservationsAdmin() {
+            vueActuelle = 'toutes'; // Mémorise la vue
+            basculerIndicateurChargement(true);
+            if (contenuReservations) renderMessage(contenuReservations, 'Chargement de toutes les courses...');
+            if (titreReservations) titreReservations.textContent = 'Toutes les courses (passées, présentes et futures)';
 
-    /**
-     * Charge TOUTES les réservations.
-     */
-    function chargerToutesReservationsAdmin() {
-        vueActuelle = 'toutes'; // Mémorise la vue
-        basculerIndicateurChargement(true);
-        if (contenuReservations) renderMessage(contenuReservations, 'Chargement de toutes les courses...');
-        if (titreReservations) titreReservations.textContent = 'Toutes les courses (passées, présentes et futures)';
-
-        google.script.run
-            .withSuccessHandler(reponse => {
-                basculerIndicateurChargement(false);
-                if (reponse.success) {
-                    toutesLesReservationsAffichees = reponse.reservations;
-                    afficherReservations(toutesLesReservationsAffichees, true);
-                    mettreAJourCAEnCours();
-                } else {
-                    afficherErreur(reponse.error);
-                }
-            })
-            .withFailureHandler(afficherErreur)
-            .obtenirToutesReservationsAdmin();
-    }
-
-    /**
-     * NOUVEAU: Rafraîchit la vue actuellement affichée.
-     */
-    function rafraichirVueActuelle() {
-        chargerClients(() => { // On recharge les clients au cas où une info a changé (ex: tournées offertes)
-            if (vueActuelle === 'toutes') {
-                chargerToutesReservationsAdmin();
-            } else {
-                chargerReservationsParDate(champDate?.value || new Date().toISOString().split('T')[0]);
-            }
-        });
-    }
-
-    /**
-     * Charge la liste complète des clients.
-     */
-    function chargerClients(callback) {
-        google.script.run
-            .withSuccessHandler(clients => {
-                tousLesClients = clients || [];
-                if (callback) callback();
-            })
-            .withFailureHandler(afficherErreur)
-            .obtenirTousLesClients();
-    }
-
-    function mettreAJourCAEnCours() {
-        google.script.run
-            .withSuccessHandler(valeur => {
-                if (typeof valeur === 'number' && caEnCours) {
-                    caEnCours.textContent = `CA en cours : ${valeur.toFixed(2)} €`;
-                    caEnCours.style.color = '#8e44ad';
-                    caEnCours.style.fontWeight = '600';
-                    caEnCours.classList.remove('hidden');
-                } else {
-                    if (caEnCours) {
-                        caEnCours.textContent = '';
-                        caEnCours.classList.add('hidden');
+            google.script.run
+                .withSuccessHandler(reponse => {
+                    basculerIndicateurChargement(false);
+                    if (reponse.success) {
+                        toutesLesReservationsAffichees = reponse.reservations;
+                        afficherReservations(toutesLesReservationsAffichees, true);
+                        mettreAJourCAEnCours();
+                    } else {
+                        afficherErreur(reponse.error);
                     }
-                }
-            })
-            .calculerCAEnCours();
-    }
-
-    /**
-     * Affiche les réservations.
-     */
-    function afficherReservations(reservations, montrerDate = false) {
-        if (!contenuReservations) return;
-        if (reservations.length === 0) {
-            renderMessage(contenuReservations, 'Aucune course à afficher.');
-            return;
+                })
+                .withFailureHandler(afficherErreur)
+                .obtenirToutesReservationsAdmin();
         }
 
-        const groupeParClient = reservations.reduce((acc, resa) => {
-            const clientKey = `${resa.clientName} (${resa.clientEmail})`;
-            if (!acc[clientKey]) acc[clientKey] = [];
-            acc[clientKey].push(resa);
-            return acc;
-        }, {});
+        /**
+         * NOUVEAU: Rafraîchit la vue actuellement affichée.
+         */
+        function rafraichirVueActuelle() {
+            chargerClients(() => { // On recharge les clients au cas où une info a changé (ex: tournées offertes)
+                if (vueActuelle === 'toutes') {
+                    chargerToutesReservationsAdmin();
+                } else {
+                    chargerReservationsParDate(champDate?.value || new Date().toISOString().split('T')[0]);
+                }
+            });
+        }
 
-        let html = '';
-        // Mémorise la structure pour actions (devis PDF par groupe)
-        window.__GROUPED_RESERVATIONS = groupeParClient;
-        for (const nomClient in groupeParClient) {
-            const safeNomClient = escapeHTML(nomClient);
-            html += `<div class="groupe-client"><div class="groupe-client-en-tete">${safeNomClient} <button class="btn btn-sm btn-secondaire btn-devis-pdf" data-client-key="${safeNomClient}">Devis PDF</button></div>`;
-            groupeParClient[nomClient].forEach(resa => {
-                const dateDebut = new Date(resa.start);
-                const heureDebut = escapeHTML(dateDebut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
-                const dateFormatee = formatDateAvecJourFr(dateDebut, { day: '2-digit', month: '2-digit', year: 'numeric' });
-                const dateAffichee = escapeHTML(dateFormatee || dateDebut.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }));
-                const prix = typeof resa.amount === 'number' ? escapeHTML(resa.amount.toFixed(2)) : 'N/A';
-                const infoRemiseHtml = resa.infoRemise ? `<span class="info-remise">${escapeHTML(resa.infoRemise)}</span>` : '';
-                const dateHtml = montrerDate ? `<strong>${dateAffichee}</strong> &agrave; ` : '';
-                const statutHtml = resa.statut ? `<span class="statut-badge" style="background-color: #7f8c8d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 8px;">${escapeHTML(resa.statut)}</span>` : '';
+        /**
+         * Charge la liste complète des clients.
+         */
+        function chargerClients(callback) {
+            google.script.run
+                .withSuccessHandler(clients => {
+                    tousLesClients = clients || [];
+                    if (callback) callback();
+                })
+                .withFailureHandler(afficherErreur)
+                .obtenirTousLesClients();
+        }
 
-                const classes = ['carte-reservation'];
-                if (resa.isDraft) classes.push('isDraft');
-                if (resa.justCreated) classes.push('justCreated');
-                html += `
+        function mettreAJourCAEnCours() {
+            google.script.run
+                .withSuccessHandler(valeur => {
+                    if (typeof valeur === 'number' && caEnCours) {
+                        caEnCours.textContent = `CA en cours : ${valeur.toFixed(2)} €`;
+                        caEnCours.style.color = '#8e44ad';
+                        caEnCours.style.fontWeight = '600';
+                        caEnCours.classList.remove('hidden');
+                    } else {
+                        if (caEnCours) {
+                            caEnCours.textContent = '';
+                            caEnCours.classList.add('hidden');
+                        }
+                    }
+                })
+                .calculerCAEnCours();
+        }
+
+        /**
+         * Affiche les réservations.
+         */
+        function afficherReservations(reservations, montrerDate = false) {
+            if (!contenuReservations) return;
+            if (reservations.length === 0) {
+                renderMessage(contenuReservations, 'Aucune course à afficher.');
+                return;
+            }
+
+            const groupeParClient = reservations.reduce((acc, resa) => {
+                const clientKey = `${resa.clientName} (${resa.clientEmail})`;
+                if (!acc[clientKey]) acc[clientKey] = [];
+                acc[clientKey].push(resa);
+                return acc;
+            }, {});
+
+            let html = '';
+            // Mémorise la structure pour actions (devis PDF par groupe)
+            window.__GROUPED_RESERVATIONS = groupeParClient;
+            for (const nomClient in groupeParClient) {
+                const safeNomClient = escapeHTML(nomClient);
+                html += `<div class="groupe-client"><div class="groupe-client-en-tete">${safeNomClient} <button class="btn btn-sm btn-secondaire btn-devis-pdf" data-client-key="${safeNomClient}">Devis PDF</button></div>`;
+                groupeParClient[nomClient].forEach(resa => {
+                    const dateDebut = new Date(resa.start);
+                    const heureDebut = escapeHTML(dateDebut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
+                    const dateFormatee = formatDateAvecJourFr(dateDebut, { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const dateAffichee = escapeHTML(dateFormatee || dateDebut.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+                    const prix = typeof resa.amount === 'number' ? escapeHTML(resa.amount.toFixed(2)) : 'N/A';
+                    const infoRemiseHtml = resa.infoRemise ? `<span class="info-remise">${escapeHTML(resa.infoRemise)}</span>` : '';
+                    const dateHtml = montrerDate ? `<strong>${dateAffichee}</strong> &agrave; ` : '';
+                    const statutHtml = resa.statut ? `<span class="statut-badge" style="background-color: #7f8c8d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 8px;">${escapeHTML(resa.statut)}</span>` : '';
+
+                    const classes = ['carte-reservation'];
+                    if (resa.isDraft) classes.push('isDraft');
+                    if (resa.justCreated) classes.push('justCreated');
+                    html += `
                     <div class="${classes.join(' ')}">
                         <div class="carte-heure">${dateHtml}${heureDebut}</div>
                         <div class="carte-details">
@@ -433,71 +454,71 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn btn-sm btn-erreur btn-supprimer" data-id-reservation="${escapeHTML(resa.id)}">Supprimer</button>
                         </div>
                     </div>`;
-            });
-            html += `</div>`;
+                });
+                html += `</div>`;
+            }
+            renderHTML(contenuReservations, html);
+            attacherEcouteursActions();
         }
-        renderHTML(contenuReservations, html);
-        attacherEcouteursActions();
-    }
 
-    /**
-     * Attache les écouteurs d'événements aux boutons d'action.
-     */
-    function attacherEcouteursActions() {
-        document.querySelectorAll('.btn-modifier').forEach(b => b.addEventListener('click', e => ouvrirModaleAjoutArret(e.target.dataset.idReservation)));
-        document.querySelectorAll('.btn-replanifier').forEach(b => b.addEventListener('click', e => ouvrirModaleReplanifier(e.target.dataset.idReservation)));
-        document.querySelectorAll('.btn-appliquer-remise').forEach(b => b.addEventListener('click', e => ouvrirModaleAppliquerRemise(e.target.dataset.idReservation)));
-        document.querySelectorAll('.btn-supprimer').forEach(b => b.addEventListener('click', e => ouvrirModaleSuppression(e.target.dataset.idReservation)));
-        document.querySelectorAll('.btn-devis-pdf').forEach(b => b.addEventListener('click', e => {
-            const key = e.currentTarget.getAttribute('data-client-key') || '';
-            const match = key.match(/\(([^)]+)\)\s*$/); // extrait l'email entre parenthèses
-            const email = match ? match[1] : '';
-            const group = (window.__GROUPED_RESERVATIONS && window.__GROUPED_RESERVATIONS[key]) || [];
-            if (!group.length) { logWarn('Aucune réservation dans ce groupe pour le devis.'); return; }
-            const items = group.map(resa => {
-                const d = new Date(resa.start);
-                const dateISO = d.toISOString().slice(0,10);
-                const startTime = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':','h');
-                return { date: dateISO, startTime: startTime, details: resa.details || '', prix: Number(resa.amount) || 0 };
-            });
-            const client = (tousLesClients && tousLesClients.find(c => c.email === email)) || { email: email, nom: key.replace(/\s*\([^)]*\)\s*$/, '') };
-            google.script.run.withSuccessHandler(res => {
-                if (res && res.success) {
-                    if (res.base64) {
-                        telechargerPdfDepuisBase64(res.base64, res.fileName, res.mimeType);
-                    } else if (res.url) {
-                        try { window.open(res.url, '_blank'); } catch(_e) {}
+        /**
+         * Attache les écouteurs d'événements aux boutons d'action.
+         */
+        function attacherEcouteursActions() {
+            document.querySelectorAll('.btn-modifier').forEach(b => b.addEventListener('click', e => ouvrirModaleAjoutArret(e.target.dataset.idReservation)));
+            document.querySelectorAll('.btn-replanifier').forEach(b => b.addEventListener('click', e => ouvrirModaleReplanifier(e.target.dataset.idReservation)));
+            document.querySelectorAll('.btn-appliquer-remise').forEach(b => b.addEventListener('click', e => ouvrirModaleAppliquerRemise(e.target.dataset.idReservation)));
+            document.querySelectorAll('.btn-supprimer').forEach(b => b.addEventListener('click', e => ouvrirModaleSuppression(e.target.dataset.idReservation)));
+            document.querySelectorAll('.btn-devis-pdf').forEach(b => b.addEventListener('click', e => {
+                const key = e.currentTarget.getAttribute('data-client-key') || '';
+                const match = key.match(/\(([^)]+)\)\s*$/); // extrait l'email entre parenthèses
+                const email = match ? match[1] : '';
+                const group = (window.__GROUPED_RESERVATIONS && window.__GROUPED_RESERVATIONS[key]) || [];
+                if (!group.length) { logWarn('Aucune réservation dans ce groupe pour le devis.'); return; }
+                const items = group.map(resa => {
+                    const d = new Date(resa.start);
+                    const dateISO = d.toISOString().slice(0, 10);
+                    const startTime = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', 'h');
+                    return { date: dateISO, startTime: startTime, details: resa.details || '', prix: Number(resa.amount) || 0 };
+                });
+                const client = (tousLesClients && tousLesClients.find(c => c.email === email)) || { email: email, nom: key.replace(/\s*\([^)]*\)\s*$/, '') };
+                google.script.run.withSuccessHandler(res => {
+                    if (res && res.success) {
+                        if (res.base64) {
+                            telechargerPdfDepuisBase64(res.base64, res.fileName, res.mimeType);
+                        } else if (res.url) {
+                            try { window.open(res.url, '_blank'); } catch (_e) { }
+                        } else {
+                            logError('Reponse devis sans contenu telechargeable.');
+                        }
                     } else {
-                        logError('Reponse devis sans contenu telechargeable.');
+                        logError(res && res.error ? res.error : 'Echec generation devis');
                     }
-                } else {
-                    logError(res && res.error ? res.error : 'Echec generation devis');
-                }
-            }).withFailureHandler(logError).genererDevisPdfFromItems({ client, items });
-        }));
-    }
+                }).withFailureHandler(logError).genererDevisPdfFromItems({ client, items });
+            }));
+        }
 
-    // --- GESTION DES MODALES (Code complet, inchangé) ---
-    function ouvrirModaleAjout() {
-        const optionsClient = tousLesClients.map(c => `<option value="${escapeHTML(c.email)}">${escapeHTML(c.nom)} (${escapeHTML(c.email)})</option>`).join('');
-        const forfaitConfig = ADMIN_CONFIG?.forfaitResident || {};
-        const residentStandardLabel = forfaitConfig.standardLabel || 'Forfait résident (standard)';
-        const residentUrgenceLabel = forfaitConfig.urgenceLabel || 'Forfait résident (urgence <4h)';
-        const residentStandardPrix = formatEuro(forfaitConfig.standardPrice);
-        const residentUrgencePrix = formatEuro(forfaitConfig.urgencePrice);
-        const residentOptions = `
+        // --- GESTION DES MODALES (Code complet, inchangé) ---
+        function ouvrirModaleAjout() {
+            const optionsClient = tousLesClients.map(c => `<option value="${escapeHTML(c.email)}">${escapeHTML(c.nom)} (${escapeHTML(c.email)})</option>`).join('');
+            const forfaitConfig = ADMIN_CONFIG?.forfaitResident || {};
+            const residentStandardLabel = forfaitConfig.standardLabel || 'Forfait résident (standard)';
+            const residentUrgenceLabel = forfaitConfig.urgenceLabel || 'Forfait résident (urgence <4h)';
+            const residentStandardPrix = formatEuro(forfaitConfig.standardPrice);
+            const residentUrgencePrix = formatEuro(forfaitConfig.urgencePrice);
+            const residentOptions = `
                   <option value="standard">${escapeHTML(residentStandardLabel)}${residentStandardPrix ? ' — ' + escapeHTML(residentStandardPrix) : ''}</option>
                   <option value="urgence">${escapeHTML(residentUrgenceLabel)}${residentUrgencePrix ? ' — ' + escapeHTML(residentUrgencePrix) : ''}</option>`;
-        const residentDurationHours = Number(forfaitConfig.durationHours);
-        let residentHelper = 'Tarif appliqué automatiquement.';
-        if (Number.isFinite(residentDurationHours) && residentDurationHours > 0) {
-            const helperDuration = residentDurationHours >= 1
-                ? `${residentDurationHours.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} h`
-                : `${Math.round(residentDurationHours * 60)} min`;
-            residentHelper += ` Durée bloquée: ${helperDuration}.`;
-        }
-        if (!contenuModale) return;
-        renderHTML(contenuModale, `
+            const residentDurationHours = Number(forfaitConfig.durationHours);
+            let residentHelper = 'Tarif appliqué automatiquement.';
+            if (Number.isFinite(residentDurationHours) && residentDurationHours > 0) {
+                const helperDuration = residentDurationHours >= 1
+                    ? `${residentDurationHours.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} h`
+                    : `${Math.round(residentDurationHours * 60)} min`;
+                residentHelper += ` Durée bloquée: ${helperDuration}.`;
+            }
+            if (!contenuModale) return;
+            renderHTML(contenuModale, `
             <h3 id="modale-titre">Ajouter une nouvelle course</h3>
             <div class="groupe-formulaire"><label for="select-client">Client</label><select id="select-client" class="champ-formulaire"><option value="new">-- Nouveau Client --</option>${optionsClient}</select></div>
             <div id="champs-client-details">
@@ -540,22 +561,22 @@ document.addEventListener('DOMContentLoaded', () => {
               <label><input type="checkbox" id="check-notifier"> Avertir le client</label>
               <button type="button" id="btn-confirmer-ajout" class="btn btn-primaire" disabled>Ajouter la course</button>
             </div>`);
-        openModal();
-        attacherEcouteursModaleAjout();
-    }
-    function ouvrirModaleAjoutArret(idReservation) {
-        const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
-        if (!reservation) return afficherErreur("Réservation introuvable.");
-        const matchTotal = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*total\(s\)/);
-        const matchSup = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*sup/);
-        const arretsActuels = matchTotal ? parseInt(matchTotal[1], 10) : (matchSup ? parseInt(matchSup[1], 10) + 1 : 1);
-        const typeRemiseInitial = reservation.tourneeOfferte ? 'Tournee Offerte' : (reservation.typeRemise || '');
-        const valeurRemiseInitiale = typeRemiseInitial === 'Arrets Offerts'
-            ? (reservation.arretsOfferts || reservation.valeurRemise || 0)
-            : (reservation.valeurRemise || 0);
-        const noteInitiale = reservation.note || '';
-        if (!contenuModale) return;
-        renderHTML(contenuModale, `
+            openModal();
+            attacherEcouteursModaleAjout();
+        }
+        function ouvrirModaleAjoutArret(idReservation) {
+            const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
+            if (!reservation) return afficherErreur("Réservation introuvable.");
+            const matchTotal = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*total\(s\)/);
+            const matchSup = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*sup/);
+            const arretsActuels = matchTotal ? parseInt(matchTotal[1], 10) : (matchSup ? parseInt(matchSup[1], 10) + 1 : 1);
+            const typeRemiseInitial = reservation.tourneeOfferte ? 'Tournee Offerte' : (reservation.typeRemise || '');
+            const valeurRemiseInitiale = typeRemiseInitial === 'Arrets Offerts'
+                ? (reservation.arretsOfferts || reservation.valeurRemise || 0)
+                : (reservation.valeurRemise || 0);
+            const noteInitiale = reservation.note || '';
+            if (!contenuModale) return;
+            renderHTML(contenuModale, `
             <h3 id="modale-titre">Modifier les arrêts</h3><p><strong>Client :</strong> ${escapeHTML(reservation.clientName)}</p>
             <div class="groupe-formulaire"><label>Nombre d'arrêt(s) total(s) :</label><div class="champ-compteur"><button type="button" class="btn-compteur btn-retirer">-</button><span class="valeur-compteur">${escapeHTML(String(arretsActuels))}</span><button type="button" class="btn-compteur btn-ajouter">+</button></div></div>
             <div class="groupe-formulaire"><label for="type-remise-maj">Remise / avantage</label><select id="type-remise-maj" class="champ-formulaire"><option value="">Aucune</option><option value="Pourcentage">Pourcentage</option><option value="Montant Fixe">Montant fixe</option><option value="Arrets Offerts">Arrêt(s) offert(s)</option><option value="Tournee Offerte">Tournée offerte</option></select></div>
@@ -563,54 +584,54 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="groupe-formulaire hidden" id="conteneur-arrets-offerts-maj"><label for="arrets-offerts-maj">Arrêt(s) offert(s)</label><input type="number" id="arrets-offerts-maj" class="champ-formulaire" step="1" min="0"></div>
             <div class="groupe-formulaire"><label for="note-maj">Note interne</label><textarea id="note-maj" class="champ-formulaire" rows="3" placeholder="Ajouter une note (optionnel)"></textarea></div>
             <div class="modale-pied-de-page"><button type="button" id="btn-confirmer-maj" class="btn btn-primaire">Valider la modification</button></div>`);
-        openModal();
-        const valeurCompteur = contenuModale.querySelector('.valeur-compteur');
-        const selectRemise = contenuModale.querySelector('#type-remise-maj');
-        const champValeurRemise = contenuModale.querySelector('#valeur-remise-maj');
-        const champArretsOfferts = contenuModale.querySelector('#arrets-offerts-maj');
-        const champNoteMaj = contenuModale.querySelector('#note-maj');
-        const contValeurRemise = contenuModale.querySelector('#conteneur-valeur-remise-maj');
-        const contArretsOfferts = contenuModale.querySelector('#conteneur-arrets-offerts-maj');
-        const majAffichageRemiseMaj = () => {
-            const typeSel = selectRemise?.value || '';
-            contValeurRemise?.classList.toggle('hidden', !(typeSel === 'Pourcentage' || typeSel === 'Montant Fixe'));
-            contArretsOfferts?.classList.toggle('hidden', typeSel !== 'Arrets Offerts');
-        };
-        if (selectRemise) { selectRemise.value = typeRemiseInitial; }
-        if (champValeurRemise && (typeRemiseInitial === 'Pourcentage' || typeRemiseInitial === 'Montant Fixe')) { champValeurRemise.value = valeurRemiseInitiale || ''; }
-        if (champArretsOfferts) { champArretsOfferts.value = typeRemiseInitial === 'Arrets Offerts' ? (valeurRemiseInitiale || 0) : 0; }
-        if (champNoteMaj) { champNoteMaj.value = noteInitiale; }
-        majAffichageRemiseMaj();
-        selectRemise?.addEventListener('change', majAffichageRemiseMaj);
-        if (valeurCompteur) {
-            contenuModale.querySelector('.btn-ajouter')?.addEventListener('click', () => { valeurCompteur.textContent = parseInt(valeurCompteur.textContent, 10) + 1; });
-            contenuModale.querySelector('.btn-retirer')?.addEventListener('click', () => { let val = parseInt(valeurCompteur.textContent, 10); if (val > 1) valeurCompteur.textContent = val - 1; });
-        }
-        contenuModale.querySelector('#btn-confirmer-maj')?.addEventListener('click', () => {
-            const totalStopsMaj = parseInt(valeurCompteur?.textContent || '1', 10);
-            const typeSelectionne = selectRemise?.value || '';
-            const noteMaj = (champNoteMaj?.value || '').trim();
-            let valeurRemise = 0;
-            let arretsOffertsMaj = 0;
-            let tourneeOfferte = false;
-            if (typeSelectionne === 'Pourcentage' || typeSelectionne === 'Montant Fixe') {
-                valeurRemise = parseFloat(champValeurRemise?.value || '0') || 0;
-            } else if (typeSelectionne === 'Arrets Offerts') {
-                arretsOffertsMaj = Math.max(0, parseInt(champArretsOfferts?.value || '0', 10));
-                valeurRemise = arretsOffertsMaj;
-            } else if (typeSelectionne === 'Tournee Offerte') {
-                tourneeOfferte = true;
+            openModal();
+            const valeurCompteur = contenuModale.querySelector('.valeur-compteur');
+            const selectRemise = contenuModale.querySelector('#type-remise-maj');
+            const champValeurRemise = contenuModale.querySelector('#valeur-remise-maj');
+            const champArretsOfferts = contenuModale.querySelector('#arrets-offerts-maj');
+            const champNoteMaj = contenuModale.querySelector('#note-maj');
+            const contValeurRemise = contenuModale.querySelector('#conteneur-valeur-remise-maj');
+            const contArretsOfferts = contenuModale.querySelector('#conteneur-arrets-offerts-maj');
+            const majAffichageRemiseMaj = () => {
+                const typeSel = selectRemise?.value || '';
+                contValeurRemise?.classList.toggle('hidden', !(typeSel === 'Pourcentage' || typeSel === 'Montant Fixe'));
+                contArretsOfferts?.classList.toggle('hidden', typeSel !== 'Arrets Offerts');
+            };
+            if (selectRemise) { selectRemise.value = typeRemiseInitial; }
+            if (champValeurRemise && (typeRemiseInitial === 'Pourcentage' || typeRemiseInitial === 'Montant Fixe')) { champValeurRemise.value = valeurRemiseInitiale || ''; }
+            if (champArretsOfferts) { champArretsOfferts.value = typeRemiseInitial === 'Arrets Offerts' ? (valeurRemiseInitiale || 0) : 0; }
+            if (champNoteMaj) { champNoteMaj.value = noteInitiale; }
+            majAffichageRemiseMaj();
+            selectRemise?.addEventListener('change', majAffichageRemiseMaj);
+            if (valeurCompteur) {
+                contenuModale.querySelector('.btn-ajouter')?.addEventListener('click', () => { valeurCompteur.textContent = parseInt(valeurCompteur.textContent, 10) + 1; });
+                contenuModale.querySelector('.btn-retirer')?.addEventListener('click', () => { let val = parseInt(valeurCompteur.textContent, 10); if (val > 1) valeurCompteur.textContent = val - 1; });
             }
-            gererSoumissionMiseAJour(idReservation, totalStopsMaj, { typeRemise: typeSelectionne, valeurRemise: valeurRemise, arretsOfferts: arretsOffertsMaj, tourneeOfferte: tourneeOfferte, note: noteMaj });
-        });
-    }
-    function ouvrirModaleReplanifier(idReservation) {
-        const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
-        if (!reservation || !reservation.end) return afficherErreur("Réservation introuvable ou invalide.");
-        const duree = (new Date(reservation.end) - new Date(reservation.start)) / 60000;
-        const horaireInitial = new Date(reservation.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', hour12: false });
-        if (!contenuModale) return;
-        renderHTML(contenuModale, `
+            contenuModale.querySelector('#btn-confirmer-maj')?.addEventListener('click', () => {
+                const totalStopsMaj = parseInt(valeurCompteur?.textContent || '1', 10);
+                const typeSelectionne = selectRemise?.value || '';
+                const noteMaj = (champNoteMaj?.value || '').trim();
+                let valeurRemise = 0;
+                let arretsOffertsMaj = 0;
+                let tourneeOfferte = false;
+                if (typeSelectionne === 'Pourcentage' || typeSelectionne === 'Montant Fixe') {
+                    valeurRemise = parseFloat(champValeurRemise?.value || '0') || 0;
+                } else if (typeSelectionne === 'Arrets Offerts') {
+                    arretsOffertsMaj = Math.max(0, parseInt(champArretsOfferts?.value || '0', 10));
+                    valeurRemise = arretsOffertsMaj;
+                } else if (typeSelectionne === 'Tournee Offerte') {
+                    tourneeOfferte = true;
+                }
+                gererSoumissionMiseAJour(idReservation, totalStopsMaj, { typeRemise: typeSelectionne, valeurRemise: valeurRemise, arretsOfferts: arretsOffertsMaj, tourneeOfferte: tourneeOfferte, note: noteMaj });
+            });
+        }
+        function ouvrirModaleReplanifier(idReservation) {
+            const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
+            if (!reservation || !reservation.end) return afficherErreur("Réservation introuvable ou invalide.");
+            const duree = (new Date(reservation.end) - new Date(reservation.start)) / 60000;
+            const horaireInitial = new Date(reservation.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', hour12: false });
+            if (!contenuModale) return;
+            renderHTML(contenuModale, `
             <h3 id="modale-titre">Déplacer la course</h3><p><strong>Client :</strong> ${escapeHTML(reservation.clientName)}</p>
             <div class="groupe-formulaire"><label for="champ-nouvelle-date">Nouvelle date :</label><input type="date" id="champ-nouvelle-date" class="champ-formulaire" value="${escapeHTML(new Date(reservation.start).toISOString().split('T')[0])}"></div>
             <div id="conteneur-creneaux-replanif" class="hidden">
@@ -623,640 +644,639 @@ document.addEventListener('DOMContentLoaded', () => {
               <p class="champ-helper">Renseignez un horaire si aucun créneau n'est proposé.</p>
             </div>
             <div class="modale-pied-de-page"><button type="button" id="btn-confirmer-replanif" class="btn btn-primaire" disabled>Confirmer le déplacement</button></div>`);
-        openModal();
-        const champDateModale = document.getElementById('champ-nouvelle-date');
-        const grilleCreneaux = document.getElementById('grille-creneaux-replanif');
-        const btnConfirmer = document.getElementById('btn-confirmer-replanif');
-        const conteneurHoraireManuel = document.getElementById('conteneur-horaire-replanif');
-        const champHoraireReplanif = document.getElementById('champ-horaire-replanif');
-        let creneauSelectionne = null;
+            openModal();
+            const champDateModale = document.getElementById('champ-nouvelle-date');
+            const grilleCreneaux = document.getElementById('grille-creneaux-replanif');
+            const btnConfirmer = document.getElementById('btn-confirmer-replanif');
+            const conteneurHoraireManuel = document.getElementById('conteneur-horaire-replanif');
+            const champHoraireReplanif = document.getElementById('champ-horaire-replanif');
+            let creneauSelectionne = null;
 
-        const nettoyerSelectionCreneaux = () => {
-            grilleCreneaux?.querySelectorAll('.btn-creneau-replanif.selected').forEach(btn => btn.classList.remove('selected'));
-        };
+            const nettoyerSelectionCreneaux = () => {
+                grilleCreneaux?.querySelectorAll('.btn-creneau-replanif.selected').forEach(btn => btn.classList.remove('selected'));
+            };
 
-        const mettreAJourSelectionManuelle = () => {
-            if (!champHoraireReplanif) {
-                creneauSelectionne = null;
-                return '';
-            }
-            const valeur = (champHoraireReplanif.value || '').trim();
-            let formatted = '';
-            if (/^\d{2}:\d{2}$/.test(valeur)) {
-                const [h, m] = valeur.split(':');
-                formatted = `${h.padStart(2, '0')}h${m.padStart(2, '0')}`;
-            }
-            creneauSelectionne = formatted || null;
-            peutSoumettreSlot = !!formatted;
-            mettreAJourEtatBouton();
-            return formatted;
-        };
-
-        champHoraireReplanif?.addEventListener('input', () => {
-            if (conteneurHoraireManuel?.classList.contains('hidden')) return;
-            mettreAJourSelectionManuelle();
-        });
-
-        function chargerCreneaux() {
-            const nouvelleDate = champDateModale?.value;
-            if (!nouvelleDate) {
-                nettoyerSelectionCreneaux();
-                creneauSelectionne = null;
-                conteneurHoraireManuel?.classList.add('hidden');
-                if (btnConfirmer) btnConfirmer.disabled = true;
-                return;
-            }
-            document.getElementById('conteneur-creneaux-replanif')?.classList.remove('hidden');
-            if (grilleCreneaux) renderMessage(grilleCreneaux, 'Chargement...', 'i');
-            nettoyerSelectionCreneaux();
-            creneauSelectionne = null;
-            if (btnConfirmer) btnConfirmer.disabled = true;
-            google.script.run.withSuccessHandler(creneaux => {
-                if (grilleCreneaux) {
-                    if (creneaux && creneaux.length > 0) {
-                        const btns = creneaux.map(c => `<button class="btn-creneau-replanif" data-creneau="${escapeHTML(c)}">${escapeHTML(c)}</button>`).join('');
-                        renderHTML(grilleCreneaux, btns);
-                        conteneurHoraireManuel?.classList.add('hidden');
-                    } else {
-                        renderMessage(grilleCreneaux, 'Aucun créneau disponible.');
-                        if (conteneurHoraireManuel) {
-                            conteneurHoraireManuel.classList.remove('hidden');
-                            if (champHoraireReplanif && !champHoraireReplanif.value) {
-                                champHoraireReplanif.value = horaireInitial || '08:00';
-                            }
-                            const manuel = mettreAJourSelectionManuelle();
-                            if (btnConfirmer) btnConfirmer.disabled = !manuel;
-                        }
-                    }
+            const mettreAJourSelectionManuelle = () => {
+                if (!champHoraireReplanif) {
+                    creneauSelectionne = null;
+                    return '';
                 }
-            }).withFailureHandler(err => {
-                afficherErreur(err);
-                if (conteneurHoraireManuel) {
-                    conteneurHoraireManuel.classList.remove('hidden');
-                    if (champHoraireReplanif && !champHoraireReplanif.value) {
-                        champHoraireReplanif.value = horaireInitial || '08:00';
-                    }
-                    const manuel = mettreAJourSelectionManuelle();
-                    if (btnConfirmer) btnConfirmer.disabled = !manuel;
+                const valeur = (champHoraireReplanif.value || '').trim();
+                let formatted = '';
+                if (/^\d{2}:\d{2}$/.test(valeur)) {
+                    const [h, m] = valeur.split(':');
+                    formatted = `${h.padStart(2, '0')}h${m.padStart(2, '0')}`;
                 }
-            }).obtenirCreneauxDisponiblesPourDate(nouvelleDate, duree, reservation.eventId);
-        }
-        champDateModale?.addEventListener('change', chargerCreneaux);
-        grilleCreneaux?.addEventListener('click', e => {
-            const btn = e.target.closest('.btn-creneau-replanif');
-            if (!btn) return;
-            nettoyerSelectionCreneaux();
-            btn.classList.add('selected');
-            creneauSelectionne = btn.dataset.creneau || null;
-            if (conteneurHoraireManuel) conteneurHoraireManuel.classList.add('hidden');
-            if (btnConfirmer) btnConfirmer.disabled = !creneauSelectionne;
-        });
-        btnConfirmer?.addEventListener('click', () => {
-            if (!champDateModale) return;
-            if (!creneauSelectionne && conteneurHoraireManuel && !conteneurHoraireManuel.classList.contains('hidden')) {
-                mettreAJourSelectionManuelle();
-            }
-            if (!creneauSelectionne) {
-                afficherErreur('Merci de sélectionner un créneau ou de renseigner un horaire.');
-                return;
-            }
-            gererSoumissionReplanifier(reservation.id, champDateModale.value, creneauSelectionne);
-        });
-        chargerCreneaux();
-    }
-
-    function ouvrirModaleAppliquerRemise(idReservation) {
-        const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
-        if (!reservation) return afficherErreur("Réservation introuvable.");
-        const client = tousLesClients.find(c => c.email === reservation.clientEmail);
-        const nbTourneesOffertesActuelClient = client ? client.nbTourneesOffertes : 0;
-        if (!contenuModale) return;
-        renderHTML(contenuModale, `
-            <h3 id="modale-titre">Appliquer une remise</h3><p><strong>Course :</strong> ${escapeHTML(reservation.details)}</p><p><strong>Client :</strong> ${escapeHTML(reservation.clientName)} (${escapeHTML(reservation.clientEmail)})</p><p><strong>Prix actuel :</strong> ${escapeHTML(reservation.amount.toFixed(2))} €</p>
-            <div class="groupe-formulaire"><label for="type-remise-tournee">Type de Remise</label><select id="type-remise-tournee" class="champ-formulaire"><option value="">Aucune</option><option value="Pourcentage">Pourcentage</option><option value="Montant Fixe">Montant Fixe</option><option value="Tournées Offertes">Tournées Offertes</option></select></div>
-            <div class="groupe-formulaire hidden" id="conteneur-valeur-remise-tournee"><label for="valeur-remise-tournee">Valeur Remise</label><input type="number" id="valeur-remise-tournee" class="champ-formulaire" step="0.01" min="0" value="0"></div>
-            <div class="groupe-formulaire hidden" id="conteneur-nb-tournees-offertes-tournee"><label>Tournées Offertes restantes pour le client</label><input type="number" class="champ-formulaire" value="${escapeHTML(String(nbTourneesOffertesActuelClient))}" readonly></div>
-            <div class="modale-pied-de-page"><button type="button" id="btn-confirmer-remise" class="btn btn-primaire">Appliquer la remise</button></div>`);
-        openModal();
-        const typeRemiseSelect = document.getElementById('type-remise-tournee');
-        const conteneurValeurRemise = document.getElementById('conteneur-valeur-remise-tournee');
-        const conteneurNbTourneesOffertes = document.getElementById('conteneur-nb-tournees-offertes-tournee');
-        const majAffichageRemiseTournee = () => {
-            const typeSelectionne = typeRemiseSelect?.value;
-            conteneurValeurRemise?.classList.toggle('hidden', typeSelectionne !== 'Pourcentage' && typeSelectionne !== 'Montant Fixe');
-            conteneurNbTourneesOffertes?.classList.toggle('hidden', typeSelectionne !== 'Tournées Offertes');
-        };
-        typeRemiseSelect?.addEventListener('change', majAffichageRemiseTournee);
-        document.getElementById('btn-confirmer-remise')?.addEventListener('click', () => {
-            const typeRemise = typeRemiseSelect?.value || '';
-            const valeurRemise = parseFloat(document.getElementById('valeur-remise-tournee')?.value) || 0;
-            gererSoumissionAppliquerRemise(idReservation, typeRemise, valeurRemise, nbTourneesOffertesActuelClient);
-        });
-        majAffichageRemiseTournee();
-    }
-    function ouvrirModaleSuppression(idReservation) {
-        const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
-        if (!reservation) return afficherErreur("Réservation introuvable.");
-        if (!contenuModale) return;
-        renderHTML(contenuModale, `
-            <h3 id="modale-titre">Confirmer la suppression</h3><p>Êtes-vous sûr de vouloir supprimer la course suivante ? Cette action est irréversible.</p>
-            <p><strong>Client :</strong> ${escapeHTML(reservation.clientName)}</p><p><strong>Détails :</strong> ${escapeHTML(reservation.details)}</p><p><strong>Date :</strong> ${escapeHTML(new Date(reservation.start).toLocaleString('fr-FR', {dateStyle: 'full', timeStyle: 'short'}))}</p>
-            <div class="modale-pied-de-page"><button type="button" id="btn-annuler-suppression" class="btn btn-secondaire">Annuler</button><button type="button" id="btn-confirmer-suppression" class="btn btn-erreur">Supprimer définitivement</button></div>`);
-        openModal();
-        document.getElementById('btn-annuler-suppression')?.addEventListener('click', () => closeModal());
-        document.getElementById('btn-confirmer-suppression')?.addEventListener('click', () => gererSoumissionSuppression(idReservation));
-    }
-
-    // --- SOUMISSIONS (utilisent maintenant rafraichirVueActuelle) ---
-    function gererSoumissionMiseAJour(idReservation, totalStops, options = {}) {
-        basculerIndicateurChargement(true);
-        closeModal();
-        google.script.run.withSuccessHandler(reponse => {
-            basculerIndicateurChargement(false);
-            if (reponse.success) {
-                afficherNotification("R�servation mise � jour !", "succes");
-                rafraichirVueActuelle();
-            } else { afficherErreur(reponse.error); }
-        }).withFailureHandler(afficherErreur).mettreAJourDetailsReservation(idReservation, totalStops, null, null, null, options);
-    }
-    function gererSoumissionReplanifier(idReservation, nouvelleDate, nouvelleHeure) {
-        basculerIndicateurChargement(true);
-        closeModal();
-        google.script.run.withSuccessHandler(reponse => {
-            basculerIndicateurChargement(false);
-            if (reponse.success) {
-                afficherNotification("Réservation déplacée !", "succes");
-                rafraichirVueActuelle();
-            } else { afficherErreur(reponse.error); }
-        }).withFailureHandler(afficherErreur).replanifierReservation(idReservation, nouvelleDate, nouvelleHeure);
-    }
-    function gererSoumissionAppliquerRemise(idReservation, typeRemise, valeurRemise, nbTourneesOffertes) {
-        basculerIndicateurChargement(true);
-        closeModal();
-        google.script.run.withSuccessHandler(reponse => {
-            basculerIndicateurChargement(false);
-            if (reponse.success) {
-                afficherNotification("Remise appliquée avec succès !", "succes");
-                rafraichirVueActuelle();
-            } else { afficherErreur(reponse.error); }
-        }).withFailureHandler(afficherErreur).appliquerRemiseSurTournee(idReservation, typeRemise, valeurRemise, nbTourneesOffertes);
-    }
-    function gererSoumissionSuppression(idReservation) {
-        basculerIndicateurChargement(true);
-        closeModal();
-        google.script.run.withSuccessHandler(reponse => {
-            basculerIndicateurChargement(false);
-            if (reponse.success) {
-                afficherNotification("Course supprimée avec succès !", "succes");
-                rafraichirVueActuelle();
-            } else { afficherErreur(reponse.error); }
-        }).withFailureHandler(afficherErreur).supprimerReservation(idReservation);
-    }
-    function gererSoumissionCreation(data) {
-        const recurrenceActive = !!(data?.recurrence && data.recurrence.enabled);
-        if (!ADMIN_OPTIMISTIC_CREATION_ENABLED || recurrenceActive) {
-            basculerIndicateurChargement(true);
-            closeModal();
-            google.script.run.withSuccessHandler(reponse => {
-                basculerIndicateurChargement(false);
-                if (reponse.success) {
-                    const total = Number(reponse.totalCreated) || 0;
-                    const message = total > 1 ? `Courses ajoutées (${total}) !` : "Course ajoutée avec succès !";
-                    afficherNotification(message, "succes");
-                    rafraichirVueActuelle();
-                } else { afficherErreur(reponse.error); }
-            }).withFailureHandler(afficherErreur).creerReservationAdmin(data);
-            return;
-        }
-
-        if (isSubmitting) return;
-        isSubmitting = true;
-        basculerIndicateurChargement(true);
-        closeModal();
-
-        const tempId = `tmp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
-        const nbSupp = Math.max(0, (data.totalStops || 1) - 1);
-        const duree = 30 + (nbSupp + (data.returnToPharmacy ? 1 : 0)) * 15;
-        const draft = {
-            id: tempId,
-            start: new Date(`${data.date}T${data.startTime.replace('h', ':')}`).toISOString(),
-            end: new Date(`${data.date}T${data.startTime.replace('h', ':')}`).toISOString(),
-            details: formatCourseLabel(duree, data.totalStops, data.returnToPharmacy),
-            clientName: data.client.nom,
-            clientEmail: data.client.email,
-            amount: 0,
-            km: 0,
-            statut: 'Calcul en cours…',
-            infoRemise: '',
-            typeRemise: '',
-            valeurRemise: 0,
-            tourneeOfferte: false,
-            arretsOfferts: 0,
-            isDraft: true,
-            justCreated: false
-        };
-        toutesLesReservationsAffichees.push(draft);
-        toutesLesReservationsAffichees.sort((a, b) => new Date(a.start) - new Date(b.start));
-        afficherReservations(toutesLesReservationsAffichees, vueActuelle === 'toutes');
-
-        google.script.run.withSuccessHandler(reponse => {
-            basculerIndicateurChargement(false);
-            if (reponse.success && reponse.reservation) {
-                const idx = toutesLesReservationsAffichees.findIndex(r => r.id === tempId);
-                if (idx >= 0) {
-                    toutesLesReservationsAffichees[idx] = Object.assign({}, reponse.reservation, { isDraft: false, justCreated: true });
-                }
-                const total = Number(reponse.totalCreated) || 0;
-                const message = total > 1 ? `Courses ajoutées (${total}) !` : "Course ajoutée avec succès !";
-                afficherNotification(message, "succes");
-                toutesLesReservationsAffichees.sort((a, b) => new Date(a.start) - new Date(b.start));
-                afficherReservations(toutesLesReservationsAffichees, vueActuelle === 'toutes');
-                if (total > 1) {
-                    rafraichirVueActuelle();
-                }
-            } else {
-                toutesLesReservationsAffichees = toutesLesReservationsAffichees.filter(r => r.id !== tempId);
-                afficherReservations(toutesLesReservationsAffichees, vueActuelle === 'toutes');
-                afficherErreur(reponse.error);
-            }
-            isSubmitting = false;
-        }).withFailureHandler(err => {
-            basculerIndicateurChargement(false);
-            toutesLesReservationsAffichees = toutesLesReservationsAffichees.filter(r => r.id !== tempId);
-            afficherReservations(toutesLesReservationsAffichees, vueActuelle === 'toutes');
-            afficherErreur(err);
-            isSubmitting = false;
-        }).creerReservationAdmin(data);
-    }
-    
-function attacherEcouteursModaleAjout() {
-        const selectClient = document.getElementById('select-client');
-        const conteneurForfaitResident = document.getElementById('conteneur-forfait-resident');
-        const selectForfaitResident = document.getElementById('select-forfait-resident');
-        const conteneurHoraireManuel = document.getElementById('conteneur-horaire-manuel');
-        const champHoraireManuel = document.getElementById('champ-horaire-manuel');
-        const champsClient = {
-            email: document.getElementById('champ-email-client'),
-            nom: document.getElementById('champ-nom-client'),
-            adresse: document.getElementById('champ-adresse-client'),
-            siret: document.getElementById('champ-siret-client'),
-            resident: document.getElementById('check-client-resident'),
-            residentMode: selectForfaitResident,
-            typeRemise: document.getElementById('type-remise'),
-            valeurRemise: document.getElementById('valeur-remise'),
-            nbTourneesOffertes: document.getElementById('nb-tournees-offertes')
-        };
-        const conteneurValeurRemise = document.getElementById('conteneur-valeur-remise');
-        const conteneurNbTourneesOffertes = document.getElementById('conteneur-nb-tournees-offertes');
-        const champDateAjout = document.getElementById('champ-date-ajout');
-        const checkRecurrence = document.getElementById('check-recurrence');
-        const conteneurRecurrence = document.getElementById('conteneur-recurrence');
-        const champFinRecurrence = document.getElementById('champ-date-fin-recurrence');
-        const valeurCompteur = modale.querySelector('.valeur-compteur');
-        const checkRetour = document.getElementById('check-retour');
-        const conteneurCreneaux = document.getElementById('conteneur-creneaux-ajout');
-        const grilleCreneaux = document.getElementById('grille-creneaux-ajout');
-        const btnConfirmer = document.getElementById('btn-confirmer-ajout');
-        let creneauSelectionne = null;
-        let peutSoumettreSlot = false;
-
-        const recurrenceValide = () => {
-            if (!checkRecurrence?.checked) return true;
-            const start = champDateAjout?.value || '';
-            const end = champFinRecurrence?.value || '';
-            if (!end) return false;
-            return !start || end >= start;
-        };
-
-        const mettreAJourEtatBouton = () => {
-            if (!btnConfirmer) return;
-            const recurrenceOk = recurrenceValide();
-            btnConfirmer.disabled = !(peutSoumettreSlot && recurrenceOk);
-        };
-
-        const proposerFinRecurrence = start => {
-            if (!start) return '';
-            const base = new Date(`${start}T00:00:00`);
-            if (Number.isNaN(base.getTime())) return '';
-            const candidate = new Date(base);
-            candidate.setDate(candidate.getDate() + 6);
-            if (candidate.getDay() === 6) {
-                candidate.setDate(candidate.getDate() + 1);
-            }
-            return candidate.toISOString().split('T')[0];
-        };
-
-        const mettreAJourRecurrenceMin = () => {
-            if (!champFinRecurrence) return;
-            const start = champDateAjout?.value || '';
-            if (start) {
-                champFinRecurrence.min = start;
-                if (checkRecurrence?.checked) {
-                    const suggestion = proposerFinRecurrence(start);
-                    if (!champFinRecurrence.value || champFinRecurrence.value < start) {
-                        champFinRecurrence.value = suggestion || start;
-                    }
-                }
-            } else {
-                champFinRecurrence.min = '';
-                if (!checkRecurrence?.checked) {
-                    champFinRecurrence.value = '';
-                }
-            }
-            mettreAJourEtatBouton();
-        };
-
-        const basculerRecurrence = actif => {
-            if (!conteneurRecurrence) return;
-            conteneurRecurrence.classList.toggle('hidden', !actif);
-            if (!actif) {
-                if (champFinRecurrence) champFinRecurrence.value = '';
-            } else if (champFinRecurrence) {
-                if (champDateAjout?.value) {
-                    champFinRecurrence.min = champDateAjout.value;
-                    if (!champFinRecurrence.value) {
-                        const suggestion = proposerFinRecurrence(champDateAjout.value);
-                        champFinRecurrence.value = suggestion || champDateAjout.value;
-                    } else if (champFinRecurrence.value < champDateAjout.value) {
-                        const suggestion = proposerFinRecurrence(champDateAjout.value);
-                        champFinRecurrence.value = suggestion || champDateAjout.value;
-                    }
-                }
-            }
-            mettreAJourEtatBouton();
-        };
-
-        const majAffichageRemise = () => {
-            if (!champsClient.typeRemise || !conteneurValeurRemise || !conteneurNbTourneesOffertes) return;
-            const typeSelectionne = champsClient.typeRemise.value;
-            conteneurValeurRemise.classList.toggle('hidden', typeSelectionne !== 'Pourcentage' && typeSelectionne !== 'Montant Fixe');
-            conteneurNbTourneesOffertes.classList.toggle('hidden', typeSelectionne !== 'Tournées Offertes');
-        };
-
-        const normaliserModeResident = valeur => (valeur === 'urgence' ? 'urgence' : 'standard');
-        const basculerForfaitResident = afficher => {
-            if (!conteneurForfaitResident) return;
-            conteneurForfaitResident.classList.toggle('hidden', !afficher);
-            if (afficher && champsClient.residentMode) {
-                const defaut = champsClient.residentMode.dataset?.default || 'standard';
-                champsClient.residentMode.value = normaliserModeResident(champsClient.residentMode.value || defaut);
-            }
-        };
-
-        const nettoyerSelectionCreneaux = () => {
-            if (!grilleCreneaux) return;
-            grilleCreneaux.querySelectorAll('.btn-creneau-replanif.selected').forEach(btn => btn.classList.remove('selected'));
-        };
-
-        const mettreAJourSelectionManuelle = () => {
-            if (!champHoraireManuel) {
-                creneauSelectionne = null;
-                return '';
-            }
-            const valeur = (champHoraireManuel.value || '').trim();
-            let formatted = '';
-            if (/^\d{2}:\d{2}$/.test(valeur)) {
-                const [h, m] = valeur.split(':');
-                formatted = `${h.padStart(2, '0')}h${m.padStart(2, '0')}`;
-            }
-            creneauSelectionne = formatted || null;
-            if (conteneurHoraireManuel && !conteneurHoraireManuel.classList.contains('hidden')) {
+                creneauSelectionne = formatted || null;
                 peutSoumettreSlot = !!formatted;
                 mettreAJourEtatBouton();
-            }
-            return formatted;
-        };
+                return formatted;
+            };
 
-        champHoraireManuel?.addEventListener('input', () => {
-            if (conteneurHoraireManuel?.classList.contains('hidden')) return;
-            mettreAJourSelectionManuelle();
-        });
+            champHoraireReplanif?.addEventListener('input', () => {
+                if (conteneurHoraireManuel?.classList.contains('hidden')) return;
+                mettreAJourSelectionManuelle();
+            });
 
-        const remplirChampsClient = client => {
-            champsClient.email.value = client ? client.email : '';
-            champsClient.nom.value = client ? client.nom : '';
-            champsClient.adresse.value = client ? client.adresse : '';
-            champsClient.siret.value = client ? client.siret : '';
-            champsClient.typeRemise.value = client ? (client.typeRemise || '') : '';
-            champsClient.valeurRemise.value = client ? (client.valeurRemise || 0) : 0;
-            champsClient.nbTourneesOffertes.value = client ? (client.nbTourneesOffertes || 0) : 0;
-            if (champsClient.resident) champsClient.resident.checked = !!(client && client.resident);
-            basculerForfaitResident(!!(client && client.resident));
-
-            const isNewClient = !client;
-            Object.entries(champsClient).forEach(([cle, champ]) => {
-                if (!champ || cle === 'residentMode') return;
-                if (champ.tagName === 'INPUT' && champ.type === 'checkbox') {
-                    champ.disabled = false;
+            function chargerCreneaux() {
+                const nouvelleDate = champDateModale?.value;
+                if (!nouvelleDate) {
+                    nettoyerSelectionCreneaux();
+                    creneauSelectionne = null;
+                    conteneurHoraireManuel?.classList.add('hidden');
+                    if (btnConfirmer) btnConfirmer.disabled = true;
                     return;
                 }
-                if (champ.id !== 'type-remise' && champ.id !== 'valeur-remise' && champ.id !== 'nb-tournees-offertes') {
-                    champ.readOnly = !isNewClient;
-                }
-            });
-            majAffichageRemise();
-        };
-
-        selectClient?.addEventListener('change', () => {
-            const selectedEmail = selectClient.value;
-            const client = selectedEmail === 'new' ? null : tousLesClients.find(c => c.email === selectedEmail);
-            remplirChampsClient(client);
-            mettreAJourCreneauxDisponibles();
-        });
-        champsClient.typeRemise?.addEventListener('change', majAffichageRemise);
-        champsClient.resident?.addEventListener('change', e => {
-            basculerForfaitResident(e.target.checked);
-            mettreAJourCreneauxDisponibles();
-        });
-        champsClient.residentMode?.addEventListener('change', () => {
-            if (champsClient.resident?.checked) mettreAJourCreneauxDisponibles();
-        });
-
-        modale.querySelector('.btn-ajouter')?.addEventListener('click', () => {
-            if (valeurCompteur) {
-                valeurCompteur.textContent = (parseInt(valeurCompteur.textContent, 10) + 1).toString();
-            }
-            mettreAJourCreneauxDisponibles();
-        });
-        modale.querySelector('.btn-retirer')?.addEventListener('click', () => {
-            if (valeurCompteur) {
-                const arrets = parseInt(valeurCompteur.textContent, 10);
-                if (arrets > 1) valeurCompteur.textContent = (arrets - 1).toString();
-                mettreAJourCreneauxDisponibles();
-            }
-        });
-        champDateAjout?.addEventListener('change', () => {
-            mettreAJourRecurrenceMin();
-            mettreAJourCreneauxDisponibles();
-        });
-        checkRetour?.addEventListener('change', mettreAJourCreneauxDisponibles);
-        checkRecurrence?.addEventListener('change', () => {
-            basculerRecurrence(checkRecurrence.checked);
-            mettreAJourRecurrenceMin();
-        });
-        champFinRecurrence?.addEventListener('input', mettreAJourEtatBouton);
-        champFinRecurrence?.addEventListener('change', () => {
-            mettreAJourRecurrenceMin();
-            mettreAJourEtatBouton();
-        });
-
-        function mettreAJourCreneauxDisponibles() {
-            const totalStops = parseInt(valeurCompteur?.textContent || '1', 10);
-            const retour = checkRetour?.checked || false;
-            const date = champDateAjout?.value;
-            if (!date) {
-                conteneurCreneaux?.classList.add('hidden');
-                conteneurHoraireManuel?.classList.add('hidden');
-                peutSoumettreSlot = false;
-                mettreAJourEtatBouton();
+                document.getElementById('conteneur-creneaux-replanif')?.classList.remove('hidden');
+                if (grilleCreneaux) renderMessage(grilleCreneaux, 'Chargement...', 'i');
                 nettoyerSelectionCreneaux();
                 creneauSelectionne = null;
-                return;
-            }
-
-            const nbSupp = Math.max(0, totalStops - 1);
-            const dureeBase = Number(ADMIN_CONFIG?.dureeBase) || 30;
-            const dureeSupp = Number(ADMIN_CONFIG?.dureeArretSup) || 15;
-            const duree = dureeBase + (nbSupp + (retour ? 1 : 0)) * dureeSupp;
-
-            conteneurCreneaux?.classList.remove('hidden');
-            if (grilleCreneaux) renderMessage(grilleCreneaux, 'Chargement...', 'i');
-            peutSoumettreSlot = false;
-            mettreAJourEtatBouton();
-            nettoyerSelectionCreneaux();
-            creneauSelectionne = null;
-
-            google.script.run
-                .withSuccessHandler(creneaux => {
+                if (btnConfirmer) btnConfirmer.disabled = true;
+                google.script.run.withSuccessHandler(creneaux => {
                     if (grilleCreneaux) {
                         if (creneaux && creneaux.length > 0) {
-                            const buttons = creneaux.map(c => `<button class="btn-creneau-replanif" data-creneau="${escapeHTML(c)}">${escapeHTML(c)}</button>`).join('');
-                            renderHTML(grilleCreneaux, buttons);
+                            const btns = creneaux.map(c => `<button class="btn-creneau-replanif" data-creneau="${escapeHTML(c)}">${escapeHTML(c)}</button>`).join('');
+                            renderHTML(grilleCreneaux, btns);
                             conteneurHoraireManuel?.classList.add('hidden');
                         } else {
                             renderMessage(grilleCreneaux, 'Aucun créneau disponible.');
                             if (conteneurHoraireManuel) {
                                 conteneurHoraireManuel.classList.remove('hidden');
-                                if (champHoraireManuel && !champHoraireManuel.value) {
-                                    champHoraireManuel.value = '08:00';
+                                if (champHoraireReplanif && !champHoraireReplanif.value) {
+                                    champHoraireReplanif.value = horaireInitial || '08:00';
                                 }
-                                mettreAJourSelectionManuelle();
+                                const manuel = mettreAJourSelectionManuelle();
+                                if (btnConfirmer) btnConfirmer.disabled = !manuel;
                             }
                         }
                     }
-                })
-                .withFailureHandler(err => {
+                }).withFailureHandler(err => {
                     afficherErreur(err);
                     if (conteneurHoraireManuel) {
                         conteneurHoraireManuel.classList.remove('hidden');
-                        if (champHoraireManuel && !champHoraireManuel.value) {
-                            champHoraireManuel.value = '08:00';
+                        if (champHoraireReplanif && !champHoraireReplanif.value) {
+                            champHoraireReplanif.value = horaireInitial || '08:00';
                         }
-                        mettreAJourSelectionManuelle();
+                        const manuel = mettreAJourSelectionManuelle();
+                        if (btnConfirmer) btnConfirmer.disabled = !manuel;
                     }
-                })
-                .obtenirCreneauxDisponiblesPourDate(date, duree);
+                }).obtenirCreneauxDisponiblesPourDate(nouvelleDate, duree, reservation.eventId);
+            }
+            champDateModale?.addEventListener('change', chargerCreneaux);
+            grilleCreneaux?.addEventListener('click', e => {
+                const btn = e.target.closest('.btn-creneau-replanif');
+                if (!btn) return;
+                nettoyerSelectionCreneaux();
+                btn.classList.add('selected');
+                creneauSelectionne = btn.dataset.creneau || null;
+                if (conteneurHoraireManuel) conteneurHoraireManuel.classList.add('hidden');
+                if (btnConfirmer) btnConfirmer.disabled = !creneauSelectionne;
+            });
+            btnConfirmer?.addEventListener('click', () => {
+                if (!champDateModale) return;
+                if (!creneauSelectionne && conteneurHoraireManuel && !conteneurHoraireManuel.classList.contains('hidden')) {
+                    mettreAJourSelectionManuelle();
+                }
+                if (!creneauSelectionne) {
+                    afficherErreur('Merci de sélectionner un créneau ou de renseigner un horaire.');
+                    return;
+                }
+                gererSoumissionReplanifier(reservation.id, champDateModale.value, creneauSelectionne);
+            });
+            chargerCreneaux();
         }
 
-        grilleCreneaux?.addEventListener('click', e => {
-            const btn = e.target.closest('.btn-creneau-replanif');
-            if (!btn) return;
-            nettoyerSelectionCreneaux();
-            btn.classList.add('selected');
-            creneauSelectionne = btn.dataset.creneau || null;
-            if (conteneurHoraireManuel) {
-                conteneurHoraireManuel.classList.add('hidden');
-            }
-            peutSoumettreSlot = !!creneauSelectionne;
-            mettreAJourEtatBouton();
-        });
+        function ouvrirModaleAppliquerRemise(idReservation) {
+            const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
+            if (!reservation) return afficherErreur("Réservation introuvable.");
+            const client = tousLesClients.find(c => c.email === reservation.clientEmail);
+            const nbTourneesOffertesActuelClient = client ? client.nbTourneesOffertes : 0;
+            if (!contenuModale) return;
+            renderHTML(contenuModale, `
+            <h3 id="modale-titre">Appliquer une remise</h3><p><strong>Course :</strong> ${escapeHTML(reservation.details)}</p><p><strong>Client :</strong> ${escapeHTML(reservation.clientName)} (${escapeHTML(reservation.clientEmail)})</p><p><strong>Prix actuel :</strong> ${escapeHTML(reservation.amount.toFixed(2))} €</p>
+            <div class="groupe-formulaire"><label for="type-remise-tournee">Type de Remise</label><select id="type-remise-tournee" class="champ-formulaire"><option value="">Aucune</option><option value="Pourcentage">Pourcentage</option><option value="Montant Fixe">Montant Fixe</option><option value="Tournées Offertes">Tournées Offertes</option></select></div>
+            <div class="groupe-formulaire hidden" id="conteneur-valeur-remise-tournee"><label for="valeur-remise-tournee">Valeur Remise</label><input type="number" id="valeur-remise-tournee" class="champ-formulaire" step="0.01" min="0" value="0"></div>
+            <div class="groupe-formulaire hidden" id="conteneur-nb-tournees-offertes-tournee"><label>Tournées Offertes restantes pour le client</label><input type="number" class="champ-formulaire" value="${escapeHTML(String(nbTourneesOffertesActuelClient))}" readonly></div>
+            <div class="modale-pied-de-page"><button type="button" id="btn-confirmer-remise" class="btn btn-primaire">Appliquer la remise</button></div>`);
+            openModal();
+            const typeRemiseSelect = document.getElementById('type-remise-tournee');
+            const conteneurValeurRemise = document.getElementById('conteneur-valeur-remise-tournee');
+            const conteneurNbTourneesOffertes = document.getElementById('conteneur-nb-tournees-offertes-tournee');
+            const majAffichageRemiseTournee = () => {
+                const typeSelectionne = typeRemiseSelect?.value;
+                conteneurValeurRemise?.classList.toggle('hidden', typeSelectionne !== 'Pourcentage' && typeSelectionne !== 'Montant Fixe');
+                conteneurNbTourneesOffertes?.classList.toggle('hidden', typeSelectionne !== 'Tournées Offertes');
+            };
+            typeRemiseSelect?.addEventListener('change', majAffichageRemiseTournee);
+            document.getElementById('btn-confirmer-remise')?.addEventListener('click', () => {
+                const typeRemise = typeRemiseSelect?.value || '';
+                const valeurRemise = parseFloat(document.getElementById('valeur-remise-tournee')?.value) || 0;
+                gererSoumissionAppliquerRemise(idReservation, typeRemise, valeurRemise, nbTourneesOffertesActuelClient);
+            });
+            majAffichageRemiseTournee();
+        }
+        function ouvrirModaleSuppression(idReservation) {
+            const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
+            if (!reservation) return afficherErreur("Réservation introuvable.");
+            if (!contenuModale) return;
+            renderHTML(contenuModale, `
+            <h3 id="modale-titre">Confirmer la suppression</h3><p>Êtes-vous sûr de vouloir supprimer la course suivante ? Cette action est irréversible.</p>
+            <p><strong>Client :</strong> ${escapeHTML(reservation.clientName)}</p><p><strong>Détails :</strong> ${escapeHTML(reservation.details)}</p><p><strong>Date :</strong> ${escapeHTML(new Date(reservation.start).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' }))}</p>
+            <div class="modale-pied-de-page"><button type="button" id="btn-annuler-suppression" class="btn btn-secondaire">Annuler</button><button type="button" id="btn-confirmer-suppression" class="btn btn-erreur">Supprimer définitivement</button></div>`);
+            openModal();
+            document.getElementById('btn-annuler-suppression')?.addEventListener('click', () => closeModal());
+            document.getElementById('btn-confirmer-suppression')?.addEventListener('click', () => gererSoumissionSuppression(idReservation));
+        }
 
-        btnConfirmer?.addEventListener('click', () => {
-            if (!creneauSelectionne && conteneurHoraireManuel && !conteneurHoraireManuel.classList.contains('hidden')) {
-                mettreAJourSelectionManuelle();
-            }
-            if (!creneauSelectionne) {
-                afficherErreur('Merci de sélectionner un créneau ou de renseigner un horaire.');
+        // --- SOUMISSIONS (utilisent maintenant rafraichirVueActuelle) ---
+        function gererSoumissionMiseAJour(idReservation, totalStops, options = {}) {
+            basculerIndicateurChargement(true);
+            closeModal();
+            google.script.run.withSuccessHandler(reponse => {
+                basculerIndicateurChargement(false);
+                if (reponse.success) {
+                    afficherNotification("R�servation mise � jour !", "succes");
+                    rafraichirVueActuelle();
+                } else { afficherErreur(reponse.error); }
+            }).withFailureHandler(afficherErreur).mettreAJourDetailsReservation(idReservation, totalStops, null, null, null, options);
+        }
+        function gererSoumissionReplanifier(idReservation, nouvelleDate, nouvelleHeure) {
+            basculerIndicateurChargement(true);
+            closeModal();
+            google.script.run.withSuccessHandler(reponse => {
+                basculerIndicateurChargement(false);
+                if (reponse.success) {
+                    afficherNotification("Réservation déplacée !", "succes");
+                    rafraichirVueActuelle();
+                } else { afficherErreur(reponse.error); }
+            }).withFailureHandler(afficherErreur).replanifierReservation(idReservation, nouvelleDate, nouvelleHeure);
+        }
+        function gererSoumissionAppliquerRemise(idReservation, typeRemise, valeurRemise, nbTourneesOffertes) {
+            basculerIndicateurChargement(true);
+            closeModal();
+            google.script.run.withSuccessHandler(reponse => {
+                basculerIndicateurChargement(false);
+                if (reponse.success) {
+                    afficherNotification("Remise appliquée avec succès !", "succes");
+                    rafraichirVueActuelle();
+                } else { afficherErreur(reponse.error); }
+            }).withFailureHandler(afficherErreur).appliquerRemiseSurTournee(idReservation, typeRemise, valeurRemise, nbTourneesOffertes);
+        }
+        function gererSoumissionSuppression(idReservation) {
+            basculerIndicateurChargement(true);
+            closeModal();
+            google.script.run.withSuccessHandler(reponse => {
+                basculerIndicateurChargement(false);
+                if (reponse.success) {
+                    afficherNotification("Course supprimée avec succès !", "succes");
+                    rafraichirVueActuelle();
+                } else { afficherErreur(reponse.error); }
+            }).withFailureHandler(afficherErreur).supprimerReservation(idReservation);
+        }
+        function gererSoumissionCreation(data) {
+            const recurrenceActive = !!(data?.recurrence && data.recurrence.enabled);
+            if (!ADMIN_OPTIMISTIC_CREATION_ENABLED || recurrenceActive) {
+                basculerIndicateurChargement(true);
+                closeModal();
+                google.script.run.withSuccessHandler(reponse => {
+                    basculerIndicateurChargement(false);
+                    if (reponse.success) {
+                        const total = Number(reponse.totalCreated) || 0;
+                        const message = total > 1 ? `Courses ajoutées (${total}) !` : "Course ajoutée avec succès !";
+                        afficherNotification(message, "succes");
+                        rafraichirVueActuelle();
+                    } else { afficherErreur(reponse.error); }
+                }).withFailureHandler(afficherErreur).creerReservationAdmin(data);
                 return;
             }
-            const recurrenceActive = checkRecurrence?.checked || false;
-            let recurrenceEndDate = '';
-            if (recurrenceActive) {
-                const startDateValue = champDateAjout?.value || '';
-                recurrenceEndDate = champFinRecurrence?.value || '';
-                if (!startDateValue) {
-                    afficherErreur('Veuillez sélectionner la date de départ.');
+
+            if (isSubmitting) return;
+            isSubmitting = true;
+            basculerIndicateurChargement(true);
+            closeModal();
+
+            const tempId = `tmp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
+            const nbSupp = Math.max(0, (data.totalStops || 1) - 1);
+            const duree = 30 + (nbSupp + (data.returnToPharmacy ? 1 : 0)) * 15;
+            const draft = {
+                id: tempId,
+                start: new Date(`${data.date}T${data.startTime.replace('h', ':')}`).toISOString(),
+                end: new Date(`${data.date}T${data.startTime.replace('h', ':')}`).toISOString(),
+                details: formatCourseLabel(duree, data.totalStops, data.returnToPharmacy),
+                clientName: data.client.nom,
+                clientEmail: data.client.email,
+                amount: 0,
+                km: 0,
+                statut: 'Calcul en cours…',
+                infoRemise: '',
+                typeRemise: '',
+                valeurRemise: 0,
+                tourneeOfferte: false,
+                arretsOfferts: 0,
+                isDraft: true,
+                justCreated: false
+            };
+            toutesLesReservationsAffichees.push(draft);
+            toutesLesReservationsAffichees.sort((a, b) => new Date(a.start) - new Date(b.start));
+            afficherReservations(toutesLesReservationsAffichees, vueActuelle === 'toutes');
+
+            google.script.run.withSuccessHandler(reponse => {
+                basculerIndicateurChargement(false);
+                if (reponse.success && reponse.reservation) {
+                    const idx = toutesLesReservationsAffichees.findIndex(r => r.id === tempId);
+                    if (idx >= 0) {
+                        toutesLesReservationsAffichees[idx] = Object.assign({}, reponse.reservation, { isDraft: false, justCreated: true });
+                    }
+                    const total = Number(reponse.totalCreated) || 0;
+                    const message = total > 1 ? `Courses ajoutées (${total}) !` : "Course ajoutée avec succès !";
+                    afficherNotification(message, "succes");
+                    toutesLesReservationsAffichees.sort((a, b) => new Date(a.start) - new Date(b.start));
+                    afficherReservations(toutesLesReservationsAffichees, vueActuelle === 'toutes');
+                    if (total > 1) {
+                        rafraichirVueActuelle();
+                    }
+                } else {
+                    toutesLesReservationsAffichees = toutesLesReservationsAffichees.filter(r => r.id !== tempId);
+                    afficherReservations(toutesLesReservationsAffichees, vueActuelle === 'toutes');
+                    afficherErreur(reponse.error);
+                }
+                isSubmitting = false;
+            }).withFailureHandler(err => {
+                basculerIndicateurChargement(false);
+                toutesLesReservationsAffichees = toutesLesReservationsAffichees.filter(r => r.id !== tempId);
+                afficherReservations(toutesLesReservationsAffichees, vueActuelle === 'toutes');
+                afficherErreur(err);
+                isSubmitting = false;
+            }).creerReservationAdmin(data);
+        }
+
+        function attacherEcouteursModaleAjout() {
+            const selectClient = document.getElementById('select-client');
+            const conteneurForfaitResident = document.getElementById('conteneur-forfait-resident');
+            const selectForfaitResident = document.getElementById('select-forfait-resident');
+            const conteneurHoraireManuel = document.getElementById('conteneur-horaire-manuel');
+            const champHoraireManuel = document.getElementById('champ-horaire-manuel');
+            const champsClient = {
+                email: document.getElementById('champ-email-client'),
+                nom: document.getElementById('champ-nom-client'),
+                adresse: document.getElementById('champ-adresse-client'),
+                siret: document.getElementById('champ-siret-client'),
+                resident: document.getElementById('check-client-resident'),
+                residentMode: selectForfaitResident,
+                typeRemise: document.getElementById('type-remise'),
+                valeurRemise: document.getElementById('valeur-remise'),
+                nbTourneesOffertes: document.getElementById('nb-tournees-offertes')
+            };
+            const conteneurValeurRemise = document.getElementById('conteneur-valeur-remise');
+            const conteneurNbTourneesOffertes = document.getElementById('conteneur-nb-tournees-offertes');
+            const champDateAjout = document.getElementById('champ-date-ajout');
+            const checkRecurrence = document.getElementById('check-recurrence');
+            const conteneurRecurrence = document.getElementById('conteneur-recurrence');
+            const champFinRecurrence = document.getElementById('champ-date-fin-recurrence');
+            const valeurCompteur = modale.querySelector('.valeur-compteur');
+            const checkRetour = document.getElementById('check-retour');
+            const conteneurCreneaux = document.getElementById('conteneur-creneaux-ajout');
+            const grilleCreneaux = document.getElementById('grille-creneaux-ajout');
+            const btnConfirmer = document.getElementById('btn-confirmer-ajout');
+            let creneauSelectionne = null;
+            let peutSoumettreSlot = false;
+
+            const recurrenceValide = () => {
+                if (!checkRecurrence?.checked) return true;
+                const start = champDateAjout?.value || '';
+                const end = champFinRecurrence?.value || '';
+                if (!end) return false;
+                return !start || end >= start;
+            };
+
+            const mettreAJourEtatBouton = () => {
+                if (!btnConfirmer) return;
+                const recurrenceOk = recurrenceValide();
+                btnConfirmer.disabled = !(peutSoumettreSlot && recurrenceOk);
+            };
+
+            const proposerFinRecurrence = start => {
+                if (!start) return '';
+                const base = new Date(`${start}T00:00:00`);
+                if (Number.isNaN(base.getTime())) return '';
+                const candidate = new Date(base);
+                candidate.setDate(candidate.getDate() + 6);
+                if (candidate.getDay() === 6) {
+                    candidate.setDate(candidate.getDate() + 1);
+                }
+                return candidate.toISOString().split('T')[0];
+            };
+
+            const mettreAJourRecurrenceMin = () => {
+                if (!champFinRecurrence) return;
+                const start = champDateAjout?.value || '';
+                if (start) {
+                    champFinRecurrence.min = start;
+                    if (checkRecurrence?.checked) {
+                        const suggestion = proposerFinRecurrence(start);
+                        if (!champFinRecurrence.value || champFinRecurrence.value < start) {
+                            champFinRecurrence.value = suggestion || start;
+                        }
+                    }
+                } else {
+                    champFinRecurrence.min = '';
+                    if (!checkRecurrence?.checked) {
+                        champFinRecurrence.value = '';
+                    }
+                }
+                mettreAJourEtatBouton();
+            };
+
+            const basculerRecurrence = actif => {
+                if (!conteneurRecurrence) return;
+                conteneurRecurrence.classList.toggle('hidden', !actif);
+                if (!actif) {
+                    if (champFinRecurrence) champFinRecurrence.value = '';
+                } else if (champFinRecurrence) {
+                    if (champDateAjout?.value) {
+                        champFinRecurrence.min = champDateAjout.value;
+                        if (!champFinRecurrence.value) {
+                            const suggestion = proposerFinRecurrence(champDateAjout.value);
+                            champFinRecurrence.value = suggestion || champDateAjout.value;
+                        } else if (champFinRecurrence.value < champDateAjout.value) {
+                            const suggestion = proposerFinRecurrence(champDateAjout.value);
+                            champFinRecurrence.value = suggestion || champDateAjout.value;
+                        }
+                    }
+                }
+                mettreAJourEtatBouton();
+            };
+
+            const majAffichageRemise = () => {
+                if (!champsClient.typeRemise || !conteneurValeurRemise || !conteneurNbTourneesOffertes) return;
+                const typeSelectionne = champsClient.typeRemise.value;
+                conteneurValeurRemise.classList.toggle('hidden', typeSelectionne !== 'Pourcentage' && typeSelectionne !== 'Montant Fixe');
+                conteneurNbTourneesOffertes.classList.toggle('hidden', typeSelectionne !== 'Tournées Offertes');
+            };
+
+            const normaliserModeResident = valeur => (valeur === 'urgence' ? 'urgence' : 'standard');
+            const basculerForfaitResident = afficher => {
+                if (!conteneurForfaitResident) return;
+                conteneurForfaitResident.classList.toggle('hidden', !afficher);
+                if (afficher && champsClient.residentMode) {
+                    const defaut = champsClient.residentMode.dataset?.default || 'standard';
+                    champsClient.residentMode.value = normaliserModeResident(champsClient.residentMode.value || defaut);
+                }
+            };
+
+            const nettoyerSelectionCreneaux = () => {
+                if (!grilleCreneaux) return;
+                grilleCreneaux.querySelectorAll('.btn-creneau-replanif.selected').forEach(btn => btn.classList.remove('selected'));
+            };
+
+            const mettreAJourSelectionManuelle = () => {
+                if (!champHoraireManuel) {
+                    creneauSelectionne = null;
+                    return '';
+                }
+                const valeur = (champHoraireManuel.value || '').trim();
+                let formatted = '';
+                if (/^\d{2}:\d{2}$/.test(valeur)) {
+                    const [h, m] = valeur.split(':');
+                    formatted = `${h.padStart(2, '0')}h${m.padStart(2, '0')}`;
+                }
+                creneauSelectionne = formatted || null;
+                if (conteneurHoraireManuel && !conteneurHoraireManuel.classList.contains('hidden')) {
+                    peutSoumettreSlot = !!formatted;
+                    mettreAJourEtatBouton();
+                }
+                return formatted;
+            };
+
+            champHoraireManuel?.addEventListener('input', () => {
+                if (conteneurHoraireManuel?.classList.contains('hidden')) return;
+                mettreAJourSelectionManuelle();
+            });
+
+            const remplirChampsClient = client => {
+                champsClient.email.value = client ? client.email : '';
+                champsClient.nom.value = client ? client.nom : '';
+                champsClient.adresse.value = client ? client.adresse : '';
+                champsClient.siret.value = client ? client.siret : '';
+                champsClient.typeRemise.value = client ? (client.typeRemise || '') : '';
+                champsClient.valeurRemise.value = client ? (client.valeurRemise || 0) : 0;
+                champsClient.nbTourneesOffertes.value = client ? (client.nbTourneesOffertes || 0) : 0;
+                if (champsClient.resident) champsClient.resident.checked = !!(client && client.resident);
+                basculerForfaitResident(!!(client && client.resident));
+
+                const isNewClient = !client;
+                Object.entries(champsClient).forEach(([cle, champ]) => {
+                    if (!champ || cle === 'residentMode') return;
+                    if (champ.tagName === 'INPUT' && champ.type === 'checkbox') {
+                        champ.disabled = false;
+                        return;
+                    }
+                    if (champ.id !== 'type-remise' && champ.id !== 'valeur-remise' && champ.id !== 'nb-tournees-offertes') {
+                        champ.readOnly = !isNewClient;
+                    }
+                });
+                majAffichageRemise();
+            };
+
+            selectClient?.addEventListener('change', () => {
+                const selectedEmail = selectClient.value;
+                const client = selectedEmail === 'new' ? null : tousLesClients.find(c => c.email === selectedEmail);
+                remplirChampsClient(client);
+                mettreAJourCreneauxDisponibles();
+            });
+            champsClient.typeRemise?.addEventListener('change', majAffichageRemise);
+            champsClient.resident?.addEventListener('change', e => {
+                basculerForfaitResident(e.target.checked);
+                mettreAJourCreneauxDisponibles();
+            });
+            champsClient.residentMode?.addEventListener('change', () => {
+                if (champsClient.resident?.checked) mettreAJourCreneauxDisponibles();
+            });
+
+            modale.querySelector('.btn-ajouter')?.addEventListener('click', () => {
+                if (valeurCompteur) {
+                    valeurCompteur.textContent = (parseInt(valeurCompteur.textContent, 10) + 1).toString();
+                }
+                mettreAJourCreneauxDisponibles();
+            });
+            modale.querySelector('.btn-retirer')?.addEventListener('click', () => {
+                if (valeurCompteur) {
+                    const arrets = parseInt(valeurCompteur.textContent, 10);
+                    if (arrets > 1) valeurCompteur.textContent = (arrets - 1).toString();
+                    mettreAJourCreneauxDisponibles();
+                }
+            });
+            champDateAjout?.addEventListener('change', () => {
+                mettreAJourRecurrenceMin();
+                mettreAJourCreneauxDisponibles();
+            });
+            checkRetour?.addEventListener('change', mettreAJourCreneauxDisponibles);
+            checkRecurrence?.addEventListener('change', () => {
+                basculerRecurrence(checkRecurrence.checked);
+                mettreAJourRecurrenceMin();
+            });
+            champFinRecurrence?.addEventListener('input', mettreAJourEtatBouton);
+            champFinRecurrence?.addEventListener('change', () => {
+                mettreAJourRecurrenceMin();
+                mettreAJourEtatBouton();
+            });
+
+            function mettreAJourCreneauxDisponibles() {
+                const totalStops = parseInt(valeurCompteur?.textContent || '1', 10);
+                const retour = checkRetour?.checked || false;
+                const date = champDateAjout?.value;
+                if (!date) {
+                    conteneurCreneaux?.classList.add('hidden');
+                    conteneurHoraireManuel?.classList.add('hidden');
+                    peutSoumettreSlot = false;
+                    mettreAJourEtatBouton();
+                    nettoyerSelectionCreneaux();
+                    creneauSelectionne = null;
                     return;
                 }
-                if (!recurrenceEndDate) {
-                    afficherErreur('Merci de renseigner la date de fin de récurrence.');
-                    return;
-                }
-                if (recurrenceEndDate < startDateValue) {
-                    afficherErreur('La date de fin de récurrence doit être postérieure ou égale à la date de départ.');
-                    return;
-                }
+
+                const nbSupp = Math.max(0, totalStops - 1);
+                const dureeBase = Number(ADMIN_CONFIG?.dureeBase) || 30;
+                const dureeSupp = Number(ADMIN_CONFIG?.dureeArretSup) || 15;
+                const duree = dureeBase + (nbSupp + (retour ? 1 : 0)) * dureeSupp;
+
+                conteneurCreneaux?.classList.remove('hidden');
+                if (grilleCreneaux) renderMessage(grilleCreneaux, 'Chargement...', 'i');
+                peutSoumettreSlot = false;
+                mettreAJourEtatBouton();
+                nettoyerSelectionCreneaux();
+                creneauSelectionne = null;
+
+                google.script.run
+                    .withSuccessHandler(creneaux => {
+                        if (grilleCreneaux) {
+                            if (creneaux && creneaux.length > 0) {
+                                const buttons = creneaux.map(c => `<button class="btn-creneau-replanif" data-creneau="${escapeHTML(c)}">${escapeHTML(c)}</button>`).join('');
+                                renderHTML(grilleCreneaux, buttons);
+                                conteneurHoraireManuel?.classList.add('hidden');
+                            } else {
+                                renderMessage(grilleCreneaux, 'Aucun créneau disponible.');
+                                if (conteneurHoraireManuel) {
+                                    conteneurHoraireManuel.classList.remove('hidden');
+                                    if (champHoraireManuel && !champHoraireManuel.value) {
+                                        champHoraireManuel.value = '08:00';
+                                    }
+                                    mettreAJourSelectionManuelle();
+                                }
+                            }
+                        }
+                    })
+                    .withFailureHandler(err => {
+                        afficherErreur(err);
+                        if (conteneurHoraireManuel) {
+                            conteneurHoraireManuel.classList.remove('hidden');
+                            if (champHoraireManuel && !champHoraireManuel.value) {
+                                champHoraireManuel.value = '08:00';
+                            }
+                            mettreAJourSelectionManuelle();
+                        }
+                    })
+                    .obtenirCreneauxDisponiblesPourDate(date, duree);
             }
-            const clientData = {
-                email: champsClient.email.value.trim(),
-                nom: champsClient.nom.value.trim(),
-                adresse: champsClient.adresse.value.trim(),
-                siret: champsClient.siret.value.trim(),
-                typeRemise: champsClient.typeRemise.value,
-                valeurRemise: parseFloat(champsClient.valeurRemise.value) || 0,
-                nbTourneesOffertes: parseInt(champsClient.nbTourneesOffertes.value) || 0,
-                resident: !!champsClient.resident?.checked
-            };
-            const residentMode = clientData.resident && champsClient.residentMode
-                ? normaliserModeResident(champsClient.residentMode.value || champsClient.residentMode.dataset?.default || 'standard')
-                : '';
-            if (clientData.resident) clientData.residentMode = residentMode;
 
-            const data = {
-                client: clientData,
-                date: champDateAjout?.value,
-                startTime: creneauSelectionne,
-                totalStops: parseInt(valeurCompteur?.textContent || '1', 10),
-                returnToPharmacy: checkRetour?.checked || false,
-                notifyClient: document.getElementById('check-notifier')?.checked || false,
-                forceUrgent: document.getElementById('check-urgent')?.checked || false,
-                residentMode: residentMode,
-                recurrence: {
-                    enabled: recurrenceActive,
-                    endDate: recurrenceActive ? recurrenceEndDate : '',
-                    skipSaturday: true
+            grilleCreneaux?.addEventListener('click', e => {
+                const btn = e.target.closest('.btn-creneau-replanif');
+                if (!btn) return;
+                nettoyerSelectionCreneaux();
+                btn.classList.add('selected');
+                creneauSelectionne = btn.dataset.creneau || null;
+                if (conteneurHoraireManuel) {
+                    conteneurHoraireManuel.classList.add('hidden');
                 }
-            };
-            gererSoumissionCreation(data);
-        }, { once: true });
+                peutSoumettreSlot = !!creneauSelectionne;
+                mettreAJourEtatBouton();
+            });
 
-        remplirChampsClient(null);
-        basculerForfaitResident(false);
-        basculerRecurrence(false);
-        mettreAJourRecurrenceMin();
-        mettreAJourEtatBouton();
-        mettreAJourCreneauxDisponibles();
-    }
+            btnConfirmer?.addEventListener('click', () => {
+                if (!creneauSelectionne && conteneurHoraireManuel && !conteneurHoraireManuel.classList.contains('hidden')) {
+                    mettreAJourSelectionManuelle();
+                }
+                if (!creneauSelectionne) {
+                    afficherErreur('Merci de sélectionner un créneau ou de renseigner un horaire.');
+                    return;
+                }
+                const recurrenceActive = checkRecurrence?.checked || false;
+                let recurrenceEndDate = '';
+                if (recurrenceActive) {
+                    const startDateValue = champDateAjout?.value || '';
+                    recurrenceEndDate = champFinRecurrence?.value || '';
+                    if (!startDateValue) {
+                        afficherErreur('Veuillez sélectionner la date de départ.');
+                        return;
+                    }
+                    if (!recurrenceEndDate) {
+                        afficherErreur('Merci de renseigner la date de fin de récurrence.');
+                        return;
+                    }
+                    if (recurrenceEndDate < startDateValue) {
+                        afficherErreur('La date de fin de récurrence doit être postérieure ou égale à la date de départ.');
+                        return;
+                    }
+                }
+                const clientData = {
+                    email: champsClient.email.value.trim(),
+                    nom: champsClient.nom.value.trim(),
+                    adresse: champsClient.adresse.value.trim(),
+                    siret: champsClient.siret.value.trim(),
+                    typeRemise: champsClient.typeRemise.value,
+                    valeurRemise: parseFloat(champsClient.valeurRemise.value) || 0,
+                    nbTourneesOffertes: parseInt(champsClient.nbTourneesOffertes.value) || 0,
+                    resident: !!champsClient.resident?.checked
+                };
+                const residentMode = clientData.resident && champsClient.residentMode
+                    ? normaliserModeResident(champsClient.residentMode.value || champsClient.residentMode.dataset?.default || 'standard')
+                    : '';
+                if (clientData.resident) clientData.residentMode = residentMode;
 
-    // --- FONCTIONS UTILITAIRES ---
-    function basculerIndicateurChargement(afficher) { if(indicateurChargement) indicateurChargement.classList.toggle('hidden', !afficher); }
-    function afficherNotification(message, type = "succes") {
-        const conteneur = document.getElementById('conteneur-notifications'); if(!conteneur) return;
-        const notif = document.createElement('div');
-        notif.className = `notification ${type}`;
-        notif.textContent = message;
-        conteneur.appendChild(notif);
-        setTimeout(() => notif.remove(), 5000);
-    }
-    function afficherErreur(erreur) {
-        basculerIndicateurChargement(false);
-        const message = typeof erreur === 'object' && erreur.message ? erreur.message : String(erreur);
-        afficherNotification(`Erreur : ${message}`, "erreur");
-        logError(erreur);
-    }
+                const data = {
+                    client: clientData,
+                    date: champDateAjout?.value,
+                    startTime: creneauSelectionne,
+                    totalStops: parseInt(valeurCompteur?.textContent || '1', 10),
+                    returnToPharmacy: checkRetour?.checked || false,
+                    notifyClient: document.getElementById('check-notifier')?.checked || false,
+                    forceUrgent: document.getElementById('check-urgent')?.checked || false,
+                    residentMode: residentMode,
+                    recurrence: {
+                        enabled: recurrenceActive,
+                        endDate: recurrenceActive ? recurrenceEndDate : '',
+                        skipSaturday: true
+                    }
+                };
+                gererSoumissionCreation(data);
+            }, { once: true });
 
-    // --- Point de départ ---
-    initialiser();
-});
+            remplirChampsClient(null);
+            basculerForfaitResident(false);
+            basculerRecurrence(false);
+            mettreAJourRecurrenceMin();
+            mettreAJourEtatBouton();
+            mettreAJourCreneauxDisponibles();
+        }
+
+        // --- FONCTIONS UTILITAIRES ---
+        function basculerIndicateurChargement(afficher) { if (indicateurChargement) indicateurChargement.classList.toggle('hidden', !afficher); }
+        function afficherNotification(message, type = "succes") {
+            const conteneur = document.getElementById('conteneur-notifications'); if (!conteneur) return;
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.textContent = message;
+            conteneur.appendChild(notif);
+            setTimeout(() => notif.remove(), 5000);
+        }
+        function afficherErreur(erreur) {
+            basculerIndicateurChargement(false);
+            const message = typeof erreur === 'object' && erreur.message ? erreur.message : String(erreur);
+            afficherNotification(`Erreur : ${message}`, "erreur");
+            logError(erreur);
+        }
+
+        // --- Point de départ ---
+        initialiser();
+    });
 </script>
-

@@ -11,12 +11,12 @@ function generateWeeklyQualityReport() {
     // 1. Récupération des données
     // On utilise Config.ID_FEUILLE_CALCUL si dispo, sinon fallback sur PropertiesService
     var sheetId = (typeof Config !== 'undefined' && Config.ID_FEUILLE_CALCUL)
-                  ? Config.ID_FEUILLE_CALCUL
-                  : PropertiesService.getScriptProperties().getProperty("ID_FEUILLE_CALCUL");
+      ? Config.ID_FEUILLE_CALCUL
+      : PropertiesService.getScriptProperties().getProperty("ID_FEUILLE_CALCUL");
 
     if (!sheetId) {
       Logger.log("ID_FEUILLE_CALCUL manquant.");
-      return;
+      return "Configuration manquante : ID_FEUILLE_CALCUL";
     }
 
     var ss = SpreadsheetApp.openById(sheetId);
@@ -25,13 +25,13 @@ function generateWeeklyQualityReport() {
 
     if (!sheet) {
       Logger.log("Feuille " + sheetName + " introuvable.");
-      return;
+      return "Feuille " + sheetName + " introuvable.";
     }
 
     var data = sheet.getDataRange().getValues();
     if (data.length < 2) {
       Logger.log("Pas assez de données dans " + sheetName);
-      return;
+      return "Pas assez de données dans " + sheetName;
     }
 
     // Headers attendus: ["Timestamp", "Livreur", "Etablissement", "Statut", "Note", "GPS_Lat", "GPS_Lng"]
@@ -43,7 +43,7 @@ function generateWeeklyQualityReport() {
 
     if (idxTime === -1 || idxStatut === -1) {
       Logger.log("Colonnes Timestamp ou Statut manquantes.");
-      return;
+      return "Colonnes Timestamp ou Statut manquantes dans la feuille.";
     }
 
     // 2. Filtrage (7 derniers jours + Anomalies)
@@ -75,11 +75,11 @@ function generateWeeklyQualityReport() {
 
     if (anomalies.length === 0) {
       Logger.log("Aucune anomalie détectée cette semaine.");
-      return;
+      return "Aucune anomalie détectée cette semaine (Tout est RAS).";
     }
 
     // 3. Préparation du Prompt pour Gemini
-    var anomaliesText = anomalies.map(function(a) {
+    var anomaliesText = anomalies.map(function (a) {
       return "- " + a.date + " | " + a.etablissement + " | " + a.statut + " | " + a.note;
     }).join("\n");
 
@@ -103,8 +103,8 @@ function generateWeeklyQualityReport() {
 
     // 5. Envoi Email
     var adminEmail = (typeof Config !== 'undefined' && Config.ADMIN_EMAIL)
-                     ? Config.ADMIN_EMAIL
-                     : PropertiesService.getScriptProperties().getProperty("ADMIN_EMAIL");
+      ? Config.ADMIN_EMAIL
+      : PropertiesService.getScriptProperties().getProperty("ADMIN_EMAIL");
 
     if (adminEmail) {
       MailApp.sendEmail({
@@ -117,7 +117,10 @@ function generateWeeklyQualityReport() {
       Logger.log("Email Admin non configuré.");
     }
 
+    return reportContent;
+
   } catch (e) {
     Logger.log("Erreur generateWeeklyQualityReport: " + e.toString());
+    return "Erreur: " + e.toString();
   }
 }
