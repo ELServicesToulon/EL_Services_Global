@@ -40,19 +40,15 @@ function test_Validators() {
 }
 
 function test_Router() {
+  // On ne peut pas facilement tester le dispatch complet sans mocker HtmlService,
+  // mais on peut vérifier si les routes sont enregistrées.
+  // Hack: vérifier si Router.dispatch ne plante pas avec un event vide
   try {
-    // On ne peut pas facilement tester le dispatch complet sans mocker HtmlService,
-    // mais on peut vérifier si les routes sont enregistrées.
-    // Hack: vérifier si Router.dispatch ne plante pas avec un event vide
-    try {
-       Router.dispatch({});
-    } catch(e) {
-       // Ca peut planter car HtmlService n'est pas dispo en mode headless pur parfois, ou template manquant
-    }
-    return { name: 'Router', success: true };
+    Router.dispatch({});
   } catch (e) {
-    return { name: 'Router', success: false, message: e.message };
+    // Ca peut planter car HtmlService n'est pas dispo en mode headless pur parfois, ou template manquant
   }
+  return { name: 'Router', success: true };
 }
 
 function test_Auth() {
@@ -61,7 +57,7 @@ function test_Auth() {
     // Difficile à tester sans propriétés configurées.
     // On skip si pas de secret
     if (!PropertiesService.getScriptProperties().getProperty('ELS_SHARED_SECRET')) {
-       return { name: 'Auth', success: true, message: 'Skipped (No Secret)' };
+      return { name: 'Auth', success: true, message: 'Skipped (No Secret)' };
     }
     const token = Auth.generateToken('test@example.com', 3600);
     if (!token.url.includes('sig=')) throw new Error('Token generation failed');

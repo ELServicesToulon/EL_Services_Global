@@ -55,7 +55,7 @@ function enregistrerOuMajClient(donneesClient) {
     let nextColumnIndex = headerRow.length;
 
     // Helper pour ajouter une colonne si manquante
-    function assurerColonne(nomColonne) {
+    const assurerColonne = function (nomColonne) {
       if (headerTrimmed.indexOf(nomColonne) === -1) {
         feuilleClients.getRange(1, nextColumnIndex + 1).setValue(nomColonne);
         headerRow.push(nomColonne); // Mise à jour locale
@@ -63,7 +63,7 @@ function enregistrerOuMajClient(donneesClient) {
         nextColumnIndex++;
         colonnesAjoutees = true;
       }
-    }
+    };
 
     assurerColonne(COLONNE_RESIDENT_CLIENT);
     assurerColonne(COLONNE_ID_CLIENT);
@@ -95,7 +95,7 @@ function enregistrerOuMajClient(donneesClient) {
       const ligneExistante = donneesFeuille[indexLigneClient];
       // On crée une copie ou on étend le tableau pour matcher la longueur actuelle du header
       const ligneAjour = new Array(headerRow.length).fill('');
-      for(let k=0; k < ligneExistante.length; k++) {
+      for (let k = 0; k < ligneExistante.length; k++) {
         ligneAjour[k] = ligneExistante[k];
       }
 
@@ -183,7 +183,7 @@ function obtenirInfosClientParEmail(email) {
     }
 
     const enTetesRequis = ["Email", "Raison Sociale", "Adresse", COLONNE_TELEPHONE_CLIENT, "SIRET", COLONNE_CODE_POSTAL_CLIENT, COLONNE_TYPE_REMISE_CLIENT, COLONNE_VALEUR_REMISE_CLIENT, COLONNE_NB_TOURNEES_OFFERTES, COLONNE_RESIDENT_CLIENT, COLONNE_ID_CLIENT];
-    
+
     // Calcul des indices localement pour éviter l'appel à obtenirIndicesEnTetes qui relit la feuille
     const indices = {};
     const enTetesManquants = enTetesRequis.filter(reqHeader => {
@@ -301,7 +301,7 @@ function obtenirCodesPostauxRetraitAvecCommunes(options) {
   }
 
   const { codes, details } = collectCodesPostauxRetrait_();
-  const sortedDetails = details.sort(function(a, b) {
+  const sortedDetails = details.sort(function (a, b) {
     const cmp = String(a.codePostal).localeCompare(String(b.codePostal));
     if (cmp !== 0) return cmp;
     return String(a.commune || '').localeCompare(String(b.commune || ''));
@@ -332,12 +332,12 @@ function collectCodesPostauxRetrait_() {
     if (!donnees || donnees.length <= 1) {
       return { codes: new Set(), details: [] };
     }
-    const enTete = donnees[0].map(function(valeur) { return String(valeur || '').trim(); });
+    const enTete = donnees[0].map(function (valeur) { return String(valeur || '').trim(); });
     const indexCode = enTete.indexOf(COLONNE_CODE_POSTAL_CLIENT);
     if (indexCode === -1) {
       throw new Error('La colonne "Code Postal" est absente de la feuille des codes postaux.');
     }
-    const normalizeHeader = function(label) {
+    const normalizeHeader = function (label) {
       return String(label || '')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
@@ -345,10 +345,10 @@ function collectCodesPostauxRetrait_() {
         .trim();
     };
     const headerNorm = enTete.map(normalizeHeader);
-    const indexCommune = headerNorm.findIndex(function(nom) {
+    const indexCommune = headerNorm.findIndex(function (nom) {
       return ['commune', 'ville', 'libelle', 'libelle commune'].indexOf(nom) !== -1;
     });
-    const indexActif = enTete.findIndex(function(nom) { return nom && nom.toString().trim().toLowerCase() === 'actif'; });
+    const indexActif = enTete.findIndex(function (nom) { return nom && nom.toString().trim().toLowerCase() === 'actif'; });
 
     const codes = new Set();
     const detailsMap = new Map(); // codePostal -> commune
@@ -377,7 +377,7 @@ function collectCodesPostauxRetrait_() {
       }
     }
 
-    const details = Array.from(detailsMap.entries()).map(function(entry) {
+    const details = Array.from(detailsMap.entries()).map(function (entry) {
       return { codePostal: entry[0], commune: entry[1] || '' };
     });
     return { codes: codes, details: details };
@@ -414,7 +414,7 @@ function decrementerTourneesOffertesClient(emailClient) {
 
     const enTetesRequis = ["Email", COLONNE_NB_TOURNEES_OFFERTES];
     const indices = obtenirIndicesEnTetes(feuilleClients, enTetesRequis);
-    
+
     const donneesFeuille = feuilleClients.getDataRange().getValues();
     const indexLigneClient = donneesFeuille.findIndex(ligne => String(ligne[indices["Email"]]).toLowerCase() === emailClient.toLowerCase());
 
@@ -464,7 +464,7 @@ function enregistrerReservationPourFacturation(dateHeureDebut, nomClient, emailC
     const indices = getFacturationHeaderIndices_(feuilleFacturation, requiredHeaders).indices;
 
     const nouvelleLigne = new Array(feuilleFacturation.getLastColumn()).fill('');
-    
+
     nouvelleLigne[indices["Date"]] = dateHeureDebut;
     nouvelleLigne[indices["Client (Raison S. Client)"]] = nomClient;
     nouvelleLigne[indices["Client (Email)"]] = emailClient;
@@ -496,44 +496,44 @@ function enregistrerReservationPourFacturation(dateHeureDebut, nomClient, emailC
  * @returns {Array<Object>} Une liste d'intervalles bloqués.
  */
 function obtenirPlagesBloqueesPourDate(date) {
-    try {
-        const feuillePlagesBloquees = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_PLAGES_BLOQUEES);
-        if (!feuillePlagesBloquees) return [];
+  try {
+    const feuillePlagesBloquees = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL')).getSheetByName(SHEET_PLAGES_BLOQUEES);
+    if (!feuillePlagesBloquees) return [];
 
-        const indices = obtenirIndicesEnTetes(feuillePlagesBloquees, ["Date", "Heure_Debut", "Heure_Fin"]);
-        const valeurs = feuillePlagesBloquees.getDataRange().getValues();
-        const dateString = formaterDateEnYYYYMMDD(date);
-        const intervallesBloques = [];
+    const indices = obtenirIndicesEnTetes(feuillePlagesBloquees, ["Date", "Heure_Debut", "Heure_Fin"]);
+    const valeurs = feuillePlagesBloquees.getDataRange().getValues();
+    const dateString = formaterDateEnYYYYMMDD(date);
+    const intervallesBloques = [];
 
-        for (let i = 1; i < valeurs.length; i++) {
-            const ligne = valeurs[i];
-            const numeroLigne = i + 1;
-            const dateLigne = ligne[indices["Date"]];
-            
-            if (dateLigne instanceof Date && formaterDateEnYYYYMMDD(dateLigne) === dateString) {
-                const heureDebut = ligne[indices["Heure_Debut"]];
-                const heureFin = ligne[indices["Heure_Fin"]];
+    for (let i = 1; i < valeurs.length; i++) {
+      const ligne = valeurs[i];
+      const numeroLigne = i + 1;
+      const dateLigne = ligne[indices["Date"]];
 
-                if (heureDebut instanceof Date && heureFin instanceof Date) {
-                    const dateHeureDebut = new Date(date);
-                    dateHeureDebut.setHours(heureDebut.getHours(), heureDebut.getMinutes(), 0, 0);
-                    
-                    const dateHeureFin = new Date(date);
-                    dateHeureFin.setHours(heureFin.getHours(), heureFin.getMinutes(), 0, 0);
-                    
-                    if (!isNaN(dateHeureDebut.getTime()) && !isNaN(dateHeureFin.getTime())) {
-                        intervallesBloques.push({ start: dateHeureDebut, end: dateHeureFin });
-                    } else {
-                        Logger.log(`AVERTISSEMENT: Donnée de temps invalide dans la feuille "Plages_Bloquees" à la ligne ${numeroLigne}. Heure début: "${heureDebut}", Heure fin: "${heureFin}". Cette plage est ignorée.`);
-                    }
-                }
-            }
+      if (dateLigne instanceof Date && formaterDateEnYYYYMMDD(dateLigne) === dateString) {
+        const heureDebut = ligne[indices["Heure_Debut"]];
+        const heureFin = ligne[indices["Heure_Fin"]];
+
+        if (heureDebut instanceof Date && heureFin instanceof Date) {
+          const dateHeureDebut = new Date(date);
+          dateHeureDebut.setHours(heureDebut.getHours(), heureDebut.getMinutes(), 0, 0);
+
+          const dateHeureFin = new Date(date);
+          dateHeureFin.setHours(heureFin.getHours(), heureFin.getMinutes(), 0, 0);
+
+          if (!isNaN(dateHeureDebut.getTime()) && !isNaN(dateHeureFin.getTime())) {
+            intervallesBloques.push({ start: dateHeureDebut, end: dateHeureFin });
+          } else {
+            Logger.log(`AVERTISSEMENT: Donnée de temps invalide dans la feuille "Plages_Bloquees" à la ligne ${numeroLigne}. Heure début: "${heureDebut}", Heure fin: "${heureFin}". Cette plage est ignorée.`);
+          }
         }
-        return intervallesBloques;
-    } catch (e) {
-        Logger.log(`Erreur lors de la lecture des plages bloquées : ${e.stack}`);
-        return [];
+      }
     }
+    return intervallesBloques;
+  } catch (e) {
+    Logger.log(`Erreur lors de la lecture des plages bloquées : ${e.stack}`);
+    return [];
+  }
 }
 
 /**

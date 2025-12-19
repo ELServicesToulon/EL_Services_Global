@@ -43,7 +43,7 @@ function importScriptProperties(properties, overwrite) {
   };
 
   for (const [key, value] of Object.entries(properties)) {
-    if (existingProps.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(existingProps, key)) {
       if (overwrite) {
         sp.setProperty(key, value);
         rapport.ecrasees.push(key);
@@ -80,7 +80,7 @@ function importSelectedProperties(sourceProperties, keys, overwrite) {
 
   const selectedProps = {};
   for (const key of keys) {
-    if (sourceProperties.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(sourceProperties, key)) {
       selectedProps[key] = sourceProperties[key];
     } else {
       Logger.log('AVERTISSEMENT: La clé "' + key + '" n\'existe pas dans les propriétés source.');
@@ -115,7 +115,7 @@ function checkMissingProperties() {
     'ELS_SHARED_SECRET'
   ];
 
-  const missing = required.filter(key => !existingProps.hasOwnProperty(key) || existingProps[key] === '');
+  const missing = required.filter(key => !Object.prototype.hasOwnProperty.call(existingProps, key) || existingProps[key] === '');
 
   if (missing.length > 0) {
     Logger.log('=== PROPRIÉTÉS MANQUANTES ===');
@@ -147,7 +147,7 @@ function compareProperties(sourceProps) {
 
   // Propriétés uniquement dans la source
   for (const key of Object.keys(sourceProps)) {
-    if (!destProps.hasOwnProperty(key)) {
+    if (!Object.prototype.hasOwnProperty.call(destProps, key)) {
       rapport.uniquementSource.push(key);
     } else {
       rapport.communes.push(key);
@@ -163,7 +163,7 @@ function compareProperties(sourceProps) {
 
   // Propriétés uniquement dans la destination
   for (const key of Object.keys(destProps)) {
-    if (!sourceProps.hasOwnProperty(key)) {
+    if (!Object.prototype.hasOwnProperty.call(sourceProps, key)) {
       rapport.uniquementDestination.push(key);
     }
   }
@@ -197,9 +197,9 @@ function compareProperties(sourceProps) {
 function exemple_importerDepuisAutreProjet() {
   // Coller ici l'objet JSON obtenu depuis exportScriptProperties()
   const propsSource = {
-  "NOM_ENTREPRISE": "EL Services",
-  
-};
+    "NOM_ENTREPRISE": "EL Services",
+
+  };
 
   // Importer sans écraser les propriétés existantes
   const rapport = importScriptProperties(propsSource, false);

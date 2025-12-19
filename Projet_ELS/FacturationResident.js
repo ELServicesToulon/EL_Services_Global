@@ -150,7 +150,7 @@ function creerEtEnvoyerFactureResident(res) {
   }
   // Modèle dédié résident si présent, sinon fallback modèle global
   var _props = PropertiesService.getScriptProperties();
-  var _tplResident = (function(){ try { return _props.getProperty('ID_MODELE_FACTURE_RESIDENT'); } catch(e){ return null; } })();
+  var _tplResident = (function () { try { return _props.getProperty('ID_MODELE_FACTURE_RESIDENT'); } catch (e) { return null; } })();
   var _tplId = _tplResident || BILLING.DOC_TEMPLATE_FACTURE_ID;
   var tmpl = DriveApp.getFileById(_tplId).makeCopy(num + ' - ' + res.RESIDENT_NOM, parentFolder);
   var doc = DocumentApp.openById(tmpl.getId());
@@ -185,18 +185,18 @@ function creerEtEnvoyerFactureResident(res) {
     if (_delai > 0) { _echeance = new Date(_echeance.getTime() + _delai * 24 * 60 * 60 * 1000); }
     var _dateEcheance = Utilities.formatDate(_echeance, Session.getScriptTimeZone(), 'dd/MM/yyyy');
 
-    var _nomEnt = (function(){ try { return getSecret('NOM_ENTREPRISE'); } catch(e){ return ''; } })();
-    var _adrEnt = (function(){ try { return getSecret('ADRESSE_ENTREPRISE'); } catch(e){ return ''; } })();
-    var _mailEnt = (function(){ try { return getSecret('EMAIL_ENTREPRISE'); } catch(e){ try { return getSecret('ADMIN_EMAIL'); } catch(_e){ return ''; } } })();
-    var _siret = (function(){ try { return getSecret('SIRET'); } catch(e){ return ''; } })();
-    var _rib = (function(){ try { return getSecret('RIB_ENTREPRISE'); } catch(e){ return ''; } })();
-    var _bic = (function(){ try { return getSecret('BIC_ENTREPRISE'); } catch(e){ return ''; } })();
-    var _lienTarifs = (function(){
-      try { var u = getSecret('URL_TARIFS_PUBLIC'); if (u) return u; } catch(e){}
-      try { var id = getSecret('ID_DOCUMENT_TARIFS'); if (id) return 'https://drive.google.com/open?id=' + id; } catch(e){}
+    var _nomEnt = (function () { try { return getSecret('NOM_ENTREPRISE'); } catch (e) { return ''; } })();
+    var _adrEnt = (function () { try { return getSecret('ADRESSE_ENTREPRISE'); } catch (e) { return ''; } })();
+    var _mailEnt = (function () { try { return getSecret('EMAIL_ENTREPRISE'); } catch (e) { try { return getSecret('ADMIN_EMAIL'); } catch (_e) { return ''; } } })();
+    var _siret = (function () { try { return getSecret('SIRET'); } catch (e) { return ''; } })();
+    var _rib = (function () { try { return getSecret('RIB_ENTREPRISE'); } catch (e) { return ''; } })();
+    var _bic = (function () { try { return getSecret('BIC_ENTREPRISE'); } catch (e) { return ''; } })();
+    var _lienTarifs = (function () {
+      try { var u = getSecret('URL_TARIFS_PUBLIC'); if (u) return u; } catch (e) { /* ignore */ }
+      try { var id = getSecret('ID_DOCUMENT_TARIFS'); if (id) return 'https://drive.google.com/open?id=' + id; } catch (e) { /* ignore */ }
       return '';
     })();
-    var _lienCgv = (function(){ try { var id = getSecret('ID_DOCUMENT_CGV'); return id ? ('https://drive.google.com/open?id=' + id) : ''; } catch(e){ return ''; } })();
+    var _lienCgv = (function () { try { var id = getSecret('ID_DOCUMENT_CGV'); return id ? ('https://drive.google.com/open?id=' + id) : ''; } catch (e) { return ''; } })();
 
     var _repl = {
       '{{numero_facture}}': num,
@@ -224,8 +224,10 @@ function creerEtEnvoyerFactureResident(res) {
         return '• ' + l.label + ' - ' + l.qty + ' ' + l.unit + ' à ' + Number(l.pu).toFixed(2) + ' € = ' + Number(l.total).toFixed(2) + ' €';
       }).join('\n');
       body.replaceText('{{LIGNES}}', _lignesTxt || '');
-    } catch (_inner) {}
-  } catch (_outer) {}
+    } catch (_inner) { // pass
+    }
+  } catch (_outer) { // pass
+  }
 
   doc.saveAndClose();
   var pdf = DriveApp.getFileById(tmpl.getId()).getAs('application/pdf');

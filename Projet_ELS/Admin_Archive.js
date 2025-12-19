@@ -85,7 +85,7 @@ function archiverFacturesDuMois() {
     }
 
     const msg = `Archivage (${libMois}) terminé. Déplacés: ${deplaces}, ignorés: ${ignores}, erreurs: ${erreurs}.`;
-    try { logAdminAction('Archivage factures mois précédent', msg); } catch (e) {}
+    try { logAdminAction('Archivage factures mois précédent', msg); } catch (e) { /* ignore */ }
     ui.alert('Archivage des factures', msg, ui.ButtonSet.OK);
   } catch (e) {
     Logger.log('Erreur critique dans archiverFacturesDuMois: ' + e.stack);

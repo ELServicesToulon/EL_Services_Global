@@ -26,7 +26,7 @@ function seedPublicAssets() {
     } else {
       file = folder.createFile(a.blob);
       if (file.getName() !== a.name) {
-        try { file.setName(a.name); } catch (_err) {}
+        try { file.setName(a.name); } catch (_err) { /* ignore */ }
       }
     }
     try {

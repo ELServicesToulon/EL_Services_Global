@@ -424,7 +424,7 @@ function obtenirReservationsClient(emailClient, exp, sig) {
                   const evenementRessource = Calendar.Events.get(getSecret('ID_CALENDRIER'), eid);
                   dateDebut = new Date(evenementRessource.start.dateTime || evenementRessource.start.date);
                   dateFin = new Date(evenementRessource.end.dateTime || evenementRessource.end.date);
-                } catch (err) { }
+                } catch (err) { /* ignore */ }
               }
 
               const details = String(ligne[indices["Détails"]]);
@@ -455,7 +455,7 @@ function obtenirReservationsClient(emailClient, exp, sig) {
                 isDestinataire: true
               });
 
-            } catch (e) { }
+            } catch (e) { /* ignore */ }
           }
         });
       }
