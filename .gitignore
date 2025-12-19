@@ -1,0 +1,11 @@
+
+# Node modules
+node_modules/
+
+# Clasp settings
+.clasp.json
+.claspignore
+
+# OS generated files
+.DS_Store
+Thumbs.db

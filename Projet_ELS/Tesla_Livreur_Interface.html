@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <title>ELS - Tesla Livreur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    
+    <?!= include('Tesla_Livreur_CSS'); ?>
+
+    <style>
+      /* Assurer une taille minimale pour le toucher sur les boutons et inputs */
+      button, input[type="text"], input[type="number"], textarea, select {
+        min-height: 44px; 
+      }
+      /* Supprimer l'apparence native des menus déroulants s'ils sont problématiques */
+      select {
+          -webkit-appearance: none; 
+          appearance: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tesla-app-container">
+      <h1>Chargement de la Tournée Tesla...</h1>
+      </div>
+
+    <?!= include('Tesla_Livreur_JS'); ?>
+  </body>
+</html>

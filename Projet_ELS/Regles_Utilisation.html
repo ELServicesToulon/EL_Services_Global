@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <? var appUrl = ScriptApp.getService().getUrl(); var nomService = NOM_ENTREPRISE; var emailEntreprise = EMAIL_ENTREPRISE; ?>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Règles d'utilisation du site <?= nomService ?>.">
+  <link rel="canonical" href="<?= appUrl ?>">
+  <meta property="og:title" content="<?= nomService ?> | Règles d'utilisation">
+  <meta property="og:description" content="Conditions générales d'utilisation (CGU) du site <?= nomService ?>.">
+  <meta property="og:url" content="<?= appUrl ?>">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="<?= nomService ?> | Règles d'utilisation">
+  <meta name="twitter:description" content="Conditions générales d'utilisation (CGU) du site <?= nomService ?>.">
+  <title><?= nomService ?> | Règles d'utilisation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style><?!= include('Styles'); ?></style>
+  <?!= include('charte'); ?>
+  <?!= include('GoogleChartsStub'); ?>
+</head>
+<body data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>" data-brand-logo="<?= BRANDING_LOGO_PUBLIC_URL ?>">
+  <main class="container" role="main">
+    <div class="app-logo-container" data-logo-slot>
+      <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+    </div>
+    <h1>Règles d'utilisation du site (CGU)</h1>
+    <section>
+      <h2>1. Objet</h2>
+      <p>
+        Les présentes Règles d'utilisation (Conditions Générales d'Utilisation ou CGU) ont pour objet de définir les modalités de mise à disposition des services du site <strong><?= nomService ?></strong> et les conditions d'utilisation du Service par l'Utilisateur.
+      </p>
+    </section>
+    <section>
+      <h2>2. Accès au site</h2>
+      <p>
+        Le site est accessible gratuitement en tout lieu à tout Utilisateur ayant un accès à Internet. Tous les frais supportés par l'Utilisateur pour accéder au service (matériel informatique, logiciels, connexion Internet, etc.) sont à sa charge.
+      </p>
+    </section>
+    <section>
+      <h2>3. Propriété intellectuelle</h2>
+      <p>
+        Les marques, logos, signes ainsi que tout le contenu du site (textes, images, son...) font l'objet d'une protection par le Code de la propriété intellectuelle et plus particulièrement par le droit d'auteur.
+      </p>
+      <p>
+        L'Utilisateur doit solliciter l'autorisation préalable du site pour toute reproduction, publication, copie des différents contenus. Il s'engage à une utilisation des contenus du site dans un cadre strictement privé, toute utilisation à des fins commerciales et publicitaires étant strictement interdite.
+      </p>
+    </section>
+    <section>
+      <h2>4. Responsabilité</h2>
+      <p>
+        Les sources des informations diffusées sur le site <strong><?= nomService ?></strong> sont réputées fiables mais le site ne garantit pas qu'il soit exempt de défauts, d'erreurs ou d'omissions.
+      </p>
+      <p>
+        Les informations communiquées sont présentées à titre indicatif et général sans valeur contractuelle. Malgré des mises à jour régulières, le site <strong><?= nomService ?></strong> ne peut être tenu responsable de la modification des dispositions administratives et juridiques survenant après la publication. De même, le site ne peut être tenue responsable de l'utilisation et de l'interprétation de l'information contenue dans ce site.
+      </p>
+    </section>
+    <section>
+      <h2>5. Données personnelles</h2>
+      <p>
+        Pour le respect de la vie privée de l'Utilisateur, le site <strong><?= nomService ?></strong> collecte et traite les données personnelles conformément au Règlement Général sur la Protection des Données (RGPD). Pour plus d'informations, veuillez consulter notre page <a href="<?= appUrl ?>?page=infos">Infos &amp; confidentialité</a>.
+      </p>
+    </section>
+    <section>
+      <h2>6. Liens hypertextes</h2>
+      <p>
+        Des liens hypertextes peuvent être présents sur le site. L'Utilisateur est informé qu'en cliquant sur ces liens, il sortira du site <strong><?= nomService ?></strong>. Ce dernier n'a pas de contrôle sur les pages web sur lesquelles aboutissent ces liens et ne saurait, en aucun cas, être responsable de leur contenu.
+      </p>
+    </section>
+    <section>
+      <h2>7. Droit applicable et juridiction compétente</h2>
+      <p>
+        La législation française s'applique au présent contrat. En cas d'absence de résolution amiable d'un litige né entre les parties, les tribunaux français seront seuls compétents pour en connaître.
+      </p>
+    </section>
+    <section>
+      <h2>8. Contact</h2>
+      <p>
+        Pour toute question relative à l'application des présentes CGU, vous pouvez joindre l'éditeur aux coordonnées suivantes : <a href="mailto:<?= emailEntreprise ?>"><?= emailEntreprise ?></a>.
+      </p>
+    </section>
+  </main>
+  <?!= include('Render_JS'); ?>
+  <?!= include('ElsLogo_Script'); ?>
+</body>
+</html>

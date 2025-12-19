@@ -1,0 +1,250 @@
+<?!= includeTemplate('Tesla_Livreur_JS'); ?>
+<script>
+    // Marquage leger pour la variante Livraison afin de faciliter le debug.
+    (function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            document.body.setAttribute('data-app', 'tesla-livraison');
+        });
+    })();
+</script>
+
+<script>
+    (function () {
+        const state = {
+            token: '',
+            date: new Date().toISOString().slice(0, 10)
+        };
+        const refs = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            refs.dateInput = document.getElementById('livreur-date');
+            refs.codeInput = document.getElementById('livreur-code');
+            refs.saveBtn = document.getElementById('livreur-save-code');
+            refs.refreshBtn = document.getElementById('livreur-refresh');
+            refs.list = document.getElementById('livraisons-liste');
+            refs.hint = document.getElementById('livreur-hint');
+
+            const today = new Date().toISOString().slice(0, 10);
+            if (refs.dateInput && !refs.dateInput.value) {
+                refs.dateInput.value = today;
+            }
+            state.date = refs.dateInput ? (refs.dateInput.value || today) : today;
+
+            const stored = lireToken();
+            if (stored && refs.codeInput) {
+                refs.codeInput.value = stored;
+                state.token = stored;
+                mettreHint('Code chauffeur chargé.');
+            }
+
+            lierEvenements();
+            if (state.token) {
+                chargerCourses(false);
+            }
+        });
+
+        function lierEvenements() {
+            if (refs.dateInput) {
+                refs.dateInput.addEventListener('change', () => {
+                    state.date = refs.dateInput.value || state.date;
+                    chargerCourses(false);
+                });
+            }
+            if (refs.saveBtn) {
+                refs.saveBtn.addEventListener('click', () => {
+                    const val = (refs.codeInput?.value || '').trim();
+                    state.token = val;
+                    stockerToken(val);
+                    mettreHint(val ? 'Code enregistré localement.' : 'Code requis pour charger les courses.');
+                    chargerCourses(false);
+                });
+            }
+            if (refs.refreshBtn) {
+                refs.refreshBtn.addEventListener('click', () => chargerCourses(true));
+            }
+            if (refs.list) {
+                refs.list.addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-statut]');
+                    if (!btn) return;
+                    const card = btn.closest('.livraison-item');
+                    const id = card ? card.dataset.id : '';
+                    const statut = btn.getAttribute('data-statut');
+                    if (id && statut) {
+                        mettreAJourStatut(id, statut, card);
+                    }
+                });
+            }
+        }
+
+        function stockerToken(val) {
+            try {
+                if (val) localStorage.setItem('els_livreur_token', val);
+                else localStorage.removeItem('els_livreur_token');
+            } catch (_e) { }
+        }
+
+        function lireToken() {
+            try {
+                return localStorage.getItem('els_livreur_token') || '';
+            } catch (_e) {
+                return '';
+            }
+        }
+
+        function mettreHint(msg) {
+            if (refs.hint) refs.hint.textContent = msg || '';
+        }
+
+        function afficherVide(message) {
+            if (!refs.list) return;
+            refs.list.innerHTML = `<p class="hint">${echapperHtml(message || 'Aucune course trouvée.')}</p>`;
+        }
+
+        function verifierToken() {
+            if (state.token && state.token.length) return true;
+            mettreHint('Entrer le code chauffeur pour charger la liste.');
+            return false;
+        }
+
+        function chargerCourses(manuel) {
+            if (!verifierToken()) {
+                afficherVide('Code chauffeur requis.');
+                return;
+            }
+            const dateStr = state.date || new Date().toISOString().slice(0, 10);
+            google.script.run
+                .withSuccessHandler((res) => gererCourses(res))
+                .withFailureHandler((err) => {
+                    afficherVide('Erreur Apps Script: ' + (err && err.message ? err.message : 'inconnue'));
+                })
+                .obtenirToutesReservationsPourDate(dateStr, state.token);
+            if (manuel) {
+                mettreHint('Rafraîchissement en cours...');
+            }
+        }
+
+        function gererCourses(reponse) {
+            if (!reponse || reponse.success !== true) {
+                afficherVide(reponse && reponse.error ? reponse.error : 'Aucune réponse serveur.');
+                return;
+            }
+            const liste = Array.isArray(reponse.reservations) ? reponse.reservations : [];
+            if (!liste.length) {
+                afficherVide('Aucune course sur cette date.');
+                return;
+            }
+            rendreListe(liste);
+            mettreHint(`${liste.length} course(s) chargée(s).`);
+        }
+
+        function rendreListe(items) {
+            if (!refs.list) return;
+            const sorted = items.slice().sort((a, b) => new Date(a.start) - new Date(b.start));
+            refs.list.innerHTML = sorted.map(construireCarte).join('');
+        }
+
+        function construireCarte(resa) {
+            const heure = formaterHeure(resa.start);
+            const statut = (resa.statut || '').trim() || 'Prévue';
+            const statutClasse = classeStatut(statut);
+            const details = resa.details || '';
+            const client = resa.clientName || '';
+            const email = resa.clientEmail || '';
+            const note = resa.note || '';
+            const id = resa.id || '';
+            return `
+      <div class="livraison-item" data-id="${echapperHtml(id)}" data-client="${echapperHtml(client)}">
+        <div class="livraison-top">
+          <div class="livraison-main">${echapperHtml(heure)} · ${echapperHtml(details)}</div>
+          <span class="status-badge ${echapperHtml(statutClasse)}">${echapperHtml(statut)}</span>
+        </div>
+        <div class="livraison-meta">${echapperHtml(client)}${email ? ' — ' + echapperHtml(email) : ''}</div>
+        ${note ? `<div class="livraison-note">${echapperHtml(note)}</div>` : ''}
+        <div class="livraison-actions">
+          <button class="btn small-ghost" data-statut="En cours">Départ</button>
+          <button class="btn primary" data-statut="Livrée">Livrée</button>
+          <button class="btn ghost" data-statut="Annulée">Annuler</button>
+        </div>
+      </div>
+    `;
+        }
+
+        function formaterHeure(iso) {
+            if (!iso) return '--:--';
+            try {
+                const d = new Date(iso);
+                return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            } catch (_e) {
+                return String(iso);
+            }
+        }
+
+        function classeStatut(statut) {
+            const clean = (statut || '').toLowerCase();
+            if (clean.includes('cours')) return 'running';
+            if (clean.includes('livr')) return 'done';
+            if (clean.includes('annul')) return 'cancel';
+            return 'planned';
+        }
+
+        function mettreAJourStatut(id, statut, cardElement) {
+            if (!verifierToken()) return;
+
+            const clientNom = cardElement ? cardElement.dataset.client : "";
+
+            // Tentative de géolocalisation avant envoi
+            if (navigator.geolocation) {
+                mettreHint('Acquisition GPS...');
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => envoyerAuServeur(id, statut, clientNom, pos.coords.latitude, pos.coords.longitude),
+                    (err) => {
+                        console.warn("GPS Fail:", err);
+                        envoyerAuServeur(id, statut, clientNom, '', '');
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                envoyerAuServeur(id, statut, clientNom, '', '');
+            }
+        }
+
+        function envoyerAuServeur(id, statut, clientNom, lat, lng) {
+            mettreHint('Enregistrement...');
+            google.script.run
+                .withSuccessHandler((res) => {
+                    if (res && res.success) {
+                        chargerCourses(false);
+                        const msg = res.trace && res.trace.validation && res.trace.validation.message
+                            ? ("Statut OK. " + res.trace.validation.message)
+                            : 'Statut mis à jour.';
+                        mettreHint(msg);
+                        if (res.trace && res.trace.validation && !res.trace.validation.match && lat) {
+                            alert("Alert GPS: " + (res.trace.validation.message || "Distance importante"));
+                        }
+                    } else {
+                        afficherVide(res && res.error ? res.error : 'Mise à jour impossible.');
+                    }
+                })
+                .withFailureHandler((err) => {
+                    afficherVide('Erreur Apps Script: ' + (err && err.message ? err.message : 'inconnue'));
+                })
+                .traiterLivraisonComplete({
+                    livraison_id: id,
+                    status: statut,
+                    authToken: state.token,
+                    client_nom: clientNom,
+                    gps_lat: lat,
+                    gps_lng: lng
+                });
+        }
+
+        function echapperHtml(texte) {
+            return String(texte || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+    })();
+</script>
