@@ -143,7 +143,7 @@ function computeChatPseudo(authorRef, options) {
  */
 function sanitizeMultiline(text, maxLength) {
   const limit = Number(maxLength) > 0 ? Number(maxLength) : 1000;
-  const raw = String(text || '').replace(/[\x00-\x1F\u007F]/g, '').replace(/<[^>]*>/g, '');
+  const raw = String(text || '').replace(/[\x00-\x1F\u007F]/g, '').replace(/<[^>]*>/g, ''); // eslint-disable-line no-control-regex
   return raw.trim().substring(0, limit);
 }
 
@@ -155,7 +155,7 @@ function sanitizeMultiline(text, maxLength) {
  */
 function sanitizeScalar(value, maxLength) {
   const limit = Number(maxLength) > 0 ? Number(maxLength) : 255;
-  const raw = String(value || '').replace(/[\x00-\x1F\u007F]/g, '');
+  const raw = String(value || '').replace(/[\x00-\x1F\u007F]/g, ''); // eslint-disable-line no-control-regex
   return raw.trim().substring(0, limit);
 }
 

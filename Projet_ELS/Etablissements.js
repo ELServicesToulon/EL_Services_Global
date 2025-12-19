@@ -653,7 +653,7 @@ function enrichirDetailsBaseEtablissements_() {
     const note = String(row[indices[COLONNE_NOTE_ETAB]] || '');
 
     if (!placeId && note.indexOf('PlaceID:') > -1) {
-      const match = note.match(/PlaceID:\s*([A-Za-z0-9_\-]+)/);
+      const match = note.match(/PlaceID:\s*([A-Za-z0-9_-]+)/);
       if (match) placeId = match[1];
     }
 
@@ -704,7 +704,8 @@ function importerEtablissementsParCodesPostaux(codes, type, options) {
           return { codePostal: cp, commune: '' };
         });
       }
-    } catch (_err) { }
+    } catch (_err) { // pass
+    }
   } else {
     liste = codes.map(function (entry) {
       if (entry && typeof entry === 'object') {
@@ -779,7 +780,8 @@ function importerTousLesTypesPourCodesPostauxRetrait() {
   try {
     const ui = SpreadsheetApp.getUi();
     ui.alert('Rapport d importation', rapportFinal, ui.ButtonSet.OK);
-  } catch (_errUi) { }
+  } catch (_errUi) { // pass
+  }
 
   return rapportFinal;
 }

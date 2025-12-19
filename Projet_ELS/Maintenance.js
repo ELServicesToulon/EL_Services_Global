@@ -8,8 +8,8 @@
 // --- Constantes de Rétention (RGPD) ---
 // Définies dans Configuration.gs : ANNEES_RETENTION_FACTURES, MOIS_RETENTION_LOGS
 
-const FACTURATION_HEADERS = (function() {
-  const headers = ['Date','Client (Raison S. Client)','Client (Email)','Type','Détails','Montant','Statut','Valider','N° Facture','Event ID','ID Réservation','Note Interne','Tournée Offerte Appliquée','Type Remise Appliquée','Valeur Remise Appliquée','Lien Note'];
+const FACTURATION_HEADERS = (function () {
+  const headers = ['Date', 'Client (Raison S. Client)', 'Client (Email)', 'Type', 'Détails', 'Montant', 'Statut', 'Valider', 'N° Facture', 'Event ID', 'ID Réservation', 'Note Interne', 'Tournée Offerte Appliquée', 'Type Remise Appliquée', 'Valeur Remise Appliquée', 'Lien Note'];
   if (BILLING_ID_PDF_CHECK_ENABLED) {
     headers.splice(9, 0, 'ID PDF');
   }
@@ -33,7 +33,7 @@ function registerSheetExpectation(exp) {
   for (var i = 0; i < SHEET_EXPECTATIONS_REGISTRY.length; i++) {
     if (SHEET_EXPECTATIONS_REGISTRY[i].name === entry.name) {
       var existing = new Set(SHEET_EXPECTATIONS_REGISTRY[i].headers);
-      entry.headers.forEach(function(h) {
+      entry.headers.forEach(function (h) {
         if (!existing.has(h)) {
           SHEET_EXPECTATIONS_REGISTRY[i].headers.push(h);
         }
@@ -53,10 +53,10 @@ function getBaseSheetExpectations_() {
     { name: 'Plages_Bloquees', headers: ['Date', 'Heure_Debut', 'Heure_Fin'], required: false },
     { name: 'Logs', headers: ['Timestamp', 'Reservation ID', 'Client Email', 'R�sum�', 'Montant', 'Statut'], required: false },
     { name: 'Admin_Logs', headers: ['Timestamp', 'Utilisateur', 'Action', 'Statut'], required: false },
-    { name: SHEET_CHAT, headers: ['timestamp','thread_id','author_type','author_ref','author_pseudo','message','visible_to','status','attachments'], required: false },
-    { name: SHEET_CHAT_META, headers: ['key','value'], required: false },
-    { name: SHEET_DEMANDES_TOURNEE, headers: ['timestamp','etablissement_type','etablissement_nom','contact_email','contact_tel','adresse','jours_souhaites','plage_horaire','details','statut','pharmacie_cible','note_interne'], required: false },
-    { name: SHEET_QUESTIONS, headers: ['id','question','auteur','reponses_json'], required: false }
+    { name: SHEET_CHAT, headers: ['timestamp', 'thread_id', 'author_type', 'author_ref', 'author_pseudo', 'message', 'visible_to', 'status', 'attachments'], required: false },
+    { name: SHEET_CHAT_META, headers: ['key', 'value'], required: false },
+    { name: SHEET_DEMANDES_TOURNEE, headers: ['timestamp', 'etablissement_type', 'etablissement_nom', 'contact_email', 'contact_tel', 'adresse', 'jours_souhaites', 'plage_horaire', 'details', 'statut', 'pharmacie_cible', 'note_interne'], required: false },
+    { name: SHEET_QUESTIONS, headers: ['id', 'question', 'auteur', 'reponses_json'], required: false }
   ];
 }
 
@@ -68,25 +68,25 @@ function getSheetExpectations_() {
     try {
       var extra = getExtraSheetExpectations();
       if (Array.isArray(extra)) {
-        expectations = expectations.concat(extra.filter(function(e){ return e && e.name; }));
+        expectations = expectations.concat(extra.filter(function (e) { return e && e.name; }));
       }
-    } catch (_err) {}
+    } catch (_err) { /* ignore */ }
   }
   var merged = {};
-  expectations.forEach(function(exp) {
+  expectations.forEach(function (exp) {
     var key = exp.name;
     if (!merged[key]) {
       merged[key] = { name: key, headers: [], required: exp.required !== false };
     }
     var set = new Set(merged[key].headers);
-    (Array.isArray(exp.headers) ? exp.headers : []).forEach(function(h) {
+    (Array.isArray(exp.headers) ? exp.headers : []).forEach(function (h) {
       if (!set.has(h)) {
         merged[key].headers.push(h);
         set.add(h);
       }
     });
   });
-  return Object.keys(merged).map(function(k){ return merged[k]; });
+  return Object.keys(merged).map(function (k) { return merged[k]; });
 }
 
 // =================================================================
@@ -234,7 +234,7 @@ function verifierStructureFeuilles() {
     report.push({ sheet: exp.name, created: created, missingHeaders: missingNow });
   });
 
-  try { logAdminAction('Vérification structure feuilles', 'Terminée'); } catch (e) {}
+  try { logAdminAction('Vérification structure feuilles', 'Terminée'); } catch (e) { /* ignore */ }
   return { success: true, report: report };
 }
 
@@ -274,14 +274,14 @@ function sauvegarderCodeProjet() {
     if (!fichiers) {
       throw new Error("Impossible de récupérer les fichiers du projet. L'API Google Apps Script est peut-être désactivée.");
     }
-    
+
     const horodatage = formaterDatePersonnalise(new Date(), "yyyy-MM-dd'_'HH'h'mm");
     const nomDossierSauvegarde = `Sauvegarde Code ${horodatage}`;
-    
+
     const dossierProjet = DriveApp.getFileById(getSecret('ID_FEUILLE_CALCUL')).getParents().next();
     const dossierParentSauvegardes = obtenirOuCreerDossier(dossierProjet, "Sauvegardes Code");
     const dossierSauvegarde = dossierParentSauvegardes.createFolder(nomDossierSauvegarde);
-    
+
     fichiers.forEach(fichier => {
       const nomFichier = fichier.type === 'SERVER_JS' ? `${fichier.name}.gs` : `${fichier.name}.html`;
       dossierSauvegarde.createFile(nomFichier, fichier.source, MimeType.PLAIN_TEXT);
@@ -304,7 +304,7 @@ function sauvegarderDonnees() {
   try {
     const feuillesASauvegarder = [SHEET_CLIENTS, SHEET_FACTURATION, SHEET_CODES_POSTAUX_RETRAIT, SHEET_PLAGES_BLOQUEES, SHEET_LOGS, SHEET_ADMIN_LOGS];
     const ssOriginale = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
-    
+
     const dossierProjet = DriveApp.getFileById(getSecret('ID_FEUILLE_CALCUL')).getParents().next();
     const dossierParentSauvegardes = obtenirOuCreerDossier(dossierProjet, "Sauvegardes Données");
 
@@ -318,9 +318,9 @@ function sauvegarderDonnees() {
         feuille.copyTo(ssSauvegarde).setName(nomFeuille);
       }
     });
-    
+
     ssSauvegarde.deleteSheet(ssSauvegarde.getSheetByName(SHEET_DEFAULT));
-    
+
     Logger.log(`Sauvegarde des données réussie. Fichier : ${ssSauvegarde.getUrl()}`);
     logAdminAction("Sauvegarde des données", `Succès : ${ssSauvegarde.getName()}`);
 
@@ -341,7 +341,7 @@ function recupererTousLesFichiersProjet() {
     headers: { Authorization: `Bearer ${ScriptApp.getOAuthToken()}` },
     muteHttpExceptions: true
   };
-  
+
   const reponse = UrlFetchApp.fetch(url, options);
   if (reponse.getResponseCode() === 200) {
     return JSON.parse(reponse.getContentText()).files;
@@ -363,47 +363,47 @@ function purgerAnciennesDonnees() {
   logAdminAction("Purge RGPD (Données + Fichiers)", "Démarré");
   try {
     const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
-    
+
     // --- Purge de la feuille de facturation et des PDF ---
     const feuilleFacturation = ss.getSheetByName(SHEET_FACTURATION);
     if (feuilleFacturation) {
-        const enTeteFact = feuilleFacturation.getRange(1, 1, 1, feuilleFacturation.getLastColumn()).getValues()[0];
-        const dateColFact = enTeteFact.indexOf("Date");
-        const idPdfCol = enTeteFact.indexOf("ID PDF");
-        
-        if (idPdfCol === -1 || dateColFact === -1) {
-          throw new Error("Colonnes 'Date' et/ou 'ID PDF' requises dans 'Facturation' pour la purge.");
-        }
+      const enTeteFact = feuilleFacturation.getRange(1, 1, 1, feuilleFacturation.getLastColumn()).getValues()[0];
+      const dateColFact = enTeteFact.indexOf("Date");
+      const idPdfCol = enTeteFact.indexOf("ID PDF");
 
-        const dateLimiteFactures = new Date();
-        dateLimiteFactures.setFullYear(dateLimiteFactures.getFullYear() - ANNEES_RETENTION_FACTURES);
-        const { lignesSupprimees, idsFichiersSupprimes } = purgerDonneesFeuille(feuilleFacturation, dateColFact, idPdfCol, dateLimiteFactures);
-        
-        let fichiersSupprimes = 0;
-        idsFichiersSupprimes.forEach(idFichier => {
-          try {
-            if (idFichier) {
-              DriveApp.getFileById(idFichier).setTrashed(true);
-              fichiersSupprimes++;
-            }
-          } catch (e) {
-            Logger.log(`Impossible de supprimer le fichier PDF avec l'ID ${idFichier}. Erreur: ${e.message}`);
+      if (idPdfCol === -1 || dateColFact === -1) {
+        throw new Error("Colonnes 'Date' et/ou 'ID PDF' requises dans 'Facturation' pour la purge.");
+      }
+
+      const dateLimiteFactures = new Date();
+      dateLimiteFactures.setFullYear(dateLimiteFactures.getFullYear() - ANNEES_RETENTION_FACTURES);
+      const { lignesSupprimees, idsFichiersSupprimes } = purgerDonneesFeuille(feuilleFacturation, dateColFact, idPdfCol, dateLimiteFactures);
+
+      let fichiersSupprimes = 0;
+      idsFichiersSupprimes.forEach(idFichier => {
+        try {
+          if (idFichier) {
+            DriveApp.getFileById(idFichier).setTrashed(true);
+            fichiersSupprimes++;
           }
-        });
-        Logger.log(`${lignesSupprimees} ligne(s) de facturation purgée(s) et ${fichiersSupprimes} PDF supprimé(s).`);
+        } catch (e) {
+          Logger.log(`Impossible de supprimer le fichier PDF avec l'ID ${idFichier}. Erreur: ${e.message}`);
+        }
+      });
+      Logger.log(`${lignesSupprimees} ligne(s) de facturation purgée(s) et ${fichiersSupprimes} PDF supprimé(s).`);
     }
 
     // --- Purge de la feuille de logs ---
     const feuilleLog = ss.getSheetByName(SHEET_LOGS);
     if (feuilleLog) {
-        const enTeteLog = feuilleLog.getRange(1, 1, 1, feuilleLog.getLastColumn()).getValues()[0];
-        const dateColLog = enTeteLog.indexOf("Timestamp");
-        const dateLimiteLogs = new Date();
-        dateLimiteLogs.setMonth(dateLimiteLogs.getMonth() - MOIS_RETENTION_LOGS);
-        const { lignesSupprimees: logsSupprimes } = purgerDonneesFeuille(feuilleLog, dateColLog, -1, dateLimiteLogs);
-        Logger.log(`${logsSupprimes} ligne(s) de log purgée(s).`);
+      const enTeteLog = feuilleLog.getRange(1, 1, 1, feuilleLog.getLastColumn()).getValues()[0];
+      const dateColLog = enTeteLog.indexOf("Timestamp");
+      const dateLimiteLogs = new Date();
+      dateLimiteLogs.setMonth(dateLimiteLogs.getMonth() - MOIS_RETENTION_LOGS);
+      const { lignesSupprimees: logsSupprimes } = purgerDonneesFeuille(feuilleLog, dateColLog, -1, dateLimiteLogs);
+      Logger.log(`${logsSupprimes} ligne(s) de log purgée(s).`);
     }
-    
+
     logAdminAction("Purge RGPD", "Succès");
 
   } catch (e) {
@@ -418,11 +418,11 @@ function purgerAnciennesDonnees() {
  */
 function purgerDonneesFeuille(feuille, indexColonneDate, indexColonneIdFichier, dateLimite) {
   if (!feuille) return { lignesSupprimees: 0, idsFichiersSupprimes: [] };
-  
+
   const donnees = feuille.getDataRange().getValues();
   let lignesSupprimees = 0;
   const idsFichiersSupprimes = [];
-  
+
   for (let i = donnees.length - 1; i >= 1; i--) { // Itère de bas en haut
     const dateLigne = new Date(donnees[i][indexColonneDate]);
     if (dateLigne < dateLimite) {
@@ -452,11 +452,11 @@ function nettoyerOngletFacturation() {
 
     const header = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0].map(v => String(v || ''));
     // Normalise les entetes pour trouver les colonnes, sans accents et sans ponctuation
-    const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s\(\)]/g, '').trim();
+    const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s()]/g, '').trim();
     const H = header.map(normalize);
     const Hcompact = H.map(h => h.replace(/[^a-z0-9]/g, ''));
-    function findIndex(names){
-      for (const n of names){
+    var findIndex = function (names) {
+      for (const n of names) {
         const compact = n.replace(/[^a-z0-9]/g, '');
         let i = Hcompact.indexOf(compact);
         if (i !== -1) return i;
@@ -468,18 +468,18 @@ function nettoyerOngletFacturation() {
     }
     let idx = {
       date: findIndex(['date']),
-      raison: findIndex(['clientraisonsclient','clientraisonsociale']),
-      email: findIndex(['clientemail','emailclient','email']),
+      raison: findIndex(['clientraisonsclient', 'clientraisonsociale']),
+      email: findIndex(['clientemail', 'emailclient', 'email']),
       type: findIndex(['type']),
-      details: findIndex(['details','detail']),
-      montant: findIndex(['montant','prix']),
-      statut: findIndex(['statut','status']),
-      valider: findIndex(['valider','avalider']),
-      numero: findIndex(['nfacture','nofacture','nufacture']),
-      eventId: findIndex(['eventid','evenementid']),
-      idResa: findIndex(['idreservation','reservationid','idresa']),
-      note: findIndex(['noteinterne','note']),
-      lien: findIndex(['liennote','lien'])
+      details: findIndex(['details', 'detail']),
+      montant: findIndex(['montant', 'prix']),
+      statut: findIndex(['statut', 'status']),
+      valider: findIndex(['valider', 'avalider']),
+      numero: findIndex(['nfacture', 'nofacture', 'nufacture']),
+      eventId: findIndex(['eventid', 'evenementid']),
+      idResa: findIndex(['idreservation', 'reservationid', 'idresa']),
+      note: findIndex(['noteinterne', 'note']),
+      lien: findIndex(['liennote', 'lien'])
     };
     let hasIdResa = idx.idResa !== -1;
     let colonnesManquantes = [];
@@ -535,7 +535,7 @@ function nettoyerOngletFacturation() {
         }
         if (bestCol !== -1 && bestCount >= 1) idx.idResa = bestCol;
       }
-    } catch (_e) {}
+    } catch (_e) { /* ignore */ }
     // Recalcule indicateurs et avertissements
     hasIdResa = idx.idResa !== -1;
     colonnesManquantes = [];
@@ -607,7 +607,7 @@ function reparerEntetesFacturation() {
     const headers = sh.getRange(1, 1, 1, lastCol).getValues()[0];
     const data = sh.getDataRange().getValues();
 
-    const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s()]/g,'').trim();
+    const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s()]/g, '').trim();
     const H = headers.map(norm);
     const Hc = H.map(h => h.replace(/[^a-z0-9]/g, ''));
     const findIdx = (cands) => {
@@ -622,8 +622,8 @@ function reparerEntetesFacturation() {
     };
 
     let idxDate = findIdx(['date']);
-    let idxEmail = findIdx(['clientemail','emailclient','email']);
-    let idxResa = findIdx(['idreservation','reservationid','idresa']);
+    let idxEmail = findIdx(['clientemail', 'emailclient', 'email']);
+    let idxResa = findIdx(['idreservation', 'reservationid', 'idresa']);
 
     // Heuristique: colonne Date
     if (idxDate === -1) {
@@ -933,10 +933,10 @@ function verifierCoherenceCalendrier() {
       try {
         const evenement = Calendar.Events.get(getSecret('ID_CALENDRIER'), eventId);
         const dateCalendrier = new Date(evenement.start.dateTime || evenement.start.date);
-        
+
         if (dateSheet.getFullYear() !== dateCalendrier.getFullYear() ||
-            dateSheet.getMonth() !== dateCalendrier.getMonth() ||
-            dateSheet.getDate() !== dateCalendrier.getDate()) {
+          dateSheet.getMonth() !== dateCalendrier.getMonth() ||
+          dateSheet.getDate() !== dateCalendrier.getDate()) {
           incoherences.push(`- Ligne ${i + 1} (ID: ${idReservation}): Incohérence de date. Sheet: ${formaterDateEnYYYYMMDD(dateSheet)}, Calendrier: ${formaterDateEnYYYYMMDD(dateCalendrier)}.`);
         }
       } catch (e) {
@@ -948,7 +948,7 @@ function verifierCoherenceCalendrier() {
         }
       }
     }
-    
+
     const escapeHtml = function (value) {
       return String(value || '').replace(/[&<>"']/g, function (c) {
         switch (c) {
@@ -973,7 +973,7 @@ function verifierCoherenceCalendrier() {
       const incoherencesSecurisees = incoherences.map(escapeHtml).join('<br>');
       rapportHtml += `<pre>${incoherencesSecurisees}</pre>`;
     }
-    
+
     if (idsIntrouvables.length > 0 && (CALENDAR_RESYNC_ENABLED || CALENDAR_PURGE_ENABLED)) {
       rapportHtml += `<h3>Réservations manquantes</h3><ul>`;
       idsIntrouvables.forEach(r => {
@@ -1087,22 +1087,22 @@ function corrigerSiretClients() {
   try {
     const ss = SpreadsheetApp.openById(getSecret('ID_FEUILLE_CALCUL'));
     var sheet = ss.getSheetByName(SHEET_CLIENTS);
-    
+
     if (!sheet) {
       throw new Error("La feuille 'Clients' est introuvable.");
     }
 
     var dataRange = sheet.getDataRange();
     var values = dataRange.getValues();
-    
+
     var headers = values[0];
     var siretColIndex = headers.indexOf('SIRET');
     var accountTypeColIndex = headers.indexOf('TypeCompte'); // Supposons que cette colonne existe pour cibler les "Pro"
-    
+
     if (siretColIndex === -1) {
       throw new Error("La colonne 'SIRET' est introuvable dans la feuille 'Clients'.");
     }
-    
+
     var correctedCount = 0;
     // Boucle à partir de la deuxième ligne (index 1) pour ignorer les en-têtes
     for (var i = 1; i < values.length; i++) {
@@ -1110,7 +1110,7 @@ function corrigerSiretClients() {
       // Si accountTypeColIndex n'est pas trouvé, on considère toutes les lignes comme potentiellement "Pro"
       var isProAccount = (accountTypeColIndex === -1) || (row[accountTypeColIndex] === 'Pro');
       var currentSiret = row[siretColIndex];
-      
+
       // Cible les comptes "Pro" où le SIRET est manquant, null, undefined ou une chaîne vide.
       // Vérifie aussi la chaine littérale "undefined" qui peut provenir d'imports mal formés.
       if (isProAccount && (currentSiret === undefined || currentSiret === null || currentSiret === '' || String(currentSiret) === 'undefined')) {
@@ -1118,7 +1118,7 @@ function corrigerSiretClients() {
         correctedCount++;
       }
     }
-    
+
     if (correctedCount > 0) {
       dataRange.setValues(values);
       var msg = "Correction terminée. " + correctedCount + " numéro(s) de SIRET mis à jour.";
@@ -1126,11 +1126,11 @@ function corrigerSiretClients() {
       logAdminAction("Correction SIRET", msg);
       SpreadsheetApp.getUi().alert("Correction terminée", msg, SpreadsheetApp.getUi().ButtonSet.OK);
     } else {
-      var msg = "Aucun numéro de SIRET n'a nécessité de correction.";
+      msg = "Aucun numéro de SIRET n'a nécessité de correction.";
       Logger.log(msg);
       SpreadsheetApp.getUi().alert("Aucune correction nécessaire", msg, SpreadsheetApp.getUi().ButtonSet.OK);
     }
-    
+
   } catch (e) {
     Logger.log("Erreur lors de la correction des SIRETs : " + e.message);
     logAdminAction("Correction SIRET", "Erreur: " + e.message);

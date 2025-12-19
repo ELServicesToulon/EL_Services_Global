@@ -26,7 +26,7 @@ function test_envoyerLienEspaceClient_smoke() {
     const cache = CacheService.getScriptCache();
     cache.remove('client_link_rate:' + keyBase);
     cache.remove('client_link_burst:' + keyBase);
-  } catch (_err) {}
+  } catch (_err) { /* ignore */ }
 
   const res = envoyerLienEspaceClient(email);
   if (!res || res.success !== true) {

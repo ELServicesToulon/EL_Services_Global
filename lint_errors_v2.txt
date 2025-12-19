@@ -1,0 +1,346 @@
+
+> el-services-global@1.0.0 lint
+> eslint .
+
+
+C:\Users\ELS\EL_Services_Global\App_Livreur\Propiet├®s.js
+   14:10  warning  'exportScriptProperties' is defined but never used                 no-unused-vars
+   98:10  warning  'checkMissingProperties' is defined but never used                 no-unused-vars
+  137:10  warning  'compareProperties' is defined but never used                      no-unused-vars
+  197:10  warning  'exemple_importerDepuisAutreProjet' is defined but never used      no-unused-vars
+  216:10  warning  'exemple_importerProprietesSpecifiques' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\API_Mobile_Handler.js
+  19:10  warning  'api_getEtablissementsGPS' is defined but never used  no-unused-vars
+  76:10  warning  'api_saveLivraisonReport' is defined but never used   no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Admin_Archive.js
+  6:10  warning  'archiverFacturesDuMois' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Administration.js
+    12:10  warning  'invaliderCacheConfiguration' is defined but never used          no-unused-vars
+    37:10  warning  'calculerCAEnCours' is defined but never used                    no-unused-vars
+    72:10  warning  'genererLienEspaceClient' is defined but never used              no-unused-vars
+    89:10  warning  'obtenirLienFactureParIdAdmin' is defined but never used         no-unused-vars
+   118:10  warning  'obtenirToutesReservationsAdmin' is defined but never used       no-unused-vars
+   227:10  warning  'obtenirToutesReservationsPourDate' is defined but never used    no-unused-vars
+   373:10  warning  'livreurMettreAJourStatutReservation' is defined but never used  no-unused-vars
+   426:10  warning  'obtenirTousLesClients' is defined but never used                no-unused-vars
+   472:10  warning  'creerReservationAdmin' is defined but never used                no-unused-vars
+   752:10  warning  'supprimerReservation' is defined but never used                 no-unused-vars
+   805:10  warning  'appliquerRemiseSurTournee' is defined but never used            no-unused-vars
+   968:10  warning  'genererFactures' is defined but never used                      no-unused-vars
+  1277:10  warning  'envoyerFacturesControlees' is defined but never used            no-unused-vars
+  1289:11  warning  'idxNote' is assigned a value but never used                     no-unused-vars
+  1351:10  warning  'archiverFacturesDuMois' is defined but never used               no-unused-vars
+  1418:10  warning  'genererDevisPdfDepuisSelection' is defined but never used       no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Agent_Qualite.js
+  9:10  warning  'generateWeeklyQualityReport' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Audit.js
+  175:10  warning  'auditGsModules' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Audit_Etablissements.js
+  16:10  warning  'auditBaseEtablissement' is defined but never used  no-unused-vars
+  92:7   warning  'rowsToUpdate' is assigned a value but never used   no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Calendrier.js
+  270:10  warning  'obtenirEtatCreneauxPourDate' is defined but never used     no-unused-vars
+  337:10  warning  'obtenirDonneesCalendrierPublic' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Chat.js
+  192:10  warning  'sanitizeChatThreadId' is defined but never used  no-unused-vars
+  311:10  warning  'chatPostMessage' is defined but never used       no-unused-vars
+  411:10  warning  'chatGetMessages' is defined but never used       no-unused-vars
+  480:10  warning  'chatAdminHide' is defined but never used         no-unused-vars
+  515:10  warning  'tourneeSubmitDemande' is defined but never used  no-unused-vars
+  592:10  warning  'chatProvisionSheets' is defined but never used   no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Code.js
+   68:10  warning  'onInstall' is defined but never used              no-unused-vars
+   80:10  warning  'doGet' is defined but never used                  no-unused-vars
+   89:10  warning  'doPost' is defined but never used                 no-unused-vars
+  167:34  warning  '_e' is defined but never used                     no-unused-vars
+  396:10  warning  'menuGenererLienClient' is defined but never used  no-unused-vars
+  455:10  warning  'safeCheckSetup_' is defined but never used        no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Communes.js
+  9:10  warning  'menuCompleterCommunes' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Configuration.js
+   19:7   warning  'NOM_ENTREPRISE' is assigned a value but never used                 no-unused-vars
+   21:7   warning  'ADRESSE_ENTREPRISE' is assigned a value but never used             no-unused-vars
+   23:7   warning  'EMAIL_ENTREPRISE' is assigned a value but never used               no-unused-vars
+   25:7   warning  'ADMIN_EMAIL' is assigned a value but never used                    no-unused-vars
+   29:7   warning  'CLIENT_PORTAL_BASE_URL' is assigned a value but never used         no-unused-vars
+   38:7   warning  'DELAI_PAIEMENT_JOURS' is assigned a value but never used           no-unused-vars
+   60:7   warning  'FACTURE_LOGO_FILE_ID' is assigned a value but never used           no-unused-vars
+   90:7   warning  'SHEET_FACTURATION' is assigned a value but never used              no-unused-vars
+   92:7   warning  'SHEET_CLIENTS' is assigned a value but never used                  no-unused-vars
+   94:7   warning  'SHEET_CODES_POSTAUX_RETRAIT' is assigned a value but never used    no-unused-vars
+   98:7   warning  'SHEET_PARAMETRES' is assigned a value but never used               no-unused-vars
+  100:7   warning  'SHEET_ADMIN_LOGS' is assigned a value but never used               no-unused-vars
+  102:7   warning  'SHEET_LOGS' is assigned a value but never used                     no-unused-vars
+  104:7   warning  'SHEET_PLAGES_BLOQUEES' is assigned a value but never used          no-unused-vars
+  108:7   warning  'SHEET_DEFAULT' is assigned a value but never used                  no-unused-vars
+  110:7   warning  'SHEET_QUESTIONS' is assigned a value but never used                no-unused-vars
+  112:7   warning  'SHEET_CHAT' is assigned a value but never used                     no-unused-vars
+  114:7   warning  'SHEET_CHAT_META' is assigned a value but never used                no-unused-vars
+  116:7   warning  'SHEET_DEMANDES_TOURNEE' is assigned a value but never used         no-unused-vars
+  124:7   warning  'DUREE_TAMPON_MINUTES' is assigned a value but never used           no-unused-vars
+  126:7   warning  'INTERVALLE_CRENEAUX_MINUTES' is assigned a value but never used    no-unused-vars
+  142:7   warning  'CLIENT_SESSION_TTL_HOURS' is assigned a value but never used       no-unused-vars
+  144:7   warning  'CLIENT_ID_CARTOON_NAMES' is assigned a value but never used        no-unused-vars
+  172:7   warning  'CLIENT_PORTAL_LINK_TTL_HOURS' is assigned a value but never used   no-unused-vars
+  182:7   warning  'SEND_MAIL_SCOPE_CHECK_ENABLED' is assigned a value but never used  no-unused-vars
+  188:7   warning  'CHARTS_PROXY_PREFETCH_ENABLED' is assigned a value but never used  no-unused-vars
+  190:7   warning  'CLIENT_CHARTS_ENABLED' is assigned a value but never used          no-unused-vars
+  196:7   warning  'CFG_ENABLE_ASSISTANT' is assigned a value but never used           no-unused-vars
+  246:7   warning  'ADMIN_DEVIS_PDF_ENABLED' is assigned a value but never used        no-unused-vars
+  287:7   warning  'DRIVE_ASSET_IDS' is assigned a value but never used                no-unused-vars
+  303:7   warning  'FLAGS' is assigned a value but never used                          no-unused-vars
+  457:7   warning  'COLONNE_TYPE_REMISE_CLIENT' is assigned a value but never used     no-unused-vars
+  459:7   warning  'COLONNE_VALEUR_REMISE_CLIENT' is assigned a value but never used   no-unused-vars
+  461:7   warning  'COLONNE_ID_CLIENT' is assigned a value but never used              no-unused-vars
+  463:7   warning  'COLONNE_NB_TOURNEES_OFFERTES' is assigned a value but never used   no-unused-vars
+  465:7   warning  'COLONNE_RESIDENT_CLIENT' is assigned a value but never used        no-unused-vars
+  467:7   warning  'COLONNE_CODE_POSTAL_CLIENT' is assigned a value but never used     no-unused-vars
+  469:7   warning  'COLONNE_TELEPHONE_CLIENT' is assigned a value but never used       no-unused-vars
+  472:7   warning  'ETABLISSEMENT_TYPES' is assigned a value but never used            no-unused-vars
+  473:7   warning  'COLONNE_TYPE_ETAB' is assigned a value but never used              no-unused-vars
+  474:7   warning  'COLONNE_NOM_ETAB' is assigned a value but never used               no-unused-vars
+  475:7   warning  'COLONNE_ADRESSE_ETAB' is assigned a value but never used           no-unused-vars
+  476:7   warning  'COLONNE_CODE_POSTAL_ETAB' is assigned a value but never used       no-unused-vars
+  477:7   warning  'COLONNE_VILLE_ETAB' is assigned a value but never used             no-unused-vars
+  478:7   warning  'COLONNE_CONTACT_ETAB' is assigned a value but never used           no-unused-vars
+  479:7   warning  'COLONNE_TELEPHONE_ETAB' is assigned a value but never used         no-unused-vars
+  480:7   warning  'COLONNE_EMAIL_ETAB' is assigned a value but never used             no-unused-vars
+  481:7   warning  'COLONNE_SITE_WEB_ETAB' is assigned a value but never used          no-unused-vars
+  482:7   warning  'COLONNE_JOURS_ETAB' is assigned a value but never used             no-unused-vars
+  483:7   warning  'COLONNE_PLAGE_ETAB' is assigned a value but never used             no-unused-vars
+  484:7   warning  'COLONNE_SOURCE_ETAB' is assigned a value but never used            no-unused-vars
+  485:7   warning  'COLONNE_NOTE_ETAB' is assigned a value but never used              no-unused-vars
+  486:7   warning  'COLONNE_PHARMACIE_REFERENTE' is assigned a value but never used    no-unused-vars
+  487:7   warning  'COLONNE_STATUT_ETAB' is assigned a value but never used            no-unused-vars
+  488:7   warning  'COLONNE_DERNIERE_MAJ_ETAB' is assigned a value but never used      no-unused-vars
+  489:7   warning  'COLONNE_PLACE_ID_ETAB' is assigned a value but never used          no-unused-vars
+  536:10  warning  'getPublicConfig' is defined but never used                         no-unused-vars
+  559:10  warning  'getConfigCached' is defined but never used                         no-unused-vars
+  752:10  warning  'TEST_Configuration' is defined but never used                      no-unused-vars
+  770:10  warning  'SETUP_INIT_PROPERTIES' is defined but never used                   no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Configuration_Flags_Compat.js
+  31:10  warning  'isFlagEnabled' is defined but never used  no-unused-vars
+  36:10  warning  'getFlagsUpper' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Configuration_RequiredProps.js
+  49:10  warning  'ensureRequiredProps' is defined but never used  no-unused-vars
+  62:10  warning  'getPropOrThrow_' is defined but never used      no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\CopyProperties.js
+   14:10  warning  'exportScriptProperties' is defined but never used                 no-unused-vars
+  100:10  warning  'diagnosticProperties' is defined but never used                   no-unused-vars
+  174:10  warning  'checkMissingProperties' is defined but never used                 no-unused-vars
+  216:10  warning  'compareProperties' is defined but never used                      no-unused-vars
+  275:10  warning  'DIAGNOSTIC_STANDALONE' is defined but never used                  no-unused-vars
+  346:10  warning  'exemple_importerDepuisAutreProjet' is defined but never used      no-unused-vars
+  366:10  warning  'exemple_importerProprietesSpecifiques' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\CopyProperty.js
+   14:10  warning  'exportScriptProperties' is defined but never used                 no-unused-vars
+   98:10  warning  'checkMissingProperties' is defined but never used                 no-unused-vars
+  137:10  warning  'compareProperties' is defined but never used                      no-unused-vars
+  197:10  warning  'exemple_importerDepuisAutreProjet' is defined but never used      no-unused-vars
+  217:10  warning  'exemple_importerProprietesSpecifiques' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Debug.js
+   22:7   warning  'ADMIN_TEST_EMAIL' is assigned a value but never used          no-unused-vars
+  324:10  warning  'test_computeCoursePriceV2' is defined but never used          no-unused-vars
+  511:10  warning  'lancerTousLesTestsEtRetournerLogs' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Debug_Properties.js
+  120:10  warning  'test_auditProperties' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Etablissements.js
+  288:10  warning  'provisionnerBaseEtablissements' is defined but never used               no-unused-vars
+  635:10  warning  'enrichirDetails' is defined but never used                              no-unused-vars
+  671:9   warning  'changed' is assigned a value but never used                             no-unused-vars
+  751:10  warning  'importerTousLesTypesPourCodesPostauxRetrait' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\FacturationResident.js
+   13:10  warning  'doGetBillingDefaults' is defined but never used           no-unused-vars
+   13:31  warning  'orderId' is defined but never used                        no-unused-vars
+   13:40  warning  'billTo' is defined but never used                         no-unused-vars
+   13:48  warning  'ctx' is defined but never used                            no-unused-vars
+   32:10  warning  'doSaveBillingForOrder' is defined but never used          no-unused-vars
+  117:10  warning  'creerEtEnvoyerFactureResident' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Facturation_V2.js
+    1:10  warning  'INV2_generateInvoicePdf_' is defined but never used  no-unused-vars
+  118:10  warning  'INV2__exampleData' is defined but never used         no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\FeuilleCalcul.js
+   26:10  warning  'enregistrerOuMajClient' is defined but never used                  no-unused-vars
+   54:9   warning  'colonnesAjoutees' is assigned a value but never used               no-unused-vars
+  285:10  warning  'obtenirCodesPostauxRetraitAvecCommunes' is defined but never used  no-unused-vars
+  395:10  warning  'codePostalAutorise' is defined but never used                      no-unused-vars
+  408:10  warning  'decrementerTourneesOffertesClient' is defined but never used       no-unused-vars
+  450:10  warning  'enregistrerReservationPourFacturation' is defined but never used   no-unused-vars
+  498:10  warning  'obtenirPlagesBloqueesPourDate' is defined but never used           no-unused-vars
+  544:10  warning  'rechercherClientParEmail' is defined but never used                no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Gestion.js
+    13:10  warning  'validerClientParEmail' is defined but never used           no-unused-vars
+   196:10  warning  'envoyerLienEspaceClient' is defined but never used         no-unused-vars
+   276:10  warning  'rechercherClientParIdentifiant' is defined but never used  no-unused-vars
+   315:10  warning  'obtenirReservationsClient' is defined but never used       no-unused-vars
+   564:10  warning  'calculerCAEnCoursClient' is defined but never used         no-unused-vars
+   648:10  warning  'obtenirFacturesPourClient' is defined but never used       no-unused-vars
+   698:10  warning  'obtenirLienFactureParIdClient' is defined but never used   no-unused-vars
+   895:10  warning  'envoyerFactureClient' is defined but never used            no-unused-vars
+   964:10  warning  'mettreAJourDetailsReservation' is defined but never used   no-unused-vars
+  1172:10  warning  'replanifierReservation' is defined but never used          no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Maintenance.js
+    26:10  warning  'registerSheetExpectation' is defined but never used       no-unused-vars
+   141:10  warning  'purgeOldLogs' is defined but never used                   no-unused-vars
+   244:10  warning  'menuVerifierStructureFeuilles' is defined but never used  no-unused-vars
+   269:10  warning  'sauvegarderCodeProjet' is defined but never used          no-unused-vars
+   302:10  warning  'sauvegarderDonnees' is defined but never used             no-unused-vars
+   362:10  warning  'purgerAnciennesDonnees' is defined but never used         no-unused-vars
+   446:10  warning  'nettoyerOngletFacturation' is defined but never used      no-unused-vars
+   600:10  warning  'reparerEntetesFacturation' is defined but never used      no-unused-vars
+   711:10  warning  'normaliserEntetesFacturation' is defined but never used   no-unused-vars
+   759:10  warning  'menuResynchroniserEvenement' is defined but never used    no-unused-vars
+   776:10  warning  'menuPurgerEventId' is defined but never used              no-unused-vars
+   903:10  warning  'verifierCoherenceCalendrier' is defined but never used    no-unused-vars
+  1022:10  warning  'lancerAuditDrive' is defined but never used               no-unused-vars
+  1036:10  warning  'deduplicateReservations' is defined but never used        no-unused-vars
+  1144:10  warning  'menuCorrigerSiret' is defined but never used              no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\OAuthErrorHandler.js
+  288:10  warning  'doGetWithOAuthCheck' is defined but never used   no-unused-vars
+  310:10  warning  'logOAuthAttempt' is defined but never used       no-unused-vars
+  347:10  warning  'getOAuthHelpMessage' is defined but never used   no-unused-vars
+  364:10  warning  'showOAuthStatusToast' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\OneShotCleaner.js
+  25:10  warning  'runManualCleanup' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Pricing.js
+  229:10  warning  'formatCourseLabel_' is defined but never used      no-unused-vars
+  240:10  warning  'getClientPricingMatrix' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\PublicAssets.js
+  11:10  warning  'seedPublicAssets' is defined but never used    no-unused-vars
+  47:10  warning  'getPublicAssetsMap' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Questions.js
+  20:10  warning  'getQuestions' is defined but never used  no-unused-vars
+  53:10  warning  'addQuestion' is defined but never used   no-unused-vars
+  90:10  warning  'addAnswer' is defined but never used     no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Reservation.js
+   12:10  warning  'verifierCodePostalAcces' is defined but never used          no-unused-vars
+   37:10  warning  'reserverPanier' is defined but never used                   no-unused-vars
+  266:10  warning  'envoyerDevisParEmail' is defined but never used             no-unused-vars
+  345:10  warning  'genererDevisPdfFromItems' is defined but never used         no-unused-vars
+  693:10  warning  'verifierDisponibiliteRecurrence' is defined but never used  no-unused-vars
+  751:10  warning  'obtenirReservationsPourClient' is defined but never used    no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Resideur_Connector.js
+  32:10  warning  'surveiller' is defined but never used          no-unused-vars
+  52:10  warning  'signalerAuPiluleur' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Setup_Checks.js
+  30:10  warning  'checkSetup_ELS' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Setup_Database.js
+  11:10  warning  'setupDatabase' is defined but never used  no-unused-vars
+  81:10  warning  'onOpen_Setup' is defined but never used   no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Setup_Master.js
+  60:10  warning  'setupSheetsMaster' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Setup_Repair.js
+  1:10  warning  'autoRepairConfig' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Tesla.js
+  162:10  warning  'genererRapportTesla' is defined but never used           no-unused-vars
+  408:10  warning  'getTeslaStatusForUI' is defined but never used           no-unused-vars
+  489:10  warning  'createTeslaReportsFolder' is defined but never used      no-unused-vars
+  517:10  warning  'traiterCoutsJournaliersTesla' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Tesla_Livraison_Renderer.js
+  6:10  warning  'renderTeslaLivraisonInterface' is defined but never used  no-unused-vars
+  6:40  warning  '_e' is defined but never used                             no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Tesla_Setup.js
+  17:10  warning  'installerDeclencheursTesla' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Tests_Interne.js
+  9:10  warning  'runTests' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Utilitaires.js
+   15:10  warning  'formaterDateEnYYYYMMDD' is defined but never used         no-unused-vars
+   28:10  warning  'formaterDateEnHHMM' is defined but never used             no-unused-vars
+   43:10  warning  'formaterDatePersonnalise' is defined but never used       no-unused-vars
+   61:10  warning  'formatMoisFrancais' is defined but never used             no-unused-vars
+   74:10  warning  'formatMontantEuro' is defined but never used              no-unused-vars
+   87:10  warning  'normaliserCodePostal' is defined but never used           no-unused-vars
+  110:10  warning  'insererImageDepuisPlaceholder' is defined but never used  no-unused-vars
+  287:10  warning  'getLogoPublicUrl' is defined but never used               no-unused-vars
+  310:10  warning  'getLogoEmailBlockHtml' is defined but never used          no-unused-vars
+  329:10  warning  'encodeMailSubjectUtf8' is defined but never used          no-unused-vars
+  346:10  warning  'toCents' is defined but never used                        no-unused-vars
+  355:10  warning  'fromCents' is defined but never used                      no-unused-vars
+  364:10  warning  'nextInvoiceNumber' is defined but never used              no-unused-vars
+  385:10  warning  'obtenirIndicesEnTetes' is defined but never used          no-unused-vars
+  476:10  warning  'getFacturationHeaderIndices_' is defined but never used   no-unused-vars
+  494:10  warning  'obtenirOuCreerDossier' is defined but never used          no-unused-vars
+  560:10  warning  'test_logHeadersModeleFacture' is defined but never used   no-unused-vars
+  592:10  warning  'logFailedLogin' is defined but never used                 no-unused-vars
+  612:10  warning  'logRequest' is defined but never used                     no-unused-vars
+  624:10  warning  'include' is defined but never used                        no-unused-vars
+  752:10  warning  'setSecret' is defined but never used                      no-unused-vars
+  791:10  warning  'generateSignedClientLink' is defined but never used       no-unused-vars
+  823:10  warning  'safeSendEmail' is defined but never used                  no-unused-vars
+  901:10  warning  'getConfiguration' is defined but never used               no-unused-vars
+  913:10  warning  'assertClient' is defined but never used                   no-unused-vars
+  929:10  warning  'assertReservationId' is defined but never used            no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\Validation.js
+  13:10  warning  'validerConfiguration' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\auditProject.js
+   14:10  warning  'generateTraceSecret' is defined but never used  no-unused-vars
+   26:10  warning  'auditProject' is defined but never used         no-unused-vars
+  133:10  warning  'installAuditTrigger' is defined but never used  no-unused-vars
+  152:10  warning  'setupTraceSheet' is defined but never used      no-unused-vars
+  232:10  warning  'doPost' is defined but never used               no-unused-vars
+  342:10  warning  'demo_log' is defined but never used             no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\debug_email.js
+  1:10  warning  'debugEmailSystem' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\tests\test_chatAssistant.js
+   40:10  warning  'test_callChatGPT_refuseSansFlag' is defined but never used      no-unused-vars
+   50:10  warning  'test_askAssistantOnThread_rateLimit' is defined but never used  no-unused-vars
+   86:10  warning  'test_askAssistantOnThread_success' is defined but never used    no-unused-vars
+  167:10  warning  'test_askAssistantOnThread_apiError' is defined but never used   no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\tests\test_clientPortal.js
+   6:10  warning  'test_client_getPortalLink_signed' is defined but never used    no-unused-vars
+  21:10  warning  'test_envoyerLienEspaceClient_smoke' is defined but never used  no-unused-vars
+  29:18  error    Empty block statement                                           no-empty
+
+C:\Users\ELS\EL_Services_Global\Projet_ELS\tests\test_pricing.js
+  40:10  warning  'testComputeCoursePriceV1_NegativeReturn' is defined but never used  no-unused-vars
+
+C:\Users\ELS\EL_Services_Global\tests\environment.spec.js
+  1:16  warning  'expect' is defined but never used  no-unused-vars
+  3:35  warning  'page' is defined but never used    no-unused-vars
+
+Ô£û 245 problems (1 error, 244 warnings)
+
