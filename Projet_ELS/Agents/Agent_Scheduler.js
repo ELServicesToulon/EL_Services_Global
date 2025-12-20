@@ -10,7 +10,7 @@ var STRATEGIES = {
         icon: "🌱",
         desc: "Budget minimal. Lundi/Vendredi uniquement.",
         tasks: [
-            { agent: "Client Mystère", function: "executerClientMystere", days: [ScriptApp.WeekDay.MONDAY, ScriptApp.WeekDay.WEDNESDAY, ScriptApp.WeekDay.FRIDAY], hour: 11 },
+            { agent: "Client Mystère", function: "executerClientExpert", days: [ScriptApp.WeekDay.MONDAY, ScriptApp.WeekDay.WEDNESDAY, ScriptApp.WeekDay.FRIDAY], hour: 11 },
             { agent: "Sentinel", function: "runSentinelAudit", days: [ScriptApp.WeekDay.MONDAY], hour: 9 },
             { agent: "Billing", function: "runBillingAudit", days: [ScriptApp.WeekDay.FRIDAY], hour: 18 } // Fin de mois simulé par vendredi
         ]
@@ -20,8 +20,8 @@ var STRATEGIES = {
         icon: "⚖️",
         desc: "Standard Production. Check quotidien.",
         tasks: [
-            { agent: "Client Mystère", function: "executerClientMystere", days: [ScriptApp.WeekDay.MONDAY, ScriptApp.WeekDay.TUESDAY, ScriptApp.WeekDay.WEDNESDAY, ScriptApp.WeekDay.THURSDAY, ScriptApp.WeekDay.FRIDAY], hour: 11 },
-            { agent: "Client Mystère", function: "executerClientMystere", days: [ScriptApp.WeekDay.MONDAY, ScriptApp.WeekDay.TUESDAY, ScriptApp.WeekDay.WEDNESDAY, ScriptApp.WeekDay.THURSDAY, ScriptApp.WeekDay.FRIDAY], hour: 16 },
+            { agent: "Client Mystère", function: "executerClientExpert", days: [ScriptApp.WeekDay.MONDAY, ScriptApp.WeekDay.TUESDAY, ScriptApp.WeekDay.WEDNESDAY, ScriptApp.WeekDay.THURSDAY, ScriptApp.WeekDay.FRIDAY], hour: 11 },
+            { agent: "Client Mystère", function: "executerClientExpert", days: [ScriptApp.WeekDay.MONDAY, ScriptApp.WeekDay.TUESDAY, ScriptApp.WeekDay.WEDNESDAY, ScriptApp.WeekDay.THURSDAY, ScriptApp.WeekDay.FRIDAY], hour: 16 },
             { agent: "Sentinel", function: "runSentinelAudit", everyDay: true, hour: 0 },
             { agent: "Bolt", function: "runBoltAudit", days: [ScriptApp.WeekDay.MONDAY], hour: 8 },
             { agent: "Billing", function: "runBillingAudit", days: [ScriptApp.WeekDay.FRIDAY], hour: 19 }
@@ -32,8 +32,8 @@ var STRATEGIES = {
         icon: "🚀",
         desc: "Proactif. Surveillance continue.",
         tasks: [
-            { agent: "Client Mystère", function: "executerClientMystere", everyDay: true, hour: 7 },
-            { agent: "Client Mystère", function: "executerClientMystere", everyDay: true, hour: 13 },
+            { agent: "Client Mystère", function: "executerClientExpert", everyDay: true, hour: 7 },
+            { agent: "Client Mystère", function: "executerClientExpert", everyDay: true, hour: 13 },
             { agent: "Sentinel", function: "runSentinelAudit", everyDay: true, hour: 12 },
             { agent: "Sentinel", function: "runSentinelAudit", everyDay: true, hour: 23 },
             { agent: "Billing", function: "runBillingAudit", everyDay: true, hour: 6 },
@@ -52,7 +52,7 @@ function applyStrategy(strategyKey) {
 
         // 1. Nettoyage TOTAL des triggers (sauf ceux système/critiques si on savait les filtrer, ici on nettoie tout ce qui est agent)
         // On filtre par nom de fonction connue
-        const knownFunctions = ["executerClientMystere", "runSentinelAudit", "runBoltAudit", "runBillingAudit", "runPaletteAudit", "runMechanicAudit"];
+        const knownFunctions = ["executerClientExpert", "executerClientMystere", "runSentinelAudit", "runBoltAudit", "runBillingAudit", "runPaletteAudit", "runMechanicAudit"];
 
         const triggers = ScriptApp.getProjectTriggers();
         let deletedCount = 0;
