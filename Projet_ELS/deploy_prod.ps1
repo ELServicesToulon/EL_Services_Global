@@ -3,6 +3,7 @@
 # ID de déploiement cible : AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb
 
 $DeploymentId = "AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb"
+Set-Location $PSScriptRoot
 
 Write-Host "1. Envoi du code vers Google (Clasp Push)..."
 clasp push --force
@@ -20,6 +21,7 @@ if ($versionOutput -match "(\d+)") {
     clasp deploy -i $DeploymentId -V $newVersion --description "Production Update"
     
     Write-Host "SUCCESS: L'URL de production utilise maintenant la version $newVersion."
-} else {
+}
+else {
     Write-Host "ERREUR: Impossible de récupérer le numéro de version."
 }

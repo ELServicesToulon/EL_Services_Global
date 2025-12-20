@@ -4,6 +4,7 @@
 # 3. Synchronise avec GitHub
 
 $ErrorActionPreference = "Stop"
+Set-Location $PSScriptRoot
 
 Write-Host "=== STARTING COMPLETE DEPLOYMENT FLOW ===" -ForegroundColor Cyan
 
@@ -27,7 +28,8 @@ $remotes = git remote -v
 if ($remotes) {
     Write-Host "Pushing to GitHub..."
     git push
-} else {
+}
+else {
     Write-Host "WARNING: No remote repository configured. Changes committed locally only." -ForegroundColor Red
 }
 
