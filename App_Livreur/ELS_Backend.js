@@ -21,6 +21,9 @@ function getConfig() {
  */
 function getSheetData(sheetName) {
   Logger.log("getSheetData called with: " + String(sheetName)); // Debug
+  if (!sheetName) {
+    try { throw new Error('Stack Trace'); } catch (e) { Logger.log("Stack: " + e.stack); }
+  }
   const config = getConfig();
   const ssId = config.ID_FEUILLE_CALCUL;
   if (!ssId) {
@@ -59,7 +62,7 @@ function enregistrerStatutLivraison(data) {
   const config = getConfig();
   const ssId = config.ID_FEUILLE_CALCUL;
   const traceSheetName = config.SHEET_TRACE_LIVRAISON || SHEET_TRACE; // Assurez-vous d'avoir SHEET_TRACE_LIVRAISON dans les propriétés si besoin
-  
+
   if (!ssId) {
     return { success: false, message: "ID_FEUILLE_CALCUL non configuré." };
   }
@@ -73,7 +76,7 @@ function enregistrerStatutLivraison(data) {
     }
 
     const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    
+
     // Correspondance des champs pour la feuille TRACE_Livraisons
     const row = {};
     row.ts_iso = new Date().toISOString();
@@ -122,11 +125,11 @@ function enregistrerStatutLivraison(data) {
             validationInfo.message = "Attention: Vous êtes à " + Math.round(dist) + "m de l'établissement.";
           }
         } else {
-             validationInfo.message = "Coordonnées GPS de l'établissement manquantes en base.";
+          validationInfo.message = "Coordonnées GPS de l'établissement manquantes en base.";
         }
       }
     } else if (!data.gps_lat || !data.gps_lng) {
-        validationInfo.message = "Position GPS du livreur non reçue.";
+      validationInfo.message = "Position GPS du livreur non reçue.";
     }
 
     return {
@@ -172,11 +175,11 @@ function getEstablishmentData(nom) {
     // Correspondance exacte ou partielle forte
     // On vérifie aussi si le nom de l'établissement en base est inclus dans le nom cible (ex: "Tamaris" dans "Tamaris / SELARL...")
     if (rowName === targetName ||
-       (rowName.includes(targetName) && targetName.length > 5) ||
-       (targetName.includes(rowName) && rowName.length > 3)) {
+      (rowName.includes(targetName) && targetName.length > 5) ||
+      (targetName.includes(rowName) && rowName.length > 3)) {
       const adresse = (adresseIndex > -1 ? row[adresseIndex] : "") + " " +
-                      (cpIndex > -1 ? row[cpIndex] : "") + " " +
-                      (villeIndex > -1 ? row[villeIndex] : "");
+        (cpIndex > -1 ? row[cpIndex] : "") + " " +
+        (villeIndex > -1 ? row[villeIndex] : "");
 
       return {
         nom: row[nomIndex],
@@ -205,8 +208,8 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const deltaLambda = (lon2 - lon1) * Math.PI / 180;
 
   const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-            Math.cos(phi1) * Math.cos(phi2) *
-            Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+    Math.cos(phi1) * Math.cos(phi2) *
+    Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return R * c;
@@ -228,13 +231,13 @@ function getListeTournees(chauffeurEmail) {
   // assignés à 'chauffeurEmail' pour la journée.
   // Pour le test, on filtre sur la raison sociale "Pharmacie de Portissol" ou "Tamaris" si l'email correspond
   // à l'un des emails de client dans Clients.csv pour simuler une tournée active.
-  
+
   const reservationsData = getSheetData("Facturation"); // Utiliser Facturation comme source de Réservations
   if (reservationsData.length === 0) {
     Logger.log("Aucune donnée de facturation trouvée.");
     return [];
   }
-  
+
   const headers = reservationsData[0];
   const data = reservationsData.slice(1);
   const ID_RESERVATION_COL = headers.indexOf("ID Réservation");
@@ -244,41 +247,41 @@ function getListeTournees(chauffeurEmail) {
   const DATE_COL = headers.indexOf("Date");
   const STATUT_COL = headers.indexOf("Statut");
   const EVENT_ID_COL = headers.indexOf("Event ID");
-  
+
   if (ID_RESERVATION_COL === -1) {
     Logger.log("Colonne 'ID Réservation' non trouvée dans Facturation.");
     return [];
   }
-  
+
   const today = new Date().toLocaleDateString('fr-FR');
-  
+
   const tournées = data.filter(row => {
     const dateCell = row[DATE_COL];
     let rowDateStr = '';
     if (dateCell instanceof Date) {
       rowDateStr = dateCell.toLocaleDateString('fr-FR');
     } else if (typeof dateCell === 'string') {
-       // Tenter de parser si c'est une chaîne, par exemple "02/12/2025 10:45:00"
+      // Tenter de parser si c'est une chaîne, par exemple "02/12/2025 10:45:00"
       const datePart = dateCell.split(' ')[0];
       if (datePart) {
         // Simple vérification de la date formatée: DD/MM/YYYY
         rowDateStr = datePart;
       }
     }
-    
+
     // Simuler l'assignation du livreur: Ici, on considère que toutes les tournées
     // non livrées du jour sont potentiellement pour le livreur connecté.
     // L'implémentation réelle nécessiterait une colonne 'Chauffeur ID' dans la feuille de Facturation
     // ou de lire l'agenda du chauffeur.
     return rowDateStr === today && row[STATUT_COL] !== 'Livrée';
-    
+
   }).map((row, index) => {
     const details = row[DETAILS_COL] || "";
     // Extraire le nombre d'arrêts supplémentaires pour simuler les arrêts détaillés.
     // Ex: "Tournée de 120min (6 arrêt(s) total(s) (dont 5 supp. + retour), retour: oui)"
     const match = details.match(/\((\d+)\s+arr.t\(s\)\s+total\(s\)/);
     const totalArrets = match ? parseInt(match[1], 10) : 1; // Au moins 1 arrêt (le client principal)
-    
+
     // Créer une liste d'arrêts pour la vue du livreur
     const arrets = [];
     arrets.push({
@@ -287,7 +290,7 @@ function getListeTournees(chauffeurEmail) {
       adresse: "Adresse Principale (à récupérer via un lookup client)",
       type_arret: "Client Principal"
     });
-    
+
     for (let i = 1; i < totalArrets; i++) {
       arrets.push({
         livraison_id: row[ID_RESERVATION_COL] + "-supp" + i,
@@ -299,14 +302,14 @@ function getListeTournees(chauffeurEmail) {
 
     // Récupérer les données de traçage existantes pour cet ID Réservation
     const traces = getTracesForTournee(row[EVENT_ID_COL] || row[ID_RESERVATION_COL]);
-    
+
     // Mettre à jour les arrêts avec les statuts et notes déjà enregistrés
     arrets.forEach(arret => {
-        const existingTrace = traces.find(t => t.livraison_id === arret.livraison_id);
-        arret.status = existingTrace ? existingTrace.status : 'À livrer';
-        arret.note = existingTrace ? existingTrace.anomalie_note : '';
+      const existingTrace = traces.find(t => t.livraison_id === arret.livraison_id);
+      arret.status = existingTrace ? existingTrace.status : 'À livrer';
+      arret.note = existingTrace ? existingTrace.anomalie_note : '';
     });
-    
+
     return {
       event_id: row[EVENT_ID_COL] || row[ID_RESERVATION_COL],
       client_nom: row[CLIENT_NOM_COL],
@@ -315,7 +318,7 @@ function getListeTournees(chauffeurEmail) {
       arrets: arrets
     };
   });
-  
+
   return tournées;
 }
 
@@ -329,22 +332,22 @@ function getTracesForTournee(tourneeId) {
   const traceSheetName = config.SHEET_TRACE_LIVRAISON || (typeof SHEET_TRACE !== 'undefined' ? SHEET_TRACE : "TRACE_Livraisons");
   Logger.log("getTracesForTournee: traceSheetName = " + traceSheetName);
   const data = getSheetData(traceSheetName || "TRACE_Livraisons");
-  
+
   if (data.length < 2) return [];
-  
+
   const headers = data[0];
   const traceData = data.slice(1);
   const TOURNEE_ID_COL = headers.indexOf("tournee_id");
-  
+
   if (TOURNEE_ID_COL === -1) {
     Logger.log("Colonne 'tournee_id' non trouvée dans TRACE_Livraisons.");
     return [];
   }
-  
+
   return traceData.filter(row => row[TOURNEE_ID_COL] === tourneeId).map(row => {
     const trace = {};
     headers.forEach((header, index) => {
-        trace[header.toLowerCase().replace(/ /g, '_').replace(/é/g, 'e').replace(/[^\w]/g, '')] = row[index];
+      trace[header.toLowerCase().replace(/ /g, '_').replace(/é/g, 'e').replace(/[^\w]/g, '')] = row[index];
     });
     return trace;
   });
@@ -358,14 +361,14 @@ function getTracesForTournee(tourneeId) {
 function doGet(e) {
   // Routing vers l'interface Tesla si demandée
   if (e && e.parameter && e.parameter.page === 'tesla') {
-     return renderTeslaLivraisonInterface(e);
+    return renderTeslaLivraisonInterface(e);
   }
 
   var template = HtmlService.createTemplateFromFile('Index');
   template.pageTitle = 'EL Services Livreur'; // Correction: Définition de pageTitle requis par le template
   return template.evaluate()
-      .setTitle('EL Services Livreur')
-      .setSandboxMode(HtmlService.SandboxMode.IFRAME);
+    .setTitle('EL Services Livreur')
+    .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
 
 /**
@@ -437,8 +440,8 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
     const data = feuille.getDataRange().getValues();
     if (data.length < 2) return { success: true, reservations: [] };
 
-    const headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
-    
+    const headers = data[0].map(function (h) { return String(h).toLowerCase().trim(); });
+
     // Recherche des indices de colonnes
     const idxDate = headers.indexOf("date");
     const idxClient = headers.findIndex(h => h.includes("client (raison") || h.includes("client"));
@@ -454,28 +457,28 @@ function obtenirToutesReservationsPourDate(dateFiltreString, authToken) {
 
     // Parcours des données
     for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        const dateCell = row[idxDate];
-        let rowDateStr = "";
-        
-        if (dateCell instanceof Date) {
-            rowDateStr = Utilities.formatDate(dateCell, Session.getScriptTimeZone(), "yyyy-MM-dd");
-        } else {
-             // Tentative de parsing manuel si string
-             // ... (simplifié)
-        }
+      const row = data[i];
+      const dateCell = row[idxDate];
+      let rowDateStr = "";
 
-        if (rowDateStr === dateFiltreString) {
-            reservations.push({
-                id: (idxId > -1) ? row[idxId] : ("ROW-" + i),
-                start: (dateCell instanceof Date) ? dateCell.toISOString() : null, // Heure approx
-                clientName: (idxClient > -1) ? row[idxClient] : "Client Inconnu",
-                clientEmail: (idxEmail > -1) ? row[idxEmail] : "",
-                details: (idxDetails > -1) ? row[idxDetails] : "",
-                statut: (idxStatut > -1) ? row[idxStatut] : "",
-                note: (idxNote > -1) ? row[idxNote] : ""
-            });
-        }
+      if (dateCell instanceof Date) {
+        rowDateStr = Utilities.formatDate(dateCell, Session.getScriptTimeZone(), "yyyy-MM-dd");
+      } else {
+        // Tentative de parsing manuel si string
+        // ... (simplifié)
+      }
+
+      if (rowDateStr === dateFiltreString) {
+        reservations.push({
+          id: (idxId > -1) ? row[idxId] : ("ROW-" + i),
+          start: (dateCell instanceof Date) ? dateCell.toISOString() : null, // Heure approx
+          clientName: (idxClient > -1) ? row[idxClient] : "Client Inconnu",
+          clientEmail: (idxEmail > -1) ? row[idxEmail] : "",
+          details: (idxDetails > -1) ? row[idxDetails] : "",
+          statut: (idxStatut > -1) ? row[idxStatut] : "",
+          note: (idxNote > -1) ? row[idxNote] : ""
+        });
+      }
     }
 
     return { success: true, reservations: reservations };
@@ -493,9 +496,9 @@ function livreurMettreAJourStatutReservation(idReservation, statut, authToken) {
   // ... (existing implementation) ...
   try {
     if (!isLivreurAuthorized_(authToken)) {
-        return { success: false, error: "Non autorisé." };
+      return { success: false, error: "Non autorisé." };
     }
-    
+
     const config = getConfig();
     const ssId = config.ID_FEUILLE_CALCUL;
     if (!ssId) return { success: false, error: "Config manquante." };
@@ -512,13 +515,13 @@ function livreurMettreAJourStatutReservation(idReservation, statut, authToken) {
     if (idxId === -1 || idxStatut === -1) return { success: false, error: "Colonnes ID/Statut introuvables." };
 
     const cleanId = String(idReservation).trim();
-    
+
     for (let i = 1; i < data.length; i++) {
-        const rowId = String(data[i][idxId]).trim();
-        if (rowId === cleanId) {
-            feuille.getRange(i + 1, idxStatut + 1).setValue(statut);
-            return { success: true, statut: statut };
-        }
+      const rowId = String(data[i][idxId]).trim();
+      if (rowId === cleanId) {
+        feuille.getRange(i + 1, idxStatut + 1).setValue(statut);
+        return { success: true, statut: statut };
+      }
     }
 
     return { success: false, error: "Réservation introuvable." };
@@ -534,39 +537,39 @@ function livreurMettreAJourStatutReservation(idReservation, statut, authToken) {
  */
 function traiterLivraisonComplete(data) {
   try {
-      // 1. Mise à jour du statut dans la feuille de gestion
-      const updateResult = livreurMettreAJourStatutReservation(data.livraison_id, data.status, data.authToken);
-      if (!updateResult.success) {
-          Logger.log("Echec mise à jour statut: " + updateResult.error);
-          // On continue quand même pour la trace, ou on stop ?
-          // Mieux vaut logger la trace meme si le statut échoue (preuve de passage)
-      }
+    // 1. Mise à jour du statut dans la feuille de gestion
+    const updateResult = livreurMettreAJourStatutReservation(data.livraison_id, data.status, data.authToken);
+    if (!updateResult.success) {
+      Logger.log("Echec mise à jour statut: " + updateResult.error);
+      // On continue quand même pour la trace, ou on stop ?
+      // Mieux vaut logger la trace meme si le statut échoue (preuve de passage)
+    }
 
-      // 2. Enregistrement de la trace GPS
-      // Adaptation des données pour enregistrerStatutLivraison
-      // Data attendu: tournee_id, livraison_id, ehpad_id, chauffeur_id, status, anomalie_note, gps_lat, gps_lng...
-      const traceResult = enregistrerStatutLivraison({
-          tournee_id: data.tournee_id || "", 
-          livraison_id: data.livraison_id,
-          ehpad_id: data.client_id || data.livraison_id, // Fallback
-          chauffeur_id: "LIVREUR-APP", // Identité générique si pas dispo
-          status: data.status,
-          anomalie_note: data.note || "",
-          anomalie_code: data.status === 'Livrée' ? 'RAS' : 'ANOMALIE',
-          gps_lat: data.gps_lat,
-          gps_lng: data.gps_lng,
-          etablissement_nom: data.client_nom, // Pour validation distance
-          app_version: 'Tesla_Mix_1.0'
-      });
+    // 2. Enregistrement de la trace GPS
+    // Adaptation des données pour enregistrerStatutLivraison
+    // Data attendu: tournee_id, livraison_id, ehpad_id, chauffeur_id, status, anomalie_note, gps_lat, gps_lng...
+    const traceResult = enregistrerStatutLivraison({
+      tournee_id: data.tournee_id || "",
+      livraison_id: data.livraison_id,
+      ehpad_id: data.client_id || data.livraison_id, // Fallback
+      chauffeur_id: "LIVREUR-APP", // Identité générique si pas dispo
+      status: data.status,
+      anomalie_note: data.note || "",
+      anomalie_code: data.status === 'Livrée' ? 'RAS' : 'ANOMALIE',
+      gps_lat: data.gps_lat,
+      gps_lng: data.gps_lng,
+      etablissement_nom: data.client_nom, // Pour validation distance
+      app_version: 'Tesla_Mix_1.0'
+    });
 
-      return { 
-          success: true, 
-          update: updateResult, 
-          trace: traceResult 
-      };
+    return {
+      success: true,
+      update: updateResult,
+      trace: traceResult
+    };
 
   } catch (e) {
-      Logger.log("Erreur traiterLivraisonComplete: " + e.toString());
-      return { success: false, error: e.message };
+    Logger.log("Erreur traiterLivraisonComplete: " + e.toString());
+    return { success: false, error: e.message };
   }
 }
