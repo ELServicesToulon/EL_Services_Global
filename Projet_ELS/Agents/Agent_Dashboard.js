@@ -98,7 +98,20 @@ function apiGetAgentsStatus() {
  * Ouvre la Sidebar des Agents
  */
 function openAgentSidebar() {
-    const template = HtmlService.createTemplateFromFile('Agent_Dashboard_Interface');
+    // Tentative de chargement avec le préfixe de dossier (structure standard Clasp)
+    let template;
+    try {
+        template = HtmlService.createTemplateFromFile('Agents/Agent_Dashboard_Interface');
+    } catch (e) {
+        // Fallback si le fichier est à la racine (aplatissement)
+        try {
+            template = HtmlService.createTemplateFromFile('Agent_Dashboard_Interface');
+        } catch (e2) {
+            SpreadsheetApp.getUi().alert("Erreur: Template 'Agent_Dashboard_Interface' introuvable.");
+            return;
+        }
+    }
+
     // On adapte le template pour la sidebar (CSS minimaliste peut-être requis)
     const output = template.evaluate().setTitle('Tableau de Bord Agents');
     SpreadsheetApp.getUi().showSidebar(output);

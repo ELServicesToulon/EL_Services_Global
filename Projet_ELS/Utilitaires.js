@@ -407,7 +407,7 @@ function obtenirIndicesEnTetes(feuille, enTetesRequis) {
 // Canonique: on reprend FACTURATION_HEADERS si disponible, sinon un fallback identique.
 const FACTURATION_HEADERS_CANONICAL = (typeof FACTURATION_HEADERS !== 'undefined' && Array.isArray(FACTURATION_HEADERS))
   ? FACTURATION_HEADERS
-  : ['Date','Client (Raison S. Client)','Client (Email)','Type','Détails','Montant','Statut','Valider','N° Facture','Event ID','ID Réservation','Note Interne','Tournée Offerte Appliquée','Type Remise Appliquée','Valeur Remise Appliquée','Lien Note'];
+  : ['Date', 'Client (Raison S. Client)', 'Client (Email)', 'Type', 'Détails', 'Montant', 'Statut', 'Valider', 'N° Facture', 'Event ID', 'ID Réservation', 'Note Interne', 'Tournée Offerte Appliquée', 'Type Remise Appliquée', 'Valeur Remise Appliquée', 'Lien Note'];
 const FACTURATION_HEADERS_OPTIONAL = ['ID PDF', 'Email à envoyer', 'Resident', 'ID Devis'];
 const FACTURATION_HEADER_ALIASES = {
   'Date': ['date prestation', 'date course'],
@@ -449,10 +449,10 @@ function buildFacturationHeaderIndex_(headers) {
   const indexMap = {};
   const resolvedNames = {};
 
-  allCanon.forEach(function(name) {
+  allCanon.forEach(function (name) {
     const target = normalizeHeaderValue_(name);
     const aliases = (FACTURATION_HEADER_ALIASES[name] || []).map(normalizeHeaderValue_);
-    const idx = normalizedHeaders.findIndex(function(h) {
+    const idx = normalizedHeaders.findIndex(function (h) {
       if (!h) return false;
       if (h === target) return true;
       return aliases.indexOf(h) !== -1;
@@ -478,7 +478,7 @@ function getFacturationHeaderIndices_(sheet, requiredHeaders) {
   const header = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0];
   const { indexMap, resolvedNames } = buildFacturationHeaderIndex_(header);
   const required = (requiredHeaders && requiredHeaders.length) ? requiredHeaders : FACTURATION_HEADERS_CANONICAL;
-  const missing = required.filter(function(name) { return typeof indexMap[name] === 'undefined'; });
+  const missing = required.filter(function (name) { return typeof indexMap[name] === 'undefined'; });
   if (missing.length) {
     throw new Error(`Colonnes manquantes dans "${sheet.getName()}": ${missing.join(', ')}`);
   }
@@ -630,6 +630,14 @@ function include(nomFichier) {
   try {
     return HtmlService.createTemplateFromFile(label).evaluate().getContent();
   } catch (e) {
+    // Tentative avec le préfixe Agents/ si échoué
+    if (!label.startsWith('Agents/') && !label.includes('/')) {
+      try {
+        return HtmlService.createTemplateFromFile('Agents/' + label).evaluate().getContent();
+      } catch (e2) {
+        // Échec silencieux final
+      }
+    }
     console.error('Fichier inclus introuvable: ' + label + ' (' + e.message + ')\nStack: ' + (e && e.stack ? e.stack : ''));
     return '';
   }
