@@ -43,10 +43,12 @@ function apiRunAgent(agentId) {
                 }
 
             case 'client_mystere':
-                if (typeof executerClientMystere === 'function') {
-                    return executerClientMystere();
+                // Note : On garde l'ID 'client_mystere' pour ne pas casser l'UI existante, 
+                // mais on pointe vers la nouvelle logique 'Client Expert'.
+                if (typeof executerClientExpert === 'function') {
+                    return executerClientExpert();
                 } else {
-                    return "Erreur: Fonction executerClientMystere introuvable.";
+                    return "Erreur: Fonction executerClientExpert introuvable (Migration en cours ?).";
                 }
 
             case 'scheduler_apply':
