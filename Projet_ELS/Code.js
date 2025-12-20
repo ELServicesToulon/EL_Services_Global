@@ -112,14 +112,7 @@ function registerRoutes_() {
   // Admin
   Router.add('admin', handleAdminPage_);
 
-  // Livraison / Tesla
-  Router.add('livraison', handleLivraisonPage_);
-  Router.add('livreur', handleLivraisonPage_);
-  Router.add('tesla-livraison', handleLivraisonPage_);
-  Router.add('tesla_livraison', handleLivraisonPage_);
-  Router.add('tesla', handleTeslaLivreurPage_);
-  Router.add('tesla_livreur', handleTeslaLivreurPage_);
-  Router.add('tesla_juniper', handleTeslaLivreurPage_);
+
 
   // Gestion Client
   Router.add('gestion', handleGestionPage_);
@@ -160,23 +153,7 @@ function handleAdminPage_(e) {
   );
 }
 
-// ... Les autres handlers (handleLivraisonPage_, handleGestionPage_, etc.) sont identiques à l'original
-// et référencés ici. Pour ne pas casser le fichier, je réintègre les fonctions originales ci-dessous,
-// en m'assurant qu'elles utilisent les nouveaux helpers si possible.
-
-function handleLivraisonPage_(e) {
-  if (isCallable_('renderTeslaLivraisonInterface')) {
-    return renderTeslaLivraisonInterface(e);
-  }
-  return handleTeslaLivreurPage_(e);
-}
-
-function handleTeslaLivreurPage_(_e) {
-  var template = HtmlService.createTemplateFromFile('Tesla_Livreur_Interface');
-  template.pageTitle = 'Tesla Junyper - ELS';
-  var output = template.evaluate().setTitle('Tesla Junyper - ELS');
-  return output.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
+// ... Les autres handlers (handleGestionPage_, etc.) sont référencés ici.
 
 function handleGestionPage_(e) {
   const params = e && e.parameter ? e.parameter : {};
