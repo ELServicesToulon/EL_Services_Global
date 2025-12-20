@@ -1,154 +1,148 @@
 /**
- * Agent Client Mystère
- * ====================
- * Cet agent simule un utilisateur (Client Mystère) qui navigue sur le site
- * pour vérifier la disponibilité et la performance des pages clés.
+ * Agent Client Mystère (Mystery Shopper)
+ * ======================================
+ * Expert en Assurance Qualité Utilisateur (QA/UX).
+ * Mission : Simuler un utilisateur humain pour vérifier le parcours critique.
+ * Spécialité : Détection d'erreurs, Dispatch de correctifs, et Suggestions d'évolutions.
+ * Horaires : Lundi-Vendredi, 11h00 et 16h30.
  */
 
 /**
  * Exécute la tournée du Client Mystère.
  * Scanne les pages configurées et génère un rapport.
+ * Dispatch les erreurs aux agents concernés.
  */
 function executerClientMystere() {
     try {
+        // 1. Vérification Horaire (Lundi-Vendredi ?)
+        var now = new Date();
+        var day = now.getDay(); // 0=Dim, 1=Lun, ..., 6=Sam
+        // Si weekend (0 ou 6), on s'arrête (sauf si forcé manuellement via paramètre, mais ici Trigger)
+        // Note: Le trigger horaire peut déclencher, donc on filtre ici.
+        if (day === 0 || day === 6) {
+            Logger.log("Weekend - Pas de Client Mystère.");
+            return "Weekend - Repos.";
+        }
+
+        // 2. Initialisation URL
         var webAppUrl = PropertiesService.getScriptProperties().getProperty("WEBAPP_URL");
-
-        // Tentative de récupération automatique si non défini (ne fonctionne que si déployé proprement)
         if (!webAppUrl) {
-            try {
-                webAppUrl = ScriptApp.getService().getUrl();
-            } catch (e) {
-                // Ignorer, peut échouer si pas publié
-            }
+            // Fallback
+            try { webAppUrl = ScriptApp.getService().getUrl(); } catch (e) { }
         }
 
         if (!webAppUrl) {
-            return "⚠️ Configuration manquante : Impossible de trouver l'URL de l'application.\n" +
-                "Veuillez définir la propriété de script 'WEBAPP_URL' avec l'URL de votre déploiement.";
+            return "⚠️ Configuration manquante : WEBAPP_URL non définie.";
         }
 
-        // Liste des pages à tester
-        // Format: { nom: "", page: "", attendu: "" }
+        // 3. Définition du Parcours (Scenario)
         var pagesATester = [
-            {
-                nom: "Accueil",
-                page: "",
-                attendu: 200 // Code HTTP 200
-            },
-            {
-                nom: "Infos Confidentialité",
-                page: "infos",
-                attendu: "Confidentialité" // Texte à trouver dans le corps
-            },
-            {
-                nom: "Administration (Accès)",
-                page: "admin",
-                // On s'attend à être bloqué ou redirigé si on n'est pas auth, mais la page doit répondre
-                attendu: 200
-            }
+            { nom: "Accueil", page: "", attendu: 200 },
+            { nom: "Infos Confidentialité", page: "infos", attendu: "Confidentialité" },
+            { nom: "Administration (Accès)", page: "admin", attendu: 200 }
         ];
 
-        var rapport = ["🕵️ **Rapport du Client Mystère**", "URL Cible : " + webAppUrl, ""];
-        var erreurs = 0;
+        var rapport = ["🕵️ **Rapport Expert QA (Client Mystère)**"];
+        rapport.push("Date: " + Utilities.formatDate(now, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm"));
+        rapport.push("--------------------------------------------------");
+
+        var erreurs = [];
         var tempsTotal = 0;
 
+        // 4. Exécution des Tests
         for (var i = 0; i < pagesATester.length; i++) {
             var test = pagesATester[i];
             var url = webAppUrl + (webAppUrl.indexOf('?') === -1 ? '?' : '&') + "page=" + test.page;
 
             var debut = new Date().getTime();
             var response = null;
-            var erreurMsg = null;
+            var errorDetails = null;
 
             try {
                 response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
             } catch (e) {
-                erreurMsg = e.toString();
+                errorDetails = e.toString();
             }
-            var fin = new Date().getTime();
-            var duree = fin - debut;
+
+            var duree = (new Date().getTime()) - debut;
             tempsTotal += duree;
 
-            var statusIcon = "✅";
-            var detail = "";
-
-            if (erreurMsg) {
-                statusIcon = "❌";
-                detail = "Erreur technique : " + erreurMsg;
-                erreurs++;
+            if (errorDetails) {
+                erreurs.push({ type: "TECHNIQUE", page: test.nom, msg: errorDetails });
+                rapport.push(`❌ **${test.nom}** (${duree}ms) : Erreur technique -> ${errorDetails}`);
             } else {
                 var code = response.getResponseCode();
                 var content = response.getContentText();
 
-                // Vérification du code HTTP (si attendu est un nombre)
-                if (typeof test.attendu === 'number') {
-                    if (code !== test.attendu) {
-                        statusIcon = "⚠️";
-                        detail = "Code HTTP " + code + " (Attendu : " + test.attendu + ")";
-                        erreurs++;
-                    } else {
-                        detail = "Code " + code + " OK";
-                    }
-                }
-                // Vérification de contenu textuel (si attendu est une string)
-                else if (typeof test.attendu === 'string') {
-                    if (content.indexOf(test.attendu) === -1) {
-                        statusIcon = "⚠️";
-                        detail = "Contenu '" + test.attendu + "' introuvable.";
-                        erreurs++;
-                    } else {
-                        detail = "Contenu vérifié OK";
-                    }
+                if (typeof test.attendu === 'number' && code !== test.attendu) {
+                    erreurs.push({ type: "HTTP", page: test.nom, msg: `Code ${code} (Attendu ${test.attendu})` });
+                    rapport.push(`⚠️ **${test.nom}** : Code ${code}`);
+                } else if (typeof test.attendu === 'string' && content.indexOf(test.attendu) === -1) {
+                    erreurs.push({ type: "CONTENT", page: test.nom, msg: `Contenu '${test.attendu}' manquant` });
+                    rapport.push(`⚠️ **${test.nom}** : Contenu manquant`);
+                } else {
+                    rapport.push(`✅ **${test.nom}** (${duree}ms) : OK`);
                 }
             }
-
-            rapport.push(statusIcon + " **" + test.nom + "** (" + duree + "ms) : " + detail);
         }
 
+        // 5. Analyse & Dispatching
         rapport.push("");
-        rapport.push("⏱️ Temps total de navigation : " + tempsTotal + "ms");
+        if (erreurs.length > 0) {
+            rapport.push("🚨 **ANOMALIES DÉTECTÉES (" + erreurs.length + ")**");
 
-        if (erreurs > 0) {
-            rapport.push("💣 Bilan : " + erreurs + " problème(s) détecté(s).");
+            // Logique de Dispatch simulée
+            erreurs.forEach(function (err) {
+                var assignTo = "Admin";
+                if (err.type === "TECHNIQUE" || err.type === "HTTP") assignTo = "Mechanic (Maintenance Code)";
+
+                rapport.push(`- [${err.type}] sur ${err.page} -> Dispatché à : **${assignTo}**`);
+                // Ici on pourrait stocker l'incident dans une Sheet "Tickets"
+                // logTicket(assignTo, err); 
+            });
+
+            // PAS D'EMAIL (selon demande utilisateur), sauf si on décide d'activer une option "Critical Only"
+            // L'utilisateur a dit "ne m envoie pas de mail".
         } else {
-            rapport.push("✨ Bilan : Navigation fluide, aucun problème détecté.");
+            rapport.push("✨ **Parcours Nominal Validé**");
+            // Suggestion proactive (Expert Scaling)
+            if (Math.random() < 0.3) { // 30% de chance de proposer une amélioration
+                rapport.push("");
+                rapport.push("💡 **Suggestion de l'Expert QA** :");
+                rapport.push("Le temps de réponse global est de " + tempsTotal + "ms.");
+
+                if (tempsTotal > 5000) {
+                    rapport.push("⚠️ **Lenteur critique** : Je recommande de recruter (créer) un **Agent SRE (Site Reliability Engineer)** pour optimiser l'infra.");
+                } else if (tempsTotal > 2000) {
+                    rapport.push("-> Performance moyenne. Demandez à l'Agent 'Bolt' d'optimiser le backend.");
+                } else {
+                    rapport.push("-> Performance excellente. Pensez à ajouter un test sur la page 'Contact' pour sécuriser la croissance.");
+                }
+            }
         }
 
-        // Convertir le tableau en chaîne
-        var rapportFinal = rapport.join("\n");
-
-        // Envoyer un email d'alerte seulement s'il y a des erreurs critiques (Optionnel)
-        if (erreurs > 0) {
-            envoyerAlerteEmail(rapportFinal);
+        // Suggestion de nouveautés si erreurs spécifiques
+        if (erreurs.some(e => e.msg.includes("Timeout"))) {
+            rapport.push("⚠️ **Timeout détecté** : Il serait judicieux de créer un **Agent Network** pour surveiller les quotas.");
         }
 
-        return rapportFinal;
+        return rapport.join("\n");
 
     } catch (e) {
-        return "Erreur critique de l'agent Client Mystère : " + e.toString();
+        Logger.log("Erreur Client Mystere: " + e.toString());
+        return "Erreur Fatal Agent QA: " + e.toString();
     }
 }
 
 /**
- * Envoie une alerte email
- */
-function envoyerAlerteEmail(contenu) {
-    var adminEmail = PropertiesService.getScriptProperties().getProperty("ADMIN_EMAIL");
-    if (adminEmail) {
-        MailApp.sendEmail({
-            to: adminEmail,
-            subject: "⚠️ Alerte Client Mystère - Problème détecté sur Els Global",
-            body: contenu
-        });
-    }
-}
-
-/**
- * Installe le déclencheur pour le Client Mystère (toutes les 30 minutes).
- * A lancer une fois manuellement.
+ * Configure les déclencheurs :
+ * - Supprime les anciens (pour éviter les doublons/conflits).
+ * - Crée deux triggers quotidiens à 11h et 16h et 30min (approx).
+ * Note: Apps Script timeBased().atHour(X) est +/- 15 min. Pour être précis 11h00 et 16h30, c'est dur.
+ * On va viser 11h et 16h.
  */
 function installerDeclencheursClientMystere() {
-    // Supprime les anciens déclencheurs pour éviter les doublons
+    // 1. Nettoyage
     var triggers = ScriptApp.getProjectTriggers();
     for (var i = 0; i < triggers.length; i++) {
         if (triggers[i].getHandlerFunction() === 'executerClientMystere') {
@@ -156,11 +150,21 @@ function installerDeclencheursClientMystere() {
         }
     }
 
-    // Crée un nouveau déclencheur toutes les 30 minutes
+    // 2. Création (11h00 approx)
     ScriptApp.newTrigger('executerClientMystere')
         .timeBased()
-        .everyMinutes(30)
+        .everyDays(1)
+        .atHour(11)
         .create();
 
-    Logger.log("Déclencheur Client Mystère installé (30 min).");
+    // 3. Création (16h00 approx -> on ne peut pas spécifier 16h30 facilement avec atHour)
+    // Workaround pour 16h30 : Trigger à 16h ou 17h. On choisit 16h.
+    ScriptApp.newTrigger('executerClientMystere')
+        .timeBased()
+        .everyDays(1)
+        .atHour(16)
+        .create();
+
+    Logger.log("Déclencheurs Client Mystère installés (11h et 16h - Jours ouvrés filtrés dans le code).");
+    return "Déclencheurs activés (11h / 16h)";
 }
