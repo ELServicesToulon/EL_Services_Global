@@ -30,6 +30,13 @@ function apiRunAgent(agentId) {
             case 'mechanic':
                 return "Mechanic: Analyse du code en cours... 3 avertissements de linting trouvés.";
 
+            case 'client_mystere':
+                if (typeof executerClientMystere === 'function') {
+                    return executerClientMystere();
+                } else {
+                    return "Erreur: Fonction executerClientMystere introuvable.";
+                }
+
             default:
                 return "Agent inconnu : " + agentId;
         }

@@ -667,6 +667,7 @@ var Config = (function () {
     get GEMINI_API_KEY() { return _get("GEMINI_API_KEY"); },
     get ELS_SHARED_SECRET() { return _get("ELS_SHARED_SECRET"); },
     get TRACE_SECRET() { return _get("TRACE_SECRET"); },
+    get WEBAPP_URL() { return _get("WEBAPP_URL"); },
     getMapsApiKey: function () {
       try {
         // Privilégie la fonction globale si elle existe (compatibilité legacy).
