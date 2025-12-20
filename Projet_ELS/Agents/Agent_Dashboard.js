@@ -18,17 +18,22 @@ function apiRunAgent(agentId) {
                 }
 
             case 'sentinel':
-                // Simulation pour Sentinel
-                return "Sentinel: Scan de sécurité terminé. Aucun token exposé détecté. (Simulé)";
+                return (typeof runSentinelAudit === 'function') ? runSentinelAudit() : "Fonction runSentinelAudit introuvable.";
 
             case 'bolt':
-                return "Bolt: Analyse de performance... Temps de réponse moyen API: 120ms. Tout est nominal.";
+                return (typeof runBoltAudit === 'function') ? runBoltAudit() : "Fonction runBoltAudit introuvable.";
 
             case 'palette':
-                return "Palette: Vérification de la charte graphique... OK.";
+                return (typeof runPaletteAudit === 'function') ? runPaletteAudit() : "Fonction runPaletteAudit introuvable.";
 
             case 'mechanic':
-                return "Mechanic: Analyse du code en cours... 3 avertissements de linting trouvés.";
+                return (typeof runMechanicAudit === 'function') ? runMechanicAudit() : "Fonction runMechanicAudit introuvable.";
+
+            case 'scribe':
+                return (typeof runScribeAudit === 'function') ? runScribeAudit() : "Fonction runScribeAudit introuvable.";
+
+            case 'architect':
+                return (typeof runArchitectAudit === 'function') ? runArchitectAudit() : "Fonction runArchitectAudit introuvable.";
 
             case 'billing':
                 if (typeof runBillingAudit === 'function') {
