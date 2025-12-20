@@ -30,6 +30,13 @@ function apiRunAgent(agentId) {
             case 'mechanic':
                 return "Mechanic: Analyse du code en cours... 3 avertissements de linting trouvés.";
 
+            case 'billing':
+                if (typeof runBillingAudit === 'function') {
+                    return runBillingAudit();
+                } else {
+                    return "Erreur: Fonction runBillingAudit introuvable.";
+                }
+
             case 'client_mystere':
                 if (typeof executerClientMystere === 'function') {
                     return executerClientMystere();
