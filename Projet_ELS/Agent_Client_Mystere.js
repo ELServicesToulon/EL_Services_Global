@@ -54,7 +54,7 @@ function executerClientMystere() {
 
         for (var i = 0; i < pagesATester.length; i++) {
             var test = pagesATester[i];
-            var url = webAppUrl + (url.indexOf('?') === -1 ? '?' : '&') + "page=" + test.page;
+            var url = webAppUrl + (webAppUrl.indexOf('?') === -1 ? '?' : '&') + "page=" + test.page;
 
             var debut = new Date().getTime();
             var response = null;
