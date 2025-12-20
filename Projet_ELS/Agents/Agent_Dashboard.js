@@ -49,12 +49,35 @@ function apiRunAgent(agentId) {
                     return "Erreur: Fonction executerClientMystere introuvable.";
                 }
 
+            case 'scheduler_apply':
+                // args doit contenir la clé de stratégie ex: "ECO"
+                // Attention: apiRunAgent n'accepte qu'un arg simple dans ce pattern, 
+                // on va devoir hacker ou modifier l'appelant. 
+                // Pour simplifier, on suppose que agentId est composit ou on créée une fonction dédiée.
+                // MAIS ici on est dans apiRunAgent.
+                // Hack: agentId = "scheduler_apply:ECO"
+                return "Utilisez la fonction dédiée apiApplyStrategy(key).";
+
             default:
                 return "Agent inconnu : " + agentId;
         }
     } catch (e) {
         return "Erreur d'exécution : " + e.toString();
     }
+}
+
+function apiApplyStrategy(key) {
+    if (typeof applyStrategy === 'function') {
+        return applyStrategy(key);
+    }
+    return "Fonction applyStrategy introuvable.";
+}
+
+function apiGetStrategy() {
+    if (typeof getActiveStrategyInfo === 'function') {
+        return getActiveStrategyInfo();
+    }
+    return "N/A";
 }
 
 /**

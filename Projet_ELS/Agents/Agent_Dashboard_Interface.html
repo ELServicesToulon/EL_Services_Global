@@ -165,6 +165,28 @@
         <!-- Les cartes seront injectées ici -->
     </div>
 
+    <div style="margin-top: 32px; padding: 24px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <h3 style="margin-top:0">🎛️ Stratégie de Coordination (Scheduler)</h3>
+        <p style="color: #666; font-size: 0.9rem; margin-bottom: 16px;">
+            Choisissez comment vos agents collaborent. Stratégie active : <strong
+                id="active-strategy-label">...</strong>
+        </p>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <button class="strategy-btn" onclick="triggerStrategy('ECO')"
+                style="background: #48bb78; color: white; border:none; padding: 12px 20px; border-radius: 8px; cursor: pointer; flex:1;">
+                🌱 <strong>Économe</strong><br><small>Minimiser les coûts</small>
+            </button>
+            <button class="strategy-btn" onclick="triggerStrategy('BALANCED')"
+                style="background: #4299e1; color: white; border:none; padding: 12px 20px; border-radius: 8px; cursor: pointer; flex:1;">
+                ⚖️ <strong>Équilibré</strong><br><small>Production Standard</small>
+            </button>
+            <button class="strategy-btn" onclick="triggerStrategy('HIGH')"
+                style="background: #ed8936; color: white; border:none; padding: 12px 20px; border-radius: 8px; cursor: pointer; flex:1;">
+                🚀 <strong>Haute Dispo</strong><br><small>0 Délai, 100% Qualité</small>
+            </button>
+        </div>
+    </div>
+
     <h3>Journal d'activité Globale</h3>
     <div id="agent-console-output">
         <div class="log-entry"><span class="log-time">[System]</span> Initialisation du Dashboard Agents...</div>
@@ -259,10 +281,36 @@
                 .apiRunAgent(agentId);
         }
 
+        function triggerStrategy(key) {
+            if (!confirm("Changer la stratégie vers " + key + " ? Cela va reprogrammer tous les déclencheurs.")) return;
+            logToConsole(`Déploiement de la stratégie : ${key}...`);
+            google.script.run
+                .withSuccessHandler((res) => {
+                    logToConsole(res);
+                    updateActiveStrategy();
+                })
+                .withFailureHandler((err) => {
+                    logToConsole(`ERREUR SCHEDULER: ${err}`);
+                })
+                .apiApplyStrategy(key);
+        }
+
+        function updateActiveStrategy() {
+            google.script.run
+                .withSuccessHandler((res) => {
+                    const label = document.getElementById('active-strategy-label');
+                    if (label) label.innerText = res;
+                })
+                .apiGetStrategy();
+        }
+
+        // Exposé globalement pour l'onclick HTML
+        window.triggerStrategy = triggerStrategy;
+
         // Auto init si visible
         if (document.getElementById('agent-dashboard-view') && !document.getElementById('agent-dashboard-view').classList.contains('hidden')) {
             initAgentDashboard();
+            updateActiveStrategy();
         }
-
     })();
 </script>
