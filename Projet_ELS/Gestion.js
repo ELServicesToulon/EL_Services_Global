@@ -272,6 +272,7 @@ function envoyerLienEspaceClient(emailClient) {
       ? (encodeMailSubjectUtf8(subjectRaw) || subjectRaw)
       : subjectRaw;
     const expirationTexte = lien.exp ? new Date(lien.exp * 1000).toLocaleString('fr-FR') : '';
+    const buttonHtml = '<a href="' + lien.url + '" style="display:inline-block;padding:12px 18px;background:#3498db;color:#fff;text-decoration:none;border-radius:999px" target="_blank" rel="noopener">Acceder a mon espace client</a>';
     const corpsHtml = `
       <div style="font-family: Montserrat, Arial, sans-serif; color:#333; line-height:1.6;">
         <h2 style="text-align:center;">${brand}</h2>
