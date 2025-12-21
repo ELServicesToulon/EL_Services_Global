@@ -30,9 +30,7 @@ function lancerAnalyseTessie() {
     var drives = fetchAllTessieDrives(config);
     Logger.log(drives.length + " trajets récupérés.");
 
-    if (drives.length > 0) {
-        Logger.log("Structure d'un trajet (DEBUG): " + JSON.stringify(drives[0]));
-    }
+
 
     // 2. Chargement des établissements et leurs coordonnées
     var etablissements = loadEstablishmentsCoordinates();

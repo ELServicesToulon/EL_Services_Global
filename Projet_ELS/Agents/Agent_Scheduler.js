@@ -26,6 +26,7 @@ var STRATEGIES = {
             { agent: "Bolt", function: "runBoltAudit", days: [ScriptApp.WeekDay.MONDAY], hour: 8 },
             { agent: "Billing", function: "runBillingAudit", days: [ScriptApp.WeekDay.FRIDAY], hour: 19 },
             { agent: "Marketing", function: "runMarketingAudit", days: [ScriptApp.WeekDay.WEDNESDAY], hour: 10 },
+            { agent: "Cloudflare", function: "runCloudflareAudit", days: [ScriptApp.WeekDay.MONDAY], hour: 9 },
             { agent: "Architecte", function: "runDailyBriefing", everyDay: true, hour: 8 }
         ]
     },
@@ -41,6 +42,7 @@ var STRATEGIES = {
             { agent: "Billing", function: "runBillingAudit", everyDay: true, hour: 6 },
             { agent: "Bolt", function: "runBoltAudit", everyDay: true, hour: 5 },
             { agent: "Marketing", function: "runMarketingAudit", everyDay: true, hour: 9 },
+            { agent: "Cloudflare", function: "runCloudflareAudit", everyDay: true, hour: 10 },
             { agent: "Architecte", function: "runDailyBriefing", everyDay: true, hour: 8 }
         ]
     }
@@ -56,7 +58,7 @@ function applyStrategy(strategyKey) {
 
         // 1. Nettoyage TOTAL des triggers (sauf ceux système/critiques si on savait les filtrer, ici on nettoie tout ce qui est agent)
         // On filtre par nom de fonction connue
-        const knownFunctions = ["executerClientExpert", "executerClientMystere", "runSentinelAudit", "runBoltAudit", "runBillingAudit", "runPaletteAudit", "runMechanicAudit"];
+        const knownFunctions = ["executerClientExpert", "executerClientMystere", "runSentinelAudit", "runBoltAudit", "runBillingAudit", "runPaletteAudit", "runMechanicAudit", "runMarketingAudit", "runCloudflareAudit"];
 
         const triggers = ScriptApp.getProjectTriggers();
         let deletedCount = 0;
