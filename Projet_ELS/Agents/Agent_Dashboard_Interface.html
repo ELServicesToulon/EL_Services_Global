@@ -205,11 +205,22 @@
             { id: 'scribe', name: 'Scribe', role: 'Documentation & JSDoc', schedule: 'À la demande', icon: '📜' },
             { id: 'architect', name: 'Architecte', role: 'Stratégie & Structure', schedule: 'Mensuel', icon: '🏛️' },
             { id: 'billing', name: 'Agent Billing', role: 'Optimisation Coûts', schedule: 'Mensuel', icon: '💰' },
-            { id: 'client_mystere', name: 'Client Mystère', role: 'Vérification Site', schedule: 'Lun-Ven 11h/16h', icon: '🕵️' }
+            { id: 'client_mystere', name: 'Client Mystère', role: 'Vérification Site', schedule: 'Lun-Ven 11h/16h', icon: '🕵️' },
+            { id: 'marketing', name: 'Agent Marketing', role: 'SEO & Trafic', schedule: 'Hebdomadaire', icon: '📈' }
         ];
 
         window.initAgentDashboard = function () {
-            renderAgents({});
+            logToConsole("Chargement des états des agents...");
+            google.script.run
+                .withSuccessHandler((status) => {
+                    renderAgents(status);
+                    logToConsole("États mis à jour.");
+                })
+                .withFailureHandler((err) => {
+                    logToConsole("Erreur chargement états: " + err);
+                    renderAgents({});
+                })
+                .apiGetAgentsStatus();
         };
 
         function renderAgents(agentsData) {
@@ -274,6 +285,8 @@
             google.script.run
                 .withSuccessHandler((res) => {
                     logToConsole(`Résultat ${agentId}: ${res}`);
+                    // Rafraîchir l'état après exécution (pour la date de dernier run)
+                    initAgentDashboard();
                 })
                 .withFailureHandler((err) => {
                     logToConsole(`ERREUR ${agentId}: ${err}`);
