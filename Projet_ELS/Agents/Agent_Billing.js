@@ -1,5 +1,5 @@
 /**
- * Agent Billing (Facturation & FinOps)
+ * @fileoverview Agent Billing (Facturation & FinOps)
  * Expert en optimisation des coûts Google Cloud et audit d'usage API.
  * Analyse les coûts Gemini, Maps et propose des économies.
  */
@@ -7,6 +7,7 @@
 /**
  * Lance l'audit de facturation et d'optimisation.
  * Analyse la configuration actuelle et propose des économies concrètes.
+ * @returns {string} Le rapport d'audit au format Markdown.
  */
 function runBillingAudit() {
     try {

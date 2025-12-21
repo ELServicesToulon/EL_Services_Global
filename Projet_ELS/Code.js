@@ -48,7 +48,8 @@ function onOpen(e) {
     .addItem('Ouvrir Tableau de Bord (Sidebar)', 'openAgentSidebar')
     .addSeparator()
     .addItem('Lancer Agent Qualité (Hebdo)', 'menuRunQualite')
-    .addItem('Lancer Sentinel (Sécurité)', 'menuRunSentinel');
+    .addItem('Lancer Sentinel (Sécurité)', 'menuRunSentinel')
+    .addItem('Lancer Agent Marketing (SEO)', 'menuRunMarketing');
 
   menuPrincipal
     .addSubMenu(menuFacturation)
@@ -249,6 +250,10 @@ function handleReglesPage_() {
 //                 LEGACY POST (ADAPTÉ)
 // =================================================================
 
+// =================================================================
+//                 LEGACY POST (ADAPTÉ)
+// =================================================================
+
 function legacyDoPost(e) {
   try {
     const event = normalizeEvent_(e);
@@ -271,7 +276,7 @@ function legacyDoPost(e) {
           payload = event.parameter;
         }
       } catch (_jsonError) {
-        throw new Error('Invalid JSON payload received.');
+        return respondJson_({ status: 'error', message: 'Invalid JSON payload.' });
       }
     } else {
       payload = event.parameter;
@@ -288,12 +293,9 @@ function legacyDoPost(e) {
 
     return respondJson_({ status: 'error', message: 'No action specified in the POST request.' });
   } catch (error) {
-    if (error && error.code === 403) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Forbidden' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
     Logger.log('Erreur critique dans doPost: ' + error.stack);
-    return respondJson_({ status: 'error', message: error.message });
+    // Security: Do not leak stack trace to the user
+    return respondJson_({ status: 'error', message: 'Internal Server Error' });
   }
 }
 

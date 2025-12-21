@@ -51,6 +51,9 @@ function apiRunAgent(agentId) {
                     return "Erreur: Fonction executerClientExpert introuvable (Migration en cours ?).";
                 }
 
+            case 'marketing':
+                return (typeof runMarketingAudit === 'function') ? runMarketingAudit() : "Fonction runMarketingAudit introuvable.";
+
             case 'scheduler_apply':
                 // args doit contenir la clé de stratégie ex: "ECO"
                 // Attention: apiRunAgent n'accepte qu'un arg simple dans ce pattern, 
@@ -128,4 +131,13 @@ function menuRunQualite() {
 function menuRunSentinel() {
     const result = apiRunAgent('sentinel');
     SpreadsheetApp.getActive().toast(result, 'Agent Sentinel', 10);
+}
+
+function menuRunMarketing() {
+    const result = apiRunAgent('marketing');
+    // Affiche le rapport dans une modale car il est trop long pour un toast
+    const html = HtmlService.createHtmlOutput('<pre style="white-space: pre-wrap; font-family: monospace;">' + result + '</pre>')
+        .setWidth(600)
+        .setHeight(600);
+    SpreadsheetApp.getUi().showModalDialog(html, 'Rapport Agent Marketing');
 }

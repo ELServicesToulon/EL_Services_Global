@@ -142,7 +142,13 @@ function obtenirToutesReservationsAdmin() {
         let dateFinEvenement;
 
         const eventId = String(ligne[indices["Event ID"]]).trim();
-        if (eventId) {
+
+        // Optimisation Performance (Bolt): Ne pas appeler Calendar pour les vieux événements (> 30 jours)
+        // On suppose que les données du Sheet sont figées pour l'historique.
+        const dateLimiteSync = new Date();
+        dateLimiteSync.setDate(dateLimiteSync.getDate() - 30);
+
+        if (eventId && dateHeureSheet > dateLimiteSync) {
           try {
             const evenementRessource = Calendar.Events.get(getSecret('ID_CALENDRIER'), eventId);
             // On met à jour avec les infos du calendrier si elles existent, car elles sont plus précises
