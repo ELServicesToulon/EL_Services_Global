@@ -6,34 +6,27 @@
  * Remplace le switch/case monolithique de Code.js.
  */
 
-var Router = (function () {
-  'use strict';
-
-  const routes = {};
+var Router = {
+  routes: {},
 
   /**
    * Enregistre une route.
-   * @param {string} path - Le paramètre ?page=...
-   * @param {Function} handler - Fonction(e) retournant HtmlOutput ou TextOutput.
    */
-  function add(path, handler) {
-    routes[path] = handler;
-  }
+  add: function (path, handler) {
+    this.routes[path] = handler;
+  },
 
   /**
    * Dispatch la requête vers le bon handler.
-   * @param {Object} e - L'événement doGet/doPost.
-   * @param {string} defaultPath - Route par défaut si 'page' est vide.
-   * @returns {HtmlOutput|TextOutput}
    */
-  function dispatch(e, defaultPath = 'accueil') {
+  dispatch: function (e, defaultPath = 'accueil') {
     const params = e && e.parameter ? e.parameter : {};
     const page = params.page || defaultPath;
 
-    // Middleware global (Logging, Security checks basiques)
+    // Middleware global
     if (typeof logRequest === 'function') logRequest(e);
 
-    const handler = routes[page];
+    const handler = this.routes[page];
     if (handler) {
       try {
         return handler(e);
@@ -42,22 +35,22 @@ var Router = (function () {
         return HtmlService.createHtmlOutput(`<h1>Erreur</h1><p>${err.message}</p>`);
       }
     } else {
-      // Fallback pour les anciennes routes définies dans Code.js si non migrées
-      // ou 404
+      // Fallback
       if (typeof getPageHandler_ === 'function') {
         const legacyHandler = getPageHandler_(page);
         if (legacyHandler) return legacyHandler(e, params);
       }
+
+      // Si la route n'est pas trouvée, on redirige vers l'accueil par défaut (Réservation)
+      // Cela explique pourquoi l'utilisateur voyait l'accueil si la route 'gestion' n'était pas enregistrée.
+      if (typeof renderReservationInterface === 'function') {
+        return renderReservationInterface();
+      }
+
       return HtmlService.createHtmlOutput('<h1>Page introuvable</h1>');
     }
   }
-
-  return {
-    add: add,
-    dispatch: dispatch
-  };
-
-})();
+};
 
 // --- Enregistrement des routes (Initialisation) ---
 // On peut appeler ceci depuis une fonction d'init ou directement ici si l'ordre de chargement le permet.
