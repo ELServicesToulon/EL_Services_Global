@@ -30,6 +30,10 @@ function lancerAnalyseTessie() {
     var drives = fetchAllTessieDrives(config);
     Logger.log(drives.length + " trajets récupérés.");
 
+    if (drives.length > 0) {
+        Logger.log("Structure d'un trajet (DEBUG): " + JSON.stringify(drives[0]));
+    }
+
     // 2. Chargement des établissements et leurs coordonnées
     var etablissements = loadEstablishmentsCoordinates();
     Logger.log(etablissements.length + " établissements chargés pour le croisement.");
@@ -71,6 +75,11 @@ function lancerAnalyseTessie() {
  * Récupère TOUS les trajets via l'API Tessie (pagination si nécessaire, ici simple get).
  */
 function fetchAllTessieDrives(config) {
+    if (!config) {
+        Logger.log("fetchAllTessieDrives appelé sans config. Tentative de récupération...");
+        config = getConfigTesla_();
+    }
+
     // L'endpoint 'drives' de Tessie retourne les trajets.
     // URL: https://api.tessie.com/{vin}/drives?limit=1000 (exemple)
     // On va demander une limite elevee pour avoir l'historique.
@@ -186,6 +195,10 @@ function toRad(deg) {
  * Ecrit le rapport d'analyse dans un nouvel onglet.
  */
 function writeAnalysisReport(analysis) {
+    if (!Array.isArray(analysis)) {
+        Logger.log("writeAnalysisReport: 'analysis' n'est pas un tableau valide.");
+        return;
+    }
     var ss = getSpreadsheet_();
     var sheetName = 'Analyse_Ref_Croisee';
     var sheet = ss.getSheetByName(sheetName);
