@@ -22,7 +22,8 @@ function getConfig() {
 function getSheetData(sheetName) {
   Logger.log("getSheetData called with: " + String(sheetName)); // Debug
   if (!sheetName) {
-    try { throw new Error('Stack Trace'); } catch (e) { Logger.log("Stack: " + e.stack); }
+    Logger.log("ALERTE: getSheetData appelé sans nom de feuille. Retourne [].");
+    return [];
   }
   const config = getConfig();
   const ssId = config.ID_FEUILLE_CALCUL;
