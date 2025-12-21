@@ -61,3 +61,43 @@ function logAgentReport(agentId, reportContent) {
         console.error("Erreur Critical Agent Logger: " + e.toString());
     }
 }
+
+/**
+ * Récupère le dernier log pour un agent donné.
+ * @param {string} agentId
+ * @returns {string} Le contenu du log ou un message par défaut.
+ */
+function apiGetLastLog(agentId) {
+    try {
+        var logSheetId = PropertiesService.getScriptProperties().getProperty("ID_JOURNAL_AGENTS");
+        if (!logSheetId) return "Aucun journal centralisé trouvé.";
+
+        var ss = SpreadsheetApp.openById(logSheetId);
+        // On suppose que le journal actif est le dernier créé ou le premier
+        var sheet = ss.getSheets()[0];
+
+        var lastRow = sheet.getLastRow();
+        if (lastRow < 2) return "Journal vide.";
+
+        // On lit les 50 dernières lignes pour être efficace
+        var startRow = Math.max(2, lastRow - 49);
+        var numRows = lastRow - startRow + 1;
+        // Colonnes A(Timestamp), B(Agent), C(Content)
+        var data = sheet.getRange(startRow, 1, numRows, 3).getValues();
+
+        // Parcours inverse pour trouver le dernier
+        for (var i = data.length - 1; i >= 0; i--) {
+            var row = data[i];
+            // Correspondance loose (ex: 'bolt' vs 'Bolt')
+            if (String(row[1]).toLowerCase() === String(agentId).toLowerCase()) {
+                var dateStr = Utilities.formatDate(new Date(row[0]), Session.getScriptTimeZone(), "dd/MM HH:mm");
+                return `📅 Dernier Run : ${dateStr}\n\n${row[2]}`;
+            }
+        }
+
+        return "Aucun log récent trouvé pour cet agent.";
+
+    } catch (e) {
+        return "Erreur lecture logs : " + e.toString();
+    }
+}
