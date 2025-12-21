@@ -94,7 +94,14 @@ function executerClientExpert() {
     // Mise à jour mémoire
     saveAgentMemory_("CLIENT_EXPERT", { lastFailureCount: sessionErrors.length, lastRun: new Date().getTime() });
 
-    return logs.join("\n");
+    var finalLog = logs.join("\n");
+
+    // Archivage automatique
+    if (typeof logAgentReport === 'function') {
+      logAgentReport('client_expert', finalLog);
+    }
+
+    return finalLog;
 
   } catch (e) {
     return "❌ Erreur Fatale Client Expert : " + e.toString();

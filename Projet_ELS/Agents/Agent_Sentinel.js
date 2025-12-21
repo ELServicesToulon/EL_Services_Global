@@ -43,5 +43,12 @@ function runSentinelAudit() {
     report.push("- Vérifiez que `doGet` et `doPost` ne retournent pas de JSON brut sans validation.");
     report.push("- Assurez-vous que les fonctions `delete*` vérifient l'email de l'utilisateur actif.");
 
-    return report.join("\n");
+    const finalReport = report.join("\n");
+
+    // Archivage automatique
+    if (typeof logAgentReport === 'function') {
+        logAgentReport('sentinel', finalReport);
+    }
+
+    return finalReport;
 }

@@ -62,7 +62,14 @@ function runBillingAudit() {
         reportParts.push("2. **Alertes de Budget** : Configurez une alerte à 50% de votre budget prévu.");
         reportParts.push("3. **Nettoyage Logs** : Réduisez les `Logger.log` dans les boucles (`Tesla.js`, `Agent_Qualite.js`) pour éviter les frais de Cloud Logging si vous avez beaucoup de trafic.");
 
-        return reportParts.join("\n");
+        var finalReport = reportParts.join("\n");
+
+        // Archivage automatique
+        if (typeof logAgentReport === 'function') {
+            logAgentReport('billing', finalReport);
+        }
+
+        return finalReport;
 
     } catch (e) {
         Logger.log("Erreur Billing Agent: " + e.toString());

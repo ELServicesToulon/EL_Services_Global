@@ -40,5 +40,12 @@ function runBoltAudit() {
 
     const executionTime = (new Date().getTime()) - start;
 
-    return `⚡ **Rapport Bolt** (${executionTime}ms)\n\n` + issues.join("\n");
+    const report = `⚡ **Rapport Bolt** (${executionTime}ms)\n\n` + issues.join("\n");
+
+    // Archivage automatique
+    if (typeof logAgentReport === 'function') {
+        logAgentReport('bolt', report);
+    }
+
+    return report;
 }
