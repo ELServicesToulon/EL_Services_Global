@@ -103,6 +103,13 @@ function runCloudflareAudit() {
             report.push(workersReport);
         }
 
+        // 3. Browser Rendering & Subscriptions
+        var browserReport = checkBrowserRendering(token);
+        if (browserReport) {
+            report.push("\n🖥️ **Browser Rendering & Add-ons**");
+            report.push(browserReport);
+        }
+
     } catch (e) {
         report.push("❌ **Erreur Critique** : " + e.toString());
         Logger.log("Cloudflare Agent Error: " + e.toString());
@@ -270,6 +277,59 @@ function checkWorkersAndPages(token) {
 
     } catch (e) {
         output.push("❌ Erreur Workers/Pages: " + e.toString());
+    }
+
+    return output.join("\n");
+}
+
+/**
+ * Vérifie l'état de "Browser Rendering" via les souscriptions/addons.
+ */
+function checkBrowserRendering(token) {
+    var headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    };
+    var options = { method: 'get', headers: headers, muteHttpExceptions: true };
+    var output = [];
+
+    try {
+        // Nous vérifions les souscriptions pour voir si l'addon est actif
+        // Endpoint: accounts/:id/subscriptions
+        var url = CLOUDFLARE_API_BASE + "/accounts/" + CLOUDFLARE_ACCOUNT_ID + "/subscriptions";
+        var response = UrlFetchApp.fetch(url, options);
+        var json = JSON.parse(response.getContentText());
+
+        if (json.success) {
+            var subs = json.result;
+            var browserFound = false;
+
+            subs.forEach(sub => {
+                // On cherche des composants liés au Browser Rendering
+                if (sub.component_values) {
+                    sub.component_values.forEach(comp => {
+                        if (comp.name && (comp.name.toLowerCase().includes("browser") || comp.name.toLowerCase().includes("rendering"))) {
+                            browserFound = true;
+                            output.push(`✅ **${comp.name}** : ${sub.state} (Price: ${sub.price} ${sub.currency})`);
+                        }
+                    });
+                }
+                // Parfois le nom de la souscription elle-même
+                if (sub.rate_plan && sub.rate_plan.public_name && sub.rate_plan.public_name.toLowerCase().includes("browser")) {
+                    browserFound = true;
+                    output.push(`✅ **${sub.rate_plan.public_name}** : ${sub.state}`);
+                }
+            });
+
+            if (!browserFound) {
+                output.push("ℹ️ Aucun abonnement 'Browser Rendering' détecté.");
+            }
+        } else {
+            output.push("⚠️ Impossible de lire les souscriptions.");
+        }
+
+    } catch (e) {
+        output.push("❌ Erreur Browser Rendering Check: " + e.toString());
     }
 
     return output.join("\n");
