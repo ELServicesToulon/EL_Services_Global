@@ -115,7 +115,7 @@ function obtenirLienFactureParIdAdmin(idPdf) {
  * Récupère TOUTES les réservations (passées, actuelles, futures) sans aucun filtre par date/email.
  * @returns {Object} Un objet avec le statut et la liste complète des réservations.
  */
-function obtenirToutesReservationsAdmin() {
+function obtenirToutesReservationsAdmin(authToken) {
   try {
     const userEmail = Session.getActiveUser().getEmail();
     const isAdmin = userEmail && userEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase();
