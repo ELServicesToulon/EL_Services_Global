@@ -72,7 +72,9 @@ function validerClientParEmail(emailClient, exp, sig) {
       }
     }
 
-    const reservations = obtenirReservationsPourClient(email);
+    const res = obtenirReservationsClient(email, exp, sig);
+    const reservations = (res && res.success) ? res.reservations : [];
+
     // Note: Pour valider, on vérifie juste s'il a des reservations. 
     // Si 0 reservations, on refuse l'accès pour éviter que n'importe qui accède.
     if (!reservations || reservations.length === 0) {
