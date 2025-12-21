@@ -88,6 +88,15 @@ function runCloudflareAudit() {
                 issuesFound++;
                 report.push(`   🛑 **CRITIQUE**: La redirection HTTPS n'est PAS active pour ${zone.name}. Le site est accessible en HTTP !`);
             }
+
+            // Suggestions proactives d'optimisation
+            if (zone.status === 'active') {
+                var suggestions = analyzeOptimization(zone.id, token);
+                if (suggestions.length > 0) {
+                    report.push(`   💡 **Opportunités :**`);
+                    suggestions.forEach(s => report.push(`     - ${s}`));
+                }
+            }
         });
 
         if (issuesFound === 0) {
@@ -333,4 +342,72 @@ function checkBrowserRendering(token) {
     }
 
     return output.join("\n");
+}
+
+/**
+ * Analyse les réglages pour proposer des optimisations (Speed & Visibility).
+ * Utilise UrlFetchApp.fetchAll pour faire les appels en parallèle (Performance).
+ */
+function analyzeOptimization(zoneId, token) {
+    var headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    };
+
+    var checks = [
+        { id: 'brotli', label: 'Brotli Compression', category: '🚀 Vitesse' },
+        { id: 'minify', label: 'Auto Minify', category: '🚀 Vitesse' },
+        { id: 'rocket_loader', label: 'Rocket Loader', category: '🚀 Vitesse' },
+        { id: 'http3', label: 'HTTP/3 (QUIC)', category: '🚀 Vitesse' },
+        { id: '0rtt', label: '0-RTT Connection Resumption', category: '🚀 Vitesse' },
+        { id: 'always_online', label: 'Always Online', category: '👁️ Visibilité' },
+        { id: 'automatic_https_rewrites', label: 'Auto HTTPS Rewrites', category: '👁️ Visibilité' }
+        // Note: Crawler Hints n'est pas toujours exposé sur tous les plans via API simple, à tester.
+    ];
+
+    var requests = checks.map(c => ({
+        url: CLOUDFLARE_API_BASE + "/zones/" + zoneId + "/settings/" + c.id,
+        method: 'get',
+        headers: headers,
+        muteHttpExceptions: true
+    }));
+
+    var suggestions = [];
+
+    try {
+        var responses = UrlFetchApp.fetchAll(requests);
+
+        responses.forEach((resp, index) => {
+            var check = checks[index];
+            var json = JSON.parse(resp.getContentText());
+
+            if (json.success) {
+                var value = json.result.value;
+
+                // Cas spécifique Minify
+                if (check.id === 'minify') {
+                    var off = [];
+                    if (value.js !== 'on') off.push('JS');
+                    if (value.css !== 'on') off.push('CSS');
+                    if (value.html !== 'on') off.push('HTML');
+
+                    if (off.length > 0) {
+                        suggestions.push(`${check.category} : Activez **Auto Minify** (${off.join(', ')}) pour réduire le poids des pages.`);
+                    }
+                }
+                // Cas classiques (on/off)
+                else {
+                    if (value !== 'on') {
+                        suggestions.push(`${check.category} : Activez **${check.label}**.`);
+                    }
+                }
+            }
+        });
+
+    } catch (e) {
+        // Tolérance aux pannes pour ne pas bloquer le rapport principal
+        // Logger.log("Optimization Check Warning: " + e);
+    }
+
+    return suggestions;
 }
