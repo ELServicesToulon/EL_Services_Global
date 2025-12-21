@@ -61,7 +61,14 @@ function runMarketingAudit() {
         reportParts.push("2. **Campagnes Emailing** : Utilisez la base clients (onglet `Clients`) pour envoyer une newsletter mensuelle (nouveaux services, jours fériés...).");
         reportParts.push("3. **Vitesse de chargement** : L'Agent Bolt surveille la perf, c'est aussi un critère SEO majeur.");
 
-        return reportParts.join("\n");
+        var finalReport = reportParts.join("\n");
+
+        // Archivage automatique
+        if (typeof logAgentReport === 'function') {
+            logAgentReport('marketing', finalReport);
+        }
+
+        return finalReport;
 
     } catch (e) {
         Logger.log("Erreur Marketing Agent: " + e.toString());
