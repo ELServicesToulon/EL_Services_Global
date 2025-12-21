@@ -27,7 +27,10 @@ function getEtablissementsHeaders_() {
     COLONNE_STATUT_ETAB,
     COLONNE_DERNIERE_MAJ_ETAB,
     COLONNE_NOTE_ETAB,
-    COLONNE_PLACE_ID_ETAB
+    COLONNE_NOTE_ETAB,
+    COLONNE_PLACE_ID_ETAB,
+    COLONNE_LATITUDE_ETAB,
+    COLONNE_LONGITUDE_ETAB
   ];
 }
 
@@ -486,7 +489,7 @@ function completerEmailsBaseEtablissements(options) {
 //              IMPORT GOOGLE PLACES (fusion Service_GooglePlaces)
 // =================================================================
 
-const GOOGLE_PLACES_DETAILS_FIELDS = 'formatted_phone_number,website,url';
+const GOOGLE_PLACES_DETAILS_FIELDS = 'formatted_phone_number,website,url,geometry';
 
 function googlePlacesGetApiKey_() {
   if (typeof Config !== 'undefined' && typeof Config.getMapsApiKey === 'function') {
@@ -523,7 +526,8 @@ function googlePlacesFetchDetails_(placeId, apiKey) {
       return {
         phone: json.result.formatted_phone_number || '',
         website: json.result.website || '',
-        url: json.result.url || ''
+        url: json.result.url || '',
+        geometry: json.result.geometry || null
       };
     }
   } catch (e) {
@@ -600,6 +604,12 @@ function googlePlacesImporterEtablissements_(query, typeEtablissement) {
       row[indices[COLONNE_NOTE_ETAB]] = 'PlaceID: ' + place.place_id;
       row[indices[COLONNE_PLACE_ID_ETAB]] = place.place_id;
     }
+
+    if (place.geometry && place.geometry.location) {
+      row[indices[COLONNE_LATITUDE_ETAB]] = place.geometry.location.lat;
+      row[indices[COLONNE_LONGITUDE_ETAB]] = place.geometry.location.lng;
+    }
+
     if (details.url) {
       const existingNote = row[indices[COLONNE_NOTE_ETAB]] || '';
       row[indices[COLONNE_NOTE_ETAB]] = (existingNote ? existingNote + ' | ' : '') + 'URL: ' + details.url;
@@ -652,12 +662,14 @@ function enrichirDetailsBaseEtablissements_() {
     let placeId = String(row[indices[COLONNE_PLACE_ID_ETAB]] || '').trim();
     const note = String(row[indices[COLONNE_NOTE_ETAB]] || '');
 
+    const lat = row[indices[COLONNE_LATITUDE_ETAB]];
+
     if (!placeId && note.indexOf('PlaceID:') > -1) {
       const match = note.match(/PlaceID:\s*([A-Za-z0-9_-]+)/);
       if (match) placeId = match[1];
     }
 
-    if (placeId && (!phone || !site)) {
+    if (placeId && (!phone || !site || !lat)) {
       const details = googlePlacesFetchDetails_(placeId, apiKey);
       let changed = false;
       if (details.phone && !phone) {
@@ -667,6 +679,12 @@ function enrichirDetailsBaseEtablissements_() {
       }
       if (details.website && !site) {
         row[indices[COLONNE_SITE_WEB_ETAB]] = details.website;
+        updatedCount++;
+        changed = true;
+      }
+      if (details.geometry && details.geometry.location && !lat) {
+        row[indices[COLONNE_LATITUDE_ETAB]] = details.geometry.location.lat;
+        row[indices[COLONNE_LONGITUDE_ETAB]] = details.geometry.location.lng;
         updatedCount++;
         changed = true;
       }

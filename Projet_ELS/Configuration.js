@@ -487,6 +487,8 @@ const COLONNE_PHARMACIE_REFERENTE = 'Pharmacie Référente';
 const COLONNE_STATUT_ETAB = 'Actif';
 const COLONNE_DERNIERE_MAJ_ETAB = 'Derniere_MAJ';
 const COLONNE_PLACE_ID_ETAB = 'PlaceID';
+const COLONNE_LATITUDE_ETAB = 'Latitude';
+const COLONNE_LONGITUDE_ETAB = 'Longitude';
 
 
 // =================================================================
