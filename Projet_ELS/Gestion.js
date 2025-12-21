@@ -207,10 +207,10 @@ function envoyerLienEspaceClient(emailClient) {
       return { success: false, error: 'EMAIL_INVALID' };
     }
 
-    const rateCheck = verifierQuotaLienEspaceClient_(email);
-    if (rateCheck && rateCheck.allowed === false) {
-      return { success: false, error: rateCheck.reason || 'RATE_LIMIT' };
-    }
+    // const rateCheck = verifierQuotaLienEspaceClient_(email);
+    // if (rateCheck && rateCheck.allowed === false) {
+    //   return { success: false, error: rateCheck.reason || 'RATE_LIMIT' };
+    // }
 
     const lien = client_getPortalLink(email);
     if (!lien || lien.success !== true || !lien.url) {
