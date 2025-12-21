@@ -21,8 +21,8 @@ function getSpreadsheet_() {
  */
 function lancerAnalyseTessie() {
     var config = getConfigTesla_();
-    if (!config.VIN || !config.TOKEN) {
-        Logger.log("Configuration Tesla manquante.");
+    if (!config || !config.VIN || !config.TOKEN) {
+        Logger.log("Configuration Tesla manquante (VIN ou TOKEN introuvable).");
         return;
     }
 
@@ -236,7 +236,7 @@ function writeAnalysisReport(analysis) {
 function getConfigTesla_() {
     var props = PropertiesService.getScriptProperties();
     return {
-        VIN: props.getProperty('VIN_TESLA_JUNIPER_2025') || props.getProperty('TESLA_VIN'),
-        TOKEN: props.getProperty('TOKEN_TESSIE') || props.getProperty('TESLA_TOKEN')
+        VIN: props.getProperty('VIN_TESLA_JUNIPER_2025') || props.getProperty('TESLA_VIN') || '5YJ3E7EA0LF7XXXXX', // Remplacer par VIN reel si besoin
+        TOKEN: props.getProperty('TOKEN_TESSIE') || props.getProperty('TESLA_TOKEN') || ''
     };
 }
