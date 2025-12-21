@@ -3,6 +3,20 @@
  */
 
 /**
+ * Helper to get the spreadsheet, falling back to ID if not bound.
+ */
+function getSpreadsheet_() {
+    try {
+        var ss = SpreadsheetApp.getActiveSpreadsheet();
+        if (ss) return ss;
+    } catch (e) { }
+
+    // Fallback ID from Projet_ELS/Configuration.js
+    var ID_FEUILLE_CALCUL = '1AzWdQQ4UEq0Fvr_iTpDY5TiXn55ij30_okIxIG5p_OM';
+    return SpreadsheetApp.openById(ID_FEUILLE_CALCUL);
+}
+
+/**
  * Lance l'extraction de l'historique complet et le croisement.
  */
 function lancerAnalyseTessie() {
@@ -84,7 +98,11 @@ function fetchAllTessieDrives(config) {
  * Charge les coordonnées des établissements depuis la feuille Base_Etablissements.
  */
 function loadEstablishmentsCoordinates() {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSpreadsheet_();
+    if (!ss) {
+        Logger.log("Impossible d'ouvrir la feuille de calcul.");
+        return [];
+    }
     var sheet = ss.getSheetByName('Base_Etablissements'); // Nom défini dans Configuration.js
     if (!sheet) return [];
 
@@ -168,7 +186,7 @@ function toRad(deg) {
  * Ecrit le rapport d'analyse dans un nouvel onglet.
  */
 function writeAnalysisReport(analysis) {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSpreadsheet_();
     var sheetName = 'Analyse_Ref_Croisee';
     var sheet = ss.getSheetByName(sheetName);
 
