@@ -268,6 +268,9 @@
             grid.querySelectorAll('.btn-run').forEach(btn => {
                 btn.addEventListener('click', () => runAgent(btn.dataset.id));
             });
+            grid.querySelectorAll('.btn-log').forEach(btn => {
+                btn.addEventListener('click', () => viewLog(btn.dataset.id));
+            });
         }
 
         function logToConsole(msg) {
@@ -292,6 +295,44 @@
                     logToConsole(`ERREUR ${agentId}: ${err}`);
                 })
                 .apiRunAgent(agentId);
+        }
+
+        function viewLog(agentId) {
+            logToConsole(`Lecture logs pour ${agentId}...`);
+            const btn = document.querySelector(`.btn-log[data-id="${agentId}"]`);
+            if (btn) btn.innerText = "⏳";
+
+            google.script.run
+                .withSuccessHandler((logContent) => {
+                    if (btn) btn.innerText = "Logs";
+                    showModal(agentId, logContent);
+                    logToConsole(`Logs recus pour ${agentId}`);
+                })
+                .withFailureHandler((err) => {
+                    if (btn) btn.innerText = "Logs";
+                    logToConsole(`Erreur Log ${agentId}: ${err}`);
+                })
+                .apiGetLastLog(agentId);
+        }
+
+        function showModal(title, content) {
+            let modal = document.getElementById('log-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'log-modal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:9999;';
+                modal.innerHTML = `
+                    <div style="background:white;padding:20px;border-radius:8px;width:80%;max-height:80%;display:flex;flex-direction:column;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <h3 id="modal-title" style="margin-top:0">Logs</h3>
+                        <pre id="modal-content" style="background:#f4f4f4;padding:10px;overflow:auto;flex:1;white-space:pre-wrap;font-family:monospace;border-radius:4px;border:1px solid #ddd;"></pre>
+                        <button class="btn-agent" onclick="document.getElementById('log-modal').style.display='none'" style="margin-top:10px;padding:10px;background:#e2e8f0;">Fermer</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('modal-title').innerText = "Logs : " + title;
+            document.getElementById('modal-content').innerText = content;
+            modal.style.display = 'flex';
         }
 
         function triggerStrategy(key) {
