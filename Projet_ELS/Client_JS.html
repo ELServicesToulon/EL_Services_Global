@@ -141,13 +141,13 @@
             });
         }
 
-        function afficherVueConnexion(prefilledEmail) {
+        function afficherVueConnexion(prefilledEmail, keepError) {
             document.getElementById('conteneur-app').classList.add('hidden');
             document.getElementById('non-connecte').classList.remove('hidden');
             if (prefilledEmail && emailConnexionInput) {
                 emailConnexionInput.value = prefilledEmail;
             }
-            if (erreurConnexionDiv) {
+            if (!keepError && erreurConnexionDiv) {
                 erreurConnexionDiv.textContent = '';
                 erreurConnexionDiv.classList.add('hidden');
             }
@@ -311,14 +311,14 @@
 
                     } else {
                         afficherErreurConnexion(reponse.error);
-                        afficherVueConnexion(email);
+                        afficherVueConnexion(email, true);
                     }
                     basculerIndicateurChargement(false);
                     unlock && unlock();
                 })
                 .withFailureHandler(err => {
                     afficherErreurConnexion("Une erreur de communication est survenue.");
-                    afficherVueConnexion(email);
+                    afficherVueConnexion(email, true);
                     basculerIndicateurChargement(false);
                     unlock && unlock();
                 })
