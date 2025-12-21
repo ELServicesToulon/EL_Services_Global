@@ -59,18 +59,26 @@ function runCloudflareAudit() {
 
         zones.forEach(zone => {
             var statusIcon = zone.status === 'active' ? '✅' : '⚠️';
-            var sslStatus = "N/A";
 
-            // Tentative de lecture simple du mode SSL si disponible dans l'objet zone (parfois partiel)
-            // Sinon nécessiterait un appel dédié /zones/:id/settings/ssl
+            // Inspection Sécurité Approfondie (SSL & HTTPS Redirect)
+            var sslDetails = getZoneSSLDetails(zone.id, token);
+            var httpsStatus = sslDetails.always_use_https === 'on' ? '🔒 HTTPS Redirection' : '🔓 NO HTTPS Redirection';
+            var sslMode = sslDetails.ssl_mode; // off, flexible, full, strict
 
             report.push(`${statusIcon} **${zone.name}** (${zone.plan.name})`);
             report.push(`   - Status: ${zone.status.toUpperCase()}`);
+            report.push(`   - SSL: ${sslMode.toUpperCase()} | ${httpsStatus}`);
             report.push(`   - Name Servers: ${zone.name_servers.join(', ')}`);
 
             if (zone.status !== 'active') {
                 issuesFound++;
                 report.push("   ⚠️ **Attention**: Le domaine n'est pas actif !");
+            }
+
+            // Alerte spécifique HTTPS
+            if (zone.status === 'active' && sslDetails.always_use_https !== 'on') {
+                issuesFound++;
+                report.push(`   🛑 **CRITIQUE**: La redirection HTTPS n'est PAS active pour ${zone.name}. Le site est accessible en HTTP !`);
             }
         });
 
@@ -123,4 +131,35 @@ function purgeCloudflareCache(zoneId) {
     } catch (e) {
         return "❌ Exception purge: " + e.toString();
     }
+}
+
+/**
+ * Récupère les détails SSL pour une zone donnée.
+ */
+function getZoneSSLDetails(zoneId, token) {
+    var headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    };
+    var options = { method: 'get', headers: headers, muteHttpExceptions: true };
+
+    var result = { ssl_mode: 'Unknown', always_use_https: 'off' };
+
+    try {
+        // 1. Check Always Use HTTPS
+        // Doc: https://developers.cloudflare.com/api/operations/zone-settings-get-always-use-https-setting
+        var respHttps = UrlFetchApp.fetch(CLOUDFLARE_API_BASE + "/zones/" + zoneId + "/settings/always_use_https", options);
+        var jsonHttps = JSON.parse(respHttps.getContentText());
+        if (jsonHttps.success) result.always_use_https = jsonHttps.result.value;
+
+        // 2. Check SSL Setting
+        // Doc: https://developers.cloudflare.com/api/operations/zone-settings-get-ssl-setting
+        var respSSL = UrlFetchApp.fetch(CLOUDFLARE_API_BASE + "/zones/" + zoneId + "/settings/ssl", options);
+        var jsonSSL = JSON.parse(respSSL.getContentText());
+        if (jsonSSL.success) result.ssl_mode = jsonSSL.result.value;
+
+    } catch (e) {
+        Logger.log("Error fetching SSL for zone " + zoneId + ": " + e);
+    }
+    return result;
 }
