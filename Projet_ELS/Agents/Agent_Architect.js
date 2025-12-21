@@ -58,7 +58,7 @@ function runArchitectAudit() {
   report.push("\n🧩 **Analyse de Structure (Gap Analysis)**");
 
   // On liste les agents connus
-  var existingAgents = ["Sentinel", "Bolt", "Palette", "Mechanic", "Billing", "Client Expert", "Scribe", "Architect"];
+  var existingAgents = ["Sentinel", "Bolt", "Palette", "Mechanic", "Billing", "Client Expert", "Scribe", "Architect", "Cloudflare"];
 
   // Logique : Si on a beaucoup de propositions UX, on suggère un "Designer".
   // Si on a beaucoup de logs billing, on suggère un "Comptable".
