@@ -41,25 +41,25 @@ function lancerAnalyseTessie() {
     // 3. Analyse et croisement
     var analysis = [];
     drives.forEach(function (drive) {
-        var startMatch = findNearestEstablishment(drive.start_latitude, drive.start_longitude, etablissements);
-        var endMatch = findNearestEstablishment(drive.end_latitude, drive.end_longitude, etablissements);
+        var startMatch = findNearestEstablishment(drive.starting_latitude, drive.starting_longitude, etablissements);
+        var endMatch = findNearestEstablishment(drive.ending_latitude, drive.ending_longitude, etablissements);
 
         analysis.push({
-            date: new Date(drive.start_date * 1000), // Tessie timestamps are often unix epoch
-            durationMin: Math.round((drive.end_date - drive.start_date) / 60),
-            distanceKm: Math.round(drive.distance * 1.60934), // Miles to Km
+            date: new Date(drive.started_at * 1000), // Tessie timestamps are unix epoch
+            durationMin: Math.round((drive.ended_at - drive.started_at) / 60),
+            distanceKm: Math.round(drive.odometer_distance * 1.60934), // Miles to Km
             start: {
-                lat: drive.start_latitude,
-                lng: drive.start_longitude,
-                address: drive.start_address,
+                lat: drive.starting_latitude,
+                lng: drive.starting_longitude,
+                address: drive.starting_location,
                 matchName: startMatch ? startMatch.nom : null,
                 matchDist: startMatch ? startMatch.distance : null,
                 matchType: startMatch ? startMatch.type : null
             },
             end: {
-                lat: drive.end_latitude,
-                lng: drive.end_longitude,
-                address: drive.end_address,
+                lat: drive.ending_latitude,
+                lng: drive.ending_longitude,
+                address: drive.ending_location,
                 matchName: endMatch ? endMatch.nom : null,
                 matchDist: endMatch ? endMatch.distance : null,
                 matchType: endMatch ? endMatch.type : null
