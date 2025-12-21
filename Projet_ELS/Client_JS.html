@@ -265,12 +265,18 @@
          * Valide l'email du client auprès du serveur, puis charge ses réservations.
          * @param {string} email L'email à valider.
          */
+        /**
+         * Valide l'email du client auprès du serveur, puis charge ses réservations.
+         * @param {string} email L'email à valider.
+         */
         function validerEtChargerClient(email, unlock) {
             if (!linkExp || !linkSig || email !== linkEmail) {
                 signatureExp = '';
                 signatureSig = '';
             }
             basculerIndicateurChargement(true);
+
+            // --- OPTIMISATION : Appel unique pour tout charger ---
             google.script.run
                 .withSuccessHandler(reponse => {
                     if (reponse.success) {
@@ -278,57 +284,36 @@
                             erreurConnexionDiv.textContent = '';
                             erreurConnexionDiv.classList.add('hidden');
                         }
+                        // 1. Infos Client
                         document.getElementById('message-bienvenue-client').textContent = `Bienvenue, ${reponse.client.nom}`;
                         document.getElementById('conteneur-app').classList.remove('hidden');
                         document.getElementById('non-connecte').classList.add('hidden');
                         emailClientCourant = email;
-                        chargerReservationsClient(email);
-                        chargerFacturesClient(email);
-                        if (typeof PRO_QA_ENABLED !== 'undefined' && PRO_QA_ENABLED) {
-                            chargerQuestions();
+
+                        // 2. Réservations
+                        toutesLesReservationsClient = reponse.reservations || [];
+                        afficherReservations(toutesLesReservationsClient);
+
+                        // 3. CA
+                        const caDiv = document.getElementById('ca-client');
+                        if (caDiv && reponse.ca !== undefined) {
+                            caDiv.textContent = `CA en cours\u00A0: ${Number(reponse.ca).toFixed(2)}\u00A0€`;
                         }
+
+                        // 4. Factures
+                        toutesLesFacturesClient = reponse.factures || [];
+                        afficherFactures(toutesLesFacturesClient);
+
+                        // 5. Questions
+                        if (typeof PRO_QA_ENABLED !== 'undefined' && PRO_QA_ENABLED && reponse.questions) {
+                            chargerQuestionsDepuisDonnees(reponse.questions);
+                        }
+
                     } else {
                         afficherErreurConnexion(reponse.error);
                         afficherVueConnexion(email);
-                        basculerIndicateurChargement(false);
-                        // Ajoute un bouton Devis PDF sur la carte "Vos prochaines courses"
-                        try {
-                            const titre = document.querySelector('#liste-reservations h3');
-                            if (titre && !document.getElementById('btn-client-devis-pdf')) {
-                                const btn = document.createElement('button');
-                                btn.id = 'btn-client-devis-pdf';
-                                btn.className = 'btn btn-secondaire btn--client';
-                                btn.textContent = 'Télécharger un devis (PDF)';
-                                btn.style.marginLeft = '10px';
-                                titre.insertAdjacentElement('afterend', btn);
-                                btn.addEventListener('click', () => {
-                                    if (!toutesLesReservationsClient || toutesLesReservationsClient.length === 0) { afficherNotification('Aucune course à deviser.', 'info'); return; }
-                                    const items = toutesLesReservationsClient.map(resa => {
-                                        const d = new Date(resa.start);
-                                        const dateISO = d.toISOString().slice(0, 10);
-                                        const startTime = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', 'h');
-                                        return { date: dateISO, startTime, details: resa.details || '', prix: Number(resa.amount) || 0 };
-                                    });
-                                    const client = { email: emailClientCourant, nom: document.getElementById('message-bienvenue-client').textContent || '' };
-                                    basculerIndicateurChargement(true);
-                                    google.script.run.withSuccessHandler(res => {
-                                        basculerIndicateurChargement(false);
-                                        if (res && res.success) {
-                                            if (res.base64) {
-                                                telechargerPdfDepuisBase64(res.base64, res.fileName, res.mimeType);
-                                            } else if (res.url) {
-                                                try { window.open(res.url, '_blank'); } catch (_e) { }
-                                            } else {
-                                                afficherErreur('Le devis n\'a pas pu être généré.');
-                                            }
-                                        } else {
-                                            afficherErreur(res && res.error ? res.error : 'Le devis n\'a pas pu être généré.');
-                                        }
-                                    }).withFailureHandler(err => { basculerIndicateurChargement(false); afficherErreur(err); }).genererDevisPdfFromItems({ client, items });
-                                });
-                            }
-                        } catch (_e) { }
                     }
+                    basculerIndicateurChargement(false);
                     unlock && unlock();
                 })
                 .withFailureHandler(err => {
@@ -337,7 +322,7 @@
                     basculerIndicateurChargement(false);
                     unlock && unlock();
                 })
-                .validerClientParEmail(email, signatureExp, signatureSig);
+                .chargerDonneesInitialesClient(email, signatureExp, signatureSig);
         }
 
         /**
@@ -510,25 +495,31 @@
         }
 
         /**
-         * Charge et affiche les questions du client.
+         * Affiche les questions depuis un tableau de données (optimisation).
+         */
+        function chargerQuestionsDepuisDonnees(qs) {
+            if (!listeQuestions) return;
+            renderText(listeQuestions, '');
+            if (qs && qs.length > 0) {
+                const html = qs.map(q => {
+                    const repHtml = q.reponses && q.reponses.length
+                        ? '<ul>' + q.reponses.map(r => `<li>${escapeHTML(r.auteur)}: ${escapeHTML(r.texte)}</li>`).join('') + '</ul>'
+                        : '';
+                    return `<div class="question-item"><p><strong>${escapeHTML(q.auteur)}:</strong> ${escapeHTML(q.question)}</p>${repHtml}</div>`;
+                }).join('');
+                renderHTML(listeQuestions, html);
+            } else {
+                renderMessage(listeQuestions, 'Aucune question pour le moment.');
+            }
+        }
+
+        /**
+         * Charge et affiche les questions du client (Mode legacy / mise à jour).
          */
         function chargerQuestions() {
             if (!listeQuestions) return;
-            renderText(listeQuestions, '');
             google.script.run
-                .withSuccessHandler(qs => {
-                    if (qs && qs.length > 0) {
-                        const html = qs.map(q => {
-                            const repHtml = q.reponses && q.reponses.length
-                                ? '<ul>' + q.reponses.map(r => `<li>${escapeHTML(r.auteur)}: ${escapeHTML(r.texte)}</li>`).join('') + '</ul>'
-                                : '';
-                            return `<div class="question-item"><p><strong>${escapeHTML(q.auteur)}:</strong> ${escapeHTML(q.question)}</p>${repHtml}</div>`;
-                        }).join('');
-                        renderHTML(listeQuestions, html);
-                    } else {
-                        renderMessage(listeQuestions, 'Aucune question pour le moment.');
-                    }
-                })
+                .withSuccessHandler(chargerQuestionsDepuisDonnees)
                 .withFailureHandler(afficherErreur)
                 .getQuestions(emailClientCourant, signatureExp, signatureSig);
         }
