@@ -168,14 +168,16 @@ function handleGestionPage_(e) {
   }
 
   if (isFlagEnabled_('CLIENT_PORTAL_SIGNED_LINKS')) {
-    const email = params.email;
-    const exp = params.exp;
-    const sig = params.sig;
+    const email = String(params.email || '').trim();
+    const exp = String(params.exp || '').trim();
+    const sig = String(params.sig || '').trim();
 
     // Si des paramètres sont fournis, on valide strictement le lien.
     if (email || exp || sig) {
       if (!Auth.verifyToken(email, exp, sig)) {
-        return creerReponseHtml('Lien invalide', 'Ce lien est expiré ou invalide. Veuillez en demander un nouveau.');
+        const debugInfo = `Email: ${email}, Exp: ${exp}, Sig: ${sig ? sig.substring(0, 10) + '...' : 'None'}`;
+        Logger.log(`Lien invalide debug: ${debugInfo}`);
+        return creerReponseHtml('Lien invalide (Debug)', `Le lien ne semble pas valide. Détails techniques : ${debugInfo}. Veuillez demander un nouveau lien.`);
       }
     }
     // Si AUCUN paramètre n'est fourni, on laisse passer : la page JS affichera le formulaire de connexion (#non-connecte).
