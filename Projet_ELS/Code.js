@@ -457,7 +457,12 @@ function isCallable_(name) {
 }
 
 function isFlagEnabled_(flagName) {
-  try { return Boolean(this[flagName]); } catch (_err) { return false; }
+  try {
+    // Tentative d'accès via 'this' (pour var/function)
+    if (typeof this[flagName] !== 'undefined') return Boolean(this[flagName]);
+    // Fallback via eval pour les const/let globales (V8)
+    return Boolean(eval(flagName));
+  } catch (_err) { return false; }
 }
 
 function ensureConfigurationValidated_() {
