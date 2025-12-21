@@ -25,7 +25,8 @@ var STRATEGIES = {
             { agent: "Sentinel", function: "runSentinelAudit", everyDay: true, hour: 0 },
             { agent: "Bolt", function: "runBoltAudit", days: [ScriptApp.WeekDay.MONDAY], hour: 8 },
             { agent: "Billing", function: "runBillingAudit", days: [ScriptApp.WeekDay.FRIDAY], hour: 19 },
-            { agent: "Marketing", function: "runMarketingAudit", days: [ScriptApp.WeekDay.WEDNESDAY], hour: 10 }
+            { agent: "Marketing", function: "runMarketingAudit", days: [ScriptApp.WeekDay.WEDNESDAY], hour: 10 },
+            { agent: "Architecte", function: "runDailyBriefing", everyDay: true, hour: 8 }
         ]
     },
     "HIGH": {
@@ -39,7 +40,8 @@ var STRATEGIES = {
             { agent: "Sentinel", function: "runSentinelAudit", everyDay: true, hour: 23 },
             { agent: "Billing", function: "runBillingAudit", everyDay: true, hour: 6 },
             { agent: "Bolt", function: "runBoltAudit", everyDay: true, hour: 5 },
-            { agent: "Marketing", function: "runMarketingAudit", everyDay: true, hour: 9 }
+            { agent: "Marketing", function: "runMarketingAudit", everyDay: true, hour: 9 },
+            { agent: "Architecte", function: "runDailyBriefing", everyDay: true, hour: 8 }
         ]
     }
 };
