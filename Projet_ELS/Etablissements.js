@@ -335,7 +335,9 @@ function provisionnerBaseEtablissements(options) {
       true,
       new Date(),
       item.note || '',
-      item.placeId || ''
+      item.placeId || '',
+      '', // Latitude
+      ''  // Longitude
     ]);
   }
 
