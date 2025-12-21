@@ -10,6 +10,52 @@
  * @param {string} emailClient L'e-mail à vérifier.
  * @returns {Object} Un objet indiquant le succès et les informations du client si trouvé.
  */
+/**
+ * Charge toutes les données initiales du client en un seul appel pour optimiser la performance.
+ */
+function chargerDonneesInitialesClient(emailClient, exp, sig) {
+  const result = { success: false };
+  try {
+    // 1. Validation du client
+    const validation = validerClientParEmail(emailClient, exp, sig);
+    if (!validation.success) {
+      return validation;
+    }
+    result.success = true;
+    result.client = validation.client;
+
+    const emailNorm = assertClient(emailClient, exp, sig);
+
+    // 2. Récupération des données en parallèle (conceptuellement)
+    const resReservations = obtenirReservationsClient(emailClient, exp, sig);
+    result.reservations = resReservations.success ? resReservations.reservations : [];
+
+    const resFactures = obtenirFacturesPourClient(emailClient, exp, sig);
+    result.factures = resFactures.success ? resFactures.factures : [];
+
+    result.ca = calculerCAEnCoursClient(emailClient, exp, sig);
+
+    if (typeof PRO_QA_ENABLED !== 'undefined' && PRO_QA_ENABLED) {
+      // Supposant que getQuestions est disponible globalement ou dans ce fichier
+      try {
+        if (typeof getQuestions === 'function') {
+          result.questions = getQuestions(emailClient, exp, sig);
+        }
+      } catch (e) { result.questions = []; }
+    }
+
+    return result;
+  } catch (e) {
+    Logger.log(`Erreur globale chargerDonneesInitialesClient: ${e.stack}`);
+    return { success: false, error: "Erreur de chargement des données." };
+  }
+}
+
+/**
+ * Valide si un client existe par son email et retourne ses infos de base.
+ * @param {string} emailClient L'e-mail à vérifier.
+ * @returns {Object} Un objet indiquant le succès et les informations du client si trouvé.
+ */
 function validerClientParEmail(emailClient, exp, sig) {
   try {
     const emailBrut = String(emailClient || '').trim();
@@ -27,7 +73,10 @@ function validerClientParEmail(emailClient, exp, sig) {
     }
 
     const reservations = obtenirReservationsPourClient(email);
+    // Note: Pour valider, on vérifie juste s'il a des reservations. 
+    // Si 0 reservations, on refuse l'accès pour éviter que n'importe qui accède.
     if (!reservations || reservations.length === 0) {
+      // ... existing logic ...
       if (CLIENT_PORTAL_ATTEMPT_LIMIT_ENABLED) {
         const cache = CacheService.getScriptCache();
         const attempts = parseInt(cache.get(cacheKey) || '0', 10) + 1;
@@ -223,11 +272,9 @@ function envoyerLienEspaceClient(emailClient) {
       ? (encodeMailSubjectUtf8(subjectRaw) || subjectRaw)
       : subjectRaw;
     const expirationTexte = lien.exp ? new Date(lien.exp * 1000).toLocaleString('fr-FR') : '';
-    const logoBlock = (typeof getLogoEmailBlockHtml === 'function') ? getLogoEmailBlockHtml() : '';
-    const buttonHtml = '<a href="' + lien.url + '" style="display:inline-block;padding:12px 18px;background:#3498db;color:#fff;text-decoration:none;border-radius:999px" target="_blank" rel="noopener">Acceder a mon espace client</a>';
     const corpsHtml = `
       <div style="font-family: Montserrat, Arial, sans-serif; color:#333; line-height:1.6;">
-        ${logoBlock}
+        <h2 style="text-align:center;">${brand}</h2>
         <p>Bonjour,</p>
         <p>Voici votre lien sécurisé de connexion :</p>
         <p style="margin:20px 0;">${buttonHtml}</p>
