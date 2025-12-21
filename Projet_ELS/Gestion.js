@@ -225,29 +225,18 @@ function envoyerLienEspaceClient(emailClient) {
     const expirationTexte = lien.exp ? new Date(lien.exp * 1000).toLocaleString('fr-FR') : '';
     const logoBlock = (typeof getLogoEmailBlockHtml === 'function') ? getLogoEmailBlockHtml() : '';
     const buttonHtml = '<a href="' + lien.url + '" style="display:inline-block;padding:12px 18px;background:#3498db;color:#fff;text-decoration:none;border-radius:999px" target="_blank" rel="noopener">Acceder a mon espace client</a>';
-    const corpsHtml = [
-      '<div style="font-family: Montserrat, Arial, sans-serif; color:#333; line-height:1.6;">',
-      logoBlock,
-      '<p>Bonjour,</p>',
-      '<p>Voici votre lien securise pour acceder a votre espace client ' + brand + '.</p>',
-      '<p style="margin:16px 0;">' + buttonHtml + '</p>',
-      '<p style="word-break: break-all;">' + lien.url + '</p>',
-      expirationTexte ? ('<p>Ce lien expire le ' + expirationTexte + '.</p>') : '',
-      "<p>Si vous n'etes pas a l'origine de cette demande, ignorez ce message.</p>",
-      '<p>Bien cordialement,<br>' + brand + '</p>',
-      '</div>'
-    ].filter(Boolean).join('');
-    const corpsTexte = [
-      'Bonjour,',
-      '',
-      'Voici votre lien pour acceder a votre espace client ' + brand + ' :',
-      lien.url,
-      expirationTexte ? ('Lien valable jusqu au ' + expirationTexte + '.') : '',
-      '',
-      "Si vous n'etes pas a l'origine de cette demande, ignorez ce message.",
-      '',
-      brand
-    ].filter(Boolean).join('\n');
+    const corpsHtml = `
+      <div style="font-family: Montserrat, Arial, sans-serif; color:#333; line-height:1.6;">
+        ${logoBlock}
+        <p>Bonjour,</p>
+        <p>Voici votre lien sécurisé de connexion :</p>
+        <p style="margin:20px 0;">${buttonHtml}</p>
+        <p style="font-size:0.9em;color:#555;">Ce lien expire le ${expirationTexte || 'bientôt'}.</p>
+        <hr style="border:0;border-top:1px solid #eee;margin:20px 0;">
+        <p style="font-size:0.8em;color:#999;">Si ce message ne vous concerne pas, vous pouvez l'ignorer.</p>
+        <p style="font-size:0.8em;color:#999;">${brand}</p>
+      </div>
+    `;
 
     const emailOptions = { htmlBody: corpsHtml };
     if (typeof EMAIL_ENTREPRISE !== 'undefined' && EMAIL_ENTREPRISE) {
@@ -257,7 +246,7 @@ function envoyerLienEspaceClient(emailClient) {
     GmailApp.sendEmail(
       email,
       subject,
-      corpsTexte || ' ',
+      ' ', // Corps texte vide pour économiser la taille (tout est dans le HTML)
       emailOptions
     );
 
