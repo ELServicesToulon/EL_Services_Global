@@ -518,6 +518,28 @@ function notifierClientConfirmation(email, nom, reservations) {
   try {
     if (!email || !reservations || reservations.length === 0) return;
     const logoBlock = getLogoEmailBlockHtml();
+
+    // Génération du lien de connexion directe (Magic Link)
+    let lienGestion = ScriptApp.getService().getUrl() + '?page=gestion';
+    let expirationTexte = '';
+    try {
+      // On suppose que generateSignedClientLink est disponible globalement (Auth.js)
+      if (typeof generateSignedClientLink === 'function') {
+        const lien = generateSignedClientLink(email);
+        if (lien && lien.url) {
+          lienGestion = lien.url;
+          if (lien.exp) {
+            const dateExpiration = new Date(lien.exp * 1000);
+            expirationTexte = `Lien valide jusqu'au ${dateExpiration.toLocaleString('fr-FR')}.`;
+          }
+        }
+      }
+    } catch (err) {
+      Logger.log(`Warning: Impossible de générer le lien signé pour ${email} dans la confirmation: ${err}`);
+    }
+
+    const buttonHtml = `<a href="${lienGestion}" style="display:inline-block;padding:12px 18px;background:#3498db;color:#fff;text-decoration:none;border-radius:4px;font-weight:bold;" target="_blank">Accéder à mon espace client</a>`;
+
     let corpsHtml = `
             <div style="font-family: Montserrat, sans-serif; color: #333;">
                 ${logoBlock}
@@ -527,6 +549,13 @@ function notifierClientConfirmation(email, nom, reservations) {
                 <ul>
                     ${reservations.map(r => `<li>Le <strong>${r.date} à ${r.time}</strong> pour un montant de ${r.price.toFixed(2)} €</li>`).join('')}
                 </ul>
+                
+                <p>Retrouvez toutes vos réservations et factures directement dans votre espace :</p>
+                <p style="text-align: center; margin: 20px 0;">
+                  ${buttonHtml}
+                </p>
+                ${expirationTexte ? `<p style="font-size:0.9em;color:#7f8c8d;">${expirationTexte}</p>` : ''}
+
                 <p>Merci de votre confiance.</p>
                 <p>L'équipe ${NOM_ENTREPRISE}</p>
             </div>
