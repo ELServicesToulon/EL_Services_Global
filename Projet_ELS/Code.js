@@ -172,10 +172,13 @@ function handleGestionPage_(e) {
     const exp = params.exp;
     const sig = params.sig;
 
-    // Utilisation du nouveau module Auth
-    if (!Auth.verifyToken(email, exp, sig)) {
-      return creerReponseHtml('Lien invalide', 'Authentification requise pour accéder à l\'espace client.');
+    // Si des paramètres sont fournis, on valide strictement le lien.
+    if (email || exp || sig) {
+      if (!Auth.verifyToken(email, exp, sig)) {
+        return creerReponseHtml('Lien invalide', 'Ce lien est expiré ou invalide. Veuillez en demander un nouveau.');
+      }
     }
+    // Si AUCUN paramètre n'est fourni, on laisse passer : la page JS affichera le formulaire de connexion (#non-connecte).
   }
 
   const templateGestion = HtmlService.createTemplateFromFile('Client_Espace');
