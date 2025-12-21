@@ -65,9 +65,17 @@ function runCloudflareAudit() {
             var httpsStatus = sslDetails.always_use_https === 'on' ? '🔒 HTTPS Redirection' : '🔓 NO HTTPS Redirection';
             var sslMode = sslDetails.ssl_mode; // off, flexible, full, strict
 
+            // Inspection Zaraz (Third Party Tools)
+            var zarazStatus = getZarazStatus(zone.id, token);
+            var zarazIcon = zarazStatus.enabled ? "⚡" : "⚪";
+
             report.push(`${statusIcon} **${zone.name}** (${zone.plan.name})`);
             report.push(`   - Status: ${zone.status.toUpperCase()}`);
             report.push(`   - SSL: ${sslMode.toUpperCase()} | ${httpsStatus}`);
+            report.push(`   - Zaraz: ${zarazIcon} ${zarazStatus.enabled ? "Actif" : "Inactif"}`);
+            if (zarazStatus.enabled && zarazStatus.toolsCount > 0) {
+                report.push(`     -> Tools: ${zarazStatus.toolsNames.join(", ")}`);
+            }
             report.push(`   - Name Servers: ${zone.name_servers.join(', ')}`);
 
             if (zone.status !== 'active') {
@@ -163,6 +171,44 @@ function getZoneSSLDetails(zoneId, token) {
 
     } catch (e) {
         Logger.log("Error fetching SSL for zone " + zoneId + ": " + e);
+    }
+    return result;
+}
+
+/**
+ * Récupère le statut de Zaraz pour une zone.
+ */
+function getZarazStatus(zoneId, token) {
+    var headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    };
+    var options = { method: 'get', headers: headers, muteHttpExceptions: true };
+
+    var result = { enabled: false, toolsCount: 0, toolsNames: [] };
+
+    try {
+        // Doc: https://developers.cloudflare.com/api/operations/zaraz-configuration-get-configuration
+        var url = CLOUDFLARE_API_BASE + "/zones/" + zoneId + "/zaraz/config";
+        var response = UrlFetchApp.fetch(url, options);
+
+        if (response.getResponseCode() === 200) {
+            var json = JSON.parse(response.getContentText());
+            if (json.result) {
+                result.enabled = json.result.zaraz_id ? true : false; // Detection basique, ou check 'debugKey' existence
+                // Zaraz est souvent "enabled" par défaut si configuré.
+                // On regarde les outils configurés
+                if (json.result.tools) {
+                    var tools = json.result.tools;
+                    var names = Object.keys(tools).filter(k => tools[k].enabled !== false); // Exclude disabled if flag exists
+                    result.toolsCount = names.length;
+                    result.toolsNames = names;
+                    if (result.toolsCount > 0) result.enabled = true;
+                }
+            }
+        }
+    } catch (e) {
+        Logger.log("Error Zaraz check: " + e);
     }
     return result;
 }
