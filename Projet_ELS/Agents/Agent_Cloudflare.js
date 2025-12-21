@@ -98,6 +98,9 @@ function runCloudflareAudit() {
         logAgentReport('cloudflare', report.join("\n"));
     }
 
+    // Affichage dans la console pour le debug immédiat
+    Logger.log(report.join("\n"));
+
     return report.join("\n");
 }
 
