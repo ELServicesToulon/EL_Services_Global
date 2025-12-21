@@ -182,6 +182,7 @@ function handleGestionPage_(e) {
   }
 
   const templateGestion = HtmlService.createTemplateFromFile('Client_Espace');
+  templateGestion.params = params;
   templateGestion.ADMIN_EMAIL = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL : '';
   const embedMode = String(params.embed || '') === '1';
   templateGestion.EMBED_MODE = embedMode;
