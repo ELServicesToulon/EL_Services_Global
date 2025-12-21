@@ -15,6 +15,7 @@
  * Lance un audit de performance rapide.
  */
 function runBoltAudit() {
+    saveAgentLastRun('bolt');
     const issues = [];
     const start = new Date().getTime();
 

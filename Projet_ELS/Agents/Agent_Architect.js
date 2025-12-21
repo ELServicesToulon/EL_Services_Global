@@ -9,6 +9,7 @@
  */
 
 function runArchitectAudit() {
+  saveAgentLastRun('architect');
   var report = [];
   report.push("🏛️ **Rapport Gouvernance Architecte**");
 

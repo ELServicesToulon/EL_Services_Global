@@ -15,6 +15,7 @@
  * Lance un audit de sécurité.
  */
 function runSentinelAudit() {
+    saveAgentLastRun('sentinel');
     const report = [];
     report.push("🛡️ **Rapport de Sécurité Sentinel**");
 

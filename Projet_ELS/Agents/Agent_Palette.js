@@ -15,7 +15,8 @@
  * Audit UX rapide.
  */
 function runPaletteAudit() {
-    return `🎨 **Rapport Palette (UX/UI)**
+   saveAgentLastRun('palette');
+   return `🎨 **Rapport Palette (UX/UI)**
   
   1. **Accessibilité Mobile**
      - Vérifiez que tous vos boutons ont une taille min de 44x44px.

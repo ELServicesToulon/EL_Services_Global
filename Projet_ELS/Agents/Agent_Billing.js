@@ -10,6 +10,7 @@
  * @returns {string} Le rapport d'audit au format Markdown.
  */
 function runBillingAudit() {
+    saveAgentLastRun('billing');
     try {
         const reportParts = [];
         reportParts.push("📊 **Rapport d'Audit Facturation & Optimisation**");

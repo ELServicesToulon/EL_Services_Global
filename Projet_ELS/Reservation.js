@@ -137,7 +137,7 @@ function reserverPanier(donneesReservation) {
       notifierClientConfirmation(client.email, client.nom, successfulReservations);
       confirmationEmailSent = true;
     }
-    
+
     if (hasFailures) {
       const summary = hasSuccess
         ? "Certains créneaux n'étaient plus disponibles mais le reste a été réservé."
@@ -167,95 +167,95 @@ function reserverPanier(donneesReservation) {
  * @returns {Object|null} L'objet de la réservation réussie ou null si échec.
  */
 function creerReservationUnique(item, client, clientPourCalcul, options = {}) {
-    const { date, startTime, totalStops, returnToPharmacy } = item;
-    const { overrideIdReservation = null, skipFacturation = false } = options;
-    const startTimeNorm = String(startTime || '').trim();
-    if (!date || !startTimeNorm) {
-      return null;
-    }
-
-    const infosTournee = calculerInfosTourneeBase(totalStops, returnToPharmacy, date, startTimeNorm);
-    const duree = infosTournee.duree;
-    const creneauxDisponibles = obtenirCreneauxDisponiblesPourDate(date, duree);
-    const slots = Array.isArray(creneauxDisponibles) ? creneauxDisponibles : [];
-
-    if (!slots.includes(startTimeNorm)) {
-        return null; // Échec
-    }
-
-    const [heure, minute] = startTimeNorm.split('h').map(Number);
-    if (!isFinite(heure) || !isFinite(minute)) {
-      return null;
-    }
-    const [annee, mois, jour] = date.split('-').map(Number);
-    const dateDebut = new Date(annee, mois - 1, jour, heure, minute);
-    const dateFin = new Date(dateDebut.getTime() + duree * 60000);
-    const idReservation = overrideIdReservation || ('RESA-' + Utilities.getUuid());
-
-    const titreEvenement = `Réservation ${NOM_ENTREPRISE} - ${client.nom}`;
-    let descriptionEvenement = `Client: ${client.nom} (${client.email})`;
-    if (client.telephone) {
-      descriptionEvenement += `\nTéléphone: ${client.telephone}`;
-    }
-    descriptionEvenement += `\nID Réservation: ${idReservation}\nDétails: ${infosTournee.details}\nNote: ${client.note || ''}`;
-    if (client.resident === true) {
-      descriptionEvenement += '\nResident: Oui';
-    }
-    const calendrier = CalendarApp.getCalendarById(getSecret('ID_CALENDRIER'));
-    const evenement = calendrier.createEvent(titreEvenement, dateDebut, dateFin, { description: descriptionEvenement });
-
-    if (evenement) {
-        if (RESERVATION_VERIFY_ENABLED) {
-          let verificationFailed = false;
-          if (typeof calendrier.getEventById === 'function') {
-            const eventCheck = calendrier.getEventById(evenement.getId());
-            const startOk = eventCheck && eventCheck.getStartTime().getTime() === dateDebut.getTime();
-            const endOk = eventCheck && eventCheck.getEndTime().getTime() === dateFin.getTime();
-            verificationFailed = !startOk || !endOk;
-          } else {
-            Logger.log('RESERVATION_VERIFY_ENABLED actif mais Calendar.getEventById indisponible, vérification sautée.');
-          }
-          if (verificationFailed || reservationIdExiste(idReservation)) {
-            evenement.deleteEvent();
-            return null;
-          }
-        }
-
-      const infosPrixFinal = calculerPrixEtDureeServeur(totalStops, returnToPharmacy, date, startTimeNorm, clientPourCalcul, { resident: client.resident === true });
-        if (!skipFacturation) {
-          try {
-            enregistrerReservationPourFacturation(
-              dateDebut,
-              client.nom,
-              client.email,
-              infosTournee.typeCourse,
-              infosTournee.details,
-              infosPrixFinal.prix,
-              evenement.getId(),
-              idReservation,
-              client.note,
-              infosPrixFinal.tourneeOfferteAppliquee,
-              clientPourCalcul.typeRemise,
-              clientPourCalcul.valeurRemise,
-              client.resident === true
-            );
-          } catch (err) {
-            try { evenement.deleteEvent(); } catch (_cleanupErr) { /* no-op */ }
-            const errMessage = err && err.message ? err.message : String(err);
-            const emailClient = client && client.email ? client.email : 'email inconnu';
-            Logger.log("ERREUR lors de l'enregistrement facturation pour : " + emailClient + " (" + errMessage + ")");
-            return null;
-          }
-        }
-        if (infosPrixFinal.tourneeOfferteAppliquee) {
-          decrementerTourneesOffertesClient(client.email);
-          if (clientPourCalcul && typeof clientPourCalcul.nbTourneesOffertes !== 'undefined') {
-            clientPourCalcul.nbTourneesOffertes = Math.max(0, (clientPourCalcul.nbTourneesOffertes || 0) - 1);
-          }
-        }
-        return { date: formaterDateEnFrancais(dateDebut), time: startTimeNorm, price: infosPrixFinal.prix, eventId: evenement.getId(), reservationId: idReservation };
-    }
+  const { date, startTime, totalStops, returnToPharmacy } = item;
+  const { overrideIdReservation = null, skipFacturation = false } = options;
+  const startTimeNorm = String(startTime || '').trim();
+  if (!date || !startTimeNorm) {
     return null;
+  }
+
+  const infosTournee = calculerInfosTourneeBase(totalStops, returnToPharmacy, date, startTimeNorm);
+  const duree = infosTournee.duree;
+  const creneauxDisponibles = obtenirCreneauxDisponiblesPourDate(date, duree);
+  const slots = Array.isArray(creneauxDisponibles) ? creneauxDisponibles : [];
+
+  if (!slots.includes(startTimeNorm)) {
+    return null; // Échec
+  }
+
+  const [heure, minute] = startTimeNorm.split('h').map(Number);
+  if (!isFinite(heure) || !isFinite(minute)) {
+    return null;
+  }
+  const [annee, mois, jour] = date.split('-').map(Number);
+  const dateDebut = new Date(annee, mois - 1, jour, heure, minute);
+  const dateFin = new Date(dateDebut.getTime() + duree * 60000);
+  const idReservation = overrideIdReservation || ('RESA-' + Utilities.getUuid());
+
+  const titreEvenement = `Réservation ${NOM_ENTREPRISE} - ${client.nom}`;
+  let descriptionEvenement = `Client: ${client.nom} (${client.email})`;
+  if (client.telephone) {
+    descriptionEvenement += `\nTéléphone: ${client.telephone}`;
+  }
+  descriptionEvenement += `\nID Réservation: ${idReservation}\nDétails: ${infosTournee.details}\nNote: ${client.note || ''}`;
+  if (client.resident === true) {
+    descriptionEvenement += '\nResident: Oui';
+  }
+  const calendrier = CalendarApp.getCalendarById(getSecret('ID_CALENDRIER'));
+  const evenement = calendrier.createEvent(titreEvenement, dateDebut, dateFin, { description: descriptionEvenement });
+
+  if (evenement) {
+    if (RESERVATION_VERIFY_ENABLED) {
+      let verificationFailed = false;
+      if (typeof calendrier.getEventById === 'function') {
+        const eventCheck = calendrier.getEventById(evenement.getId());
+        const startOk = eventCheck && eventCheck.getStartTime().getTime() === dateDebut.getTime();
+        const endOk = eventCheck && eventCheck.getEndTime().getTime() === dateFin.getTime();
+        verificationFailed = !startOk || !endOk;
+      } else {
+        Logger.log('RESERVATION_VERIFY_ENABLED actif mais Calendar.getEventById indisponible, vérification sautée.');
+      }
+      if (verificationFailed || reservationIdExiste(idReservation)) {
+        evenement.deleteEvent();
+        return null;
+      }
+    }
+
+    const infosPrixFinal = calculerPrixEtDureeServeur(totalStops, returnToPharmacy, date, startTimeNorm, clientPourCalcul, { resident: client.resident === true });
+    if (!skipFacturation) {
+      try {
+        enregistrerReservationPourFacturation(
+          dateDebut,
+          client.nom,
+          client.email,
+          infosTournee.typeCourse,
+          infosTournee.details,
+          infosPrixFinal.prix,
+          evenement.getId(),
+          idReservation,
+          client.note,
+          infosPrixFinal.tourneeOfferteAppliquee,
+          clientPourCalcul.typeRemise,
+          clientPourCalcul.valeurRemise,
+          client.resident === true
+        );
+      } catch (err) {
+        try { evenement.deleteEvent(); } catch (_cleanupErr) { /* no-op */ }
+        const errMessage = err && err.message ? err.message : String(err);
+        const emailClient = client && client.email ? client.email : 'email inconnu';
+        Logger.log("ERREUR lors de l'enregistrement facturation pour : " + emailClient + " (" + errMessage + ")");
+        return null;
+      }
+    }
+    if (infosPrixFinal.tourneeOfferteAppliquee) {
+      decrementerTourneesOffertesClient(client.email);
+      if (clientPourCalcul && typeof clientPourCalcul.nbTourneesOffertes !== 'undefined') {
+        clientPourCalcul.nbTourneesOffertes = Math.max(0, (clientPourCalcul.nbTourneesOffertes || 0) - 1);
+      }
+    }
+    return { date: formaterDateEnFrancais(dateDebut), time: startTimeNorm, price: infosPrixFinal.prix, eventId: evenement.getId(), reservationId: idReservation };
+  }
+  return null;
 }
 
 /**
@@ -515,10 +515,10 @@ function envoyerIdentifiantAccesClient(email, nom, clientId) {
  * Envoie un email de confirmation de réservation au client.
  */
 function notifierClientConfirmation(email, nom, reservations) {
-    try {
-        if (!email || !reservations || reservations.length === 0) return;
-        const logoBlock = getLogoEmailBlockHtml();
-        let corpsHtml = `
+  try {
+    if (!email || !reservations || reservations.length === 0) return;
+    const logoBlock = getLogoEmailBlockHtml();
+    let corpsHtml = `
             <div style="font-family: Montserrat, sans-serif; color: #333;">
                 ${logoBlock}
                 <h1>Confirmation de votre réservation</h1>
@@ -531,20 +531,20 @@ function notifierClientConfirmation(email, nom, reservations) {
                 <p>L'équipe ${NOM_ENTREPRISE}</p>
             </div>
         `;
-        const subjectText = `Confirmation de votre réservation - ${NOM_ENTREPRISE}`;
-        const subjectEncoded = encodeMailSubjectUtf8(subjectText) || subjectText;
-        safeSendEmail(
-            email,
-            subjectEncoded,
-            'Votre confirmation détaillée est disponible dans la version HTML ci-dessous.',
-            {
-                htmlBody: corpsHtml,
-                replyTo: EMAIL_ENTREPRISE
-            }
-        );
-    } catch (e) {
-        Logger.log(`Erreur lors de l'envoi de l'email de confirmation à ${email}: ${e.toString()}`);
-    }
+    const subjectText = `Confirmation de votre réservation - ${NOM_ENTREPRISE}`;
+    const subjectEncoded = encodeMailSubjectUtf8(subjectText) || subjectText;
+    safeSendEmail(
+      email,
+      subjectEncoded,
+      'Votre confirmation détaillée est disponible dans la version HTML ci-dessous.',
+      {
+        htmlBody: corpsHtml,
+        replyTo: EMAIL_ENTREPRISE
+      }
+    );
+  } catch (e) {
+    Logger.log(`Erreur lors de l'envoi de l'email de confirmation à ${email}: ${e.toString()}`);
+  }
 }
 
 /**
@@ -619,9 +619,9 @@ function notifierAdminNouvelleReservation(client, reservations) {
  * Formate une date en français (ex: "Mercredi 6 août 2025").
  */
 function formaterDateEnFrancais(date) {
-    const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-    const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-    return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()}`;
+  const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 /**
@@ -695,29 +695,29 @@ function verifierDisponibiliteRecurrence(itemDeBase) {
   const startSlot = String(startTime || '').trim();
   const resultats = [];
   const dateInitiale = new Date(date + 'T00:00:00');
-  const jourDeLaSemaineCible = dateInitiale.getDay();
-  const annee = dateInitiale.getFullYear();
-  const mois = dateInitiale.getMonth();
-  const joursDuMois = new Date(annee, mois + 1, 0).getDate();
 
-  for (let jour = 1; jour <= joursDuMois; jour++) {
-    const dateCourante = new Date(annee, mois, jour);
-    if (dateCourante.getDay() === jourDeLaSemaineCible && dateCourante >= new Date(new Date().setHours(0, 0, 0, 0))) {
-      const dateString = Utilities.formatDate(dateCourante, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-      const creneauxDisponibles = obtenirCreneauxDisponiblesPourDate(dateString, duree);
-      const slots = Array.isArray(creneauxDisponibles) ? creneauxDisponibles : [];
-      const dateFormatee = formaterDateEnFrancais(dateCourante);
-      let statutPourCeJour = { dateFormatee: dateFormatee, dateISO: dateString, original: startSlot };
+  // Logic updated: Check the next 4 occurrences (approx 1 month sliding window)
+  const maxOccurrences = 4;
+  let iter = new Date(dateInitiale.getTime());
 
-      if (startSlot && slots.includes(startSlot)) {
-        statutPourCeJour.status = 'OK';
-        statutPourCeJour.creneau = startSlot;
-      } else {
-        statutPourCeJour.status = 'Conflict';
-        statutPourCeJour.creneau = startSlot ? trouverAlternativeProche(startSlot, slots) : null;
-      }
-      resultats.push(statutPourCeJour);
+  for (let i = 0; i < maxOccurrences; i++) {
+    const dateString = Utilities.formatDate(iter, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    const creneauxDisponibles = obtenirCreneauxDisponiblesPourDate(dateString, duree);
+    const slots = Array.isArray(creneauxDisponibles) ? creneauxDisponibles : [];
+    const dateFormatee = formaterDateEnFrancais(iter);
+    let statutPourCeJour = { dateFormatee: dateFormatee, dateISO: dateString, original: startSlot };
+
+    if (startSlot && slots.includes(startSlot)) {
+      statutPourCeJour.status = 'OK';
+      statutPourCeJour.creneau = startSlot;
+    } else {
+      statutPourCeJour.status = 'Conflict';
+      statutPourCeJour.creneau = startSlot ? trouverAlternativeProche(startSlot, slots) : null;
     }
+    resultats.push(statutPourCeJour);
+
+    // Jump to next week
+    iter.setDate(iter.getDate() + 7);
   }
   return resultats;
 }

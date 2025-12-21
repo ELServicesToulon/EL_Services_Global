@@ -7,6 +7,7 @@
  * Analyse les livraisons des 7 derniers jours et envoie un rapport synthétique.
  */
 function generateWeeklyQualityReport() {
+  saveAgentLastRun('qualite');
   try {
     // 1. Récupération des données
     // On utilise Config.ID_FEUILLE_CALCUL si dispo, sinon fallback sur PropertiesService

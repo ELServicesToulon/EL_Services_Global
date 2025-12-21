@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Livraison pharmacie à domicile et EHPAD pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol. Service de tournée officinale.">
-  <meta name="keywords" content="livraison pharmacie, service de tournée officinale, pharmaciens, préparateurs, infirmiers, EHPAD, Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol, Bandol">
+  <meta name="description"
+    content="Livraison pharmacie à domicile et EHPAD pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol et Bandol. Service de tournée officinale.">
+  <meta name="keywords"
+    content="livraison pharmacie, service de tournée officinale, pharmaciens, préparateurs, infirmiers, EHPAD, Tamaris, Mar Vivo, Six-Fours-les-Plages, Sanary, Portissol, Bandol">
   <link rel="canonical" href="<?= appUrl ?>">
   <meta property="og:title" content="<?= nomService ?> | Livraison Pharmacie Tamaris, Mar Vivo, Six-Fours">
-  <meta property="og:description" content="Réservez vos tournées de livraison de pharmacie à domicile pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours, Sanary, Portissol et Bandol. Service de tournée officinale.">
+  <meta property="og:description"
+    content="Réservez vos tournées de livraison de pharmacie à domicile pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours, Sanary, Portissol et Bandol. Service de tournée officinale.">
   <meta property="og:url" content="<?= appUrl ?>">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="<?= nomService ?> | Livraison Pharmacie Tamaris, Mar Vivo, Six-Fours">
-  <meta name="twitter:description" content="Réservez vos tournées de livraison de pharmacie à domicile pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours, Sanary, Portissol et Bandol. Service de tournée officinale.">
+  <meta name="twitter:description"
+    content="Réservez vos tournées de livraison de pharmacie à domicile pour pharmaciens, préparateurs, infirmiers sur Tamaris, Mar Vivo, Six-Fours, Sanary, Portissol et Bandol. Service de tournée officinale.">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -61,7 +66,9 @@
     ]
   }
   </script>
-  <title><?= nomService ?> | Réservation de Livraison</title>
+  <title>
+    <?= nomService ?> | Réservation de Livraison
+  </title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -71,7 +78,7 @@
   <?!= include('charte'); ?>
   <style>
     /* Palette UX improvements */
-    body > .sr-only.focus-visible-not-sr-only:focus {
+    body>.sr-only.focus-visible-not-sr-only:focus {
       position: absolute;
       width: auto;
       height: auto;
@@ -88,10 +95,11 @@
       text-decoration: none;
       font-weight: bold;
       border-radius: 0 0 10px 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       outline: 3px solid #3498db;
       outline-offset: 2px;
     }
+
     .external-link-icon {
       display: inline-block;
       vertical-align: middle;
@@ -112,10 +120,12 @@
     });
   </script>
 </head>
-<body class="page" data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>" data-brand-logo="<?= brandLogoUrl ?>">
+
+<body class="page" data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>"
+  data-brand-logo="<?= brandLogoUrl ?>">
   <a href="#layout" class="sr-only focus-visible-not-sr-only">Aller au contenu principal</a>
   <script>
-    (function() {
+    (function () {
       try {
         if (localStorage.getItem('ELS_THEME_CHOICE') === 'ultra') {
           document.body.classList.add('theme-ultra');
@@ -125,13 +135,15 @@
       }
     })();
   </script>
-  <div id="code-postal-overlay" class="code-postal-overlay" role="dialog" aria-modal="true" aria-hidden="false" aria-labelledby="code-postal-overlay-titre">
+  <div id="code-postal-overlay" class="code-postal-overlay" role="dialog" aria-modal="true" aria-hidden="false"
+    aria-labelledby="code-postal-overlay-titre">
     <div class="code-postal-overlay__card">
       <h2 id="code-postal-overlay-titre">Accès réservé aux officines desservies</h2>
       <p class="muted">Indiquez le code postal de votre officine pour vérifier que nous couvrons votre secteur.</p>
       <form id="formulaire-code-postal" class="code-postal-overlay__form">
         <label for="code-postal-saisie">Code postal officine</label>
-        <input type="text" id="code-postal-saisie" class="champ-formulaire" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="postal-code" required>
+        <input type="text" id="code-postal-saisie" class="champ-formulaire" inputmode="numeric" pattern="[0-9]{5}"
+          maxlength="5" autocomplete="postal-code" required>
         <button type="submit" class="btn btn-primaire">Continuer</button>
       </form>
       <p id="code-postal-erreur" class="code-postal-overlay__message hidden" role="alert"></p>
@@ -145,16 +157,16 @@
   <script type="application/json" id="conf-tarifs"><?!= TARIFS_JSON ?></script>
   <script type="application/json" id="conf-pricing-rules-v2"><?!= PRICING_RULES_V2_JSON ?></script>
   <script type="application/json" id="conf-pricing-matrix"><?!= PRICING_MATRIX_JSON ?></script>
- 
+
   <script>
     // Objet de configuration injecté par le serveur
     const configServeur = {
       appUrl: <?= JSON.stringify(appUrl) ?>,
       nomService: <?= JSON.stringify(nomService) ?>,
       logoUrl: <?= JSON.stringify(brandLogoUrl) ?>,
-      TARIFS: (function(){ try { return JSON.parse(document.getElementById('conf-tarifs').textContent); } catch(e){ return {}; } })(),
-      PRICING_RULES_V2: (function(){ try { return JSON.parse(document.getElementById('conf-pricing-rules-v2').textContent); } catch(e){ return {}; } })(),
-      PRICING_MATRIX: (function(){ try { return JSON.parse(document.getElementById('conf-pricing-matrix').textContent); } catch(e){ return {}; } })(),
+      TARIFS: (function () { try { return JSON.parse(document.getElementById('conf-tarifs').textContent); } catch (e) { return {}; } })(),
+      PRICING_RULES_V2: (function () { try { return JSON.parse(document.getElementById('conf-pricing-rules-v2').textContent); } catch (e) { return {}; } })(),
+      PRICING_MATRIX: (function () { try { return JSON.parse(document.getElementById('conf-pricing-matrix').textContent); } catch (e) { return {}; } })(),
       DUREE_BASE: <?= DUREE_BASE ?>,
       DUREE_ARRET_SUP: <?= DUREE_ARRET_SUP ?>,
       KM_BASE: <?= KM_BASE ?>,
@@ -169,7 +181,7 @@
       FORFAIT_RESIDENT_STANDARD: <?= FORFAIT_RESIDENT.STANDARD_PRICE ?>,
       FORFAIT_RESIDENT_URGENCE: <?= FORFAIT_RESIDENT.URGENCE_PRICE ?>,
       FORFAIT_RESIDENT_DURATION: <?= FORFAIT_RESIDENT.DURATION_HOURS ?>
-      ,RESIDENT_AFFILIATION_REQUIRED: <?= RESIDENT_AFFILIATION_REQUIRED ? 'true' : 'false' ?>
+      , RESIDENT_AFFILIATION_REQUIRED: <?= RESIDENT_AFFILIATION_REQUIRED ? 'true' : 'false' ?>
     };
   </script>
 
@@ -179,7 +191,8 @@
 
   <main id="layout" class="container layout-two-cols layout-els">
     <section id="col-center" class="col col--calendar els-center-grid" aria-label="Sélection de créneau">
-      <div id="calendar-panel" class="card" aria-label="Calendrier de réservation" role="region" data-component="calendar">
+      <div id="calendar-panel" class="card" aria-label="Calendrier de réservation" role="region"
+        data-component="calendar">
         <div id="app-conteneur" role="main" aria-label="Contenu principal de la page de réservation">
           <div id="vue-calendrier" role="application" aria-roledescription="calendrier interactif" class="carte">
             <div class="carte-en-tete">
@@ -188,12 +201,18 @@
               <button id="btn-mois-suivant" class="btn-icone" aria-label="Mois suivant">&#9654;</button>
             </div>
             <div class="calendrier-jours-semaine" aria-hidden="true">
-              <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
+              <div>Lun</div>
+              <div>Mar</div>
+              <div>Mer</div>
+              <div>Jeu</div>
+              <div>Ven</div>
+              <div>Sam</div>
+              <div>Dim</div>
             </div>
             <div id="grille-calendrier" class="grille-calendrier" role="grid"></div>
           </div>
         </div>
-        </div>
+      </div>
 
       <? if (PROOF_SOCIAL_ENABLED) { ?>
       <section id="proof-card" class="card" aria-labelledby="preuves-sociales-titre" role="region">
@@ -208,19 +227,23 @@
         <h3>Finaliser la réservation</h3>
         <form id="formulaire-reservation">
           <h4>Informations Client</h4>
-          <p class="muted">Pour créer votre accès client, validez votre réservation et complétez les champs indiqués comme obligatoires. Les autres informations pourront être ajoutées depuis l'espace client.</p>
+          <p class="muted">Pour créer votre accès client, validez votre réservation et complétez les champs indiqués
+            comme obligatoires. Les autres informations pourront être ajoutées depuis l'espace client.</p>
           <div class="groupe-formulaire">
             <label for="client-email">Email (obligatoire)</label>
             <input type="email" id="client-email" required aria-describedby="client-email-helper">
-            <small id="client-email-helper" class="muted">Cette adresse email est requise pour recevoir votre identifiant d'acc&egrave;s client.</small>
+            <small id="client-email-helper" class="muted">Cette adresse email est requise pour recevoir votre
+              identifiant d'acc&egrave;s client.</small>
           </div>
           <div class="groupe-formulaire">
             <label for="client-code-postal">Code postal de l'officine (obligatoire)</label>
             <div class="code-postal-input-row">
-              <input type="text" id="client-code-postal" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" autocomplete="postal-code" required readonly aria-describedby="client-code-postal-helper">
+              <input type="text" id="client-code-postal" inputmode="numeric" pattern="[0-9]{5}" maxlength="5"
+                autocomplete="postal-code" required readonly aria-describedby="client-code-postal-helper">
               <button type="button" id="btn-modifier-code-postal" class="btn btn-secondaire btn-sm">Modifier</button>
             </div>
-            <small id="client-code-postal-helper" class="muted">L'accès est limité aux codes postaux desservis par ELS.</small>
+            <small id="client-code-postal-helper" class="muted">L'accès est limité aux codes postaux desservis par
+              ELS.</small>
           </div>
           <div class="groupe-formulaire">
             <label for="client-nom">Raison Sociale (obligatoire)</label>
@@ -228,17 +251,21 @@
           </div>
           <div class="groupe-formulaire">
             <label for="client-telephone">Téléphone (obligatoire)</label>
-            <input type="tel" id="client-telephone" inputmode="tel" autocomplete="tel" required aria-describedby="client-telephone-helper">
-            <small id="client-telephone-helper" class="muted">Ce numéro nous permet de vous joindre en cas d'ajustement logistique.</small>
+            <input type="tel" id="client-telephone" inputmode="tel" autocomplete="tel" required
+              aria-describedby="client-telephone-helper">
+            <small id="client-telephone-helper" class="muted">Ce numéro nous permet de vous joindre en cas d'ajustement
+              logistique.</small>
           </div>
           <div class="groupe-formulaire">
             <label for="client-adresse">Adresse de retrait (obligatoire)</label>
             <div class="adresse-autocomplete">
               <input type="text" id="client-adresse" autocomplete="street-address" required>
-              <div id="client-adresse-suggestions" class="adresse-suggestions hidden" role="listbox" aria-label="Suggestions d'adresse"></div>
+              <div id="client-adresse-suggestions" class="adresse-suggestions hidden" role="listbox"
+                aria-label="Suggestions d'adresse"></div>
             </div>
           </div>
-          <div class="groupe-formulaire"><label for="client-siret">SIRET</label><input type="text" id="client-siret"></div>
+          <div class="groupe-formulaire"><label for="client-siret">SIRET</label><input type="text" id="client-siret">
+          </div>
           <div class="groupe-formulaire">
             <label class="checkbox-inline">
               <input type="checkbox" id="client-resident">
@@ -247,7 +274,8 @@
           </div>
           <div class="carte carte--notice hidden" id="client-resident-details">
             <h5>Forfait résident</h5>
-            <p class="muted">Ce mode bloque la place pour un résident d'EHPAD ou d'une structure de soins. La tarification est forfaitaire&nbsp;: choisissez l'option adaptée.</p>
+            <p class="muted">Ce mode bloque la place pour un résident d'EHPAD ou d'une structure de soins. La
+              tarification est forfaitaire&nbsp;: choisissez l'option adaptée.</p>
             <div class="resident-forfait-options">
               <label class="radio-inline">
                 <input type="radio" name="resident-mode" id="resident-mode-standard" value="standard" checked>
@@ -264,9 +292,11 @@
                 </span>
               </label>
             </div>
-            <p class="muted">Vous pouvez indiquer l'email de votre structure pour recevoir un récapitulatif, sinon nous enregistrons simplement la course.</p>
+            <p class="muted">Vous pouvez indiquer l'email de votre structure pour recevoir un récapitulatif, sinon nous
+              enregistrons simplement la course.</p>
           </div>
-          <div class="groupe-formulaire"><label for="note-reservation">Note (optionnel)</label><textarea id="note-reservation"></textarea></div>
+          <div class="groupe-formulaire"><label for="note-reservation">Note (optionnel)</label><textarea
+              id="note-reservation"></textarea></div>
           <div class="modale-pied-de-page">
             <button type="button" id="btn-annuler-reservation" class="btn btn-secondaire">Annuler</button>
             <button type="submit" class="btn btn-primaire">Confirmer la réservation</button>
@@ -279,12 +309,8 @@
         <aside id="vue-panier" aria-labelledby="panier-titre" class="carte">
           <div class="panier-entete">
             <div class="panier-identite">
-              <img
-                src="data:image/png;base64,<?!= include('PanierLogo_b64'); ?>"
-                alt="Logo Espace Livraison Sante"
-                class="panier-logo"
-                decoding="async"
-                loading="lazy">
+              <img src="data:image/png;base64,<?!= include('PanierLogo_b64'); ?>" alt="Logo Espace Livraison Sante"
+                class="panier-logo" decoding="async" loading="lazy">
               <h3 id="panier-titre">Panier de réservation</h3>
             </div>
             <div id="banniere-client-reconnu" class="panier-greeting hidden" aria-live="polite">
@@ -295,12 +321,8 @@
           <? if (CLIENT_PORTAL_ENABLED) { ?>
           <button id="btn-connecter-client" class="btn btn-secondaire btn-sm" type="button">Se connecter</button>
           <? } ?>
-          <a
-            id="btn-espace-client"
-            href="<?= appUrl ?>?page=gestion"
-            class="btn btn-secondaire btn-sm hidden"
-            aria-hidden="true"
-            tabindex="-1">Mon Espace Client</a>
+          <a id="btn-espace-client" href="<?= appUrl ?>?page=gestion" class="btn btn-secondaire btn-sm hidden"
+            aria-hidden="true" tabindex="-1">Mon Espace Client</a>
           <ul id="liste-panier">
             <li class="panier-vide" aria-live="polite">Votre panier est vide.</li>
           </ul>
@@ -310,7 +332,8 @@
               <strong id="panier-total-valeur">0 €</strong>
             </div>
             <div class="panier-actions-groupe">
-              <button id="btn-vider-panier" class="btn btn-secondaire" aria-label="Vider le panier">Vider le panier</button>
+              <button id="btn-vider-panier" class="btn btn-secondaire" aria-label="Vider le panier">Vider le
+                panier</button>
               <button id="btn-envoyer-devis" class="btn btn-secondaire">Recevoir un devis</button>
               <button id="btn-telecharger-devis" class="btn btn-secondaire">Télécharger le devis (PDF)</button>
               <button id="btn-valider-panier" class="btn btn-primaire">Valider le panier</button>
@@ -327,20 +350,19 @@
         <div class="client-espace-inline__header">
           <div>
             <h3>Mon Espace Client</h3>
-            <p id="client-espace-inline-caption" class="muted">Suivez vos tournées, factures et messages sans quitter cette page.</p>
+            <p id="client-espace-inline-caption" class="muted">Suivez vos tournées, factures et messages sans quitter
+              cette page.</p>
           </div>
-          <button type="button" class="btn btn-secondaire btn-sm hidden" id="btn-recharger-espace-client">Actualiser</button>
+          <button type="button" class="btn btn-secondaire btn-sm hidden"
+            id="btn-recharger-espace-client">Actualiser</button>
         </div>
         <div id="client-espace-inline-status" class="client-espace-inline__status">
-          Validez votre première réservation puis utilisez &laquo;&nbsp;Se connecter&nbsp;&raquo; pour activer votre espace client.
+          Validez votre première réservation puis utilisez &laquo;&nbsp;Se connecter&nbsp;&raquo; pour activer votre
+          espace client.
         </div>
         <div id="client-espace-inline-frame-wrapper" class="client-espace-inline__frame-wrapper hidden">
-          <iframe
-            id="client-espace-inline-frame"
-            title="Mon Espace Client"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            allowtransparency="true"></iframe>
+          <iframe id="client-espace-inline-frame" title="Mon Espace Client" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade" allowtransparency="true"></iframe>
         </div>
       </div>
       <? } ?>
@@ -350,10 +372,13 @@
     <div class="cta-duo">
       <div class="cta-whatsapp-wrapper">
         <a class="cta-whatsapp" href="https://wa.me/33768591888" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="" width="22" height="22" aria-hidden="true">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="" width="22" height="22"
+            aria-hidden="true">
           Discuter sur WhatsApp
           <span class="sr-only">(s'ouvre dans un nouvel onglet)</span>
-          <svg class="external-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+          <svg class="external-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+          </svg>
         </a>
       </div>
     </div>
@@ -363,44 +388,57 @@
         <article class="tarif-carte" data-tarif="tournees">
           <h3>Tournées</h3>
           <ul class="tarif-liste">
-            <li class="tarif-ligne tarif-action" data-tarif-action="tournee" data-tarif-variant="normal" role="button" tabindex="0" aria-label="Choisir le tarif normal">
+            <li class="tarif-ligne tarif-action" data-tarif-action="tournee" data-tarif-variant="normal" role="button"
+              tabindex="0" aria-label="Choisir le tarif normal">
               <span class="tarif-libelle">Normal</span>
               <span class="tarif-valeur" id="tarif-normal-base">-</span>
-              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison" data-meta-separator=" + "></span>
+              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison"
+                data-meta-separator=" + "></span>
             </li>
-            <li class="tarif-ligne tarif-action" data-tarif-action="tournee" data-tarif-variant="samedi" role="button" tabindex="0" aria-label="Choisir le tarif samedi">
+            <li class="tarif-ligne tarif-action" data-tarif-action="tournee" data-tarif-variant="samedi" role="button"
+              tabindex="0" aria-label="Choisir le tarif samedi">
               <span class="tarif-libelle">Samedi</span>
               <span class="tarif-valeur" id="tarif-samedi-base">-</span>
-              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison" data-meta-separator=" + "></span>
+              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison"
+                data-meta-separator=" + "></span>
             </li>
-            <li class="tarif-ligne tarif-action tarif-ligne--urgent" data-tarif-action="tournee" data-tarif-variant="urgent" role="button" tabindex="0" aria-label="Choisir le tarif urgent">
+            <li class="tarif-ligne tarif-action tarif-ligne--urgent" data-tarif-action="tournee"
+              data-tarif-variant="urgent" role="button" tabindex="0" aria-label="Choisir le tarif urgent">
               <span class="tarif-libelle">Urgent</span>
               <span class="tarif-valeur" id="tarif-urgent-base">-</span>
-              <button type="button" class="btn-urgent-aide" id="btn-urgent-aide" aria-label="Besoin d'aide pour une livraison urgente">
+              <button type="button" class="btn-urgent-aide" id="btn-urgent-aide"
+                aria-label="Besoin d'aide pour une livraison urgente">
                 <span class="urgent-dot" aria-hidden="true"></span>
                 Aide urgence
               </button>
-              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison" data-meta-separator=" + "></span>
+              <span class="tarif-description js-meta-base" data-meta-prefix="1 retrait + 1 livraison"
+                data-meta-separator=" + "></span>
             </li>
-            <li class="tarif-ligne tarif-ligne--wrap tarif-action" data-tarif-action="tournee" data-tarif-variant="supplements" role="button" tabindex="0" aria-label="Voir les suppléments par arrêt">
+            <li class="tarif-ligne tarif-ligne--wrap tarif-action" data-tarif-action="tournee"
+              data-tarif-variant="supplements" role="button" tabindex="0" aria-label="Voir les suppléments par arrêt">
               <span class="tarif-libelle">Suppléments par arrêt</span>
               <span class="tarif-valeur" id="tarif-supplements">-</span>
-              <span class="tarif-description js-meta-supp" data-meta-prefix="Par arrêt supplémentaire" data-meta-separator=" + "></span>
+              <span class="tarif-description js-meta-supp" data-meta-prefix="Par arrêt supplémentaire"
+                data-meta-separator=" + "></span>
             </li>
           </ul>
         </article>
         <article class="tarif-carte" data-tarif="forfait-resident">
           <h3>Forfait résident</h3>
           <ul class="tarif-liste">
-            <li class="tarif-ligne tarif-action" data-tarif-action="resident" data-tarif-variant="standard" role="button" tabindex="0" aria-label="Choisir le forfait résident standard">
+            <li class="tarif-ligne tarif-action" data-tarif-action="resident" data-tarif-variant="standard"
+              role="button" tabindex="0" aria-label="Choisir le forfait résident standard">
               <span class="tarif-libelle">Pré-collecte veille + livraison lendemain</span>
               <span class="tarif-valeur" id="forfait-resident-standard">-</span>
-              <span class="tarif-description">1 retrait documents sur site résident + 1 démarche &amp; retrait PUI Sainte Musse + 1 livraison sur site résident le lendemain.</span>
+              <span class="tarif-description">1 retrait documents sur site résident + 1 démarche &amp; retrait PUI
+                Sainte Musse + 1 livraison sur site résident le lendemain.</span>
             </li>
-            <li class="tarif-ligne tarif-action" data-tarif-action="resident" data-tarif-variant="urgence" role="button" tabindex="0" aria-label="Choisir le forfait résident urgence">
+            <li class="tarif-ligne tarif-action" data-tarif-action="resident" data-tarif-variant="urgence" role="button"
+              tabindex="0" aria-label="Choisir le forfait résident urgence">
               <span class="tarif-libelle">Retrait &amp; livraison en URGENCE </span>
               <span class="tarif-valeur" id="forfait-resident-urgence">-</span>
-              <span class="tarif-description">1 retrait documents sur site résident + 1 démarche & retrait PUI Sainte Musse + 1 livraison sur site résident dans les délais les plus rapides possibles.</span>
+              <span class="tarif-description">1 retrait documents sur site résident + 1 démarche & retrait PUI Sainte
+                Musse + 1 livraison sur site résident dans les délais les plus rapides possibles.</span>
             </li>
           </ul>
           <div id="els-demandes" class="els-card" role="region" aria-labelledby="els-demandes-title">
@@ -419,133 +457,160 @@
               <input id="adresse" placeholder="Adresse complète">
               <input id="jours" placeholder="Jours souhaités (ex: Lun, Mer, Ven)">
               <input id="plage" placeholder="Plage horaire (ex: 10h–12h)">
-              <textarea id="details" placeholder="Précisions (ordonnances, volume, contraintes…)" maxlength="1500"></textarea>
+              <textarea id="details" placeholder="Précisions (ordonnances, volume, contraintes…)"
+                maxlength="1500"></textarea>
               <button type="submit" class="els-btn">Envoyer la demande</button>
             </form>
-            <p id="demandeOk" class="visually-hidden" role="status">Merci, votre demande est bien envoyée. Réponse sous 24–72h ouvrées.</p>
+            <p id="demandeOk" class="visually-hidden" role="status">Merci, votre demande est bien envoyée. Réponse sous
+              24–72h ouvrées.</p>
           </div>
         </article>
       </div>
-      <p class="hero-footnote">TVA: <?= TVA_APPLICABLE ? 'Applicable' : 'Non applicable (art. 293B du CGI)' ?>.</p>
+      <p class="hero-footnote">TVA:
+        <?= TVA_APPLICABLE ? 'Applicable' : 'Non applicable (art. 293B du CGI)' ?>.
+      </p>
     </div>
   </section>
   <!-- MODALE 1: Configuration de la tournée (VERSION COMPLÈTE) -->
-  <div id="modale-config-tournee" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-config-titre">
+  <div id="modale-config-tournee" class="modale-overlay hidden" role="dialog" aria-modal="true"
+    aria-labelledby="modale-config-titre">
     <div class="modale-contenu">
-      <button id="btn-fermer-config-tournee" class="btn-fermer" aria-label="Fermer la fenêtre de configuration">&times;</button>
+      <button id="btn-fermer-config-tournee" class="btn-fermer"
+        aria-label="Fermer la fenêtre de configuration">&times;</button>
       <div class="app-logo-container" data-logo-slot>
-        <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
+        <span class="app-logo--fallback" data-logo-fallback="true">
+          <?= nomService ?>
+        </span>
       </div>
       <h3 id="modale-config-titre"></h3>
-      <p class="modale-intro">Choisissez simplement le nombre d'arrêts (départ inclus) et précisez si la tournée doit revenir à l'officine. Nous adaptons automatiquement la durée et le tarif estimés.</p>
+      <p class="modale-intro">Choisissez simplement le nombre d'arrêts (départ inclus) et précisez si la tournée doit
+        revenir à l'officine. Nous adaptons automatiquement la durée et le tarif estimés.</p>
       <form id="formulaire-config-tournee">
         <div class="groupe-formulaire">
-            <label>Arrêts prévus (départ inclus)</label>
-            <div class="champ-compteur">
-                <button type="button" id="btn-retirer-arret" class="btn-compteur" aria-label="Retirer un arrêt">-</button>
-                <span id="valeur-arrets-sup" class="valeur-compteur">1</span>
-                <button type="button" id="btn-ajouter-arret" class="btn-compteur" aria-label="Ajouter un arrêt">+</button>
-            </div>
+          <label>Arrêts prévus (départ inclus)</label>
+          <div class="champ-compteur">
+            <button type="button" id="btn-retirer-arret" class="btn-compteur" aria-label="Retirer un arrêt">-</button>
+            <span id="valeur-arrets-sup" class="valeur-compteur">1</span>
+            <button type="button" id="btn-ajouter-arret" class="btn-compteur" aria-label="Ajouter un arrêt">+</button>
+          </div>
         </div>
         <div class="groupe-formulaire conteneur-interrupteur">
-            <label for="interrupteur-retour">Retour à la pharmacie</label>
-            <label class="interrupteur"><input type="checkbox" id="interrupteur-retour"><span class="glissiere"></span></label>
+          <label for="interrupteur-retour">Retour à la pharmacie</label>
+          <label class="interrupteur"><input type="checkbox" id="interrupteur-retour"><span
+              class="glissiere"></span></label>
         </div>
         <div id="resume-config-tournee" class="modale-resume"></div>
         <div class="modale-pied-de-page">
-            <button type="submit" class="btn btn-primaire">Voir les créneaux</button>
+          <button type="submit" class="btn btn-primaire">Voir les créneaux</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODALE 2: Sélection du créneau (VERSION COMPLÈTE) -->
-  <div id="modale-selection-creneau" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-selection-titre">
-      <div class="modale-contenu">
-          <button id="btn-fermer-selection-creneau" class="btn-fermer" aria-label="Fermer la fenêtre de sélection">&times;</button>
-          <div class="app-logo-container" data-logo-slot>
-            <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
-          </div>
-          <h3 id="modale-selection-titre">Sélectionner un créneau</h3>
-          <div id="grille-selection-creneau" class="grille-selection-creneau"></div>
-          <div class="groupe-formulaire conteneur-interrupteur u-mt-16">
-              <label for="interrupteur-recurrence">Réserver pour tous les [jour de la semaine] de ce mois</label>
-              <label class="interrupteur"><input type="checkbox" id="interrupteur-recurrence"><span class="glissiere"></span></label>
-          </div>
-          <div class="modale-resume u-mt-16">
-              <div id="recap-creneau-heure">--:--</div>
-              <div id="recap-creneau-tarif">--</div>
-              <strong id="recap-creneau-prix">--.-- €</strong>
-          </div>
-          <div class="notice-resident hidden" id="notice-resident-creneau">
-            <p>Forfait r&eacute;sident activ&eacute; : le tarif affich&eacute; sera remplac&eacute; par le forfait choisi lors de la confirmation.</p>
-          </div>
-          <div class="modale-pied-de-page">
-              <button type="button" id="btn-modifier-tournee" class="btn btn-secondaire">Modifier la tournée</button>
-              <button type="button" id="btn-ajouter-au-panier" class="btn btn-primaire" disabled>Ajouter au panier</button>
-          </div>
+  <div id="modale-selection-creneau" class="modale-overlay hidden" role="dialog" aria-modal="true"
+    aria-labelledby="modale-selection-titre">
+    <div class="modale-contenu">
+      <button id="btn-fermer-selection-creneau" class="btn-fermer"
+        aria-label="Fermer la fenêtre de sélection">&times;</button>
+      <div class="app-logo-container" data-logo-slot>
+        <span class="app-logo--fallback" data-logo-fallback="true">
+          <?= nomService ?>
+        </span>
       </div>
+      <h3 id="modale-selection-titre">Sélectionner un créneau</h3>
+      <div id="grille-selection-creneau" class="grille-selection-creneau"></div>
+      <div class="groupe-formulaire conteneur-interrupteur u-mt-16">
+        <label for="interrupteur-recurrence">Réserver ce créneau pour 4 semaines</label>
+        <label class="interrupteur"><input type="checkbox" id="interrupteur-recurrence"><span
+            class="glissiere"></span></label>
+      </div>
+      <div class="modale-resume u-mt-16">
+        <div id="recap-creneau-heure">--:--</div>
+        <div id="recap-creneau-tarif">--</div>
+        <strong id="recap-creneau-prix">--.-- €</strong>
+      </div>
+      <div class="notice-resident hidden" id="notice-resident-creneau">
+        <p>Forfait r&eacute;sident activ&eacute; : le tarif affich&eacute; sera remplac&eacute; par le forfait choisi
+          lors de la confirmation.</p>
+      </div>
+      <div class="modale-pied-de-page">
+        <button type="button" id="btn-modifier-tournee" class="btn btn-secondaire">Modifier la tournée</button>
+        <button type="button" id="btn-ajouter-au-panier" class="btn btn-primaire" disabled>Ajouter au panier</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODALE 3: Confirmation de la récurrence (VERSION COMPLÈTE) -->
-  <div id="modale-confirmation-recurrence" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-recurrence-titre">
-      <div class="modale-contenu">
-          <button id="btn-fermer-confirmation-recurrence" class="btn-fermer" aria-label="Fermer">&times;</button>
-          <div class="app-logo-container" data-logo-slot>
-            <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
-          </div>
-          <h3 id="modale-recurrence-titre">Confirmer les dates récurrentes</h3>
-          <p>Veuillez vérifier les créneaux pour votre réservation récurrente. Les conflits ont été ajustés au plus proche.</p>
-          <ul id="liste-recurrence-details" class="liste-recurrence"></ul>
-          <div class="modale-pied-de-page">
-              <button type="button" id="btn-annuler-recurrence" class="btn btn-secondaire">Annuler</button>
-              <button type="button" id="btn-confirmer-recurrence" class="btn btn-primaire">Confirmer et Ajouter</button>
-          </div>
+  <div id="modale-confirmation-recurrence" class="modale-overlay hidden" role="dialog" aria-modal="true"
+    aria-labelledby="modale-recurrence-titre">
+    <div class="modale-contenu">
+      <button id="btn-fermer-confirmation-recurrence" class="btn-fermer" aria-label="Fermer">&times;</button>
+      <div class="app-logo-container" data-logo-slot>
+        <span class="app-logo--fallback" data-logo-fallback="true">
+          <?= nomService ?>
+        </span>
       </div>
+      <h3 id="modale-recurrence-titre">Confirmer les dates récurrentes</h3>
+      <p>Veuillez vérifier les créneaux pour votre réservation récurrente. Les conflits ont été ajustés au plus proche.
+      </p>
+      <ul id="liste-recurrence-details" class="liste-recurrence"></ul>
+      <div class="modale-pied-de-page">
+        <button type="button" id="btn-annuler-recurrence" class="btn btn-secondaire">Annuler</button>
+        <button type="button" id="btn-confirmer-recurrence" class="btn btn-primaire">Confirmer et Ajouter</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODALE 4: Email pour le devis (VERSION COMPLÈTE) -->
-  <div id="modale-email-devis" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-devis-titre">
-      <div class="modale-contenu">
-          <button id="btn-fermer-email-devis" class="btn-fermer" aria-label="Fermer">&times;</button>
-          <div class="app-logo-container" data-logo-slot>
-            <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
-          </div>
-          <h3 id="modale-devis-titre">Recevoir votre devis</h3>
-          <p>Les directeurs d’EHPAD peuvent envoyer le devis directement à la famille du résident.</p>
-          <form id="formulaire-email-devis">
-              <div class="groupe-formulaire">
-                  <label for="email-pour-devis">Adresse e-mail (famille du résident si souhaité)</label>
-                  <input type="email" id="email-pour-devis" required>
-                  <small class="muted">Nous n’utilisons cet e-mail que pour l’envoi du devis.</small>
-              </div>
-              <div class="modale-pied-de-page">
-                  <button type="submit" class="btn btn-primaire">Envoyer le devis</button>
-              </div>
-          </form>
+  <div id="modale-email-devis" class="modale-overlay hidden" role="dialog" aria-modal="true"
+    aria-labelledby="modale-devis-titre">
+    <div class="modale-contenu">
+      <button id="btn-fermer-email-devis" class="btn-fermer" aria-label="Fermer">&times;</button>
+      <div class="app-logo-container" data-logo-slot>
+        <span class="app-logo--fallback" data-logo-fallback="true">
+          <?= nomService ?>
+        </span>
       </div>
+      <h3 id="modale-devis-titre">Recevoir votre devis</h3>
+      <p>Les directeurs d’EHPAD peuvent envoyer le devis directement à la famille du résident.</p>
+      <form id="formulaire-email-devis">
+        <div class="groupe-formulaire">
+          <label for="email-pour-devis">Adresse e-mail (famille du résident si souhaité)</label>
+          <input type="email" id="email-pour-devis" required>
+          <small class="muted">Nous n’utilisons cet e-mail que pour l’envoi du devis.</small>
+        </div>
+        <div class="modale-pied-de-page">
+          <button type="submit" class="btn btn-primaire">Envoyer le devis</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- MODALE: Connexion espace client -->
-  <div id="modale-connexion-client" class="modale-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modale-connexion-titre">
-      <div class="modale-contenu">
-          <button id="btn-fermer-connexion-client" class="btn-fermer" aria-label="Fermer">&times;</button>
-          <div class="app-logo-container" data-logo-slot>
-            <span class="app-logo--fallback" data-logo-fallback="true"><?= nomService ?></span>
-          </div>
-          <h3 id="modale-connexion-titre">Connexion &agrave; l'espace client</h3>
-          <p class="modale-intro">Saisissez l'adresse e-mail utilisée pour vos réservations. Nous vous envoyons un lien sécurisé pour créer ou mettre &agrave; jour votre mot de passe.</p>
-          <form id="formulaire-connexion-reservation">
-              <div class="groupe-formulaire">
-                  <label for="email-connexion-reservation">Adresse e-mail</label>
-                  <input type="email" id="email-connexion-reservation" class="champ-formulaire" required autocomplete="email">
-              </div>
-              <div class="modale-pied-de-page">
-                  <button type="button" id="btn-annuler-connexion-client" class="btn btn-secondaire">Annuler</button>
-                  <button type="submit" class="btn btn-primaire">Recevoir le lien</button>
-              </div>
-          </form>
+  <div id="modale-connexion-client" class="modale-overlay hidden" role="dialog" aria-modal="true"
+    aria-labelledby="modale-connexion-titre">
+    <div class="modale-contenu">
+      <button id="btn-fermer-connexion-client" class="btn-fermer" aria-label="Fermer">&times;</button>
+      <div class="app-logo-container" data-logo-slot>
+        <span class="app-logo--fallback" data-logo-fallback="true">
+          <?= nomService ?>
+        </span>
       </div>
+      <h3 id="modale-connexion-titre">Connexion &agrave; l'espace client</h3>
+      <p class="modale-intro">Saisissez l'adresse e-mail utilisée pour vos réservations. Nous vous envoyons un lien
+        sécurisé pour créer ou mettre &agrave; jour votre mot de passe.</p>
+      <form id="formulaire-connexion-reservation">
+        <div class="groupe-formulaire">
+          <label for="email-connexion-reservation">Adresse e-mail</label>
+          <input type="email" id="email-connexion-reservation" class="champ-formulaire" required autocomplete="email">
+        </div>
+        <div class="modale-pied-de-page">
+          <button type="button" id="btn-annuler-connexion-client" class="btn btn-secondaire">Annuler</button>
+          <button type="submit" class="btn btn-primaire">Recevoir le lien</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <div id="conteneur-notifications" role="status" aria-live="polite"></div>
@@ -554,7 +619,7 @@
       document.querySelectorAll('.theme-selector, #btn-theme, #menu-theme').forEach(el => el && el.remove());
     });
   </script>
-  
+
   <? if (THEME_V2_ENABLED) { ?>
   <?!= include('Render_JS'); ?>
   <?!= include('Pricing_JS'); ?>
@@ -715,7 +780,7 @@
     });
   </script>
   <script>
-    (function() {
+    (function () {
       var assetNode = document.getElementById('hero-assets');
       if (!assetNode) {
         return;
@@ -732,10 +797,10 @@
       } else if (assetNode.parentNode) {
         assetNode.parentNode.removeChild(assetNode);
       }
-      var assign = function(key, dataUrl) {
+      var assign = function (key, dataUrl) {
         if (!dataUrl) return;
         var nodes = document.querySelectorAll('[data-asset="' + key + '"]');
-        Array.prototype.forEach.call(nodes, function(node) {
+        Array.prototype.forEach.call(nodes, function (node) {
           if (node && node.tagName === 'IMG') {
             node.src = dataUrl;
             node.removeAttribute('data-asset');
@@ -747,7 +812,7 @@
           assign('logo', payload.logo);
         }
         if (payload.hero && typeof payload.hero === 'object') {
-          Object.keys(payload.hero).forEach(function(key) {
+          Object.keys(payload.hero).forEach(function (key) {
             assign('hero-' + key, payload.hero[key]);
           });
         }
@@ -758,13 +823,19 @@
     <div class="card carte carte--tesla">
       <div class="tesla-content">
         <h3>Engagés pour une logistique durable</h3>
-        <p>Chez <?= nomService ?>, nous roulons à l'électrique pour une logistique santé plus propre.</p>
-        <p><strong>Vous aussi, passez à l'électrique :</strong> Bénéficiez de 1 000 Kilomètres de Supercharge gratuite ou d'une réduction de 500 € grâce à mon lien de parrainage.</p>
+        <p>Chez
+          <?= nomService ?>, nous roulons à l'électrique pour une logistique santé plus propre.
+        </p>
+        <p><strong>Vous aussi, passez à l'électrique :</strong> Bénéficiez de 1 000 Kilomètres de Supercharge gratuite
+          ou d'une réduction de 500 € grâce à mon lien de parrainage.</p>
         <div class="tesla-actions">
           <a href="https://ts.la/emmanuel48924" target="_blank" rel="noopener noreferrer" class="btn btn-tesla">
-             Profiter de l'offre Tesla
-             <span class="sr-only">(s'ouvre dans un nouvel onglet)</span>
-             <svg class="external-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="fill: white;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            Profiter de l'offre Tesla
+            <span class="sr-only">(s'ouvre dans un nouvel onglet)</span>
+            <svg class="external-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"
+              style="fill: white;">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+            </svg>
           </a>
         </div>
       </div>
@@ -783,7 +854,10 @@
       <a href="<?= appUrl ?>?page=cgv">CGV</a>
       <a href="<?= appUrl ?>?page=regles">Règles d'utilisation du site</a>
     </nav>
-    <p>&copy; <?= new Date().getFullYear() ?> <?= nomService ?>. Tous droits réservés.</p>
+    <p>&copy;
+      <?= new Date().getFullYear() ?>
+      <?= nomService ?>. Tous droits réservés.
+    </p>
   </footer>
   <? } ?>
   <?!= include('ElsLogo_Script'); ?>
@@ -791,9 +865,11 @@
   <?!= renderChatPiluleur().getContent() ?>
 
   <!-- Palette: Back to Top Button -->
-  <button id="btn-back-to-top" class="btn-back-to-top hidden" aria-label="Retour en haut de page" title="Retour en haut">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M18 15l-6-6-6 6"/>
+  <button id="btn-back-to-top" class="btn-back-to-top hidden" aria-label="Retour en haut de page"
+    title="Retour en haut">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M18 15l-6-6-6 6" />
     </svg>
   </button>
   <script>
@@ -821,5 +897,5 @@
     });
   </script>
 </body>
-</html>
 
+</html>

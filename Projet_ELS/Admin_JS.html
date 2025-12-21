@@ -540,11 +540,22 @@
                 <div class="groupe-formulaire hidden" id="conteneur-nb-tournees-offertes"><label for="nb-tournees-offertes">Nombre Tournées Offertes</label><input type="number" id="nb-tournees-offertes" class="champ-formulaire" min="0" step="1"></div>
             </div>
             <div class="groupe-formulaire"><label for="champ-date-ajout">Date de la course</label><input type="date" id="champ-date-ajout" class="champ-formulaire" value="${escapeHTML(champDate ? champDate.value : '')}"></div>
-            <div class="groupe-formulaire"><label class="checkbox-inline"><input type="checkbox" id="check-recurrence"> Créer une récurrence (hors samedi)</label></div>
-            <div class="groupe-formulaire hidden" id="conteneur-recurrence">
+            <div class="groupe-formulaire"><label class="checkbox-inline"><input type="checkbox" id="check-recurrence"> Créer une récurrence</label></div>
+            <div class="groupe-formulaire hidden" id="conteneur-recurrence" style="border-left: 3px solid #3498db; padding-left: 10px; margin-left: 5px;">
+              <div style="margin-bottom: 8px;">
+                <label>Jours de répétition</label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                   <label class="checkbox-inline" style="font-weight: normal;"><input type="checkbox" class="check-jour-recurrence" value="1" checked> Lun</label>
+                   <label class="checkbox-inline" style="font-weight: normal;"><input type="checkbox" class="check-jour-recurrence" value="2" checked> Mar</label>
+                   <label class="checkbox-inline" style="font-weight: normal;"><input type="checkbox" class="check-jour-recurrence" value="3" checked> Mer</label>
+                   <label class="checkbox-inline" style="font-weight: normal;"><input type="checkbox" class="check-jour-recurrence" value="4" checked> Jeu</label>
+                   <label class="checkbox-inline" style="font-weight: normal;"><input type="checkbox" class="check-jour-recurrence" value="5" checked> Ven</label>
+                   <label class="checkbox-inline" style="font-weight: normal;"><input type="checkbox" class="check-jour-recurrence" value="6"> Sam</label>
+                </div>
+              </div>
               <label for="champ-date-fin-recurrence">Date de fin de récurrence</label>
               <input type="date" id="champ-date-fin-recurrence" class="champ-formulaire">
-              <p class="champ-helper">La course sera dupliquée chaque jour hors samedi jusqu'à cette date incluse.</p>
+              <p class="champ-helper">La course sera dupliquée les jours sélectionnés jusqu'à cette date incluse.</p>
             </div>
             <div class="groupe-formulaire"><label>Arrêts totaux :</label><div style="display: flex; align-items: center; gap: 20px;"><div class="champ-compteur"><button type="button" class="btn-compteur btn-retirer">-</button><span class="valeur-compteur">1</span><button type="button" class="btn-compteur btn-ajouter">+</button></div><label><input type="checkbox" id="check-retour"> Retour pharmacie</label></div></div>
             <div id="conteneur-creneaux-ajout" class="hidden">
@@ -1245,7 +1256,7 @@
                     recurrence: {
                         enabled: recurrenceActive,
                         endDate: recurrenceActive ? recurrenceEndDate : '',
-                        skipSaturday: true
+                        days: recurrenceActive ? Array.from(document.querySelectorAll('.check-jour-recurrence:checked')).map(cb => parseInt(cb.value, 10)) : []
                     }
                 };
                 gererSoumissionCreation(data);

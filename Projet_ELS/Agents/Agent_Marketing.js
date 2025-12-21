@@ -10,6 +10,7 @@
  * @returns {string} Le rapport d'audit au format Markdown.
  */
 function runMarketingAudit() {
+    saveAgentLastRun('marketing');
     try {
         const reportParts = [];
         reportParts.push("📈 **Rapport d'Audit Marketing & SEO**");
