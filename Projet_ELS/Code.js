@@ -133,6 +133,10 @@ function registerRoutes_() {
   Router.add('home', renderReservationInterface);
   Router.add('index', renderReservationInterface);
   Router.add('reservation', renderReservationInterface);
+
+  // Mobile Widget
+  Router.add('mobile', handleMobilePage_);
+  Router.add('widget', handleMobilePage_);
 }
 
 // =================================================================
@@ -226,6 +230,28 @@ function handlePiluleurPage_(e) {
     return openPiluleurInterface(imageId, imageUrl);
   }
   return HtmlService.createHtmlOutput('Module Piluleur introuvable');
+}
+
+function handleMobilePage_(e) {
+  // Optionnel: Vérifier Auth ici si on veut restreindre l'accès
+  // if (!Auth.isAdmin(e)) return creerReponseHtml("Accès Interdit", "Admin seulement");
+
+  const template = HtmlService.createTemplateFromFile('Mobile_Hub');
+  return template.evaluate()
+    .setTitle('ELS Mobile Widget')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL); // Pour permettre l'iframe si nécessaire
+}
+
+function getBroadcastVersion() {
+  try {
+    if (typeof BUILD_TIMESTAMP !== 'undefined') {
+      return BUILD_TIMESTAMP;
+    }
+  } catch (e) {
+    // Variable non définie
+  }
+  return 'Dev / Unknown';
 }
 
 function handleCgvPage_() {

@@ -20,6 +20,11 @@ foreach ($projName in $projects.Keys) {
         Push-Location $projName
 
         try {
+            # 0. VERSION STAMP
+            $ts = Get-Date -Format "yyyy-MM-dd HH:mm"
+            Set-Content -Path "BuildInfo.js" -Value "var BUILD_TIMESTAMP = 'Build $ts';"
+            Write-Host "Generated BuildInfo.js ($ts)"
+
             # A. PUSH
             Write-Host "1. Clasp Push..."
             npx clasp push --force
