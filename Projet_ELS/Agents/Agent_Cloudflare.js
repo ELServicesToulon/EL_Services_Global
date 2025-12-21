@@ -96,6 +96,13 @@ function runCloudflareAudit() {
             report.push(`\n⚠️ **${issuesFound} problèmes détectés.** Une vérification manuelle est recommandée.`);
         }
 
+        // 2. Vérification Workers & Pages
+        var workersReport = checkWorkersAndPages(token);
+        if (workersReport) {
+            report.push("\n⚡ **Workers & Pages**");
+            report.push(workersReport);
+        }
+
     } catch (e) {
         report.push("❌ **Erreur Critique** : " + e.toString());
         Logger.log("Cloudflare Agent Error: " + e.toString());
@@ -211,4 +218,59 @@ function getZarazStatus(zoneId, token) {
         Logger.log("Error Zaraz check: " + e);
     }
     return result;
+}
+
+/**
+ * Vérifie les Workers et Pages Projects.
+ */
+function checkWorkersAndPages(token) {
+    var headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    };
+    var options = { method: 'get', headers: headers, muteHttpExceptions: true };
+    var output = [];
+
+    try {
+        // 1. Workers Scripts
+        // https://developers.cloudflare.com/api/operations/worker-script-list-workers
+        var urlWorkers = CLOUDFLARE_API_BASE + "/accounts/" + CLOUDFLARE_ACCOUNT_ID + "/workers/scripts";
+        var respWorkers = UrlFetchApp.fetch(urlWorkers, options);
+        var jsonWorkers = JSON.parse(respWorkers.getContentText());
+
+        if (jsonWorkers.success) {
+            var scripts = jsonWorkers.result;
+            if (scripts && scripts.length > 0) {
+                output.push(`🔹 **${scripts.length} Workers actifs** :`);
+                scripts.forEach(s => {
+                    output.push(`   - **${s.id}** (Dernière modif: ${s.modified_on.split('T')[0]})`);
+                });
+            } else {
+                output.push("🔹 Aucun Worker script détecté.");
+            }
+        }
+
+        // 2. Pages Projects
+        // https://developers.cloudflare.com/api/operations/pages-project-list-projects
+        var urlPages = CLOUDFLARE_API_BASE + "/accounts/" + CLOUDFLARE_ACCOUNT_ID + "/pages/projects";
+        var respPages = UrlFetchApp.fetch(urlPages, options);
+        var jsonPages = JSON.parse(respPages.getContentText());
+
+        if (jsonPages.success) {
+            var projects = jsonPages.result;
+            if (projects && projects.length > 0) {
+                output.push(`\n📄 **${projects.length} Pages Projects** :`);
+                projects.forEach(p => {
+                    var url = p.subdomain; // Souvent le subdomain pages.dev
+                    output.push(`   - **${p.name}** (Branch: ${p.production_branch})`);
+                    output.push(`     🔗 https://${url}`);
+                });
+            }
+        }
+
+    } catch (e) {
+        output.push("❌ Erreur Workers/Pages: " + e.toString());
+    }
+
+    return output.join("\n");
 }
