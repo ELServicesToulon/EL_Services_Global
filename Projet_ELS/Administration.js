@@ -555,10 +555,25 @@ function creerReservationAdmin(data) {
       if (dateFinRecurrence.getTime() < dateDepart.getTime()) {
         throw new Error("La date de fin de récurrence doit être postérieure ou égale à la date de départ.");
       }
+
+      let targetDays = null; // Array of day indices (0=Sun, 1=Mon, ..., 6=Sat)
+      if (Array.isArray(recurrenceInfo.days) && recurrenceInfo.days.length > 0) {
+        targetDays = recurrenceInfo.days.map(Number);
+      }
+
       const iter = new Date(dateDepart.getTime());
       while (iter.getTime() <= dateFinRecurrence.getTime()) {
         const day = iter.getDay();
-        if (!(skipSaturday && day === 6)) {
+        let shouldAdd = false;
+
+        if (targetDays !== null) {
+          if (targetDays.includes(day)) shouldAdd = true;
+        } else {
+          // Legacy behavior: exclude Saturday if requested
+          if (!(skipSaturday && day === 6)) shouldAdd = true;
+        }
+
+        if (shouldAdd) {
           occurrenceDates.push({
             dateObj: new Date(iter.getTime()),
             dateStr: Utilities.formatDate(iter, timezone, 'yyyy-MM-dd')
@@ -567,7 +582,7 @@ function creerReservationAdmin(data) {
         iter.setDate(iter.getDate() + 1);
       }
       if (!occurrenceDates.length) {
-        throw new Error("Aucune occurrence à créer (toutes les dates tombent un samedi).");
+        throw new Error("Aucune occurrence à créer avec les paramètres sélectionnés.");
       }
     } else {
       occurrenceDates.push({

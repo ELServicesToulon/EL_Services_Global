@@ -13,10 +13,11 @@
  * Audit de code syntaxique.
  */
 function runMechanicAudit() {
-    // Dans un environnement réel, Mechanic analyserait le résultat d'ESLint.
-    // Ici on simule une lecture des logs d'erreurs récents.
+  saveAgentLastRun('mechanic');
+  // Dans un environnement réel, Mechanic analyserait le résultat d'ESLint.
+  // Ici on simule une lecture des logs d'erreurs récents.
 
-    return `🔧 **Rapport Mechanic**
+  return `🔧 **Rapport Mechanic**
   
   INFO: Le linting est géré en local via ESLint.
   

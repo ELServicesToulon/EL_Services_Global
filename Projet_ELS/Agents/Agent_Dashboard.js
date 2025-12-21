@@ -5,6 +5,8 @@
 function apiRunAgent(agentId) {
     try {
         Logger.log("Agent Dashboard: Triggering " + agentId);
+        saveAgentLastRun(agentId); // Mise à jour du timestamp
+
 
         switch (agentId) {
             case 'qualite':
@@ -89,8 +91,36 @@ function apiGetStrategy() {
  * Récupère l'état des agents (pour la persistance future)
  */
 function apiGetAgentsStatus() {
-    // TODO: Implémenter le stockage de l'état dans PropertiesService ou une feuille Sheet
-    return {};
+    var props = PropertiesService.getScriptProperties().getProperties();
+    var agents = ['sentinel', 'bolt', 'qualite', 'palette', 'mechanic', 'scribe', 'architect', 'billing', 'client_mystere', 'marketing'];
+    var status = {};
+
+    agents.forEach(function (id) {
+        var key = 'LAST_RUN_' + id.toUpperCase();
+        if (props[key]) {
+            status[id] = {
+                status: 'idle', // Pour l'instant on ne track pas le "running" state en temps réel
+                lastRun: props[key]
+            };
+        } else {
+            status[id] = { status: 'idle', lastRun: 'Jamais' };
+        }
+    });
+
+    return status;
+}
+
+/**
+ * Enregistre le run d'un agent
+ * @param {string} agentId
+ */
+function saveAgentLastRun(agentId) {
+    if (!agentId) return;
+    var key = 'LAST_RUN_' + agentId.toUpperCase();
+    var now = new Date();
+    // Format français propre : JJ/MM HH:mm
+    var timeString = Utilities.formatDate(now, Session.getScriptTimeZone(), "dd/MM HH:mm");
+    PropertiesService.getScriptProperties().setProperty(key, timeString);
 }
 
 // ===================================

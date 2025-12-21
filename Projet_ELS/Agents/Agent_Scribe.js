@@ -10,7 +10,8 @@
  */
 
 function runScribeAudit() {
-    return `📜 **Rapport Scribe**
+  saveAgentLastRun('scribe');
+  return `📜 **Rapport Scribe**
   
   **Documentation Coverage :**
   - Vérifiez que \`Agent_Billing.js\` et les nouveaux agents ont bien leurs en-têtes JSDoc.
