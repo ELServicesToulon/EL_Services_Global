@@ -56,6 +56,15 @@ function apiRunAgent(agentId) {
             case 'marketing':
                 return (typeof runMarketingAudit === 'function') ? runMarketingAudit() : "Fonction runMarketingAudit introuvable.";
 
+            case 'cloudflare':
+                return (typeof runCloudflareAudit === 'function') ? runCloudflareAudit() : "Fonction runCloudflareAudit introuvable.";
+
+            case 'guardian':
+                return (typeof runGuardianHealthCheck === 'function') ? runGuardianHealthCheck() : "Fonction runGuardianHealthCheck introuvable.";
+
+            case 'client_expert':
+                return (typeof executerClientExpert === 'function') ? executerClientExpert() : "Fonction executerClientExpert introuvable.";
+
             case 'scheduler_apply':
                 // args doit contenir la clé de stratégie ex: "ECO"
                 // Attention: apiRunAgent n'accepte qu'un arg simple dans ce pattern, 

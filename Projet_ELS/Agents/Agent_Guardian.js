@@ -37,13 +37,18 @@ function runGuardianHealthCheck() {
     // 3. (Optionnel) Vérification des derniers logs d'erreur si accès à une API de logging externe
     // N'étant pas possible nativement en GAS simple sans Stackdriver avancé, on simule ici.
 
+    var status = "";
     if (errors.length > 0) {
-        Logger.log("❌ Sytème instable ou compromis:\n" + errors.join("\n"));
-        return false; // ÉCHEC
+        status = "❌ Sytème instable ou compromis:\n" + errors.join("\n");
+        Logger.log(status);
+        if (typeof logAgentReport === 'function') logAgentReport('guardian', status);
+        return status; // ÉCHEC (Retour String pour Dashboard)
     }
 
-    Logger.log("✅ Système opérationnel.");
-    return true; // SUCCÈS
+    status = "✅ Système opérationnel.";
+    Logger.log(status);
+    if (typeof logAgentReport === 'function') logAgentReport('guardian', status);
+    return status; // SUCCÈS (Retour String pour Dashboard)
 }
 
 /**
