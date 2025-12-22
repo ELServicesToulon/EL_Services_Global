@@ -59,6 +59,9 @@ function apiRunAgent(agentId) {
             case 'cloudflare':
                 return (typeof runCloudflareAudit === 'function') ? runCloudflareAudit() : "Fonction runCloudflareAudit introuvable.";
 
+            case 'tessie':
+                return (typeof runTessieAudit === 'function') ? runTessieAudit() : "Fonction runTessieAudit introuvable.";
+
             case 'guardian':
                 return (typeof runGuardianHealthCheck === 'function') ? runGuardianHealthCheck() : "Fonction runGuardianHealthCheck introuvable.";
 
@@ -101,7 +104,7 @@ function apiGetStrategy() {
  */
 function apiGetAgentsStatus() {
     var props = PropertiesService.getScriptProperties().getProperties();
-    var agents = ['sentinel', 'bolt', 'qualite', 'palette', 'mechanic', 'scribe', 'architect', 'billing', 'client_mystere', 'marketing'];
+    var agents = ['sentinel', 'bolt', 'qualite', 'palette', 'mechanic', 'scribe', 'architect', 'billing', 'client_mystere', 'marketing', 'cloudflare', 'guardian', 'tessie'];
     var status = {};
 
     agents.forEach(function (id) {
