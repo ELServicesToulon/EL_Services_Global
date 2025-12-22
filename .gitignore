@@ -3,3 +3,5 @@ node_modules/
 .clasp.json
 .env
 reports/
+
+Agents_Backend/keys/
