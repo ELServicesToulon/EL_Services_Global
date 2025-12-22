@@ -47,9 +47,22 @@ function onOpen(e) {
   const menuAgents = ui.createMenu('🤖 Agents')
     .addItem('Ouvrir Tableau de Bord (Sidebar)', 'openAgentSidebar')
     .addSeparator()
-    .addItem('Lancer Agent Qualité (Hebdo)', 'menuRunQualite')
-    .addItem('Lancer Sentinel (Sécurité)', 'menuRunSentinel')
-    .addItem('Lancer Agent Marketing (SEO)', 'menuRunMarketing');
+    .addSubMenu(ui.createMenu('Gouvernance')
+      .addItem('Lancer Architecte (Lead)', 'menuRunArchitect')
+      .addItem('Lancer Client Expert (QA)', 'menuRunClientExpert')
+      .addItem('Lancer Guardian (Santé)', 'menuRunGuardian'))
+    .addSubMenu(ui.createMenu('Performance & Infra')
+      .addItem('Lancer Bolt (Speed)', 'menuRunBolt')
+      .addItem('Lancer Cloudflare (Réseau)', 'menuRunCloudflare')
+      .addItem('Lancer Sentinel (Sécurité)', 'menuRunSentinel'))
+    .addSubMenu(ui.createMenu('Maintenance')
+      .addItem('Lancer Mechanic (Fix)', 'menuRunMechanic')
+      .addItem('Lancer Palette (UX)', 'menuRunPalette')
+      .addItem('Lancer Scribe (Docs)', 'menuRunScribe'))
+    .addSubMenu(ui.createMenu('Activités')
+      .addItem('Lancer Marketing (SEO)', 'menuRunMarketing')
+      .addItem('Lancer Billing (Fact)', 'menuRunBilling')
+      .addItem('Lancer Qualité (Hebdo)', 'menuRunQualite'));
 
   menuPrincipal
     .addSubMenu(menuFacturation)
@@ -446,6 +459,84 @@ function normalizeEvent_(e) {
   }
   return event;
 }
+
+// ===================================
+// WRAPPERS AGENTS (NOUVEAUX)
+// ===================================
+
+function menuRunArchitect() {
+  runAgentWrapper_('architect', 'Architecte');
+}
+
+function menuRunBilling() {
+  runAgentWrapper_('billing', 'Billing');
+}
+
+function menuRunBolt() {
+  runAgentWrapper_('bolt', 'Bolt');
+}
+
+function menuRunClientExpert() {
+  runAgentWrapper_('client_expert', 'Client Expert (Expert QA)');
+}
+
+function menuRunCloudflare() {
+  runAgentWrapper_('cloudflare', 'Cloudflare', true); // Modal car rapport long
+}
+
+function menuRunGuardian() {
+  runAgentWrapper_('guardian', 'Guardian');
+}
+
+function menuRunMechanic() {
+  runAgentWrapper_('mechanic', 'Mechanic');
+}
+
+function menuRunPalette() {
+  runAgentWrapper_('palette', 'Palette');
+}
+
+function menuRunScribe() {
+  runAgentWrapper_('scribe', 'Scribe');
+}
+
+function menuRunValiderConfigAgent() {
+  // Helper pour valider la config si besoin, ou setup
+  if (typeof checkSetup_ELS === 'function') {
+    const res = checkSetup_ELS();
+    SpreadsheetApp.getUi().alert("Setup Check : " + JSON.stringify(res));
+  } else {
+    SpreadsheetApp.getActive().toast("Fonction checkSetup_ELS manquante.");
+  }
+}
+
+
+/**
+ * Helper générique pour lancer un agent et afficher le résultat.
+ * @param {string} agentId - ID de l'agent (ex: 'bolt')
+ * @param {string} displayName - Nom affiché
+ * @param {boolean} forceModal - Si true, utilise une modale plutôt qu'un toast/alert
+ */
+function runAgentWrapper_(agentId, displayName, forceModal) {
+  SpreadsheetApp.getActive().toast("Démarrage de l'agent " + displayName + "...", "Agents ELS", 3);
+
+  // On suppose que apiRunAgent est disponible globalement (Agent_Dashboard.js)
+  let result = "Fonction apiRunAgent introuvable.";
+  if (typeof apiRunAgent === 'function') {
+    result = apiRunAgent(agentId);
+  }
+
+  // Affichage
+  if (forceModal || (result && result.length > 300)) {
+    const html = HtmlService.createHtmlOutput('<pre style="white-space: pre-wrap; font-family: monospace; font-size: 11px;">' + result + '</pre>')
+      .setWidth(700)
+      .setHeight(500);
+    SpreadsheetApp.getUi().showModalDialog(html, 'Rapport : ' + displayName);
+  } else {
+    SpreadsheetApp.getUi().alert(displayName, result, SpreadsheetApp.getUi().ButtonSet.OK);
+  }
+}
+
 
 function respondJson_(payload) {
   return ContentService.createTextOutput(JSON.stringify(payload || {}))

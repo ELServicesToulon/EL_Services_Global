@@ -69,7 +69,9 @@ function runArchitectAudit() {
     report.push("   *Voulez-vous que je le génère ?*");
   }
 
-  return report.join("\n");
+  if (typeof logAgentReport === 'function') {
+    logAgentReport('architect', report.join("\n"));
+  }
   return report.join("\n");
 }
 
