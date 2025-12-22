@@ -53,3 +53,25 @@
    - [JS WARNING] warn - Remove it from the `plugins` array in your configuration to eliminate this warning.
    - [STOCK] Aucun créneau de livraison disponible !
 [2025-12-22T20:53:47.825Z] [GHOST_SHOPPER] ERREUR CRITIQUE: Trop d'anomalies détectées (13)
+[2025-12-22T21:10:06.316Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2025-12-22T21:10:16.711Z] [MARKETING] Trafic: 20 visiteurs. SEO: 85/100
+[2025-12-22T21:10:45.244Z] [CLIENT_EXPERT] ⚠️ 14 ANOMALIES:
+   - [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+   - [JS WARNING] Unrecognized feature: 'speaker'.
+   - [JS WARNING] Unrecognized feature: 'web-share'.
+   - [JS WARNING] Unrecognized feature: 'vibrate'.
+   - [JS WARNING] Unrecognized feature: 'vr'.
+   - [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+   - [JS ERROR] Framing 'https://n-zjwp7nrsadcn33vmfliax42t7nalwabp373435q-0lu-script.googleusercontent.com/' violates the following report-only Content Security Policy directive: "frame-ancestors 'self'". The violation has been logged, but no further action has been taken.
+
+   - [PERF] Chargement initial lent: 8485ms (Objectif: <3000ms)
+   - [CRASH JS] Unexpected token ';'
+   - [JS WARNING] cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation
+   - [JS WARNING] 
+   - [JS WARNING] warn - As of Tailwind CSS v3.3, the `@tailwindcss/line-clamp` plugin is now included by default.
+   - [JS WARNING] warn - Remove it from the `plugins` array in your configuration to eliminate this warning.
+   - [STOCK] Aucun créneau de livraison disponible !
+[2025-12-22T21:10:45.249Z] [GHOST_SHOPPER] ERREUR CRITIQUE: Trop d'anomalies détectées (14)
+[2025-12-22T21:25:06.871Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
+[2025-12-22T21:30:06.743Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
+[2025-12-22T21:35:06.780Z] [ARCHIVE] Backup : 2 fichiers sécurisés.
