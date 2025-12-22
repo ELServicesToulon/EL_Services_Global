@@ -258,33 +258,28 @@ function envoyerLienEspaceClient(emailClient) {
       return { success: false, error: 'EMAIL_INVALID' };
     }
 
+    // Rate Limit (commented out per debug request)
     // const rateCheck = verifierQuotaLienEspaceClient_(email);
     // if (rateCheck && rateCheck.allowed === false) {
     //   return { success: false, error: rateCheck.reason || 'RATE_LIMIT' };
     // }
 
-    const lien = client_getPortalLink(email);
-    if (!lien || lien.success !== true || !lien.url) {
-      return { success: false, error: lien && lien.error ? lien.error : 'LINK_UNAVAILABLE' };
-    }
+    // --- OTP LOGIC ---
+    // On génère un code OTP et on l'envoie
+    const code = Auth.generateOtp(email);
 
     const brand = (typeof NOM_ENTREPRISE !== 'undefined' && NOM_ENTREPRISE) ? NOM_ENTREPRISE : 'EL Services';
-    const subjectRaw = "Votre lien d'acces a l'espace client - " + brand;
-    const subject = (typeof encodeMailSubjectUtf8 === 'function')
-      ? (encodeMailSubjectUtf8(subjectRaw) || subjectRaw)
-      : subjectRaw;
-    const expirationTexte = lien.exp ? new Date(lien.exp * 1000).toLocaleString('fr-FR') : '';
-    const buttonHtml = '<a href="' + lien.url + '" style="display:inline-block;padding:12px 18px;background:#3498db;color:#fff;text-decoration:none;border-radius:999px" target="_blank" rel="noopener">Acceder a mon espace client</a>';
+    const subject = `Code de connexion : ${code} - ${brand}`;
+
     const corpsHtml = `
-      <div style="font-family: Montserrat, Arial, sans-serif; color:#333; line-height:1.6;">
-        <h2 style="text-align:center;">${brand}</h2>
+      <div style="font-family: Montserrat, Arial, sans-serif; color:#333; line-height:1.6; text-align:center;">
+        <h2>${brand}</h2>
         <p>Bonjour,</p>
-        <p>Voici votre lien sécurisé de connexion :</p>
-        <p style="margin:20px 0;">${buttonHtml}</p>
-        <p style="font-size:0.9em;color:#555;">Ce lien expire le ${expirationTexte || 'bientôt'}.</p>
+        <p>Voici votre code de connexion temporaire :</p>
+        <div style="font-size: 2.5em; font-weight: bold; margin: 20px 0; color: #3498db; letter-spacing: 8px; background: #f8f9fa; padding: 20px; border-radius: 8px; display: inline-block;">${code}</div>
+        <p>Ce code est valable 15 minutes.</p>
         <hr style="border:0;border-top:1px solid #eee;margin:20px 0;">
-        <p style="font-size:0.8em;color:#999;">Si ce message ne vous concerne pas, vous pouvez l'ignorer.</p>
-        <p style="font-size:0.8em;color:#999;">${brand}</p>
+        <p style="font-size:0.8em;color:#999;">Si ce message ne vous concerne pas, ignorez-le.</p>
       </div>
     `;
 
@@ -293,19 +288,34 @@ function envoyerLienEspaceClient(emailClient) {
       emailOptions.replyTo = EMAIL_ENTREPRISE;
     }
 
-    GmailApp.sendEmail(
-      email,
-      subject,
-      ' ', // Corps texte vide pour économiser la taille (tout est dans le HTML)
-      emailOptions
-    );
-
-    return { success: true, url: lien.url, exp: lien.exp };
+    GmailApp.sendEmail(email, subject, `Code: ${code}`, emailOptions);
+    return { success: true, mode: 'OTP' }; // Indique au front que c'est un OTP
   } catch (e) {
-    Logger.log('Erreur dans envoyerLienEspaceClient: ' + e.stack);
-    return { success: false, error: e.message || 'INTERNAL_ERROR' };
+    Logger.log('Erreur envoi code client: ' + e);
+    return { success: false, error: 'SEND_ERROR' };
   }
 }
+
+/**
+ * Vérifie le code OTP saisi par le client.
+ */
+function verifierCodeClient(emailClient, code) {
+  try {
+    const email = String(emailClient || '').trim().toLowerCase();
+    if (Auth.verifyOtp(email, code)) {
+      const link = Auth.generateToken(email); // Returns {url, exp}
+      // Extract sig from URL
+      const match = link.url.match(/&sig=([^&]+)/);
+      const sig = match ? decodeURIComponent(match[1]) : '';
+      return { success: true, email: email, exp: link.exp, sig: sig };
+    }
+    return { success: false, error: 'Code incorrect ou expiré.' };
+  } catch (e) {
+    return { success: false, error: e.toString() };
+  }
+}
+
+
 
 /**
  * Recherche un client via son identifiant opaque.
