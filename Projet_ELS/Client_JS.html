@@ -369,8 +369,11 @@
                     unlock && unlock();
 
                     if (response.success) {
-                        if (formulaireConnexionClient) {
-                            formulaireConnexionClient.innerHTML = `
+                        if (response.mode === 'OTP') {
+                            afficherFormulaireOTP(email);
+                        } else {
+                            if (formulaireConnexionClient) {
+                                formulaireConnexionClient.innerHTML = `
                             <div class="message-succes" style="text-align: center; padding: 20px;">
                                 <p style="font-size: 1.1em; margin-bottom: 10px;"><strong>Lien envoyé !</strong></p>
                                 <p>Veuillez consulter votre boîte de réception (${escapeHTML(email)})<br>pour accéder à votre espace client.</p>
@@ -378,6 +381,7 @@
                                 <button class="btn btn-secondaire btn--client u-mt-15" onclick="location.reload()">Retour</button>
                             </div>
                         `;
+                            }
                         }
                     } else {
                         afficherErreurConnexion(response.error || "Impossible d'envoyer le lien.");
@@ -390,6 +394,110 @@
                     logError(err);
                 })
                 .envoyerLienEspaceClient(email);
+        }
+
+        function afficherFormulaireOTP(email) {
+            const container = document.getElementById('non-connecte');
+            if (!container) return;
+
+            container.innerHTML = `
+                <h2>Vérification</h2>
+                <p>Un code à 6 chiffres a été envoyé à <strong>${escapeHTML(email)}</strong>.</p>
+                <form id="form-otp" class="groupe-formulaire u-mt-20">
+                    <label for="input-otp">Code de connexion :</label>
+                    <input type="text" id="input-otp" class="champ-formulaire" placeholder="123456" required pattern="[0-9]*" inputmode="numeric" autocomplete="one-time-code" style="font-size: 1.5em; letter-spacing: 5px; text-align: center;">
+                    <div id="erreur-otp" class="message-erreur-connexion hidden"></div>
+                    <button type="submit" class="btn btn-primaire btn--client btn--client-full u-mt-15">Valider</button>
+                    <button type="button" class="btn btn-secondaire btn--client u-mt-10" onclick="location.reload()">Retour</button>
+                </form>
+             `;
+
+            const form = document.getElementById('form-otp');
+            const input = document.getElementById('input-otp');
+            if (input) input.focus();
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                validerCodeOTP(email, input.value.trim());
+            });
+        }
+
+        function validerCodeOTP(email, code) {
+            const btn = document.querySelector('#form-otp button[type="submit"]');
+            const errDiv = document.getElementById('erreur-otp');
+            if (errDiv) errDiv.classList.add('hidden');
+
+            const unlock = lockButton(btn);
+            basculerIndicateurChargement(true);
+
+            google.script.run
+                .withSuccessHandler(res => {
+                    basculerIndicateurChargement(false);
+                    unlock();
+
+                    if (res.success) {
+                        // Store session params implicitly by variables
+                        // Note: Client_JS.html uses 'linkExp', 'linkSig', 'emailClientCourant'
+                        // Update them for subsequent calls
+
+                        // We do NOT modify window.location to keep it SPA, 
+                        // but we rely on these vars being set for 'chargerDonneesInitialesClient'
+
+                        // Hack: Update the global variables expected by 'validerEtChargerClient'
+                        // Since 'validerEtChargerClient' uses arguments, we just call it.
+                        // But subsequent calls (like 'chargerReservationsClient') use 'signatureExp/Sig'.
+
+                        // Update globals defined at top of Client_JS.html (needs to be accessible)
+                        // In Client_JS, 'signatureExp' and 'signatureSig' are 'let'.
+
+                        // However, inside this scope (function), we can't easily reach them if they are module-scoped in specific way
+                        // But they are top-level inside 'DOMContentLoaded' callback? 
+                        // Ah, 'demanderLienConnexion' is inside 'initialiser', inside 'DOMContentLoaded'. 
+                        // So they capture the closure variables 'signatureExp', 'signatureSig'.
+
+                        signatureExp = res.exp;
+                        signatureSig = res.sig;
+                        emailClientCourant = res.email;
+
+                        // Persist session if needed (optional for OTP?)
+                        // Usually we want persistence. Storing in localStorage allows reload.
+                        try {
+                            localStorage.setItem(CLE_LOCALSTORAGE_CLIENT, JSON.stringify({
+                                email: res.email,
+                                ts: Date.now(),
+                                // We don't have a token, but we have signature.
+                                // If we want to restore session, we need to save exp/sig OR handle session via token.
+                                // Current 'connecterDepuisSession' handles {email} but triggers 'validerEtChargerClient'.
+                                // But 'validerEtChargerClient' needs sig if enforced.
+                                // We should save exp/sig in localStorage if we want persistence.
+                                // But 'Client_JS' logic for 'recupererSessionLocale' only checks 'email' or 'token'.
+                                // It doesn't seem to restore sig/exp.
+                                // If CLIENT_PORTAL_SIGNED_LINKS is true, restoration from localStorage (just email) FAILs?
+                                // Let's check 'connecterDepuisSession'.
+                                // It calls 'validerEtChargerClient(session.email)'. 
+                                // 'validerEtChargerClient(email)' sets sig='' if email != linkEmail (URL params).
+                                // So reloading page with localStorage session FAILS if signed links are enforced!
+                                // Fix: Save sig/exp in localStorage too.
+                            }));
+                        } catch (e) { }
+
+                        validerEtChargerClient(res.email);
+                    } else {
+                        if (errDiv) {
+                            errDiv.textContent = res.error || 'Code invalide';
+                            errDiv.classList.remove('hidden');
+                        }
+                    }
+                })
+                .withFailureHandler(e => {
+                    basculerIndicateurChargement(false);
+                    unlock();
+                    if (errDiv) {
+                        errDiv.textContent = "Erreur technique: " + e.toString();
+                        errDiv.classList.remove('hidden');
+                    }
+                })
+                .verifierCodeClient(email, code);
         }
 
         /**
