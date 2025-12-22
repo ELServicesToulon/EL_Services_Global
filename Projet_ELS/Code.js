@@ -576,3 +576,12 @@ function safeCheckSetup_() {
   }
   return { ok: true, missingProps: [] };
 }
+
+/**
+ * Récupère le contenu du loader Google Charts (proxy).
+ * Appelée uniquement par le client via GoogleChartsStub.
+ */
+function fetchGoogleChartsLoader() {
+  const url = 'https://www.gstatic.com/charts/loader.js';
+  return UrlFetchApp.fetch(url).getContentText();
+}
