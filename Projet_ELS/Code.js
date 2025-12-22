@@ -385,20 +385,23 @@ function renderReservationInterface() {
   template.logoPublicUrl = logoPublicUrl;
   template.heroImages = heroImages;
   template.heroAssetsJson = JSON.stringify({ logo: logoDataUrl || null, hero: heroImages || {} }).replace(/</g, '\\u003c');
-  template.DUREE_BASE = conf.DUREE_BASE;
-  template.DUREE_ARRET_SUP = conf.DUREE_ARRET_SUP;
-  template.KM_BASE = conf.KM_BASE;
-  template.KM_ARRET_SUP = conf.KM_ARRET_SUP;
-  template.URGENT_THRESHOLD_MINUTES = conf.URGENT_THRESHOLD_MINUTES;
+
+  // Sécurisation des valeurs numériques avec fallback pour éviter les crash syntaxiques JS
+  template.DUREE_BASE = (conf.DUREE_BASE !== undefined && conf.DUREE_BASE !== null) ? conf.DUREE_BASE : 30;
+  template.DUREE_ARRET_SUP = (conf.DUREE_ARRET_SUP !== undefined && conf.DUREE_ARRET_SUP !== null) ? conf.DUREE_ARRET_SUP : 15;
+  template.KM_BASE = (conf.KM_BASE !== undefined && conf.KM_BASE !== null) ? conf.KM_BASE : 10;
+  template.KM_ARRET_SUP = (conf.KM_ARRET_SUP !== undefined && conf.KM_ARRET_SUP !== null) ? conf.KM_ARRET_SUP : 5;
+  template.URGENT_THRESHOLD_MINUTES = (conf.URGENT_THRESHOLD_MINUTES !== undefined && conf.URGENT_THRESHOLD_MINUTES !== null) ? conf.URGENT_THRESHOLD_MINUTES : 45;
+
   template.dateDuJour = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   template.PRICING_RULES_V2_ENABLED = (typeof PRICING_RULES_V2_ENABLED !== 'undefined') ? PRICING_RULES_V2_ENABLED : false;
   template.RETURN_IMPACTS_ESTIMATES_ENABLED = (typeof RETURN_IMPACTS_ESTIMATES_ENABLED !== 'undefined') ? RETURN_IMPACTS_ESTIMATES_ENABLED : false;
 
-  template.heureDebut = conf.HEURE_DEBUT_SERVICE;
-  template.heureFin = conf.HEURE_FIN_SERVICE;
-  template.prixBaseNormal = (conf.TARIFS && conf.TARIFS['Normal']) ? conf.TARIFS['Normal'].base : '';
-  template.prixBaseSamedi = (conf.TARIFS && conf.TARIFS['Samedi']) ? conf.TARIFS['Samedi'].base : '';
-  template.prixBaseUrgent = (conf.TARIFS && conf.TARIFS['Urgent']) ? conf.TARIFS['Urgent'].base : '';
+  template.heureDebut = conf.HEURE_DEBUT_SERVICE || "08:00";
+  template.heureFin = conf.HEURE_FIN_SERVICE || "20:00";
+  template.prixBaseNormal = (conf.TARIFS && conf.TARIFS['Normal']) ? (conf.TARIFS['Normal'].base || 0) : 0;
+  template.prixBaseSamedi = (conf.TARIFS && conf.TARIFS['Samedi']) ? (conf.TARIFS['Samedi'].base || 0) : 0;
+  template.prixBaseUrgent = (conf.TARIFS && conf.TARIFS['Urgent']) ? (conf.TARIFS['Urgent'].base || 0) : 0;
   template.tvaApplicable = typeof conf.TVA_APPLICABLE !== 'undefined' ? conf.TVA_APPLICABLE : false;
 
   // Variables manquantes pour éviter 'Unexpected token'
