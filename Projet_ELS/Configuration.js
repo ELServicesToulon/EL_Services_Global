@@ -167,7 +167,7 @@ const CLIENT_ID_CARTOON_NAMES = Object.freeze([
 /** @const {boolean} Active l'espace client. */
 const CLIENT_PORTAL_ENABLED = true;
 /** @const {boolean} Exige un lien signé (email+exp+sig) pour l'espace client. */
-const CLIENT_PORTAL_SIGNED_LINKS = true;
+const CLIENT_PORTAL_SIGNED_LINKS = false;
 /** @const {number} Durée de validité d'un lien client signé (heures). */
 const CLIENT_PORTAL_LINK_TTL_HOURS = 168;
 /** @const {boolean} Affiche le lien vers les informations de confidentialité. */
