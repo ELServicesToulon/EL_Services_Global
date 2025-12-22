@@ -1,0 +1,13 @@
+{
+    "name": "antigravity-agents-backend",
+    "version": "1.0.0",
+    "description": "Backend local pour les agents Antigravity",
+    "main": "Sentinel_Core.js",
+    "scripts": {
+        "start": "node Sentinel_Core.js"
+    },
+    "dependencies": {
+        "googleapis": "^126.0.0",
+        "dotenv": "^16.3.1"
+    }
+}
