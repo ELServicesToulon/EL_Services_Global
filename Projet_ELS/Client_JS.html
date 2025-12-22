@@ -83,9 +83,9 @@
         const formQuestion = document.getElementById('form-question');
         const questionTexte = document.getElementById('question-texte');
         const btnContactSupport = document.getElementById('btn-contact-support');
-        const linkEmail = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.email) || '';
-        const linkExp = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.exp) || '';
-        const linkSig = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.sig) || '';
+        let linkEmail = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.email) || '';
+        let linkExp = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.exp) || '';
+        let linkSig = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.sig) || '';
         let signatureExp = linkExp || '';
         let signatureSig = linkSig || '';
 
@@ -458,6 +458,11 @@
                         signatureExp = res.exp;
                         signatureSig = res.sig;
                         emailClientCourant = res.email;
+                        
+                        // IMPORTANT: Update link parameters so validerEtChargerClient trusts them
+                        linkEmail = res.email;
+                        linkExp = res.exp;
+                        linkSig = res.sig;
 
                         // Persist session if needed (optional for OTP?)
                         // Usually we want persistence. Storing in localStorage allows reload.
