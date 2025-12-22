@@ -159,7 +159,7 @@
     }
 </style>
 
-<div id="agent-dashboard-view" class="carte hidden">
+<div id="agent-dashboard-view" class="carte">
     <h2>Tableau de Bord des Agents Jules</h2>
     <div class="agent-grid" id="agent-grid">
         <!-- Les cartes seront injectées ici -->
@@ -361,10 +361,10 @@
         // Exposé globalement pour l'onclick HTML
         window.triggerStrategy = triggerStrategy;
 
-        // Auto init si visible
-        if (document.getElementById('agent-dashboard-view') && !document.getElementById('agent-dashboard-view').classList.contains('hidden')) {
+        // Auto init
+        window.addEventListener('load', function () {
             initAgentDashboard();
             updateActiveStrategy();
-        }
+        });
     })();
 </script>
