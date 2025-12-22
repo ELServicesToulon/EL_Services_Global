@@ -331,6 +331,12 @@ function legacyDoPost(e) {
       switch (payload.action) {
         case 'getConfiguration':
           return respondJson_(getConfiguration());
+        case 'securityReport':
+          // Integration Agent Sentinel
+          if (typeof receiveSecurityReport === 'function') {
+            return respondJson_(receiveSecurityReport(payload));
+          }
+          return respondJson_({ status: 'error', message: 'receiveSecurityReport function not found.' });
         default:
           return respondJson_({ status: 'error', message: 'Unknown action specified.' });
       }

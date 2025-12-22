@@ -1,7 +1,22 @@
-.DS_Store
-node_modules/
-.clasp.json
+# --- SECURITY & CREDENTIALS ---
+Cles ne pas exposer/
 .env
-reports/
-
+.clasp.json
 Agents_Backend/keys/
+
+# --- LOGS & DEBUG OUTPUT ---
+reports/
+logs/
+*.log
+login_output*.txt
+lint_errors*.txt
+tmp.txt
+
+# --- BACKUPS & TEMP ---
+Backups/
+node_modules/
+.DS_Store
+
+# --- PROJECT SPECIFIC ---
+# Configuration.js contient des secrets mais est nécessaire au fonctionnement.
+# TODO: Passer les secrets de Configuration.js dans des variables d'environnement ou ScriptProperties.
