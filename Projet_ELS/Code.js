@@ -401,6 +401,12 @@ function renderReservationInterface() {
   template.prixBaseUrgent = (conf.TARIFS && conf.TARIFS['Urgent']) ? conf.TARIFS['Urgent'].base : '';
   template.tvaApplicable = typeof conf.TVA_APPLICABLE !== 'undefined' ? conf.TVA_APPLICABLE : false;
 
+  // Variables manquantes pour éviter 'Unexpected token'
+  template.TARIFS_DETAILLE_ENABLED = (typeof conf.TARIFS_DETAILLE_ENABLED !== 'undefined') ? conf.TARIFS_DETAILLE_ENABLED : true;
+  template.FORFAIT_RESIDENT_ENABLED = (typeof conf.FORFAIT_RESIDENT_ENABLED !== 'undefined') ? conf.FORFAIT_RESIDENT_ENABLED : false;
+  template.FORFAIT_RESIDENT = conf.FORFAIT_RESIDENT || { STANDARD_PRICE: 0, URGENCE_PRICE: 0, DURATION_HOURS: 0 };
+  template.RESIDENT_AFFILIATION_REQUIRED = (typeof conf.RESIDENT_AFFILIATION_REQUIRED !== 'undefined') ? conf.RESIDENT_AFFILIATION_REQUIRED : false;
+
   return template.evaluate()
     .setTitle(NOM_ENTREPRISE + ' | Réservation')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
