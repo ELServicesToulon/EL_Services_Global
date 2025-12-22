@@ -18,3 +18,38 @@
    - [STOCK] Aucun créneau de livraison disponible !
 [2025-12-22T20:36:47.946Z] [GHOST_SHOPPER] ERREUR CRITIQUE: Trop d'anomalies détectées (14)
 [2025-12-22T20:46:12.144Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
+[2025-12-22T20:51:12.148Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
+[2025-12-22T20:51:29.386Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2025-12-22T20:51:42.066Z] [MARKETING] Trafic: 54 visiteurs. SEO: 85/100
+[2025-12-22T20:52:03.257Z] [CLIENT_EXPERT] ⚠️ 13 ANOMALIES:
+   - [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+   - [JS WARNING] Unrecognized feature: 'speaker'.
+   - [JS WARNING] Unrecognized feature: 'web-share'.
+   - [JS WARNING] Unrecognized feature: 'vibrate'.
+   - [JS WARNING] Unrecognized feature: 'vr'.
+   - [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+   - [PERF] Chargement initial lent: 7933ms (Objectif: <3000ms)
+   - [CRASH JS] Unexpected token ';'
+   - [JS WARNING] cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation
+   - [JS WARNING] 
+   - [JS WARNING] warn - As of Tailwind CSS v3.3, the `@tailwindcss/line-clamp` plugin is now included by default.
+   - [JS WARNING] warn - Remove it from the `plugins` array in your configuration to eliminate this warning.
+   - [STOCK] Aucun créneau de livraison disponible !
+[2025-12-22T20:52:03.260Z] [GHOST_SHOPPER] ERREUR CRITIQUE: Trop d'anomalies détectées (13)
+[2025-12-22T20:53:17.936Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2025-12-22T20:53:26.780Z] [MARKETING] Trafic: 48 visiteurs. SEO: 85/100
+[2025-12-22T20:53:47.822Z] [CLIENT_EXPERT] ⚠️ 13 ANOMALIES:
+   - [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+   - [JS WARNING] Unrecognized feature: 'speaker'.
+   - [JS WARNING] Unrecognized feature: 'web-share'.
+   - [JS WARNING] Unrecognized feature: 'vibrate'.
+   - [JS WARNING] Unrecognized feature: 'vr'.
+   - [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+   - [PERF] Chargement initial lent: 7902ms (Objectif: <3000ms)
+   - [CRASH JS] Unexpected token ';'
+   - [JS WARNING] cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation
+   - [JS WARNING] 
+   - [JS WARNING] warn - As of Tailwind CSS v3.3, the `@tailwindcss/line-clamp` plugin is now included by default.
+   - [JS WARNING] warn - Remove it from the `plugins` array in your configuration to eliminate this warning.
+   - [STOCK] Aucun créneau de livraison disponible !
+[2025-12-22T20:53:47.825Z] [GHOST_SHOPPER] ERREUR CRITIQUE: Trop d'anomalies détectées (13)
