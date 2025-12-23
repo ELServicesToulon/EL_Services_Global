@@ -110,7 +110,7 @@
       fill: currentColor;
     }
   </style>
-  <?!= include('GoogleChartsStub'); ?>
+  <? /* include('GoogleChartsStub'); */ ?>
   <? var brandLogoUrl = (logoPublicUrl && logoPublicUrl.length) ? logoPublicUrl : (logoDataUrl || ''); ?>
   <script>
     window.ELS_BRAND = Object.assign({}, window.ELS_BRAND || {}, {
@@ -861,8 +861,8 @@
     </p>
   </footer>
   <? } ?>
-  <?!= include('ElsLogo_Script'); ?>
-  <?!= include('whatsapp_js'); ?>
+  <? /* include('ElsLogo_Script'); */ ?>
+  <? /* include('whatsapp_js'); */ ?>
   <? /* renderChatPiluleur().getContent() */ ?>
 
   <!-- Palette: Back to Top Button -->
