@@ -172,20 +172,34 @@ async function runGhostShopperCycle() {
 
         if (await workingScope.isVisible(calendarDaySelector)) {
             console.log(' -> Calendrier détecté. Sélection d\'un jour disponible...');
-            await page.waitForTimeout(1000); // 1s stabilite
+            await page.waitForTimeout(1000);
             const days = await workingScope.$$(calendarDaySelector);
             if (days.length > 0) {
-                // Clique sur le premier jour dispo (souvent demain ou jour même)
+                // Clique sur le premier jour dispo
                 await days[0].click();
                 console.log(' -> Jour sélectionné.');
-                await page.waitForTimeout(2000); // Attente ouverture modale créneaux
+                await page.waitForTimeout(2000);
+
+                // Check for Modale Config Tournée (V2)
+                const configModal = '#modale-config-tournee';
+                if (await workingScope.isVisible(configModal)) {
+                    console.log(' -> Modale Configuration détectée. Validation...');
+                    const btnVoirCreneaux = await workingScope.$('#formulaire-config-tournee button[type="submit"]');
+                    if (btnVoirCreneaux) {
+                        await btnVoirCreneaux.click();
+                        console.log(' -> Validation Configuration effectuée.');
+                        await page.waitForTimeout(2000); // Attente chargement créneaux
+                    } else {
+                        report.issues.push('[UX] Bouton "Voir les créneaux" introuvable dans la modale configuration.');
+                    }
+                }
             } else {
                 report.issues.push('[STOCK] Calendrier affiché mais aucun jour sélectionnable !');
             }
         }
 
         const slotSelectors = ['.creneau-disponible', '.slot-item', 'button.slot', 'div[onclick*="selectSlot"]', '.creneau-item', '.time-slot', '.slot-btn'];
-        await page.waitForTimeout(2000); // Petite attente pour le rendu dynamique
+        await page.waitForTimeout(2000);
 
         let slotsAvailable = 0;
         let slotFound = false;
@@ -194,7 +208,6 @@ async function runGhostShopperCycle() {
             const slots = await workingScope.$$(selector);
             slotsAvailable += slots.length;
             if (slots.length > 0) {
-                // On clique sur le premier pour le parcours Ghost Shopper
                 console.log(` -> Créneau trouvé (${selector}). Clic.`);
                 await slots[0].click();
                 slotFound = true;
@@ -204,11 +217,6 @@ async function runGhostShopperCycle() {
 
         if (slotsAvailable === 0 && !slotFound) {
             report.issues.push('[STOCK] Aucun créneau de livraison disponible !');
-            // DEBUG: Dump Calendar HTML
-            const calHtml = await workingScope.$eval('#calendrier-container', el => el.innerHTML).catch(() => 'CALENDAR CONTAINER NOT FOUND');
-            console.log('--- CALENDAR HTML DUMP ---');
-            console.log(calHtml);
-            console.log('--- END CALENDAR DUMP ---');
         } else {
             report.steps.push(`Créneaux détectés. Sélection du premier.`);
         }
