@@ -93,6 +93,36 @@ async function runGhostShopperCycle() {
 
         await page.waitForLoadState('networkidle');
 
+        // --- CONTEXT SWITCH (IFRAME HANDLING) ---
+        // Google Apps Script wraps the app in an iframe. We must switch to it.
+        let workingScope = page;
+        const iframeElement = await page.$('iframe#sandboxFrame');
+        if (iframeElement) {
+            console.log(' -> Wrapper Google détecté. Bascule vers l\'iframe #sandboxFrame...');
+            const frame = await iframeElement.contentFrame();
+            if (frame) {
+                workingScope = frame;
+                // Wait for inner content to load
+                try {
+                    await workingScope.waitForLoadState('domcontentloaded');
+                } catch (e) { console.log(' -> Warning: domcontentloaded timeout in iframe'); }
+
+                // Often there is a second nested iframe 'userHtmlFrame' inside sandboxFrame in some GAS versions?
+                // But for standard WebApp it's usually direct or one level.
+                // Let's check for nested iframe just in case
+                const nestedFrameElement = await workingScope.$('iframe#userHtmlFrame');
+                if (nestedFrameElement) {
+                    const nestedFrame = await nestedFrameElement.contentFrame();
+                    if (nestedFrame) {
+                        console.log(' -> Nested iframe #userHtmlFrame détectée. Bascule...');
+                        workingScope = nestedFrame;
+                    }
+                }
+            } else {
+                report.issues.push('[ERROR] Impossible d\'accéder au contentFrame du sandboxFrame.');
+            }
+        }
+
         // --- ETAPE 1 : CODE POSTAL (Eligibilité) ---
         console.log(' -> Vérification Eligibilité (83000)...');
         const cpSelectors = ['input[name="codePostal"]', 'input[placeholder*="Code Postal"]', '#cp-input', 'input[type="text"]'];
@@ -101,21 +131,21 @@ async function runGhostShopperCycle() {
         await page.waitForTimeout(2000); // Stabilisation UI
 
         for (const sel of cpSelectors) {
-            if (await page.isVisible(sel)) {
+            if (await workingScope.isVisible(sel)) {
                 cpInputCible = sel;
                 break;
             }
         }
 
         if (cpInputCible) {
-            await page.fill(cpInputCible, '83000');
+            await workingScope.fill(cpInputCible, '83000');
             report.steps.push('CP 83000 saisi');
 
             const cpBtnSelectors = ['button:has-text("Vérifier")', 'button:has-text("Valider")', '#btn-check-cp', 'button[type="submit"]'];
             let clickedCp = false;
             for (const sel of cpBtnSelectors) {
-                if (await page.isVisible(sel)) {
-                    await page.click(sel);
+                if (await workingScope.isVisible(sel)) {
+                    await workingScope.click(sel);
                     clickedCp = true;
                     break;
                 }
@@ -136,15 +166,17 @@ async function runGhostShopperCycle() {
         const calendarDaySelector = '.jour-calendrier:not(.desactive)';
         try {
             // Attendre explicitement que le calendrier soit rendu (max 10s) car le chargement initial est lent
-            await page.waitForSelector('.jour-calendrier', { state: 'attached', timeout: 10000 });
+            await workingScope.waitForSelector('.jour-calendrier', { state: 'attached', timeout: 10000 });
         } catch (e) {
             console.log(' -> Calendrier non détecté après attente (Timeout).');
+            // Check context
+            if (workingScope === page) report.issues.push('[WARN] Iframe content check failed - used Top Page');
         }
 
-        if (await page.isVisible(calendarDaySelector)) {
+        if (await workingScope.isVisible(calendarDaySelector)) {
             console.log(' -> Calendrier détecté. Sélection d\'un jour disponible...');
             await page.waitForTimeout(1000); // 1s stabilite
-            const days = await page.$$(calendarDaySelector);
+            const days = await workingScope.$$(calendarDaySelector);
             if (days.length > 0) {
                 // Clique sur le premier jour dispo (souvent demain ou jour même)
                 await days[0].click();
@@ -155,17 +187,14 @@ async function runGhostShopperCycle() {
             }
         }
 
-        const slotSelectors = ['.creneau-disponible', '.slot-item', 'button.slot', 'div[onclick*="selectSlot"]', '.creneau-item', '.time-slot'];
-        await page.waitForSelector('body'); // Juste pour être sûr
-
-        // Petite attente pour le rendu dynamique
-        await page.waitForTimeout(2000);
+        const slotSelectors = ['.creneau-disponible', '.slot-item', 'button.slot', 'div[onclick*="selectSlot"]', '.creneau-item', '.time-slot', '.slot-btn'];
+        await page.waitForTimeout(2000); // Petite attente pour le rendu dynamique
 
         let slotsAvailable = 0;
         let slotFound = false;
 
         for (const selector of slotSelectors) {
-            const slots = await page.$$(selector);
+            const slots = await workingScope.$$(selector);
             slotsAvailable += slots.length;
             if (slots.length > 0) {
                 // On clique sur le premier pour le parcours Ghost Shopper
@@ -184,7 +213,7 @@ async function runGhostShopperCycle() {
 
         if (!slotFound) {
             // Fallback générique
-            const btnResa = await page.$('button:has-text("Réserver")');
+            const btnResa = await workingScope.$('button:has-text("Réserver")');
             if (btnResa) await btnResa.click();
         }
         await page.waitForTimeout(2000);
@@ -204,8 +233,8 @@ async function runGhostShopperCycle() {
         for (const [key, val] of Object.entries(formMap)) {
             const sels = [`input[name="${key}"]`, `input[id="${key}"]`, `input[placeholder*="${key}"]`];
             for (const s of sels) {
-                if (await page.isVisible(s)) {
-                    await page.fill(s, val);
+                if (await workingScope.isVisible(s)) {
+                    await workingScope.fill(s, val);
                     filledCount++;
                     break;
                 }
@@ -218,8 +247,8 @@ async function runGhostShopperCycle() {
         let commandeEnvoyee = false;
 
         for (const sel of validerCmdSelectors) {
-            if (await page.isVisible(sel)) {
-                await page.click(sel);
+            if (await workingScope.isVisible(sel)) {
+                await workingScope.click(sel);
                 commandeEnvoyee = true;
                 break;
             }
@@ -231,7 +260,7 @@ async function runGhostShopperCycle() {
             await page.waitForTimeout(5000); // Attente confirmation et animation
 
             // Vérification visuelle
-            const content = await page.content();
+            const content = await workingScope.content();
             if (content.includes('Merci') || content.includes('reçue') || content.includes('Confirmé')) {
                 report.steps.push('✅ Confirmation de commande reçue');
             } else {
