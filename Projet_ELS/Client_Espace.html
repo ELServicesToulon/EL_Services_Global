@@ -76,9 +76,18 @@
   <style id="theme-style"></style>
   <?!= include('Client_CSS'); ?>
   <?!= include('charte'); ?>
-  <? if (typeof CLIENT_CHARTS_ENABLED !== 'undefined' && CLIENT_CHARTS_ENABLED) { ?>
+  <script>
+    window.onerror = function (msg, url, line, col, error) {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:white;z-index:9999;padding:20px;font-family:monospace;';
+      d.innerHTML = '<strong>FATAL ERROR:</strong> ' + msg + '<br>Line: ' + line + '<br>' + (error ? error.stack : '');
+      document.body.appendChild(d);
+    };
+  </script>
+  <!-- FORCE DISABLED CHARTS -->
+  <? /* if (typeof CLIENT_CHARTS_ENABLED !== 'undefined' && CLIENT_CHARTS_ENABLED) { ?>
   <?!= include('GoogleChartsStub'); ?>
-  <? } ?>
+  <? } */ ?>
 </head>
 
 <body data-brand-name="<?= nomService ?>" data-brand-home="<?= appUrl ?>"
