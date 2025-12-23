@@ -205,6 +205,7 @@ function handleGestionPage_(e) {
   templateGestion.CLIENT_SESSION_OPAQUE_ID_ENABLED = (typeof CLIENT_SESSION_OPAQUE_ID_ENABLED !== 'undefined') ? CLIENT_SESSION_OPAQUE_ID_ENABLED : false;
   templateGestion.CLIENT_SESSION_TTL_HOURS = (typeof CLIENT_SESSION_TTL_HOURS !== 'undefined') ? CLIENT_SESSION_TTL_HOURS : 24;
   templateGestion.CLIENT_ID_CARTOON_NAMES = (typeof CLIENT_ID_CARTOON_NAMES !== 'undefined') ? CLIENT_ID_CARTOON_NAMES : [];
+  // Deploy Check: 205
   const sortieGestion = templateGestion.evaluate().setTitle('Mon Espace Client');
   return sortieGestion.setXFrameOptionsMode(
     embedMode ? HtmlService.XFrameOptionsMode.ALLOWALL : HtmlService.XFrameOptionsMode.DEFAULT
