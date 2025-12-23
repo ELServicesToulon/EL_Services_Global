@@ -66,8 +66,8 @@
     }
 
     const CLE_LOCALSTORAGE_CLIENT = 'sessionClientELServices';
-    const CLIENT_SESSION_OPAQUE_ID_ENABLED = <?!= (typeof CLIENT_SESSION_OPAQUE_ID_ENABLED !== 'undefined' ? CLIENT_SESSION_OPAQUE_ID_ENABLED : false) ?>;
-    const CLIENT_SESSION_TTL_HOURS = <?!= (typeof CLIENT_SESSION_TTL_HOURS !== 'undefined' ? CLIENT_SESSION_TTL_HOURS : 24) ?>;
+    const CLIENT_SESSION_OPAQUE_ID_ENABLED = false; // Fix: Hardcoded
+    const CLIENT_SESSION_TTL_HOURS = 24;
 
     document.addEventListener('DOMContentLoaded', () => {
         // --- Références aux éléments du DOM ---
