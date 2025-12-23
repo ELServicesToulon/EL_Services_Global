@@ -53,8 +53,9 @@ async function runGhostShopperCycle() {
 
     // 2. Sonde Crash Page (Uncaught Exceptions)
     page.on('pageerror', exception => {
-        report.issues.push(`[CRASH JS] ${exception.message}`);
-        console.error(`🔥 CRASH JS: ${exception.message}`);
+        const msg = `[CRASH JS] ${exception.message}\nSTACK: ${exception.stack}`;
+        report.issues.push(msg);
+        console.error(`🔥 ${msg}`);
     });
 
     // 3. Sonde Réseau (404/500)
@@ -78,6 +79,12 @@ async function runGhostShopperCycle() {
         const navResponse = await page.goto(targetUrl, { timeout: 60000 });
         const loadTime = Date.now() - tStart;
         report.steps.push(`Navigation Initiale: ${navResponse.status()} en ${loadTime}ms`);
+
+        // DEBUG: Dump HTML to analyze crash state
+        const htmlContent = await page.content();
+        console.log('--- HTML DUMP START ---');
+        console.log(htmlContent);
+        console.log('--- HTML DUMP END ---');
 
         // Audit Performance Chargement
         if (loadTime > PERF_THRESHOLDS.PAGE_LOAD) {
@@ -125,7 +132,30 @@ async function runGhostShopperCycle() {
         // L'Expert vérifie s'il y a des créneaux, non seulement pour réserver, mais pour signaler une "Pénurie"
         console.log(' -> Audit Créneaux...');
 
-        const slotSelectors = ['.creneau-disponible', '.slot-item', 'button.slot', 'div[onclick*="selectSlot"]'];
+        // Support complet de l'interface Calendrier (V2)
+        const calendarDaySelector = '.jour-calendrier:not(.desactive)';
+        try {
+            // Attendre explicitement que le calendrier soit rendu (max 10s) car le chargement initial est lent
+            await page.waitForSelector('.jour-calendrier', { state: 'attached', timeout: 10000 });
+        } catch (e) {
+            console.log(' -> Calendrier non détecté après attente (Timeout).');
+        }
+
+        if (await page.isVisible(calendarDaySelector)) {
+            console.log(' -> Calendrier détecté. Sélection d\'un jour disponible...');
+            await page.waitForTimeout(1000); // 1s stabilite
+            const days = await page.$$(calendarDaySelector);
+            if (days.length > 0) {
+                // Clique sur le premier jour dispo (souvent demain ou jour même)
+                await days[0].click();
+                console.log(' -> Jour sélectionné.');
+                await page.waitForTimeout(2000); // Attente ouverture modale créneaux
+            } else {
+                report.issues.push('[STOCK] Calendrier affiché mais aucun jour sélectionnable !');
+            }
+        }
+
+        const slotSelectors = ['.creneau-disponible', '.slot-item', 'button.slot', 'div[onclick*="selectSlot"]', '.creneau-item', '.time-slot'];
         await page.waitForSelector('body'); // Juste pour être sûr
 
         // Petite attente pour le rendu dynamique
@@ -139,6 +169,7 @@ async function runGhostShopperCycle() {
             slotsAvailable += slots.length;
             if (slots.length > 0) {
                 // On clique sur le premier pour le parcours Ghost Shopper
+                console.log(` -> Créneau trouvé (${selector}). Clic.`);
                 await slots[0].click();
                 slotFound = true;
                 break;
