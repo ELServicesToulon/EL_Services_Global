@@ -415,6 +415,11 @@ function renderReservationInterface() {
   template.FORFAIT_RESIDENT = conf.FORFAIT_RESIDENT || { STANDARD_PRICE: 0, URGENCE_PRICE: 0, DURATION_HOURS: 0 };
   template.RESIDENT_AFFILIATION_REQUIRED = (typeof conf.RESIDENT_AFFILIATION_REQUIRED !== 'undefined') ? conf.RESIDENT_AFFILIATION_REQUIRED : false;
 
+  // Variables de Session Client (Fix CRASH JS)
+  template.CLIENT_SESSION_OPAQUE_ID_ENABLED = (typeof CLIENT_SESSION_OPAQUE_ID_ENABLED !== 'undefined') ? CLIENT_SESSION_OPAQUE_ID_ENABLED : false;
+  template.CLIENT_SESSION_TTL_HOURS = (typeof CLIENT_SESSION_TTL_HOURS !== 'undefined') ? CLIENT_SESSION_TTL_HOURS : 24;
+  template.CLIENT_ID_CARTOON_NAMES = (typeof CLIENT_ID_CARTOON_NAMES !== 'undefined') ? CLIENT_ID_CARTOON_NAMES : [];
+
   return template.evaluate()
     .setTitle(NOM_ENTREPRISE + ' | Réservation')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
