@@ -2,7 +2,7 @@
 # Security Monitor Agent for Antigravity/Sentinel
 # Checks Windows Firewall and ESET status and sends report to GAS Web App.
 
-$WEB_APP_URL = "YOUR_WEB_APP_URL_HERE_PLEASE_REPLACE"
+$WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb/exec"
 $MACHINE_NAME = $env:COMPUTERNAME
 
 function Get-FirewallStatus {
@@ -26,26 +26,24 @@ Write-Host "Firewall Enabled: $firewallStatus"
 Write-Host "ESET Service Running: $esetStatus"
 
 $payload = @{
-    action = "securityReport"
+    action      = "securityReport"
     machineName = $MACHINE_NAME
-    firewall = $firewallStatus
+    firewall    = $firewallStatus
     esetService = $esetStatus
-    details = @{
-        os = (Get-CimInstance Win32_OperatingSystem).Caption
+    details     = @{
+        os   = (Get-CimInstance Win32_OperatingSystem).Caption
         user = $env:USERNAME
     }
 }
 
 $jsonPayload = $payload | ConvertTo-Json
 
-if ($WEB_APP_URL -eq "YOUR_WEB_APP_URL_HERE_PLEASE_REPLACE") {
-    Write-Warning "Please replace YOUR_WEB_APP_URL_HERE_PLEASE_REPLACE with your actual Google Apps Script Web App URL in the script."
-    exit
-}
+
 
 try {
     $response = Invoke-RestMethod -Uri $WEB_APP_URL -Method Post -Body $jsonPayload -ContentType "application/json"
     Write-Host "Report sent successfully: $($response.status)"
-} catch {
+}
+catch {
     Write-Error "Failed to send report: $_"
 }
