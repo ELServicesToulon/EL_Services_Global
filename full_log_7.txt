@@ -1,0 +1,62 @@
+--- STARTING MANUAL GHOST SHOPPER TEST ---
+[CLIENT EXPERT] ­ƒÜÇ D├®marrage de la session QA + Parcours...
+ -> Navigation vers le portail...
+ÔÜá´©Å JS: Unrecognized feature: 'ambient-light-sensor'.
+ÔÜá´©Å JS: Unrecognized feature: 'speaker'.
+ÔÜá´©Å JS: Unrecognized feature: 'web-share'.
+ÔÜá´©Å JS: Unrecognized feature: 'vibrate'.
+ÔÜá´©Å JS: Unrecognized feature: 'vr'.
+ÔÜá´©Å JS: An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+ -> Wrapper Google d├®tect├®. Bascule vers l'iframe #sandboxFrame...
+ -> Nested iframe #userHtmlFrame d├®tect├®e. Bascule...
+ -> V├®rification Eligibilit├® (83000)...
+ -> Audit Cr├®neaux...
+ -> Calendrier d├®tect├®. S├®lection d'un jour disponible...
+ -> Jour s├®lectionn├®.
+--- CALENDAR HTML DUMP ---
+CALENDAR CONTAINER NOT FOUND
+--- END CALENDAR DUMP ---
+ -> Validation UX Formulaire...
+ÔÜá´©Å ANOMALIES D├ëTECT├ëES :
+   - [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+   - [JS WARNING] Unrecognized feature: 'speaker'.
+   - [JS WARNING] Unrecognized feature: 'web-share'.
+   - [JS WARNING] Unrecognized feature: 'vibrate'.
+   - [JS WARNING] Unrecognized feature: 'vr'.
+   - [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+   - [PERF] Chargement initial lent: 10694ms (Objectif: <3000ms)
+   - [STOCK] Aucun cr├®neau de livraison disponible !
+[CLIENT EXPERT] Audit termin├®.
+--- REPORT ---
+{
+  "success": false,
+  "steps": [
+    "Navigation Initiale: 200 en 10694ms",
+    "CP 83000 saisi",
+    "Validation CP effectu├®e",
+    "Formulaire: 2/5 champs identifi├®s et remplis",
+    "ÔÜá´©Å Bouton Commander introuvable (Bloquant pour Ghost Shopper, mais Expert continue l'audit)"
+  ],
+  "issues": [
+    "[JS WARNING] Unrecognized feature: 'ambient-light-sensor'.",
+    "[JS WARNING] Unrecognized feature: 'speaker'.",
+    "[JS WARNING] Unrecognized feature: 'web-share'.",
+    "[JS WARNING] Unrecognized feature: 'vibrate'.",
+    "[JS WARNING] Unrecognized feature: 'vr'.",
+    "[JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.",
+    "[PERF] Chargement initial lent: 10694ms (Objectif: <3000ms)",
+    "[STOCK] Aucun cr├®neau de livraison disponible !"
+  ],
+  "screenshotPath": "C:\\Users\\ELS\\EL_Services_Global\\Backups\\Screenshots\\QA_WARN_2025-12-23T11-46-28513Z.png",
+  "error": "Trop d'anomalies d├®tect├®es (8)"
+}
+ISSUES FOUND:
+- [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+- [JS WARNING] Unrecognized feature: 'speaker'.
+- [JS WARNING] Unrecognized feature: 'web-share'.
+- [JS WARNING] Unrecognized feature: 'vibrate'.
+- [JS WARNING] Unrecognized feature: 'vr'.
+- [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+- [PERF] Chargement initial lent: 10694ms (Objectif: <3000ms)
+- [STOCK] Aucun cr├®neau de livraison disponible !
+--- END ---
