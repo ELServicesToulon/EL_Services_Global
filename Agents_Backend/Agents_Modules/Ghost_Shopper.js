@@ -204,6 +204,11 @@ async function runGhostShopperCycle() {
 
         if (slotsAvailable === 0 && !slotFound) {
             report.issues.push('[STOCK] Aucun créneau de livraison disponible !');
+            // DEBUG: Dump Calendar HTML
+            const calHtml = await workingScope.$eval('#calendrier-container', el => el.innerHTML).catch(() => 'CALENDAR CONTAINER NOT FOUND');
+            console.log('--- CALENDAR HTML DUMP ---');
+            console.log(calHtml);
+            console.log('--- END CALENDAR DUMP ---');
         } else {
             report.steps.push(`Créneaux détectés. Sélection du premier.`);
         }
