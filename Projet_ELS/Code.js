@@ -375,11 +375,11 @@ function renderReservationInterface() {
   template.nomService = NOM_ENTREPRISE;
   template.EMAIL_ENTREPRISE = EMAIL_ENTREPRISE;
   template.CLIENT_PORTAL_ENABLED = CLIENT_PORTAL_ENABLED;
-  template.TARIFS_JSON = JSON.stringify(conf.TARIFS || {});
+  template.TARIFS_JSON = JSON.stringify(conf.TARIFS || {}).replace(/</g, '\\u003c');
   template.TARIFS = conf.TARIFS;
-  template.PRICING_RULES_V2_JSON = JSON.stringify(conf.PRICING_RULES_V2 || {});
+  template.PRICING_RULES_V2_JSON = JSON.stringify(conf.PRICING_RULES_V2 || {}).replace(/</g, '\\u003c');
   template.PRICING_RULES_V2 = conf.PRICING_RULES_V2;
-  template.PRICING_MATRIX_JSON = JSON.stringify(getClientPricingMatrix(30) || {});
+  template.PRICING_MATRIX_JSON = JSON.stringify(getClientPricingMatrix(30) || {}).replace(/</g, '\\u003c');
 
   // Utilisation de Utilitaires si disponibles
   const logoDataUrl = (typeof getLogoDataUrl === 'function') ? getLogoDataUrl() : '';

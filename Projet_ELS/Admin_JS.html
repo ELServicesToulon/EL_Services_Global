@@ -27,7 +27,8 @@
         const formatted = date.toLocaleDateString('fr-FR', opts);
         return formatted.charAt(0).toUpperCase() + formatted.slice(1);
     }
-    const ADMIN_OPTIMISTIC_CREATION_ENABLED = <?!= ADMIN_OPTIMISTIC_CREATION_ENABLED ?>;
+    const ADMIN_CRENEAU_FORCE_OVERLAP = true;
+    const ADMIN_OPTIMISTIC_CREATION_ENABLED = false; // Fix: Hardcoded default
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const ADMIN_CONFIG = window.ADMIN_CONFIG || {};
     const EURO_FORMATTER = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
