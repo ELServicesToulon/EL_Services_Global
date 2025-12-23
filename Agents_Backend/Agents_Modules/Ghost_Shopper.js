@@ -112,6 +112,41 @@ async function runGhostShopperCycle() {
             }
         }
 
+        // --- ETAPE 1 : CODE POSTAL (Eligibilité) ---
+        console.log(' -> Vérification Eligibilité (83000)...');
+        const cpSelectors = ['input[name="codePostal"]', 'input[placeholder*="Code Postal"]', '#cp-input', 'input[type="text"]'];
+        let cpInputCible = null;
+
+        await page.waitForTimeout(2000); // Stabilisation UI
+
+        for (const sel of cpSelectors) {
+            if (await workingScope.isVisible(sel)) {
+                cpInputCible = sel;
+                break;
+            }
+        }
+
+        if (cpInputCible) {
+            await workingScope.fill(cpInputCible, '83000');
+            report.steps.push('CP 83000 saisi');
+
+            const cpBtnSelectors = ['button:has-text("Vérifier")', 'button:has-text("Valider")', '#btn-check-cp', 'button[type="submit"]'];
+            let clickedCp = false;
+            for (const sel of cpBtnSelectors) {
+                if (await workingScope.isVisible(sel)) {
+                    await workingScope.click(sel);
+                    clickedCp = true;
+                    break;
+                }
+            }
+            if (!clickedCp) await page.keyboard.press('Enter');
+            report.steps.push('Validation CP effectuée');
+            await page.waitForTimeout(3000); // Attente réponse AJAX
+        } else {
+            // Si pas de champ CP, on assume qu'on est peut-être déjà logué ou page différente
+            report.steps.push('ℹ️ Champ CP non trouvé (Bypass)');
+        }
+
         // --- TEST LOGIN (CLIENT PORTAL FIX) ---
         console.log(' -> Test Connexion Espace Client (antigravityels@gmail.com)...');
 
@@ -175,47 +210,7 @@ async function runGhostShopperCycle() {
         }
 
 
-        // --- ETAPE 1 : CODE POSTAL (Eligibilité) ---
-        console.log(' -> Vérification Eligibilité (83000)...');
-        const cpSelectors = ['input[name="codePostal"]', 'input[placeholder*="Code Postal"]', '#cp-input', 'input[type="text"]'];
-        let cpInputCible = null;
 
-        await page.waitForTimeout(2000); // Stabilisation UI
-
-        for (const sel of cpSelectors) {
-            if (await workingScope.isVisible(sel)) {
-                cpInputCible = sel;
-                break;
-            }
-        }
-
-        if (cpInputCible) {
-            // ... (suite code postal qui sera recollé par le tool replace s'il gère le contexte)
-            // Mais replace_file_content remplace un bloc. Je dois faire attention à ne pas supprimer la suite.
-            // Je remplace jusqu'a "report.steps.push('CP 83000 saisi');" exclus ou similaire pour garder la continuité? 
-            // Non je dois remettre le bloc Eligibilité complet si je l'ai englobé dans le target.
-            // Le target s'arrête à report.steps.push('ℹ️ Champ CP non trouvé (Bypass)');
-
-            // Je vais juste réécrire le début du bloc Eligibilité que j'ai écrasé.
-            await workingScope.fill(cpInputCible, '83000');
-            report.steps.push('CP 83000 saisi');
-
-            const cpBtnSelectors = ['button:has-text("Vérifier")', 'button:has-text("Valider")', '#btn-check-cp', 'button[type="submit"]'];
-            let clickedCp = false;
-            for (const sel of cpBtnSelectors) {
-                if (await workingScope.isVisible(sel)) {
-                    await workingScope.click(sel);
-                    clickedCp = true;
-                    break;
-                }
-            }
-            if (!clickedCp) await page.keyboard.press('Enter');
-            report.steps.push('Validation CP effectuée');
-            await page.waitForTimeout(3000); // Attente réponse AJAX
-        } else {
-            // Si pas de champ CP, on assume qu'on est peut-être déjà logué ou page différente
-            report.steps.push('ℹ️ Champ CP non trouvé (Bypass)');
-        }
 
         // --- ETAPE 2 : AUDIT DISPONIBILITÉ ---
         // L'Expert vérifie s'il y a des créneaux, non seulement pour réserver, mais pour signaler une "Pénurie"
