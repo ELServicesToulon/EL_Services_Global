@@ -188,7 +188,7 @@ async function runGhostShopperCycle() {
                     if (btnVoirCreneaux) {
                         await btnVoirCreneaux.click();
                         console.log(' -> Validation Configuration effectuée.');
-                        await page.waitForTimeout(2000); // Attente chargement créneaux
+                        await page.waitForTimeout(5000); // Increased wait for slots
                     } else {
                         report.issues.push('[UX] Bouton "Voir les créneaux" introuvable dans la modale configuration.');
                     }
@@ -199,7 +199,13 @@ async function runGhostShopperCycle() {
         }
 
         const slotSelectors = ['.creneau-disponible', '.slot-item', 'button.slot', 'div[onclick*="selectSlot"]', '.creneau-item', '.time-slot', '.slot-btn'];
-        await page.waitForTimeout(2000);
+
+        // Ensure Modale 2 is visible
+        if (await workingScope.isVisible('#modale-selection-creneau')) {
+            console.log(' -> Modale Sélection Créneau visible.');
+        } else {
+            console.log(' -> Modale Sélection Créneau NON visible (ou pas encore).');
+        }
 
         let slotsAvailable = 0;
         let slotFound = false;
@@ -217,6 +223,11 @@ async function runGhostShopperCycle() {
 
         if (slotsAvailable === 0 && !slotFound) {
             report.issues.push('[STOCK] Aucun créneau de livraison disponible !');
+            // DEBUG: Dump Grid HTML
+            const gridHtml = await workingScope.$eval('#grille-selection-creneau', el => el.innerHTML).catch(() => 'GRID NOT FOUND');
+            console.log('--- GRID HTML DUMP ---');
+            console.log(gridHtml);
+            console.log('--- END GRID DUMP ---');
         } else {
             report.steps.push(`Créneaux détectés. Sélection du premier.`);
         }
