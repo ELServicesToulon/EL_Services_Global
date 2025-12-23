@@ -276,7 +276,12 @@ function obtenirCreneauxDisponiblesPourDate(dateString, duree, idEvenementAIgnor
  */
 function obtenirEtatCreneauxPourDate(dateString, duree, idEvenementAIgnorer = null, evenementsPrecharges = null, autresCoursesPanier = []) {
   try {
+    // DEBUG: Check constants
+    if (typeof HEURE_DEBUT_SERVICE === 'undefined') throw new Error("HEURE_DEBUT_SERVICE undefined");
+
     const [annee, mois, jour] = dateString.split('-').map(Number);
+    if (!annee || !mois || !jour) throw new Error("Format date invalide: " + dateString);
+
     const [heureDebut, minuteDebut] = HEURE_DEBUT_SERVICE.split(':').map(Number);
     const [heureFin, minuteFin] = HEURE_FIN_SERVICE.split(':').map(Number);
     const debutJournee = new Date(annee, mois - 1, jour, heureDebut, minuteDebut);
@@ -331,7 +336,7 @@ function obtenirEtatCreneauxPourDate(dateString, duree, idEvenementAIgnorer = nu
     return creneaux;
   } catch (e) {
     Logger.log(`Erreur dans obtenirEtatCreneauxPourDate pour ${dateString}: ${e.stack}`);
-    return [];
+    return [{ time: "ERR: " + e.message, status: "closed", taken: true, inPast: false }];
   }
 }
 
