@@ -81,10 +81,7 @@ async function runGhostShopperCycle() {
         report.steps.push(`Navigation Initiale: ${navResponse.status()} en ${loadTime}ms`);
 
         // DEBUG: Dump HTML to analyze crash state
-        const htmlContent = await page.content();
-        console.log('--- HTML DUMP START ---');
-        console.log(htmlContent);
-        console.log('--- HTML DUMP END ---');
+        // HTML Dump removed to reduce log size
 
         // Audit Performance Chargement
         if (loadTime > PERF_THRESHOLDS.PAGE_LOAD) {
