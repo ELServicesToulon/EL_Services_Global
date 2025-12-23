@@ -191,9 +191,9 @@
   </script>
   <script>
     window.CLIENT_PARAMS = {
-      email: <?= (params && params.email) ? JSON.stringify(params.email) : "''" ?>,
-      exp: <?= (params && params.exp) ? JSON.stringify(params.exp) : "''" ?>,
-      sig: <?= (params && params.sig) ? JSON.stringify(params.sig) : "''" ?>
+      email: <?= (params && params.email) ? JSON.stringify(params.email).replace(/</g, '\\u003c') : "''" ?>,
+      exp: <?= (params && params.exp) ? JSON.stringify(params.exp).replace(/</g, '\\u003c') : "''" ?>,
+      sig: <?= (params && params.sig) ? JSON.stringify(params.sig).replace(/</g, '\\u003c') : "''" ?>
     };
   </script>
   <?!= include('Render_JS'); ?>
