@@ -80,9 +80,6 @@ async function runGhostShopperCycle() {
         const loadTime = Date.now() - tStart;
         report.steps.push(`Navigation Initiale: ${navResponse.status()} en ${loadTime}ms`);
 
-        // DEBUG: Dump HTML to analyze crash state
-        // HTML Dump removed to reduce log size
-
         // Audit Performance Chargement
         if (loadTime > PERF_THRESHOLDS.PAGE_LOAD) {
             report.issues.push(`[PERF] Chargement initial lent: ${loadTime}ms (Objectif: <${PERF_THRESHOLDS.PAGE_LOAD}ms)`);
@@ -91,7 +88,6 @@ async function runGhostShopperCycle() {
         await page.waitForLoadState('networkidle');
 
         // --- CONTEXT SWITCH (IFRAME HANDLING) ---
-        // Google Apps Script wraps the app in an iframe. We must switch to it.
         let workingScope = page;
         const iframeElement = await page.$('iframe#sandboxFrame');
         if (iframeElement) {
@@ -99,14 +95,10 @@ async function runGhostShopperCycle() {
             const frame = await iframeElement.contentFrame();
             if (frame) {
                 workingScope = frame;
-                // Wait for inner content to load
                 try {
                     await workingScope.waitForLoadState('domcontentloaded');
                 } catch (e) { console.log(' -> Warning: domcontentloaded timeout in iframe'); }
 
-                // Often there is a second nested iframe 'userHtmlFrame' inside sandboxFrame in some GAS versions?
-                // But for standard WebApp it's usually direct or one level.
-                // Let's check for nested iframe just in case
                 const nestedFrameElement = await workingScope.$('iframe#userHtmlFrame');
                 if (nestedFrameElement) {
                     const nestedFrame = await nestedFrameElement.contentFrame();
@@ -119,6 +111,54 @@ async function runGhostShopperCycle() {
                 report.issues.push('[ERROR] Impossible d\'accéder au contentFrame du sandboxFrame.');
             }
         }
+
+        // --- TEST LOGIN (CLIENT PORTAL FIX) ---
+        console.log(' -> Test Connexion Espace Client (antigravityels@gmail.com)...');
+        // On check si le formulaire de connexion est visible (peut être dans un onglet ou direct)
+        // D'après les screenshots, c'est parfois direct.
+        const emailInputSel = '#email-connexion';
+        if (await workingScope.isVisible(emailInputSel)) {
+            console.log(' -> Formulaire de connexion détecté.');
+            await workingScope.fill(emailInputSel, 'antigravityels@gmail.com');
+            const btnConnect = await workingScope.$('#formulaire-connexion-client button[type="submit"]');
+            if (btnConnect) {
+                await btnConnect.click();
+                console.log(' -> Demande de code envoyée.');
+                report.steps.push('Login: Email saisi et validé');
+
+                // Attente du champ OTP
+                const otpInputSel = '#input-otp';
+                try {
+                    await workingScope.waitForSelector(otpInputSel, { timeout: 10000 });
+                    console.log(' -> Champ OTP apparu.');
+                    await workingScope.fill(otpInputSel, '999999'); // Backdoor
+
+                    const btnOtp = await workingScope.$('#form-otp button[type="submit"]');
+                    if (btnOtp) {
+                        await btnOtp.click();
+                        console.log(' -> Code OTP 999999 envoyé.');
+                        report.steps.push('Login: Code OTP backdoor utilisé');
+
+                        // Attente succès (disparition form ou message bienvenue)
+                        // #message-bienvenue-client
+                        try {
+                            await workingScope.waitForSelector('#message-bienvenue-client', { timeout: 10000 });
+                            const msg = await workingScope.$eval('#message-bienvenue-client', el => el.textContent);
+                            console.log(` -> SUCCES LOGIN: ${msg}`);
+                            report.steps.push(`Login SUCCES: ${msg}`);
+                        } catch (e) {
+                            report.issues.push('[LOGIN] Échec validation OTP ou timeout succès.');
+                        }
+                    }
+                } catch (e) {
+                    report.issues.push('[LOGIN] Le champ OTP n\'est pas apparu après saisie email.');
+                }
+            }
+        } else {
+            console.log(' -> Pas de formulaire de connexion visible immédiatement.');
+            report.steps.push('Login: Formulaire non trouvé (Déjà connecté ?)');
+        }
+
 
         // --- ETAPE 1 : CODE POSTAL (Eligibilité) ---
         console.log(' -> Vérification Eligibilité (83000)...');
@@ -135,6 +175,13 @@ async function runGhostShopperCycle() {
         }
 
         if (cpInputCible) {
+            // ... (suite code postal qui sera recollé par le tool replace s'il gère le contexte)
+            // Mais replace_file_content remplace un bloc. Je dois faire attention à ne pas supprimer la suite.
+            // Je remplace jusqu'a "report.steps.push('CP 83000 saisi');" exclus ou similaire pour garder la continuité? 
+            // Non je dois remettre le bloc Eligibilité complet si je l'ai englobé dans le target.
+            // Le target s'arrête à report.steps.push('ℹ️ Champ CP non trouvé (Bypass)');
+
+            // Je vais juste réécrire le début du bloc Eligibilité que j'ai écrasé.
             await workingScope.fill(cpInputCible, '83000');
             report.steps.push('CP 83000 saisi');
 
@@ -171,30 +218,75 @@ async function runGhostShopperCycle() {
         }
 
         if (await workingScope.isVisible(calendarDaySelector)) {
-            console.log(' -> Calendrier détecté. Sélection d\'un jour disponible...');
-            await page.waitForTimeout(1000);
-            const days = await workingScope.$$(calendarDaySelector);
-            if (days.length > 0) {
-                // Clique sur le premier jour dispo
-                await days[0].click();
-                console.log(' -> Jour sélectionné.');
-                await page.waitForTimeout(2000);
+            console.log(' -> Calendrier détecté. Recherche de jours avec créneaux...');
 
-                // Check for Modale Config Tournée (V2)
-                const configModal = '#modale-config-tournee';
-                if (await workingScope.isVisible(configModal)) {
-                    console.log(' -> Modale Configuration détectée. Validation...');
-                    const btnVoirCreneaux = await workingScope.$('#formulaire-config-tournee button[type="submit"]');
-                    if (btnVoirCreneaux) {
-                        await btnVoirCreneaux.click();
-                        console.log(' -> Validation Configuration effectuée.');
-                        await page.waitForTimeout(5000); // Increased wait for slots
-                    } else {
-                        report.issues.push('[UX] Bouton "Voir les créneaux" introuvable dans la modale configuration.');
+            // Fonction pour tester les jours visibles
+            const tryFindDayWithSlots = async () => {
+                let days = await workingScope.$$(calendarDaySelector);
+                // On teste jusqu'à 3 jours pour éviter de spammer
+                const attemptCount = Math.min(days.length, 3);
+                for (let i = 0; i < attemptCount; i++) {
+                    days = await workingScope.$$(calendarDaySelector);
+                    if (days.length <= i) break;
+
+                    const day = days[i];
+                    console.log(` -> Test jour ${i + 1}/${days.length}...`);
+                    await day.click();
+                    try { await workingScope.waitForSelector('#indicateur-chargement', { state: 'hidden', timeout: 5000 }); } catch (e) { }
+                    await page.waitForTimeout(2000);
+
+                    // Handle Config (V2)
+                    if (await workingScope.isVisible('#modale-config-tournee')) {
+                        const btn = await workingScope.$('#formulaire-config-tournee button[type="submit"]');
+                        if (btn) await btn.click();
+                        await page.waitForTimeout(2500);
                     }
+
+                    // Check Slots
+                    const slotSel = '.creneau-disponible, .slot-item, button.slot, .creneau-item';
+                    if (await workingScope.isVisible(slotSel)) {
+                        return true; // Slots found and visible!
+                    }
+
+                    // Fermeture forcée de toute modale bloquante avant suite
+                    const modales = ['#modale-selection-creneau', '#modale-config-tournee'];
+                    for (const m of modales) {
+                        if (await workingScope.isVisible(m)) {
+                            console.log(` -> Modale ${m} détectée (sans slots). Fermeture...`);
+                            // Wait for loader
+                            try { await workingScope.waitForSelector('#indicateur-chargement', { state: 'hidden', timeout: 8000 }); } catch (e) { }
+
+                            const closeBtn = await workingScope.$(`${m} .btn-fermer`);
+                            if (closeBtn) await closeBtn.evaluate(b => b.click());
+                            else await workingScope.evaluate(selector => {
+                                const el = document.querySelector(selector);
+                                if (el) el.classList.add('hidden');
+                            }, m);
+                            await page.waitForTimeout(1000);
+                        }
+                    }
+
+                    console.log(' -> Pas de slots sur ce jour.');
                 }
+                return false;
+            };
+
+            let slotsFound = await tryFindDayWithSlots();
+
+            if (!slotsFound) {
+                console.log(' -> Aucun slot sur les jours testés du mois courant. Passage au suivant...');
+                const btnNext = await workingScope.$('#btn-mois-suivant');
+                if (btnNext) {
+                    await btnNext.click({ force: true });
+                    await page.waitForTimeout(2000);
+                    slotsFound = await tryFindDayWithSlots();
+                }
+            }
+
+            if (!slotsFound) {
+                report.issues.push('[STOCK] Pénurie: Aucun créneau trouvé (Décembre & Janvier vérifiés).');
             } else {
-                report.issues.push('[STOCK] Calendrier affiché mais aucun jour sélectionnable !');
+                console.log(' -> Jour avec créneaux validé.');
             }
         }
 
@@ -210,12 +302,15 @@ async function runGhostShopperCycle() {
         let slotsAvailable = 0;
         let slotFound = false;
 
+        // Sécurité: wait for loader hidden
+        try { await workingScope.waitForSelector('#indicateur-chargement', { state: 'hidden', timeout: 5000 }); } catch (e) { }
+
         for (const selector of slotSelectors) {
             const slots = await workingScope.$$(selector);
             slotsAvailable += slots.length;
             if (slots.length > 0) {
-                console.log(` -> Créneau trouvé (${selector}). Clic.`);
-                await slots[0].click();
+                console.log(` -> Créneau trouvé (${selector}). Clic (Force).`);
+                await slots[0].click({ force: true });
                 slotFound = true;
                 break;
             }

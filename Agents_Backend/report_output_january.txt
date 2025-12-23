@@ -1,0 +1,69 @@
+--- STARTING MANUAL GHOST SHOPPER TEST ---
+[CLIENT EXPERT] 🚀 Démarrage de la session QA + Parcours...
+ -> Navigation vers le portail...
+⚠️ JS: Unrecognized feature: 'ambient-light-sensor'.
+⚠️ JS: Unrecognized feature: 'speaker'.
+⚠️ JS: Unrecognized feature: 'web-share'.
+⚠️ JS: Unrecognized feature: 'vibrate'.
+⚠️ JS: Unrecognized feature: 'vr'.
+⚠️ JS: An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+ -> Wrapper Google détecté. Bascule vers l'iframe #sandboxFrame...
+ -> Nested iframe #userHtmlFrame détectée. Bascule...
+ -> Test Connexion Espace Client (antigravityels@gmail.com)...
+ -> Pas de formulaire de connexion visible immédiatement.
+ -> Vérification Eligibilité (83000)...
+ -> Audit Créneaux...
+ -> Calendrier détecté. Recherche de jours disponibles sur le mois courant...
+ -> 1 jours disponibles trouvés. Sélection du premier.
+ -> Jour sélectionné.
+ -> Modale Configuration détectée. Validation...
+ -> Validation Configuration effectuée.
+ -> Modale Sélection Créneau NON visible (ou pas encore).
+--- GRID HTML DUMP ---
+
+--- END GRID DUMP ---
+ -> Validation UX Formulaire...
+⚠️ ANOMALIES DÉTECTÉES :
+   - [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+   - [JS WARNING] Unrecognized feature: 'speaker'.
+   - [JS WARNING] Unrecognized feature: 'web-share'.
+   - [JS WARNING] Unrecognized feature: 'vibrate'.
+   - [JS WARNING] Unrecognized feature: 'vr'.
+   - [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+   - [PERF] Chargement initial lent: 8763ms (Objectif: <3000ms)
+   - [STOCK] Aucun créneau de livraison disponible !
+[CLIENT EXPERT] Audit terminé.
+--- REPORT ---
+{
+  "success": false,
+  "steps": [
+    "Navigation Initiale: 200 en 8763ms",
+    "Login: Formulaire non trouvé (Déjà connecté ?)",
+    "CP 83000 saisi",
+    "Validation CP effectuée",
+    "Formulaire: 2/5 champs identifiés et remplis",
+    "⚠️ Bouton Commander introuvable (Bloquant pour Ghost Shopper, mais Expert continue l'audit)"
+  ],
+  "issues": [
+    "[JS WARNING] Unrecognized feature: 'ambient-light-sensor'.",
+    "[JS WARNING] Unrecognized feature: 'speaker'.",
+    "[JS WARNING] Unrecognized feature: 'web-share'.",
+    "[JS WARNING] Unrecognized feature: 'vibrate'.",
+    "[JS WARNING] Unrecognized feature: 'vr'.",
+    "[JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.",
+    "[PERF] Chargement initial lent: 8763ms (Objectif: <3000ms)",
+    "[STOCK] Aucun créneau de livraison disponible !"
+  ],
+  "screenshotPath": "C:\\Users\\ELS\\EL_Services_Global\\Backups\\Screenshots\\QA_WARN_2025-12-23T19-49-34667Z.png",
+  "error": "Trop d'anomalies détectées (8)"
+}
+ISSUES FOUND:
+- [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+- [JS WARNING] Unrecognized feature: 'speaker'.
+- [JS WARNING] Unrecognized feature: 'web-share'.
+- [JS WARNING] Unrecognized feature: 'vibrate'.
+- [JS WARNING] Unrecognized feature: 'vr'.
+- [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+- [PERF] Chargement initial lent: 8763ms (Objectif: <3000ms)
+- [STOCK] Aucun créneau de livraison disponible !
+--- END ---
