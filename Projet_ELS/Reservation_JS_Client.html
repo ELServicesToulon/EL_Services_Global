@@ -9,9 +9,9 @@
 
   const CLE_LOCALSTORAGE_CLIENT = 'sessionClientELServices';
   const CLE_NOTICE_PREMIERE_CONNEXION = 'noticePremiereConnexionELServices';
-  const CLIENT_SESSION_OPAQUE_ID_ENABLED = <?!= (typeof CLIENT_SESSION_OPAQUE_ID_ENABLED !== 'undefined' ? CLIENT_SESSION_OPAQUE_ID_ENABLED : false) ?>;
-  const CLIENT_SESSION_TTL_HOURS = <?!= (typeof CLIENT_SESSION_TTL_HOURS !== 'undefined' ? CLIENT_SESSION_TTL_HOURS : 24) ?>;
-  const CLIENT_ID_CARTOON_NAMES = <?!= JSON.stringify(typeof CLIENT_ID_CARTOON_NAMES !== 'undefined' ? CLIENT_ID_CARTOON_NAMES : []) ?>;
+  const CLIENT_SESSION_OPAQUE_ID_ENABLED = false; // Fix: Hardcoded to avoid crash
+  const CLIENT_SESSION_TTL_HOURS = 24;
+  const CLIENT_ID_CARTOON_NAMES = []; // Fix: Hardcoded to avoid crash
   const EMAIL_CLIENT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   let portailClientLienEnCours = null;
   let releaseConnexionFocus = () => { };
