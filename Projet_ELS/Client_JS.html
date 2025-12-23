@@ -168,7 +168,7 @@
                 }
                 return session;
             } catch (err) {
-                logWarn('Session client locale invalide, r�initialisation.', err);
+                logWarn('Session client locale invalide, réinitialisation.', err);
                 localStorage.removeItem(CLE_LOCALSTORAGE_CLIENT);
                 return null;
             }
@@ -193,7 +193,7 @@
                         }
                     })
                     .withFailureHandler(err => {
-                        logWarn('Impossible de r�cup�rer le client via son identifiant opaque.', err);
+                        logWarn('Impossible de récupérer le client via son identifiant opaque.', err);
                         afficherVueConnexion();
                     })
                     .rechercherClientParIdentifiant(session.token);
