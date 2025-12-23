@@ -114,13 +114,28 @@ async function runGhostShopperCycle() {
 
         // --- TEST LOGIN (CLIENT PORTAL FIX) ---
         console.log(' -> Test Connexion Espace Client (antigravityels@gmail.com)...');
-        // On check si le formulaire de connexion est visible (peut être dans un onglet ou direct)
-        // D'après les screenshots, c'est parfois direct.
-        const emailInputSel = '#email-connexion';
+
+        // Gestion bouton "Se connecter" (Mode Réservation)
+        const btnLoginResa = await workingScope.$('#btn-connecter-client');
+        if (btnLoginResa && await btnLoginResa.isVisible()) {
+            console.log(' -> Bouton "Se connecter" trouvé. Clic...');
+            await btnLoginResa.click();
+            await page.waitForTimeout(500);
+        }
+
+        // Choix du sélecteur (Mode Page vs Mode Modale)
+        let emailInputSel = '#email-connexion';
+        let submitBtnSel = '#formulaire-connexion-client button[type="submit"]';
+
+        if (await workingScope.isVisible('#email-connexion-reservation')) {
+            emailInputSel = '#email-connexion-reservation';
+            submitBtnSel = '#formulaire-connexion-reservation button[type="submit"]';
+        }
+
         if (await workingScope.isVisible(emailInputSel)) {
-            console.log(' -> Formulaire de connexion détecté.');
+            console.log(` -> Formulaire de connexion détecté (${emailInputSel}).`);
             await workingScope.fill(emailInputSel, 'antigravityels@gmail.com');
-            const btnConnect = await workingScope.$('#formulaire-connexion-client button[type="submit"]');
+            const btnConnect = await workingScope.$(submitBtnSel);
             if (btnConnect) {
                 await btnConnect.click();
                 console.log(' -> Demande de code envoyée.');
