@@ -466,10 +466,10 @@
          * Attache les écouteurs d'événements aux boutons d'action.
          */
         function attacherEcouteursActions() {
-            document.querySelectorAll('.btn-modifier').forEach(b => b.addEventListener('click', e => ouvrirModaleAjoutArret(e.target.dataset.idReservation)));
-            document.querySelectorAll('.btn-replanifier').forEach(b => b.addEventListener('click', e => ouvrirModaleReplanifier(e.target.dataset.idReservation)));
-            document.querySelectorAll('.btn-appliquer-remise').forEach(b => b.addEventListener('click', e => ouvrirModaleAppliquerRemise(e.target.dataset.idReservation)));
-            document.querySelectorAll('.btn-supprimer').forEach(b => b.addEventListener('click', e => ouvrirModaleSuppression(e.target.dataset.idReservation)));
+            document.querySelectorAll('.btn-modifier').forEach(b => b.addEventListener('click', e => ouvrirModaleAjoutArret(e.currentTarget.dataset.idReservation)));
+            document.querySelectorAll('.btn-replanifier').forEach(b => b.addEventListener('click', e => ouvrirModaleReplanifier(e.currentTarget.dataset.idReservation)));
+            document.querySelectorAll('.btn-appliquer-remise').forEach(b => b.addEventListener('click', e => ouvrirModaleAppliquerRemise(e.currentTarget.dataset.idReservation)));
+            document.querySelectorAll('.btn-supprimer').forEach(b => b.addEventListener('click', e => ouvrirModaleSuppression(e.currentTarget.dataset.idReservation)));
             document.querySelectorAll('.btn-devis-pdf').forEach(b => b.addEventListener('click', e => {
                 const key = e.currentTarget.getAttribute('data-client-key') || '';
                 const match = key.match(/\(([^)]+)\)\s*$/); // extrait l'email entre parenthèses
@@ -577,7 +577,7 @@
             attacherEcouteursModaleAjout();
         }
         function ouvrirModaleAjoutArret(idReservation) {
-            const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
+            const reservation = toutesLesReservationsAffichees.find(r => String(r.id) === String(idReservation));
             if (!reservation) return afficherErreur("Réservation introuvable.");
             const matchTotal = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*total\(s\)/);
             const matchSup = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*sup/);
@@ -638,7 +638,7 @@
             });
         }
         function ouvrirModaleReplanifier(idReservation) {
-            const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
+            const reservation = toutesLesReservationsAffichees.find(r => String(r.id) === String(idReservation));
             if (!reservation || !reservation.end) return afficherErreur("Réservation introuvable ou invalide.");
             const duree = (new Date(reservation.end) - new Date(reservation.start)) / 60000;
             const horaireInitial = new Date(reservation.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -759,7 +759,7 @@
         }
 
         function ouvrirModaleAppliquerRemise(idReservation) {
-            const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
+            const reservation = toutesLesReservationsAffichees.find(r => String(r.id) === String(idReservation));
             if (!reservation) return afficherErreur("Réservation introuvable.");
             const client = tousLesClients.find(c => c.email === reservation.clientEmail);
             const nbTourneesOffertesActuelClient = client ? client.nbTourneesOffertes : 0;
@@ -788,7 +788,7 @@
             majAffichageRemiseTournee();
         }
         function ouvrirModaleSuppression(idReservation) {
-            const reservation = toutesLesReservationsAffichees.find(r => r.id === idReservation);
+            const reservation = toutesLesReservationsAffichees.find(r => String(r.id) === String(idReservation));
             if (!reservation) return afficherErreur("Réservation introuvable.");
             if (!contenuModale) return;
             renderHTML(contenuModale, `
