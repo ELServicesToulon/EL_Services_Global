@@ -466,10 +466,24 @@
          * Attache les écouteurs d'événements aux boutons d'action.
          */
         function attacherEcouteursActions() {
-            document.querySelectorAll('.btn-modifier').forEach(b => b.addEventListener('click', e => ouvrirModaleAjoutArret(e.currentTarget.dataset.idReservation)));
-            document.querySelectorAll('.btn-replanifier').forEach(b => b.addEventListener('click', e => ouvrirModaleReplanifier(e.currentTarget.dataset.idReservation)));
-            document.querySelectorAll('.btn-appliquer-remise').forEach(b => b.addEventListener('click', e => ouvrirModaleAppliquerRemise(e.currentTarget.dataset.idReservation)));
-            document.querySelectorAll('.btn-supprimer').forEach(b => b.addEventListener('click', e => ouvrirModaleSuppression(e.currentTarget.dataset.idReservation)));
+            const btns = document.querySelectorAll('.btn-modifier');
+            console.log('[ELS] Attaching events to', btns.length, 'modifier buttons');
+            btns.forEach(b => b.addEventListener('click', e => {
+                console.log('[ELS] Click modifier', e.currentTarget.dataset.idReservation);
+                ouvrirModaleAjoutArret(e.currentTarget.dataset.idReservation);
+            }));
+            document.querySelectorAll('.btn-replanifier').forEach(b => b.addEventListener('click', e => {
+                console.log('[ELS] Click replanifier', e.currentTarget.dataset.idReservation);
+                ouvrirModaleReplanifier(e.currentTarget.dataset.idReservation);
+            }));
+            document.querySelectorAll('.btn-appliquer-remise').forEach(b => b.addEventListener('click', e => {
+                console.log('[ELS] Click remise', e.currentTarget.dataset.idReservation);
+                ouvrirModaleAppliquerRemise(e.currentTarget.dataset.idReservation);
+            }));
+            document.querySelectorAll('.btn-supprimer').forEach(b => b.addEventListener('click', e => {
+                console.log('[ELS] Click supprimer', e.currentTarget.dataset.idReservation);
+                ouvrirModaleSuppression(e.currentTarget.dataset.idReservation);
+            }));
             document.querySelectorAll('.btn-devis-pdf').forEach(b => b.addEventListener('click', e => {
                 const key = e.currentTarget.getAttribute('data-client-key') || '';
                 const match = key.match(/\(([^)]+)\)\s*$/); // extrait l'email entre parenthèses
@@ -577,8 +591,12 @@
             attacherEcouteursModaleAjout();
         }
         function ouvrirModaleAjoutArret(idReservation) {
+            console.log('[ELS] ouvrirModaleAjoutArret id:', idReservation);
             const reservation = toutesLesReservationsAffichees.find(r => String(r.id) === String(idReservation));
-            if (!reservation) return afficherErreur("Réservation introuvable.");
+            if (!reservation) {
+                console.error('[ELS] Reservation not found for id', idReservation, 'in', toutesLesReservationsAffichees);
+                return afficherErreur("Réservation introuvable.");
+            }
             const matchTotal = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*total\(s\)/);
             const matchSup = reservation.details.match(/(\d+)\s*arr\u00eat\(s\)\s*sup/);
             const arretsActuels = matchTotal ? parseInt(matchTotal[1], 10) : (matchSup ? parseInt(matchSup[1], 10) + 1 : 1);
