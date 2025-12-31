@@ -1,92 +1,121 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Calendar, Package, User } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient'
+import BookingForm from '../components/BookingForm'
+import BookingList from '../components/BookingList'
+import { LogOut, Truck, User, Bell } from 'lucide-react'
 
 export default function Dashboard() {
-    const [user, setUser] = useState(null)
     const navigate = useNavigate()
+    const [user, setUser] = useState(null)
+    const [bookings, setBookings] = useState([])
+    const [loadingBookings, setLoadingBookings] = useState(true)
 
+    // Check Auth & Fetch Data
     useEffect(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (!user) navigate('/')
-            else setUser(user)
-        })
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) {
+                navigate('/')
+            } else {
+                setUser(session.user)
+                fetchBookings(session.user.id)
+            }
+        }
+        getSession()
     }, [navigate])
+
+    const fetchBookings = async (userId) => {
+        setLoadingBookings(true)
+        const { data, error } = await supabase
+            .from('bookings')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+
+        if (!error) {
+            setBookings(data)
+        }
+        setLoadingBookings(false)
+    }
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
         navigate('/')
     }
 
-    if (!user) return null
-
     return (
-        <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
-            {/* Navbar */}
-            <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-                                EL Services
-                            </h1>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <div className="hidden md:flex items-center text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
-                                <User size={16} className="mr-2 text-primary" />
-                                {user.email}
-                            </div>
-                            <button
-                                onClick={handleLogout}
-                                className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-50 group"
-                            >
-                                <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
-                                <span className="hidden sm:inline">Déconnexion</span>
-                            </button>
-                        </div>
+        <div className="min-h-screen bg-gray-50 flex font-sans">
+
+            {/* Sidebar (Simple for V1) */}
+            <aside className="w-64 bg-slate-900 hidden md:flex flex-col text-white">
+                <div className="p-6 flex items-center space-x-3">
+                    <div className="bg-blue-600 p-2 rounded-lg">
+                        <Truck className="w-5 h-5 text-white" />
                     </div>
+                    <span className="font-bold text-lg tracking-tight">Mediconvoi</span>
                 </div>
-            </nav>
+
+                <nav className="flex-1 px-4 py-6 space-y-2">
+                    <a href="#" className="flex items-center px-4 py-3 bg-blue-600/10 text-blue-400 rounded-xl transition-colors">
+                        <Truck className="w-5 h-5 mr-3" />
+                        Commandes
+                    </a>
+                    {/* Placeholder links */}
+                    <a href="#" className="flex items-center px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors">
+                        <User className="w-5 h-5 mr-3" />
+                        Mon Profil
+                    </a>
+                </nav>
+
+                <div className="p-4 border-t border-slate-800">
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors"
+                    >
+                        <LogOut className="w-4 h-4 mr-3" />
+                        Déconnexion
+                    </button>
+                </div>
+            </aside>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-                <div className="mb-8">
-                    <h2 className="text-3xl font-bold text-gray-900">Tableau de bord</h2>
-                    <p className="mt-2 text-gray-600">Bienvenue dans votre espace client.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Action Card: Nouvelle Réservation */}
-                    <div
-                        onClick={() => navigate('/booking')}
-                        className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group"
-                    >
-                        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
-                            <Calendar size={24} />
+            <main className="flex-1 overflow-y-auto">
+                {/* Header Mobile/Desktop */}
+                <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
+                    <div className="px-6 py-4 flex justify-between items-center">
+                        <h1 className="text-xl font-bold text-gray-800">Tableau de bord</h1>
+                        <div className="flex items-center space-x-4">
+                            <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-full relative">
+                                <Bell className="w-5 h-5" />
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                            </button>
+                            <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+                                {user?.email?.charAt(0).toUpperCase()}
+                            </div>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900">Nouvelle Réservation</h3>
-                        <p className="text-sm text-gray-500 mt-2">Planifiez une nouvelle livraison ou tournée.</p>
                     </div>
+                </header>
 
-                    {/* Action Card: Mes Commandes */}
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group">
-                        <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary mb-4 group-hover:scale-110 transition-transform">
-                            <Package size={24} />
+                <div className="p-6 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    {/* Colonne Gauche: Liste des Commandes */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-lg font-semibold text-gray-800">Mes dernières courses</h2>
+                            <button onClick={() => user && fetchBookings(user.id)} className="text-sm text-blue-600 hover:text-blue-700 font-medium">Actualiser</button>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900">Mes Commandes</h3>
-                        <p className="text-sm text-gray-500 mt-2">Suivez l'état de vos livraisons en cours.</p>
-                    </div>
-                </div>
 
-                <div className="mt-10">
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-8 text-center">
-                        <h3 className="text-xl font-semibold text-indigo-900 mb-2">Construction en cours 🚧</h3>
-                        <p className="text-indigo-700">
-                            Nous construisons activement cette nouvelle plateforme.
-                            <br />Revenez bientôt pour voir les fonctionnalités s'activer !
-                        </p>
+                        <BookingList bookings={bookings} loading={loadingBookings} />
                     </div>
+
+                    {/* Colonne Droite: Formulaire */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-24">
+                            <BookingForm onBookingCreated={() => user && fetchBookings(user.id)} />
+                        </div>
+                    </div>
+
                 </div>
             </main>
         </div>

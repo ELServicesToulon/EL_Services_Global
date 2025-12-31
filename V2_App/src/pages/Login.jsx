@@ -1,113 +1,108 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import { Mail, ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Truck, Mail, Lock, Loader2, ArrowRight } from 'lucide-react'
 
 export default function Login() {
-    const [email, setEmail] = useState('')
     const [loading, setLoading] = useState(false)
-    const [sent, setSent] = useState(false)
-    const [error, setError] = useState(null)
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('') // We might use Magic Link, but let's prep for password too or just Magic Link.
+    // User asked for "Login (Email + Magic Link)" in the plan.
+    const [message, setMessage] = useState(null)
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        // Check if user is already logged in
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) navigate('/dashboard')
+        })
+    }, [navigate])
 
     const handleLogin = async (e) => {
         e.preventDefault()
         setLoading(true)
-        setError(null)
+        setMessage(null)
 
-        try {
-            // Magic Link Login
-            const { error } = await supabase.auth.signInWithOtp({
-                email,
-                options: {
-                    emailRedirectTo: window.location.origin + '/dashboard',
-                },
-            })
-            if (error) throw error
-            setSent(true)
-        } catch (err) {
-            setError(err.message)
-        } finally {
-            setLoading(false)
+        // Magic Link Login
+        const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+                emailRedirectTo: window.location.origin + '/dashboard',
+            },
+        })
+
+        if (error) {
+            setMessage({ type: 'error', text: error.message })
+        } else {
+            setMessage({ type: 'success', text: 'Lien de connexion envoyé ! Vérifiez votre boîte mail.' })
         }
-    }
-
-    if (sent) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 font-sans">
-                <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-gray-100 animate-fade-in-up">
-                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                        <CheckCircle size={32} />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Vérifiez vos emails !</h2>
-                    <p className="text-gray-600 mb-6">
-                        Nous avons envoyé un lien magique à <strong>{email}</strong>.
-                        <br />
-                        Cliquez dessus pour vous connecter instantanément.
-                    </p>
-                    <button
-                        onClick={() => setSent(false)}
-                        className="text-primary font-medium hover:underline text-sm"
-                    >
-                        Recommencer avec une autre adresse
-                    </button>
-                </div>
-            </div>
-        )
+        setLoading(false)
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 p-4 font-sans">
-            <div className="bg-white p-10 rounded-3xl shadow-2xl max-w-md w-full border border-white/50 backdrop-blur-sm transition-all duration-300 hover:shadow-3xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary mb-2 tracking-tight">
-                        EL Services
-                    </h1>
-                    <p className="text-gray-500 font-medium tracking-wide text-sm uppercase">Espace Client</p>
-                </div>
+        <div className="flex min-h-screen w-full bg-[#0f172a] text-white font-sans overflow-hidden relative">
+            {/* Background Elements */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-                <form onSubmit={handleLogin} className="space-y-6">
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2 pl-1">
-                            Adresse Email
-                        </label>
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors duration-200">
-                                <Mail size={20} />
-                            </div>
-                            <input
-                                id="email"
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all duration-200 placeholder-gray-400 font-medium text-gray-800"
-                                placeholder="nom@exemple.com"
-                            />
+            <div className="flex flex-col items-center justify-center w-full px-4 z-10">
+
+                <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl animate-fade-in-up">
+
+                    <div className="flex flex-col items-center mb-8">
+                        <div className="bg-blue-600 p-3 rounded-xl mb-4 shadow-lg shadow-blue-600/50">
+                            <Truck className="w-8 h-8 text-white" />
                         </div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                            Mediconvoi
+                        </h1>
+                        <p className="text-gray-400 text-sm mt-2">Accédez à votre espace livraison</p>
                     </div>
 
-                    {error && (
-                        <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center animate-pulse">
-                            <p>{error}</p>
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300 ml-1">Email Professionnel</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Mail className="h-5 w-5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+                                </div>
+                                <input
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-xl leading-5 bg-gray-900/50 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="nom@entreprise.com"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg shadow-blue-900/50 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <Loader2 className="animate-spin h-5 w-5" />
+                            ) : (
+                                <>
+                                    Recevoir mon lien magique <ArrowRight className="ml-2 h-4 w-4" />
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    {message && (
+                        <div className={`mt-6 p-4 rounded-xl flex items-start space-x-3 text-sm animate-fade-in ${message.type === 'error' ? 'bg-red-500/10 border border-red-500/20 text-red-200' : 'bg-green-500/10 border border-green-500/20 text-green-200'}`}>
+                            <span>{message.text}</span>
                         </div>
                     )}
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-95 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-primary/30 transition-all duration-300 flex items-center justify-center gap-2 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        {loading ? (
-                            <Loader2 className="animate-spin" size={24} />
-                        ) : (
-                            <>
-                                Recevoir mon lien d'accès <ArrowRight size={20} />
-                            </>
-                        )}
-                    </button>
-                </form>
-
-                <div className="mt-8 text-center text-xs text-gray-400">
-                    <p>© {new Date().getFullYear()} EL Services Global</p>
+                    <div className="mt-8 text-center">
+                        <p className="text-xs text-gray-500">
+                            En vous connectant, vous acceptez nos <a href="#" className="underline hover:text-gray-300">CGU</a> et notre <a href="#" className="underline hover:text-gray-300">Politique de confidentialité</a>.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
