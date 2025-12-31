@@ -13,7 +13,8 @@ const path = require('path');
 // --- MODULES ---
 const ArchiveKeeper = require('./Agents_Modules/Archive_Keeper');
 const NetworkOverseer = require('./Agents_Modules/Network_Overseer');
-const GhostShopper = require('./Agents_Modules/Ghost_Shopper'); // aka Client Expert Backend
+// const GhostShopper = require('./Agents_Modules/Ghost_Shopper'); // ❌ DÉSACTIVÉ : Migré sur VPS Dédié (Worker)
+const GhostShopper = null;
 const TeslaMonitor = require('./Agents_Modules/Tesla_Monitor');
 const AgentMarketing = require('./Agents_Modules/Agent_Marketing');
 

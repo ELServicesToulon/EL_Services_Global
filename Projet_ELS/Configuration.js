@@ -16,13 +16,13 @@
 
 // --- Informations sur l'entreprise ---
 /** @const {string} Nom officiel de l'entreprise utilisé dans l'interface et la facturation. */
-const NOM_ENTREPRISE = getSecret('NOM_ENTREPRISE');
+const NOM_ENTREPRISE = "Emmanuel LECOURT (EL Services)";
 /** @const {string} Adresse postale de l'entreprise pour les documents légaux. */
-const ADRESSE_ENTREPRISE = getSecret('ADRESSE_ENTREPRISE');
+const ADRESSE_ENTREPRISE = "255 Bis Avenue Marcel Castié, 83000 Toulon";
 /** @const {string} Adresse e-mail de contact de l'entreprise. */
-const EMAIL_ENTREPRISE = getSecret('EMAIL_ENTREPRISE');
+const EMAIL_ENTREPRISE = "elservicestoulon@gmail.com";
 /** @const {string} Adresse e-mail recevant les notifications administratives. */
-const ADMIN_EMAIL = getSecret('ADMIN_EMAIL');
+const ADMIN_EMAIL = "elservicestoulon@gmail.com";
 
 /** @const {string} URL de base du portail client (WebApp). A définir si URL personnalisée. */
 // TODO: Renseignez ici l'URL de déploiement de votre WebApp pour garantir les liens dans les emails.

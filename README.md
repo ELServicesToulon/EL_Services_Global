@@ -65,3 +65,11 @@ Le projet utilise GitHub Actions pour l'intégration continue :
 *   Linting du code (ESLint).
 *   Tests automatisés (Playwright).
 *   Déploiement automatique via `clasp` sur la branche `main`.
+
+## Infrastructure Backend (Sentinel & Agents)
+
+Le système repose sur une architecture distribuée pour garantir la stabilité du monitoring critique.
+
+*   **Documentation Stratégique** : Voir `Agents_Backend/INFRASTRUCTURE.md`
+*   **Sentinel Core** : Hébergé sur VPS XS (Stable, Intouchable).
+*   **Agents Lourds** : Hébergés sur VPS dédiés jetables (XS/S/M), gérés via templates Systemd standardisés.
