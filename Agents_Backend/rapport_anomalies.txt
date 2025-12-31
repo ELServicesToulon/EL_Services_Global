@@ -143,3 +143,29 @@
 [2025-12-23T17:38:13.811Z] [MARKETING] Trafic: 47 visiteurs. SEO: 85/100
 [2025-12-23T17:38:39.677Z] [CLIENT_EXPERT] ⚠️ 8 ANOMALIES AUTOMATISÉES.
 [2025-12-23T17:38:39.679Z] [GHOST_SHOPPER] ERREUR: Trop d'anomalies détectées (8)
+[2025-12-29T19:46:34.367Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2025-12-29T19:46:45.574Z] [MARKETING] Trafic: 56 visiteurs. SEO: 85/100
+[2025-12-29T19:47:31.654Z] [CLIENT_EXPERT] ⚠️ 9 ANOMALIES:
+   - [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+   - [JS WARNING] Unrecognized feature: 'speaker'.
+   - [JS WARNING] Unrecognized feature: 'web-share'.
+   - [JS WARNING] Unrecognized feature: 'vibrate'.
+   - [JS WARNING] Unrecognized feature: 'vr'.
+   - [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+   - [PERF] Chargement initial lent: 7693ms (Objectif: <3000ms)
+   - [LOGIN] Le champ OTP n'est pas apparu après saisie email.
+   - [STOCK] Aucun créneau de livraison disponible !
+[2025-12-29T19:47:31.663Z] [GHOST_SHOPPER] ERREUR CRITIQUE: Trop d'anomalies détectées (9)
+[2025-12-30T13:29:13.985Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2025-12-30T13:29:27.163Z] [MARKETING] Trafic: 45 visiteurs. SEO: 85/100
+[2025-12-30T13:30:13.002Z] [CLIENT_EXPERT] ⚠️ 9 ANOMALIES:
+   - [JS WARNING] Unrecognized feature: 'ambient-light-sensor'.
+   - [JS WARNING] Unrecognized feature: 'speaker'.
+   - [JS WARNING] Unrecognized feature: 'web-share'.
+   - [JS WARNING] Unrecognized feature: 'vibrate'.
+   - [JS WARNING] Unrecognized feature: 'vr'.
+   - [JS WARNING] An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.
+   - [PERF] Chargement initial lent: 9192ms (Objectif: <3000ms)
+   - [LOGIN] Le champ OTP n'est pas apparu après saisie email.
+   - [STOCK] Aucun créneau de livraison disponible !
+[2025-12-30T13:30:13.004Z] [GHOST_SHOPPER] ERREUR CRITIQUE: Trop d'anomalies détectées (9)
