@@ -2,7 +2,7 @@
 # Security Monitor Agent for Antigravity/Sentinel
 # Checks Windows Firewall and ESET status and sends report to GAS Web App.
 
-$WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb/exec"
+$WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyWUC3njn-hIU1pdgElOQX9FlXUclS3YC-Nat4Ujlw/exec"
 $MACHINE_NAME = $env:COMPUTERNAME
 
 function Get-FirewallStatus {

@@ -7,7 +7,7 @@ Set-Location $PSScriptRoot
 
 # Configuration des projets et de leurs ID de déploiement de production
 $projects = @{
-    "Projet_ELS"  = "AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb"
+    "Projet_ELS"  = "AKfycbyWUC3njn-hIU1pdgElOQX9FlXUclS3YC-Nat4Ujlw"
     "App_Livreur" = "AKfycbyC1PWyq5xnYa3HaLtuRtahsnjpkiTryQxqy5jgYHrR6pDwLgAlkM3ecxjSAAgEOYWKGg"
 }
 

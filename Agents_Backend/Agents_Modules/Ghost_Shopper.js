@@ -74,7 +74,7 @@ async function runGhostShopperCycle() {
 
         // 1. Accès au Portail
         console.log(' -> Navigation vers le portail...');
-        const targetUrl = 'https://script.google.com/macros/s/AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb/exec';
+        const targetUrl = 'https://script.google.com/macros/s/AKfycbyWUC3njn-hIU1pdgElOQX9FlXUclS3YC-Nat4Ujlw/exec';
 
         const navResponse = await page.goto(targetUrl, { timeout: 60000 });
         const loadTime = Date.now() - tStart;
