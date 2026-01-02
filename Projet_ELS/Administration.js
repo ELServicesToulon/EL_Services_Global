@@ -1134,61 +1134,128 @@ function genererFactures() {
         const dossierAnnee = obtenirOuCreerDossier(dossierArchives, dateFacture.getFullYear().toString());
         const dossierMois = obtenirOuCreerDossier(dossierAnnee, formaterDatePersonnalise(dateFacture, "MMMM yyyy"));
 
-        // === GENERATION FACTURE HTML (Version Premium) ===
-        const template = HtmlService.createTemplateFromFile('Modele_Facture_ELS');
+        const modeleFacture = DriveApp.getFileById(getSecret('ID_MODELE_FACTURE'));
+        const copieFactureDoc = modeleFacture.makeCopy(`${numFacture} - ${clientInfos.nom}`, dossierMois);
+        const doc = DocumentApp.openById(copieFactureDoc.getId());
+        const corps = doc.getBody();
 
-        // 1. Données de l'entreprise et client
-        template.logo = getLogoEmailBlockHtml();
-        template.nom_entreprise = NOM_ENTREPRISE;
-        template.adresse_entreprise = ADRESSE_ENTREPRISE;
-        template.siret = getSecret('SIRET');
-        template.email_entreprise = EMAIL_ENTREPRISE;
-        template.client_nom = clientInfos.nom;
-        template.client_adresse = clientInfos.adresse;
+        const logoFallbackBlob = getLogoSvgBlob();
+        if (!insererImageDepuisPlaceholder(corps, '{{logo}}', FACTURE_LOGO_FILE_ID, 160, logoFallbackBlob)) {
+          corps.replaceText('{{logo}}', '');
+        }
 
-        // 2. Métadonnées Facture
-        template.numero_facture = numFacture;
-        template.date_facture = formaterDatePersonnalise(dateFacture, 'dd/MM/yyyy');
-        template.periode_facturee = formatMoisFrancais(dateMin);
-        template.date_debut_periode = formaterDatePersonnalise(dateMin, 'dd/MM/yyyy');
-        template.date_fin_periode = formaterDatePersonnalise(dateMax, 'dd/MM/yyyy');
-        template.date_echeance = formaterDatePersonnalise(dateEcheance, 'dd/MM/yyyy');
+        corps.replaceText('{{nom_entreprise}}', NOM_ENTREPRISE);
+        corps.replaceText('{{adresse_entreprise}}', ADRESSE_ENTREPRISE);
+        corps.replaceText('{{siret}}', getSecret('SIRET'));
+        corps.replaceText('{{email_entreprise}}', EMAIL_ENTREPRISE);
+        corps.replaceText('{{client_nom}}', clientInfos.nom);
+        corps.replaceText('{{client_adresse}}', clientInfos.adresse);
+        corps.replaceText('{{numero_facture}}', numFacture);
+        corps.replaceText('{{date_facture}}', formaterDatePersonnalise(dateFacture, 'dd/MM/yyyy'));
+        corps.replaceText('{{periode_facturee}}', formatMoisFrancais(dateMin));
+        corps.replaceText('{{date_debut_periode}}', formaterDatePersonnalise(dateMin, 'dd/MM/yyyy'));
+        corps.replaceText('{{date_fin_periode}}', formaterDatePersonnalise(dateMax, 'dd/MM/yyyy'));
+        corps.replaceText('{{total_du}}', formatMontantEuro(totalTTC));
+        corps.replaceText('{{total_ht}}', formatMontantEuro(totalMontant));
+        corps.replaceText('{{montant_tva}}', formatMontantEuro(tva));
+        corps.replaceText('{{total_ttc}}', formatMontantEuro(totalTTC));
+        const totalRemisesTexte = totalRemises > 0 ? `- ${formatMontantEuro(totalRemises)} ${symboleEuro}` : `0,00 ${symboleEuro}`;
+        const totalAvantRemisesTexte = formatMontantEuro(totalAvantRemises);
+        corps.replaceText('{{total_remises}}', totalRemisesTexte);
+        corps.replaceText('{{total_avant_remises}}', totalAvantRemisesTexte);
+        const totalRemisesOffertesTexte = formatMontantEuro(totalRemises);
+        corps.replaceText('{{total_remises_offertes}}', totalRemisesOffertesTexte);
+        corps.replaceText('{{nombre_courses}}', String(lignesBordereau.length));
 
-        // 3. Montants
-        template.total_du = formatMontantEuro(totalTTC);
-        template.total_ht = formatMontantEuro(totalMontant);
-        template.montant_tva = formatMontantEuro(tva);
-        template.total_ttc = formatMontantEuro(totalTTC);
-        template.total_remises = totalRemises > 0 ? `- ${formatMontantEuro(totalRemises)} ${symboleEuro}` : `0,00 ${symboleEuro}`;
-        template.total_avant_remises = formatMontantEuro(totalAvantRemises);
-        template.total_remises_offertes = formatMontantEuro(totalRemises);
-        template.nombre_courses = String(lignesBordereau.length);
-
-        // 4. Informations Bancaires & Paiement
-        template.delai_paiement = String(DELAI_PAIEMENT_JOURS);
-        // Fallback sécurisé pour la banque
-        try { template.societe_banque = getSecret('NOM_BANQUE'); } catch (e) { template.societe_banque = 'Votre Banque'; }
-        template.rib_entreprise = getSecret('RIB_ENTREPRISE');
-        template.bic_entreprise = getSecret('BIC_ENTREPRISE');
-
-        // 5. Liens (Tarifs / CGV)
         const lienTarifs = (() => {
-          try { return getSecret('URL_TARIFS_PUBLIC'); }
-          catch (_err) { return `Contactez ${EMAIL_ENTREPRISE}`; }
+          try {
+            return getSecret('URL_TARIFS_PUBLIC');
+          } catch (_err) {
+            try {
+              const docTarifs = getSecret('ID_DOCUMENT_TARIFS');
+              return docTarifs ? `https://drive.google.com/file/d/${docTarifs}/view` : `Contactez ${EMAIL_ENTREPRISE}`;
+            } catch (_err2) {
+              return `Contactez ${EMAIL_ENTREPRISE}`;
+            }
+          }
         })();
+
         const lienCgv = (() => {
-          try { const cgvId = getSecret('ID_DOCUMENT_CGV'); return `https://drive.google.com/file/d/${cgvId}/view`; }
-          catch (_err) { return `Contactez ${EMAIL_ENTREPRISE}`; }
+          try {
+            const cgvId = getSecret('ID_DOCUMENT_CGV');
+            return `https://drive.google.com/file/d/${cgvId}/view`;
+          } catch (_err) {
+            return `Contactez ${EMAIL_ENTREPRISE}`;
+          }
         })();
-        template.lien_tarifs = lienTarifs;
-        template.lien_cgv = lienCgv;
 
-        // 6. Données dynamiques (Tableau)
-        template.lignesBordereau = lignesBordereau;
+        corps.replaceText('{{lien_tarifs}}', lienTarifs);
+        corps.replaceText('{{lien_cgv}}', lienCgv);
+        corps.replaceText('{{date_echeance}}', formaterDatePersonnalise(dateEcheance, 'dd/MM/yyyy'));
+        corps.replaceText('{{rib_entreprise}}', getSecret('RIB_ENTREPRISE'));
+        corps.replaceText('{{bic_entreprise}}', getSecret('BIC_ENTREPRISE'));
+        corps.replaceText('{{delai_paiement}}', String(DELAI_PAIEMENT_JOURS));
 
-        // === GENERATION PDF ===
-        const blobPDF = template.evaluate().getAs(MimeType.PDF).setName(`${numFacture} - ${clientInfos.nom}.pdf`);
-        const fichierPDF = dossierMois.createFile(blobPDF);
+        const detectionBordereau = trouverTableBordereau(corps);
+        if (detectionBordereau) {
+          const tableBordereau = detectionBordereau.table;
+          const colonnesBordereau = detectionBordereau.columns;
+          while (tableBordereau.getNumRows() > 1) {
+            tableBordereau.removeRow(1);
+          }
+
+          const headerCellCount = tableBordereau.getRow(0).getNumCells();
+
+          lignesBordereau.forEach(ligne => {
+            const nouvelleLigne = tableBordereau.appendTableRow();
+            while (nouvelleLigne.getNumCells() < headerCellCount) {
+              nouvelleLigne.appendTableCell('');
+            }
+
+            const setCell = (key, valeur) => {
+              if (colonnesBordereau[key] === undefined) return;
+              nouvelleLigne.getCell(colonnesBordereau[key]).setText(valeur || '');
+            };
+
+            setCell('date', ligne.date);
+            setCell('heure', ligne.heure);
+            setCell('details', ligne.details);
+
+            if (colonnesBordereau.notes !== undefined) {
+              const celluleNote = nouvelleLigne.getCell(colonnesBordereau.notes);
+              if (ligne.lienNote && ligne.lienNote.startsWith('http')) {
+                const text = celluleNote.editAsText();
+                text.setText('Voir la note');
+                text.setLinkUrl(0, text.getText().length - 1, ligne.lienNote);
+              } else {
+                celluleNote.setText(ligne.note || '');
+              }
+            }
+
+            if (colonnesBordereau.remise !== undefined) {
+              const valeur = ligne.remiseTexte || '';
+              nouvelleLigne.getCell(colonnesBordereau.remise).setText(valeur);
+            }
+
+            if (colonnesBordereau.montant !== undefined) {
+              let valeurMontant = ligne.montantTexte ? `${ligne.montantTexte} ${symboleEuro}` : '';
+              if (ligne.remiseMontantTexte) {
+                const etiquette = ligne.remiseTexte ? `Remise ${ligne.remiseTexte}` : 'Remise';
+                valeurMontant = `${valeurMontant} (${etiquette} : ${ligne.remiseMontantTexte})`;
+              } else if (ligne.estOfferte) {
+                valeurMontant = valeurMontant ? `${valeurMontant} (Offert)` : 'Offert';
+              }
+              nouvelleLigne.getCell(colonnesBordereau.montant).setText(valeurMontant.trim());
+            }
+          });
+        } else {
+          throw new Error("Aucun tableau de bordereau valide trouvé. Vérifiez les en-têtes.");
+        }
+
+        doc.saveAndClose();
+
+        const blobPDF = copieFactureDoc.getAs(MimeType.PDF);
+        const fichierPDF = dossierMois.createFile(blobPDF).setName(`${numFacture} - ${clientInfos.nom}.pdf`);
 
         // Mise à jour du fichier Sheets
         lignesFactureClient.forEach(item => {

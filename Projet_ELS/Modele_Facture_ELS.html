@@ -7,62 +7,50 @@
   <style>
     :root {
       --primary: #8e44ad;
-      /* Violet - Creativity/Wisdom */
       --secondary: #5dade2;
-      /* Cyan - Trust/Calm */
       --dark: #2c3e50;
-      /* Dark Blue - Professionalism */
       --text: #34495e;
-      /* Grey Blue - Readability */
       --bg: #fdfdfd;
-      /* Clean White */
-      --card-bg: #ffffff;
       --highlight: #f4f6f7;
-    }
-
-    * {
-      box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 0;
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      /* Web safe fonts */
       font-size: 11pt;
-      line-height: 1.5;
-      color: var(--text);
-      background: #eee;
+      line-height: 1.4;
+      color: #34495e;
+      background: white;
     }
 
     .page {
-      width: 210mm;
-      min-height: 297mm;
-      margin: 0 auto;
-      background: var(--card-bg);
-      padding: 15mm 15mm 15mm;
-      /* Balanced padding */
-      position: relative;
+      width: 100%;
+      background: white;
+      padding: 20px;
     }
 
-    /* UTILS */
+    /* TABLE LAYOUTS FOR PDF COMPATIBILITY */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    td {
+      vertical-align: top;
+      padding: 0;
+    }
+
     .text-primary {
-      color: var(--primary);
+      color: #8e44ad;
     }
 
     .text-secondary {
-      color: var(--secondary);
-    }
-
-    .text-dark {
-      color: var(--dark);
-    }
-
-    .font-bold {
-      font-weight: 700;
-    }
-
-    .text-uppercase {
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      color: #5dade2;
     }
 
     .text-right {
@@ -73,218 +61,146 @@
       text-align: center;
     }
 
-    /* HEADER - Split Layout */
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 20px;
-      border-bottom: 2px solid var(--highlight);
-      margin-bottom: 30px;
+    .font-bold {
+      font-weight: bold;
     }
 
-    .brand-block {
-      display: flex;
-      align-items: center;
-      gap: 15px;
+    .text-uppercase {
+      text-transform: uppercase;
     }
 
-    .brand-logo {
-      width: 80px;
-      /* Adjust based on actual logo size */
+    /* HEADER */
+    .header-table td.brand-col {
+      width: 60%;
+      vertical-align: middle;
+    }
+
+    .header-table td.company-col {
+      width: 40%;
+      text-align: right;
+      font-size: 9pt;
+      color: #7f8c8d;
+    }
+
+    .brand-logo svg,
+    .brand-logo img {
+      height: 60px;
+      vertical-align: middle;
+    }
+
+    .brand-text {
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 10px;
     }
 
     .brand-text h1 {
       margin: 0;
       font-size: 18pt;
-      color: var(--primary);
-      line-height: 1.1;
+      color: #8e44ad;
     }
 
     .brand-text p {
-      margin: 4px 0 0;
-      font-size: 9pt;
-      color: var(--secondary);
-      font-weight: 600;
+      margin: 0;
+      font-size: 8pt;
+      color: #5dade2;
+      font-weight: bold;
       text-transform: uppercase;
-    }
-
-    .company-details {
-      text-align: right;
-      font-size: 9pt;
-      color: #7f8c8d;
     }
 
     /* TRUST BANNER */
     .trust-banner {
-      background: linear-gradient(90deg, rgba(142, 68, 173, 0.05) 0%, rgba(93, 173, 226, 0.1) 100%);
-      color: var(--primary);
+      background-color: #f4f6f7;
+      color: #8e44ad;
       text-align: center;
       padding: 8px;
-      border-radius: 4px;
+      margin: 20px 0;
       font-size: 10pt;
-      font-weight: 600;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+
+    /* HERO SECTION */
+    .hero-table {
       margin-bottom: 30px;
     }
 
-    /* HERO SECTION - Grid Layout */
-    .invoice-hero {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      margin-bottom: 40px;
-    }
-
-    /* Left Column: Client & Info */
     .client-box h3 {
       font-size: 10pt;
-      color: var(--secondary);
+      color: #5dade2;
       text-transform: uppercase;
-      margin: 0 0 10px 0;
-      border-bottom: 1px solid var(--highlight);
+      margin: 0 0 5px 0;
+      border-bottom: 1px solid #eee;
       display: inline-block;
-      padding-bottom: 3px;
     }
 
     .client-name {
-      font-size: 14pt;
-      font-weight: 700;
-      color: var(--dark);
-      margin-bottom: 5px;
+      font-size: 12pt;
+      font-weight: bold;
+      color: #2c3e50;
     }
 
-    .meta-grid {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 8px 15px;
-      margin-top: 20px;
-      font-size: 9.5pt;
+    .meta-table td {
+      padding-bottom: 5px;
     }
 
     .meta-label {
       color: #95a5a6;
+      width: 80px;
+      font-size: 9pt;
     }
 
     .meta-value {
-      color: var(--dark);
-      font-weight: 600;
+      color: #2c3e50;
+      font-weight: bold;
+      font-size: 10pt;
     }
 
-    /* Right Column: The "Payable" Focus */
+    /* PAYMENT CARD */
     .payment-card {
-      background: var(--highlight);
-      border-radius: 12px;
-      padding: 25px;
-      text-align: center;
+      background-color: #f4f6f7;
       border: 1px solid #eef2f3;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .payment-label {
-      font-size: 11pt;
-      color: var(--text);
-      margin-bottom: 10px;
+      padding: 15px;
+      text-align: center;
+      border-radius: 8px;
     }
 
     .payment-amount {
-      font-size: 28pt;
-      font-weight: 800;
-      color: var(--primary);
-      line-height: 1;
-      margin-bottom: 5px;
-    }
-
-    .payment-context {
-      font-size: 10pt;
-      color: #7f8c8d;
+      font-size: 24pt;
+      font-weight: bold;
+      color: #8e44ad;
+      margin: 5px 0;
     }
 
     .discount-badge {
-      margin-top: 15px;
+      background-color: #fff;
+      color: #5dade2;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 8pt;
+      font-weight: bold;
       display: inline-block;
-      background: #fff;
-      color: var(--secondary);
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 9pt;
-      font-weight: 600;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      margin-top: 10px;
+      border: 1px solid #eee;
     }
 
     /* DETAILS TABLE */
-    .details-section h3 {
-      font-size: 12pt;
-      color: var(--dark);
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .details-section h3::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #ecf0f1;
-    }
-
-    /* FOOTER / PAYMENT INFO */
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 30px;
-      margin-top: auto;
-      /* Push to bottom if content is short, usually styled in distinct section */
-      padding-top: 30px;
-      border-top: 2px solid var(--highlight);
-    }
-
-    .payment-info p {
-      margin: 3px 0;
-      font-size: 9.5pt;
-      color: #7f8c8d;
-    }
-
-    .payment-info strong {
-      color: var(--dark);
-    }
-
-    .legal-links {
-      text-align: right;
-      font-size: 9pt;
-    }
-
-    .legal-links a {
-      color: var(--secondary);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    /* ANNEXE TABLE STYLES */
     table.data {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 20px;
     }
 
     table.data th {
       text-align: left;
-      color: var(--primary);
+      color: #8e44ad;
       font-size: 9pt;
-      border-bottom: 2px solid var(--highlight);
-      padding: 10px 5px;
+      border-bottom: 2px solid #f4f6f7;
+      padding: 8px 4px;
     }
 
     table.data td {
-      padding: 12px 5px;
-      border-bottom: 1px solid #f0f0f0;
+      padding: 8px 4px;
+      border-bottom: 1px solid #f9f9f9;
       font-size: 10pt;
-    }
-
-    table.data tr:last-child td {
-      border-bottom: none;
     }
 
     .notes {
@@ -293,20 +209,15 @@
       font-size: 9pt;
     }
 
-    .page-break {
-      page-break-before: always;
+    /* FOOTER */
+    .footer-table {
+      margin-top: 40px;
+      border-top: 2px solid #f4f6f7;
+      padding-top: 20px;
     }
 
-    @media print {
-      body {
-        background: white;
-      }
-
-      .page {
-        margin: 0;
-        box-shadow: none;
-        padding: 10mm;
-      }
+    .page-break {
+      page-break-before: always;
     }
   </style>
 </head>
@@ -315,82 +226,128 @@
   <!-- PAGE 1: FACTURE -->
   <div class="page">
 
-    <!-- HEADER -->
-    <div class="header-container">
-      <div class="brand-block">
-        <div class="brand-logo">{{logo}}</div>
-        <div class="brand-text">
-          <h1>{{nom_entreprise}}</h1>
-          <p>Bien-&ecirc;tre patient &bull; Excellence officinale</p>
-        </div>
-      </div>
-      <div class="company-details">
-        <p>{{adresse_entreprise}}</p>
-        <p>SIRET : {{siret}}</p>
-        <p>{{email_entreprise}}</p>
-        <p style="font-size: 8pt; margin-top: 4px; color: #95a5a6;">Assurance RC Auto-Entrepreneur SIMPLIS n&deg;
-          15251070</p>
-      </div>
-    </div>
+    <!-- HEADER TABLE -->
+    <table class="header-table">
+      <tr>
+        <td class="brand-col">
+          <div class="brand-logo" style="display:inline-block; vertical-align:middle;">
+            <?!= logo ?>
+          </div>
+          <div class="brand-text">
+            <h1>
+              <?= nom_entreprise ?>
+            </h1>
+            <p>Bien-&ecirc;tre patient &bull; Excellence officinale</p>
+          </div>
+        </td>
+        <td class="company-col">
+          <div>
+            <?= adresse_entreprise ?>
+          </div>
+          <div>SIRET :
+            <?= siret ?>
+          </div>
+          <div>
+            <?= email_entreprise ?>
+          </div>
+          <div style="font-size: 8pt; margin-top: 4px; color: #95a5a6;">Assurance RC Auto-Entrepreneur SIMPLIS n&deg;
+            15251070</div>
+        </td>
+      </tr>
+    </table>
 
-    <!-- TRUST BANNER -->
     <div class="trust-banner">
-      Une année de confiance s'achève, merci de la vôtre !
+      Une ann&eacute;e de confiance s'ach&egrave;ve, merci de la v&ocirc;tre !
     </div>
 
-    <!-- HERO SECTION -->
-    <div class="invoice-hero">
-      <!-- Client & Invoice Meta -->
-      <div>
-        <div class="client-box">
-          <h3>Destinataire</h3>
-          <div class="client-name">{{client_nom}}</div>
-          <div style="color: #7f8c8d;">{{client_adresse}}</div>
-        </div>
+    <!-- HERO TABLE -->
+    <table class="hero-table">
+      <tr>
+        <td style="width: 55%; padding-right: 20px;">
+          <div class="client-box">
+            <h3>Destinataire</h3>
+            <div class="client-name">
+              <?= client_nom ?>
+            </div>
+            <div style="color: #7f8c8d;">
+              <?= client_adresse ?>
+            </div>
+          </div>
+          <br>
+          <table class="meta-table">
+            <tr>
+              <td class="meta-label">Num&eacute;ro :</td>
+              <td class="meta-value text-primary">
+                <?= numero_facture ?>
+              </td>
+            </tr>
+            <tr>
+              <td class="meta-label">Date :</td>
+              <td class="meta-value">
+                <?= date_facture ?>
+              </td>
+            </tr>
+            <tr>
+              <td class="meta-label">P&eacute;riode :</td>
+              <td class="meta-value">
+                <?= periode_facturee ?>
+              </td>
+            </tr>
+            <tr>
+              <td class="meta-label">&Eacute;ch&eacute;ance :</td>
+              <td class="meta-value">
+                <?= date_echeance ?>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td style="width: 45%;">
+          <div class="payment-card">
+            <div style="font-size: 11pt; color: #34495e;">Net &agrave; payer</div>
+            <div class="payment-amount">
+              <?= total_du ?> &euro;
+            </div>
+            <div style="font-size: 10pt; color: #7f8c8d;">pour
+              <?= nombre_courses ?> tourn&eacute;es
+            </div>
+            <div class="discount-badge">
+              2025
+              <?= total_remises_offertes ?> 2026
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
 
-        <div class="meta-grid">
-          <span class="meta-label">Num&eacute;ro :</span>
-          <span class="meta-value text-primary">{{numero_facture}}</span>
-
-          <span class="meta-label">Date :</span>
-          <span class="meta-value">{{date_facture}}</span>
-
-          <span class="meta-label">P&eacute;riode :</span>
-          <span class="meta-value">{{periode_facturee}}</span>
-
-          <span class="meta-label">&Eacute;ch&eacute;ance :</span>
-          <span class="meta-value">{{date_echeance}}</span>
-        </div>
-      </div>
-
-      <!-- Payment Highlight -->
-      <div class="payment-card">
-        <div class="payment-label">Net &agrave; payer</div>
-        <div class="payment-amount">{{total_du}} &euro;</div>
-        <div class="payment-context">pour {{nombre_courses}} tourn&eacute;es</div>
-
-        <div class="discount-badge">
-          2025 {{total_remises_offertes}} 2026
-        </div>
-      </div>
-    </div>
-
-    <!-- PAYMENT & LEGAL -->
-    <div class="details-section">
-      <h3>Informations de r&egrave;glement</h3>
-      <div class="footer-grid">
-        <div class="payment-info">
-          <p>R&egrave;glement attendu sous <strong>{{delai_paiement}} jours</strong></p>
-          <p>Banque : <strong>{{societe_banque}}</strong></p>
-          <p>IBAN : {{rib_entreprise}}</p>
-          <p>BIC : {{bic_entreprise}}</p>
-        </div>
-        <div class="legal-links">
-          <p>Tarifs &amp; CGV :</p>
-          <p>{{lien_tarifs}}</p>
-          <p>{{lien_cgv}}</p>
-        </div>
-      </div>
+    <!-- PAYMENT INFO TABLE -->
+    <div style="margin-top:20px;">
+      <h3 style="font-size:12pt; color:#2c3e50; border-bottom:1px solid #eee; padding-bottom:5px;">Informations de
+        r&egrave;glement</h3>
+      <table class="footer-table" style="margin-top:10px; border:none;">
+        <tr>
+          <td style="width: 60%; font-size: 9.5pt; color: #7f8c8d;">
+            R&egrave;glement attendu sous <strong>
+              <?= delai_paiement ?> jours
+            </strong><br>
+            Banque : <strong>
+              <?= societe_banque ?>
+            </strong><br>
+            IBAN :
+            <?= rib_entreprise ?><br>
+            BIC :
+            <?= bic_entreprise ?>
+          </td>
+          <td style="width: 40%; text-align: right; font-size: 9pt;">
+            <p>Tarifs &amp; CGV :</p>
+            <p><a href="#" style="color:#5dade2; text-decoration:none;">
+                <?= lien_tarifs ?>
+              </a></p>
+            <p><a href="#" style="color:#5dade2; text-decoration:none;">
+                <?= lien_cgv ?>
+              </a></p>
+          </td>
+        </tr>
+      </table>
     </div>
 
   </div>
@@ -399,27 +356,30 @@
 
   <!-- PAGE 2: ANNEXE -->
   <div class="page">
-    <div class="header-container" style="border:none; margin-bottom: 10px;">
-      <div class="brand-block">
-        <span class="text-primary font-bold text-uppercase">D&eacute;tail des services</span>
-      </div>
-      <div class="company-details">
-        Ref: {{numero_facture}}
-      </div>
-    </div>
+    <table style="width:100%; margin-bottom:10px;">
+      <tr>
+        <td class="text-primary font-bold text-uppercase" style="font-size:12pt;">
+          D&eacute;tail des services
+        </td>
+        <td class="text-right" style="color:#7f8c8d; font-size:10pt;">
+          Ref:
+          <?= numero_facture ?>
+        </td>
+      </tr>
+    </table>
 
     <p style="font-size: 9pt; color: #95a5a6; margin-bottom: 20px;">
       Ce document annexe est destin&eacute; &agrave; votre suivi interne.
     </p>
 
-    <table class="data" data-els="bordereau-annexe">
+    <table class="data">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Horaire</th>
-          <th>D&eacute;tails</th>
-          <th>Notes</th>
-          <th class="text-right">Montant</th>
+          <th style="width:15%">Date</th>
+          <th style="width:10%">Horaire</th>
+          <th style="width:40%">D&eacute;tails</th>
+          <th style="width:20%">Notes</th>
+          <th class="text-right" style="width:15%">Montant</th>
         </tr>
       </thead>
       <tbody>
@@ -436,14 +396,14 @@
           <td>
             <?= ligne.details ?>
             <? if (ligne.remiseMontantTexte) { ?>
-            <br><small style="color:var(--secondary)">Remise:
+            <br><small class="text-secondary">Remise:
               <?= ligne.remiseMontantTexte ?>
             </small>
             <? } ?>
           </td>
           <td class="notes">
             <? if (ligne.lienNote && ligne.lienNote.startsWith('http')) { ?>
-            <a href="<?= ligne.lienNote ?>" target="_blank" style="color:var(--secondary)">Voir la note</a>
+            <a href="<?= ligne.lienNote ?>" target="_blank" class="text-secondary">Voir la note</a>
             <? } else { ?>
             <?= ligne.note ?>
             <? } ?>
@@ -451,9 +411,9 @@
           <td class="text-right">
             <?= ligne.montantTexte ?>
             <? if (ligne.estOfferte) { ?>
-            <span style="color:var(--secondary)">(Offert)</span>
+            <span class="text-secondary">(Offert)</span>
             <? } else if (ligne.remiseMontantTexte) { ?>
-            <span style="color:var(--secondary)"> (-
+            <span class="text-secondary"> (-
               <?= ligne.remiseTexte ?>)
             </span>
             <? } ?>
