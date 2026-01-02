@@ -22,7 +22,13 @@ async function runHealthCheck() {
             const duration = Date.now() - start;
 
             if (res.status >= 400) {
-                report.push(`⚠️ ${app.name} : ERREUR ${res.status} (${duration}ms)`);
+                if (res.status === 403) {
+                    // 403 = Service en ligne mais accès restreint (Google Auth)
+                    // On considère cela comme "UP" pour le monitoring local
+                    // console.log(`[OK] ${app.name} (Protected/403)`);
+                } else {
+                    report.push(`⚠️ ${app.name} : ERREUR ${res.status} (${duration}ms)`);
+                }
             } else {
                 // Tout va bien, on ne spamme pas le rapport sauf si demandé
                 // console.log(`[OK] ${app.name} (${duration}ms)`);

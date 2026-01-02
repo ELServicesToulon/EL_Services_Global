@@ -37,7 +37,11 @@ function extractTeslaConfig() {
 async function runTeslaAudit() {
     const config = extractTeslaConfig();
     if (!config || !config.token || config.token.includes('TON_TOKEN')) {
-        return "⚠️ Config Tesla non trouvée ou placeholder détecté.";
+        // Mode Simulation si pas de config (éviter les logs d'erreur en démo)
+        const mockBat = 78;
+        const mockRange = 320;
+        const mockState = "online";
+        return `🔋 Tesla (Simu): ${mockBat}% (${mockState}) [Config non détectée]`;
     }
 
     // Endpoint Tessie

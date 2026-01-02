@@ -13,8 +13,91 @@ const path = require('path');
 // --- MODULES ---
 const ArchiveKeeper = require('./Agents_Modules/Archive_Keeper');
 const NetworkOverseer = require('./Agents_Modules/Network_Overseer');
-// const GhostShopper = require('./Agents_Modules/Ghost_Shopper'); // ❌ DÉSACTIVÉ : Migré sur VPS Dédié (Worker)
-const GhostShopper = null;
+const AgentConnector = require('./Agents_Modules/Agent_Connector');
+
+// --- CONFIGURATION WORKER ---
+// Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
+// Simulation locale : on peut mettre 'localhost' si un serveur SSH tourne, 
+// ou laisser vide pour simuler le fallback ou le dispatch mock.
+const WORKER_IP = process.env.WORKER_IP || null; // ex: '87.106.1.4'
+
+// Simulation GhostShopper (Activé via Dispatch)
+const GhostShopper = { name: 'GHOST_SHOPPER' };
+
+// ... (Rest of imports)
+
+// ... (Inside main function)
+
+// --- 4. GHOST SHOPPER / CLIENT EXPERT (Mode Distribué) ---
+if (GhostShopper) {
+    console.log('👻 Ghost Shopper : Armé (Mode Distribué).');
+
+    const runDistributedGhostShopper = async () => {
+        console.log('👻 Ghost Shopper : Tentative de lancement...');
+
+        try {
+            let report = null;
+
+            if (WORKER_IP) {
+                // MODE REMOTE (SSH)
+                await remoteLog('ORCHESTRATOR', `Dispatching GhostShopper to Worker ${WORKER_IP}...`);
+
+                // Configurer le connecteur (Credentials à sécuriser en prod via .env)
+                AgentConnector.configure(WORKER_IP, 'root', process.env.WORKER_PASS || 'password');
+
+                // Exécuter le launcher sur le worker
+                const output = await AgentConnector.executeCommand('node /root/sentinel/Worker_Launcher.js GHOST_SHOPPER');
+                console.log('👻 [REMOTE] Output:', output);
+
+                // Parser le résultat (on cherche la ligne RAPPORT_JSON)
+                const match = output.match(/RAPPORT_JSON: ({.*})/);
+                if (match) {
+                    report = JSON.parse(match[1]);
+                } else {
+                    throw new Error("Worker output malformed (No JSON report found)");
+                }
+
+            } else {
+                // MODE LOCAL / SIMULATION (Fallback)
+                console.log('👻 [LOCAL] Pas de Worker IP. Lancement local (Simulation)...');
+                // On appelle le Launcher localement via child_process pour simuler l'isolation
+                const { exec } = require('child_process');
+                const localCmd = `node ${path.join(__dirname, 'Worker_Launcher.js')} GHOST_SHOPPER`;
+
+                const stdout = await new Promise((resolve, reject) => {
+                    exec(localCmd, (error, stdout, stderr) => {
+                        if (error) reject(error);
+                        else resolve(stdout);
+                    });
+                });
+
+                console.log('👻 [LOCAL] Output:', stdout.trim());
+                const match = stdout.match(/RAPPORT_JSON: ({.*})/);
+                if (match) report = JSON.parse(match[1]);
+                else report = { success: false, error: "Local Exec output malformed" };
+            }
+
+            // Traitement du Rapport (Commun Local/Remote)
+            if (report) {
+                if (report.success) {
+                    await remoteLog('GHOST_SHOPPER', `Succès Distribué. Etapes: ${report.steps.join(', ')}`);
+                } else {
+                    await remoteLog('GHOST_SHOPPER', `Echec Distribué: ${report.error}`);
+                }
+            }
+
+        } catch (e) {
+            console.error('👻 CRASH DISPATCH :', e.message);
+            await remoteLog('GHOST_SHOPPER', `CRASH DISPATCH: ${e.message}`);
+        }
+    };
+
+    // Lancement différé initial
+    setTimeout(runDistributedGhostShopper, 5000);
+
+    // Puis périodique
+    setInterval(runDistributedGhostShopper, 14400000); // 4h
+}
 const TeslaMonitor = require('./Agents_Modules/Tesla_Monitor');
 const AgentMarketing = require('./Agents_Modules/Agent_Marketing');
 
@@ -162,47 +245,7 @@ async function main() {
         }, 300000);
     }
 
-    // --- 4. GHOST SHOPPER / CLIENT EXPERT (Différé + 4h) ---
-    if (GhostShopper) {
-        console.log('👻 Ghost Shopper : Armé et prêt.');
-
-        // Lancement différé (5s) après boot
-        setTimeout(async () => {
-            console.log('👻 Ghost Shopper : Lancement de l\'infiltration...');
-            try {
-                const report = await GhostShopper.runGhostShopperCycle();
-
-                // Rapport Anomalies (partie Expert)
-                if (report.issues && report.issues.length > 0) {
-                    const issueMsg = `⚠️ ${report.issues.length} ANOMALIES:\n` + report.issues.map(i => `   - ${i}`).join('\n');
-                    await remoteLog('CLIENT_EXPERT', issueMsg);
-                }
-
-                // Rapport Global
-                if (!report.success) {
-                    console.error('👻 ECHEC :', report.error);
-                    await remoteLog('GHOST_SHOPPER', `ERREUR CRITIQUE: ${report.error}`);
-                } else {
-                    console.log('👻 SUCCES :', report.steps.join(' -> '));
-                    if (report.screenshotPath) console.log(`📸 Preuve capturée : ${report.screenshotPath}`);
-                    await remoteLog('GHOST_SHOPPER', `Parcours OK. ${report.steps.length} étapes validées.`);
-                }
-            } catch (e) {
-                console.error('👻 CRASH :', e.message);
-                await remoteLog('GHOST_SHOPPER', `CRASH EXECUTION: ${e.message}`);
-            }
-        }, 5000);
-
-        // Puis toutes les 4h
-        setInterval(async () => {
-            const report = await GhostShopper.runGhostShopperCycle();
-            if (report.issues && report.issues.length > 0) {
-                await remoteLog('CLIENT_EXPERT', `⚠️ ${report.issues.length} ANOMALIES AUTOMATISÉES.`);
-            }
-            if (!report.success) await remoteLog('GHOST_SHOPPER', `ERREUR: ${report.error}`);
-            else await remoteLog('GHOST_SHOPPER', `Parcours OK.`);
-        }, 14400000);
-    }
+    // (Ancien bloc GhostShopper remplacé par la version distribuée ci-dessus)
 
     // --- 5. MARKETING (Initial + 1h) ---
     if (AgentMarketing) {
