@@ -1117,6 +1117,7 @@ function genererFactures() {
             note: ligneData[indicesFacturation['Note Interne']] || '',
             lienNote: ligneData[indicesFacturation['Lien Note']] || null,
             montantTexte: montantFormate,
+            montantAvantRemiseTexte: formatMontantEuro(montantAvantRemise),
             remiseTexte: libelleRemise,
             remiseMontantTexte: remiseMontantFormatee,
             estOfferte: tourneeOfferte && montantLigne === 0
@@ -1242,14 +1243,17 @@ function genererFactures() {
               let valeurMontant = ligne.montantTexte ? `${ligne.montantTexte} ${symboleEuro}` : '';
 
               if (ligne.remiseMontantTexte) {
-                // Simplification demandée : "- 5,00 €" en rouge sur une nouvelle ligne
+                // Modif: Afficher le montant AVANT remise en premier (ex: "41,00 €" aulieu de "36,00 €")
+                // Le montantAvantRemiseTexte a été ajouté dans l'objet ligne
+                const baseAmount = ligne.montantAvantRemiseTexte ? `${ligne.montantAvantRemiseTexte} ${symboleEuro}` : valeurMontant;
+
                 const discountText = `\n- ${ligne.remiseMontantTexte}`;
-                const fullText = valeurMontant + discountText;
+                const fullText = baseAmount + discountText;
                 cell.setText(fullText);
 
                 // Appliquer la couleur ROUGE uniquement sur la partie remise
                 const textObj = cell.editAsText();
-                const startOffset = valeurMontant.length;
+                const startOffset = baseAmount.length;
                 const endOffset = fullText.length - 1;
                 if (endOffset >= startOffset) {
                   textObj.setForegroundColor(startOffset, endOffset, '#CC0000');
