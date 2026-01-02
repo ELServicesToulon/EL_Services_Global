@@ -423,13 +423,43 @@
         </tr>
       </thead>
       <tbody>
+        <? for (var i = 0; i < lignesBordereau.length; i++) { 
+             var ligne = lignesBordereau[i];
+        ?>
         <tr>
-          <td>01/09/25</td>
-          <td>10h00</td>
-          <td>Tourn&eacute;e pharmacie &ndash; 3 arr&ecirc;ts</td>
-          <td class="notes">Exemple de note</td>
-          <td class="text-right">36,00 &euro;</td>
+          <td>
+            <?= ligne.date ?>
+          </td>
+          <td>
+            <?= ligne.heure ?>
+          </td>
+          <td>
+            <?= ligne.details ?>
+            <? if (ligne.remiseMontantTexte) { ?>
+            <br><small style="color:var(--secondary)">Remise:
+              <?= ligne.remiseMontantTexte ?>
+            </small>
+            <? } ?>
+          </td>
+          <td class="notes">
+            <? if (ligne.lienNote && ligne.lienNote.startsWith('http')) { ?>
+            <a href="<?= ligne.lienNote ?>" target="_blank" style="color:var(--secondary)">Voir la note</a>
+            <? } else { ?>
+            <?= ligne.note ?>
+            <? } ?>
+          </td>
+          <td class="text-right">
+            <?= ligne.montantTexte ?>
+            <? if (ligne.estOfferte) { ?>
+            <span style="color:var(--secondary)">(Offert)</span>
+            <? } else if (ligne.remiseMontantTexte) { ?>
+            <span style="color:var(--secondary)"> (-
+              <?= ligne.remiseTexte ?>)
+            </span>
+            <? } ?>
+          </td>
         </tr>
+        <? } ?>
       </tbody>
     </table>
   </div>
