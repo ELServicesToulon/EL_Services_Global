@@ -1,0 +1,25 @@
+[Unit]
+Description=Antigravity Sentinel Service
+Documentation=file:///home/ubuntu/Documents/EL_Services_Global/Agents_Backend/INFRASTRUCTURE.md
+After=network.target
+
+[Service]
+# Exécuter en tant que root pour avoir accès à 'ufw status' et autres commandes système
+User=root
+Group=root
+
+# Répertoire de l'agent
+WorkingDirectory=/home/ubuntu/Documents/EL_Services_Global/Agents_Backend
+
+# Commande de lancement
+ExecStart=/usr/bin/node Sentinel_Node.js
+
+# Redémarrage périodique pour simuler un monitoring continu (toutes les 5 minutes après la fin de l'exécution)
+Restart=always
+RestartSec=300
+
+# Variables d'environnement
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
