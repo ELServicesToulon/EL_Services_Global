@@ -23,20 +23,20 @@ function logActivity(idReservation, emailClient, description, montant, statut) {
     // getSecret et SHEET_LOGS doivent être accessibles globalement.
     var spreadsheetId = getSecret('ID_FEUILLE_CALCUL');
     var ss = SpreadsheetApp.openById(spreadsheetId);
-    
+
     var sheetName = (typeof SHEET_LOGS !== 'undefined') ? SHEET_LOGS : 'Logs';
     var sheet = ss.getSheetByName(sheetName);
-    
+
     // Si la feuille n'existe pas, on tente de la créer
     if (!sheet) {
       sheet = ss.insertSheet(sheetName);
       // En-tête par défaut
       sheet.appendRow(['Timestamp', 'ID Réservation', 'Email Client', 'Description', 'Montant', 'Statut']);
     }
-    
+
     var timestamp = new Date();
     sheet.appendRow([timestamp, idReservation, emailClient, description, montant, statut]);
-    
+
   } catch (e) {
     // Fallback console en cas d'erreur critique de logging (ex: quota, permissions)
     console.error("Erreur critique dans logActivity : " + e.toString());
@@ -54,4 +54,15 @@ function logTechnicalError(context, error) {
   var stack = (error && error.stack) ? error.stack : '';
   console.error("Erreur [" + context + "]: " + msg);
   Logger.log("Erreur [" + context + "]: " + msg + "\nStack: " + stack);
+}
+
+/**
+ * Journalise une action spécifique de l'administrateur.
+ * Alias spécialisé de logActivity.
+ * @param {string} action - L'action effectuée (ex: "Génération Factures").
+ * @param {string} details - Détails de l'action.
+ */
+function logAdminAction(action, details) {
+  var userEmail = Session.getActiveUser().getEmail();
+  logActivity("ADMIN", userEmail || "Admin", action, 0, details);
 }

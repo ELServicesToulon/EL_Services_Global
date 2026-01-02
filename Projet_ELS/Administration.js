@@ -1078,9 +1078,13 @@ function genererFactures() {
 
           if (tourneeOfferte) {
             libelleRemise = 'Offerte';
-            montantRemiseValeur = montantAvantRemise; // tout le montant est offert
+            // Use declared value if present, otherwise assume line amount (which strictly is 0, so flawed if no value provided)
+            montantRemiseValeur = (valeurRemise > 0) ? valeurRemise : montantAvantRemise;
+            if (valeurRemise > 0) {
+              montantAvantRemise = montantLigne + valeurRemise;
+            }
             nbRemisesOffertes += 1;
-            totalRemisesOffertes += montantAvantRemise;
+            totalRemisesOffertes += montantRemiseValeur;
           } else if (typeRemise === 'Pourcentage' && valeurRemise > 0) {
             libelleRemise = `-${valeurRemise}%`;
             if (valeurRemise < 100) {
@@ -1159,9 +1163,7 @@ function genererFactures() {
         const totalAvantRemisesTexte = formatMontantEuro(totalAvantRemises);
         corps.replaceText('{{total_remises}}', totalRemisesTexte);
         corps.replaceText('{{total_avant_remises}}', totalAvantRemisesTexte);
-        const totalRemisesOffertesTexte = totalRemisesOffertes > 0
-          ? `${formatMontantEuro(totalRemisesOffertes)} ${symboleEuro} (${nbRemisesOffertes} offerte${nbRemisesOffertes > 1 ? 's' : ''})`
-          : `0,00 ${symboleEuro} (${nbRemisesOffertes} offerte${nbRemisesOffertes > 1 ? 's' : ''})`;
+        const totalRemisesOffertesTexte = formatMontantEuro(totalRemises);
         corps.replaceText('{{total_remises_offertes}}', totalRemisesOffertesTexte);
         corps.replaceText('{{nombre_courses}}', String(lignesBordereau.length));
 
