@@ -1238,14 +1238,28 @@ function genererFactures() {
             }
 
             if (colonnesBordereau.montant !== undefined) {
+              const cell = nouvelleLigne.getCell(colonnesBordereau.montant);
               let valeurMontant = ligne.montantTexte ? `${ligne.montantTexte} ${symboleEuro}` : '';
+
               if (ligne.remiseMontantTexte) {
-                const etiquette = ligne.remiseTexte ? `Remise ${ligne.remiseTexte}` : 'Remise';
-                valeurMontant = `${valeurMontant} (${etiquette} : ${ligne.remiseMontantTexte})`;
-              } else if (ligne.estOfferte) {
-                valeurMontant = valeurMontant ? `${valeurMontant} (Offert)` : 'Offert';
+                // Simplification demandée : "- 5,00 €" en rouge sur une nouvelle ligne
+                const discountText = `\n- ${ligne.remiseMontantTexte}`;
+                const fullText = valeurMontant + discountText;
+                cell.setText(fullText);
+
+                // Appliquer la couleur ROUGE uniquement sur la partie remise
+                const textObj = cell.editAsText();
+                const startOffset = valeurMontant.length;
+                const endOffset = fullText.length - 1;
+                if (endOffset >= startOffset) {
+                  textObj.setForegroundColor(startOffset, endOffset, '#CC0000');
+                }
+              } else {
+                if (ligne.estOfferte) {
+                  valeurMontant = valeurMontant ? `${valeurMontant} (Offert)` : 'Offert';
+                }
+                cell.setText(valeurMontant.trim());
               }
-              nouvelleLigne.getCell(colonnesBordereau.montant).setText(valeurMontant.trim());
             }
           });
         } else {
