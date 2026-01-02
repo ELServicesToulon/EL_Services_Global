@@ -1,14 +1,14 @@
 const { Client } = require('ssh2');
 
 const config = {
-    host: '87.106.1.4',
+    host: '37.59.124.82',
     port: 22,
-    username: 'root',
-    password: 'kTU7RJS5'
+    username: 'ubuntu',
+    password: 'CHANGE_ME'
 };
 
 const conn = new Client();
-const REMOTE_DIR = '/root/sentinel';
+const REMOTE_DIR = '/home/ubuntu/sentinel';
 
 conn.on('ready', () => {
     console.log('SSH :: Ready');

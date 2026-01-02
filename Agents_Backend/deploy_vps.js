@@ -3,15 +3,15 @@ const fs = require('fs');
 const path = require('path');
 
 const config = {
-    host: '87.106.1.4',
+    host: '37.59.124.82', // Nouvelle IP
     port: 22,
-    username: 'root',
-    password: 'kTU7RJS5' // Initial password
+    username: 'ubuntu', // Nouvel utilisateur par défaut
+    password: 'CHANGE_ME' // TODO: Remplacer par le mot de passe reçu par mail
 };
 
 const conn = new Client();
 
-const REMOTE_DIR = '/root/sentinel';
+const REMOTE_DIR = '/home/ubuntu/sentinel';
 
 // Helper to iterate recursively through local directories
 function getAllFiles(dirPath, arrayOfFiles) {
@@ -36,10 +36,10 @@ conn.on('ready', () => {
 
     // Commands to setup environment
     const setupCommands = [
-        'apt-get update',
-        'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -',
-        'apt-get install -y nodejs',
-        'npm install pm2 -g',
+        'sudo apt-get update',
+        'curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -',
+        'sudo apt-get install -y nodejs',
+        'sudo npm install pm2 -g',
         `mkdir -p ${REMOTE_DIR}`,
         `mkdir -p ${REMOTE_DIR}/Agents_Modules`,
         `mkdir -p ${REMOTE_DIR}/keys`
