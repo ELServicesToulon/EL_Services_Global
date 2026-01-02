@@ -33,12 +33,14 @@ async function runHealthCheck() {
             if (res.status >= 400) {
                 if (res.status === 403 && target.type === 'gas') {
                     // 403 = Service en ligne mais accès restreint (Google Auth)
-                    // On considère cela comme "UP" pour le monitoring local
                 } else {
                     report.push(`⚠️ ${target.name} : ERREUR ${res.status} (${duration}ms)`);
                 }
             } else {
-                // Tout va bien
+                // Check Security (HTTP vs HTTPS) for web targets
+                if (target.type === 'web' && url.startsWith('http:')) {
+                    report.push(`🔓 ${target.name} : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)`);
+                }
             }
         } catch (error) {
             report.push(`🔥 ${target.name} : DOWN (Timeout/Error: ${error.message})`);
