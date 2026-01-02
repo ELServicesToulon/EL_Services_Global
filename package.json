@@ -15,7 +15,7 @@
   "author": "EL Services",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@google/clasp": "^2.4.2",
+    "@google/clasp": "^2.5.0",
     "@playwright/test": "^1.40.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.11",
