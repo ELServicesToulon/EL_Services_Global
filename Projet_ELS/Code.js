@@ -342,6 +342,12 @@ function legacyDoPost(e) {
             return respondJson_(receiveSecurityReport(payload));
           }
           return respondJson_({ status: 'error', message: 'receiveSecurityReport function not found.' });
+        case 'nouvelleReservation':
+          // Integration Mediconvoi Vitrine
+          if (typeof reserverPanier === 'function') {
+            return respondJson_(reserverPanier(payload));
+          }
+          return respondJson_({ status: 'error', message: 'reserverPanier function not found.' });
         default:
           return respondJson_({ status: 'error', message: 'Unknown action specified.' });
       }

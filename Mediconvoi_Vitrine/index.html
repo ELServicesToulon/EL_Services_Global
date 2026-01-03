@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Réservez votre transport médical en 3 clics. Ambulance, VSL, Taxi conventionné. Service rapide et agréé.">
+    <meta name="theme-color" content="#0ea5e9">
+    <title>Mediconvoi - Transport Médical Simplifié</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Additional inline styles for specific icons/layouts */
+        .transport-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .transport-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .transport-card:hover {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+
+        .transport-card.selected {
+            border-color: var(--primary);
+            background: #e0f2fe;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .transport-icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .transport-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <span style="font-size: 1.8rem;">🚑</span> Mediconvoi<span style="color:var(--dark)">.fr</span>
+                </div>
+                <a href="tel:0123456789" class="btn btn-primary">📞 Appeler le régulateur</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div class="container">
+            <h1>Votre Santé,<br>Notre Priorité Logistique</h1>
+            <p>Réservez votre VSL, Ambulance ou TPMR en quelques secondes. <br>Nous gérons l'administratif pour vous.
+            </p>
+
+            <div class="trust-badges">
+                <div class="trust-item">✅ Conventionné CPAM</div>
+                <div class="trust-item">⚡ Réponse immédiate</div>
+                <div class="trust-item">🛡️ 100% Sécurisé</div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <div class="booking-section">
+            <div class="booking-card" id="reservation">
+                <div class="booking-header">
+                    <h2>📅 Réservation Express</h2>
+                    <p>Trouvez un véhicule adapté en moins de 2 minutes.</p>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+
+                <form id="reservationForm">
+                    <input type="hidden" id="transportType" name="transportType" value="vsl">
+
+                    <!-- Step 1: Type -->
+                    <div class="step-content active" data-step="1">
+                        <h3 style="margin-bottom: 1rem;">Quel type de transport ?</h3>
+                        <div class="transport-grid">
+                            <div class="transport-card selected" data-value="vsl">
+                                <span class="transport-icon">🚕</span>
+                                <span class="transport-name">VSL / Taxi</span>
+                            </div>
+                            <div class="transport-card" data-value="ambulance">
+                                <span class="transport-icon">🚑</span>
+                                <span class="transport-name">Ambulance</span>
+                            </div>
+                            <div class="transport-card" data-value="tpmr">
+                                <span class="transport-icon">♿</span>
+                                <span class="transport-name">TPMR</span>
+                            </div>
+                        </div>
+                        <div class="action-row" style="justify-content: flex-end;">
+                            <button type="button" class="btn btn-primary btn-next">Suivant ➜</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Trajet -->
+                    <div class="step-content" data-step="2">
+                        <h3 style="margin-bottom: 1rem;">Votre Trajet</h3>
+                        <div class="form-group">
+                            <label class="form-label">D'où partez-vous ?</label>
+                            <input type="text" class="form-input" placeholder="Ex: 12 Rue de la Paix, Paris" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Où allez-vous ?</label>
+                            <input type="text" class="form-input" placeholder="Ex: Hôpital Necker..." required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Quand ?</label>
+                            <input type="datetime-local" class="form-input" required>
+                        </div>
+                        <div class="action-row">
+                            <button type="button" class="btn btn-secondary btn-prev"
+                                style="background:#e2e8f0; color:#333;">⬅ Retour</button>
+                            <button type="button" class="btn btn-primary btn-next">Suivant ➜</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Contact -->
+                    <div class="step-content" data-step="3">
+                        <h3 style="margin-bottom: 1rem;">Finalisation</h3>
+                        <div class="form-group">
+                            <label class="form-label">Votre Nom</label>
+                            <input type="text" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Votre Email (pour la confirmation)</label>
+                            <input type="email" class="form-input" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Votre Téléphone</label>
+                            <input type="tel" class="form-input" placeholder="06..." required>
+                        </div>
+                        <div class="action-row">
+                            <button type="button" class="btn btn-secondary btn-prev"
+                                style="background:#e2e8f0; color:#333;">⬅ Retour</button>
+                            <button type="submit" class="btn btn-accent" style="width: 100%;">Valider la
+                                réservation</button>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #94a3b8; text-align: center; margin-top: 1rem;">
+                            🔒 Vos données sont confidentielles.
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h3>Rapidité</h3>
+                    <p>Nous trouvons le véhicule le plus proche de chez vous en quelques minutes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Administratif Simplifié</h3>
+                    <p>Zéro papier, nous traitons directement avec les caisses d'assurance maladie.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Accompagnement</h3>
+                    <p>Nos chauffeurs sont formés pour vous accompagner de porte à porte.</p>
+                </div>
+            </div>
+        </div>
+        <div class="faq-section" style="margin-top: 6rem; padding-top: 4rem; border-top: 1px solid #e2e8f0;">
+            <div class="booking-header">
+                <h2>Questions Fréquentes</h2>
+                <p>Tout ce que vous devez savoir avant de réserver.</p>
+            </div>
+
+            <div style="max-width: 800px; margin: 0 auto; display: grid; gap: 1.5rem;">
+                <details
+                    style="background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; cursor: pointer;">
+                    <summary style="font-weight: 600; color: var(--dark);">Est-ce que le transport est remboursé ?
+                    </summary>
+                    <p style="color: #64748b; margin-top: 0.5rem;">Oui, si vous disposez d'une prescription médicale de
+                        transport (bon de transport) datée d'avant le trajet. Nous sommes conventionnés CPAM.</p>
+                </details>
+
+                <details
+                    style="background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; cursor: pointer;">
+                    <summary style="font-weight: 600; color: var(--dark);">Quelle différence entre VSL et taxi
+                        conventionné ?</summary>
+                    <p style="color: #64748b; margin-top: 0.5rem;">Aucune différence pour vous en termes de
+                        remboursement. Le VSL est une voiture blanche avec la croix bleue, le taxi est un véhicule
+                        classique agréé.</p>
+                </details>
+
+                <details
+                    style="background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; cursor: pointer;">
+                    <summary style="font-weight: 600; color: var(--dark);">Puis-je être accompagné ?</summary>
+                    <p style="color: #64748b; margin-top: 0.5rem;">Un accompagnant est autorisé si son besoin est
+                        précisé sur la prescription médicale ou si le patient est mineur/nécessite une assistance.</p>
+                </details>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Mediconvoi. Tous droits réservés.</p>
+            <p><strong>Siège Social :</strong> 80 Avenue du Général de Gaulle, 83160 La Valette-du-Var</p>
+            <p><strong>Contact :</strong> <a href="mailto:mediconvoi@gmail.com"
+                    style="color: inherit;">mediconvoi@gmail.com</a></p>
+            <p style="margin-top: 1rem; font-size: 0.8rem; opacity: 0.7;">Transport sanitaire agréé ARS & Conventionné
+                CPAM</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

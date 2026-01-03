@@ -8,7 +8,7 @@ const axios = require('axios');
 const MONITORING_TARGETS = [
     { name: 'Portail Client', type: 'gas', id: 'AKfycbyWUC3njn-hIU1pdgElOQX9FlXUclS3YC-Nat4Ujlw' },
     { name: 'App Livreur', type: 'gas', id: 'AKfycbyC1PWyq5xnYa3HaLtuRtahsnjpkiTryQxqy5jgYHrR6pDwLgAlkM3ecxjSAAgEOYWKGg' },
-    { name: 'Medcargo', type: 'web', url: 'https://medcargo.fr' },
+    { name: 'Mediconvoi Vitrine', type: 'web', url: 'https://mediconvoi.fr' },
     { name: 'Mediconvoi Core', type: 'web', url: 'http://vps-7848861f.vps.ovh.net' },
     { name: 'Mediconvoi Sentinelle', type: 'web', url: 'http://87.106.1.4' }
 ];

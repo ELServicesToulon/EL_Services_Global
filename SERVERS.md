@@ -2,9 +2,9 @@
 
 Document source: [Google Doc](https://docs.google.com/document/d/1iFMe257KEFPOeb4s0pZnNuZHENJvA5JqPCdUHZW50-k/edit)
 
-## 1. O2switch (Medcargo)
-- **Nom**: Medcargo
-- **Domaine**: [medcargo.fr](https://medcargo.fr)
+## 1. O2switch (Mediconvoi Vitrine)
+- **Nom**: Mediconvoi
+- **Domaine**: [mediconvoi.fr](https://mediconvoi.fr)
 - **Type**: Offre Unique Cloud
 - **Compte**: yuda1395
 - **Expiration**: 31/12/2026
