@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/yuda1395/public_html/
+    - /bin/cp -R ELS_Livreur_App/dist/* $DEPLOYPATH
