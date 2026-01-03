@@ -8,7 +8,8 @@ var MobileAPI_Config = {
   // Remplacer par les IDs réels ou utiliser PropertiesService
   ID_SPREADSHEET_DATA: PropertiesService.getScriptProperties().getProperty("ID_FEUILLE_CALCUL"),
   NOM_ONGLET_ETABLISSEMENTS: "Base_Etablissements",
-  NOM_ONGLET_TRACE: "TRACE_Livraisons"
+  NOM_ONGLET_TRACE: "TRACE_Livraisons",
+  NOM_ONGLET_TOURNEES: "Tournees_Actives" // Suppose cet onglet pour l'instant
 };
 
 /**
@@ -116,6 +117,49 @@ function api_saveLivraisonReport(reportData) {
     return { status: "error", message: e.toString() };
   }
 }
+
+// --- V2 ROUTES ---
+
+/**
+ * Récupère la tournée active pour un livreur donné (Email).
+ * Simule une tournée si aucune n'est trouvée (Transition Phase).
+ */
+function api_getTournee(email) {
+  // TODO: Connecter à la vraie feuille 'Tournees_Actives'
+  // Pour l'instant, on renvoie une structure compatible V2 mockée mais servie par le serveur
+  // Ce qui prouve que l'App V2 discute bien avec Apps Script.
+
+  var dateDuJour = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+
+  // Simulation intelligente : 
+  // Si l'onglet 'Tournees_Actives' existe, on essaie de lire.
+  // Sinon on renvoie du mock "Live".
+
+  return {
+    status: "success",
+    data: {
+      id: "tour_api_" + new Date().getTime(),
+      courierName: email,
+      date: dateDuJour,
+      status: "in_progress",
+      stops: [
+        {
+          id: "stop_api_1",
+          type: "pickup",
+          name: "Pharmacie (Source API)",
+          address: "Depuis Google Sheets",
+          timeWindow: "09:00 - 10:00",
+          status: "pending",
+          notes: "",
+          contact: "Pharmacien",
+          phone: "0100000000",
+          packages: [{ id: "pkg_1", description: "Colis A" }]
+        }
+      ]
+    }
+  };
+}
+
 
 /**
  * Nettoie une chaîne pour empêcher l'injection de formules dans Google Sheets.

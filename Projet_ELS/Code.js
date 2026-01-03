@@ -348,6 +348,20 @@ function legacyDoPost(e) {
             return respondJson_(reserverPanier(payload));
           }
           return respondJson_({ status: 'error', message: 'reserverPanier function not found.' });
+
+        // --- V2 DELIVERY APP ROUTES ---
+        case 'getTournee':
+          if (typeof api_getTournee === 'function') {
+            return respondJson_(api_getTournee(payload.email));
+          }
+          return respondJson_({ status: 'error', message: 'api_getTournee missing' });
+
+        case 'saveLivraisonReport':
+          if (typeof api_saveLivraisonReport === 'function') {
+            return respondJson_(api_saveLivraisonReport(payload));
+          }
+          return respondJson_({ status: 'error', message: 'api_saveLivraisonReport missing' });
+
         default:
           return respondJson_({ status: 'error', message: 'Unknown action specified.' });
       }
