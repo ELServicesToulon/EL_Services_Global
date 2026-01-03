@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTour } from '../hooks/useTour';
+import { sendReport } from '../lib/api';
 import { Share2, Printer, CheckCircle, XCircle, Clock, MapPin, ArrowLeft } from 'lucide-react';
 
 export default function DeliveryReport() {
@@ -8,6 +9,17 @@ export default function DeliveryReport() {
     const navigate = useNavigate();
     const { tour, loading } = useTour();
     const reportRef = useRef();
+
+    // Auto-sync link to backend
+    useEffect(() => {
+        if (tour && tour.id === tourId) {
+            sendReport({
+                reservationId: tour.id,
+                reportLink: window.location.href,
+                statut: 'SYNC_LINK_ONLY'
+            }).catch(err => console.error("Failed to sync link", err));
+        }
+    }, [tour, tourId]);
 
     // In real app, fetch by tourId. Here we check if loaded tour matches.
     if (loading) return <div className="p-10 text-center">Chargement...</div>;
@@ -22,7 +34,7 @@ export default function DeliveryReport() {
     const handleCopyLink = () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url);
-        alert("Lien copié ! Vous pouvez l'ajouter au bordereau de facturation.");
+        alert("Lien copié ! Il a également été transmis au bordereau de facturation.");
     };
 
     const handlePrint = () => {
