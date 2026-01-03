@@ -20,3 +20,5 @@ node_modules/
 # --- PROJECT SPECIFIC ---
 # Configuration.js contient des secrets mais est nécessaire au fonctionnement.
 # TODO: Passer les secrets de Configuration.js dans des variables d'environnement ou ScriptProperties.
+credentials.json
+.cloudflare_env
