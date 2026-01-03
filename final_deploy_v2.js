@@ -5,7 +5,7 @@ const fs = require('fs');
 // Configuration
 const CONFIG = {
     host: "ftp.yuda1395.odns.fr",
-    user: "antigravity@yuda1395.odns.fr",
+    user: "antigravity@mediconvoi.fr",
     password: "1970-Manolo-145",
     secure: false,
     localDist: path.join(__dirname, 'V2_App', 'dist')
@@ -31,16 +31,8 @@ async function run() {
         // Afficher quelques fichiers clés
         list.slice(0, 10).forEach(f => console.log(`- ${f.name}`));
 
-        const hasWP = list.some(f => f.name.includes('wp-content') || f.name.includes('wp-config'));
-        const hasV2 = list.some(f => f.name === 'index.html' && f.size < 2000); // Simple heuristic
-
-        if (hasWP) {
-            console.log("🎯 CIBLE CONFIRMÉE : Fichiers WordPress détectés. On est au bon endroit !");
-        } else if (hasV2) {
-            console.log("ℹ️ Dossier contient déjà potentiellement une app JS/Vite.");
-        } else {
-            console.log("⚠️ Dossier vide ou inconnu. On installe quand même ? OUI.");
-        }
+        // Si le dossier est presque vide (juste .well-known, cgi-bin), c'est bon.
+        console.log("ℹ️ Dossier cible identifié. Prêt pour le déploiement.");
 
         // 2. BACKUP (Move all current content to a backup folder)
         console.log("\n🧹 Début du RESET (Backup & Nettoyage)...");
