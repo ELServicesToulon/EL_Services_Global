@@ -11,9 +11,7 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-20 items-center">
                         <div className="flex items-center space-x-2">
-                            <div className="bg-blue-600 p-2 rounded-lg">
-                                <Truck className="h-6 w-6 text-white" />
-                            </div>
+                            <img src="/logo.png" alt="Mediconvoi" className="h-10 w-auto" />
                             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-blue-500">
                                 Mediconvoi
                             </span>
@@ -196,7 +194,7 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-4 gap-8">
                     <div className="col-span-1 md:col-span-2">
                         <div className="flex items-center space-x-2 mb-4">
-                            <Truck className="h-6 w-6 text-blue-500" />
+                            <img src="/logo.png" alt="Mediconvoi" className="h-8 w-auto" />
                             <span className="text-xl font-bold text-white">Mediconvoi</span>
                         </div>
                         <p className="max-w-xs text-sm">
