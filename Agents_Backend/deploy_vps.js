@@ -3,10 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 const config = {
-    host: '37.59.124.82', // Nouvelle IP
+    host: '37.59.124.82', // IP VPS OVH
     port: 22,
-    username: 'ubuntu', // Nouvel utilisateur par défaut
-    password: 'CHANGE_ME' // TODO: Remplacer par le mot de passe reçu par mail
+    username: 'ubuntu', // Utilisateur par défaut OVH Cloud
+    password: '1970-Manolo-145' // Mot de passe fourni
 };
 
 const conn = new Client();
