@@ -50,7 +50,8 @@ export default function Login() {
             })
 
             if (error) {
-                setMessage({ type: 'error', text: error.message })
+                console.error("Supabase Error:", error);
+                setMessage({ type: 'error', text: error.message || "Une erreur est survenue." })
             } else {
                 setMessage({ type: 'success', text: 'Lien de connexion envoyé ! Vérifiez votre boîte mail.' })
             }
