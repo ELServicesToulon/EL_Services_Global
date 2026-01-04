@@ -56,3 +56,20 @@ export async function sendReport(reportData) {
         })
     });
 }
+
+export async function fetchSlots(date) {
+    // date: YYYY-MM-DD
+    const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            action: 'getSlots',
+            date: date
+        })
+    });
+    const data = await response.json();
+    if (data.status === 'success') {
+        return data.data; // List of { time, status, taken, inPast }
+    }
+    throw new Error(data.message || 'Error fetching slots');
+}

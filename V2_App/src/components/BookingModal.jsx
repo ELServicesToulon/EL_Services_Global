@@ -1,23 +1,72 @@
-import React, { useState } from 'react';
-import { X, Minus, Plus, MapPin, Clock, Euro } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Minus, Plus, MapPin, Clock, Euro, Loader, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { fetchSlots } from '../lib/api';
 
 export function BookingModal({ date, isOpen, onClose }) {
     const [stops, setStops] = useState(1);
     const [returnToPharmacy, setReturnToPharmacy] = useState(false);
     const [showSlots, setShowSlots] = useState(false);
 
-    // Hardcoded logic based on screenshots
+    // API State
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+    const [slotError, setSlotError] = useState(null);
+    const [selectedSlot, setSelectedSlot] = useState(null);
+
+    // Hardcoded logic based on screenshots (pricing)
     const basePrice = 15;
     const stopPrice = 5;
     const estimatedPrice = basePrice + (stops > 1 ? (stops - 1) * stopPrice : 0);
     const estimatedTime = 30 + (stops * 15) + (returnToPharmacy ? 20 : 0);
     const estimatedDist = 9 + (stops * 2) + (returnToPharmacy ? 9 : 0);
 
-    // Time slots
-    const slots = ["08:30", "08:45", "09:00", "09:15", "09:30", "09:45", "10:00"];
+    // Load slots when date changes or modal opens
+    useEffect(() => {
+        if (isOpen && date && showSlots) {
+            loadSlots();
+        }
+    }, [isOpen, date, showSlots]);
+
+    const loadSlots = async () => {
+        setIsLoadingSlots(true);
+        setSlotError(null);
+        try {
+            const dateStr = format(date, 'yyyy-MM-dd');
+            const data = await fetchSlots(dateStr);
+            console.log("Slots loaded:", data);
+            setAvailableSlots(data);
+        } catch (err) {
+            console.error(err);
+            setSlotError("Impossible de charger les créneaux.");
+        } finally {
+            setIsLoadingSlots(false);
+        }
+    };
+
+    const handleConfirm = () => {
+        if (!selectedSlot) return;
+        // Ici on pourrait déclencher l'action de réservation réelle via une prop onBook(slot, details)
+        alert(`Réservation confirmée pour ${selectedSlot} (${stops} arrêts)`);
+        onClose();
+    };
+
+    // Calculate slot style based on status
+    const getSlotStyle = (slot) => {
+        // slot: { time: "08:00", status: "open"|"closed", taken: bool, inPast: bool }
+        const isSelected = selectedSlot === slot.time;
+        const isDisabled = slot.status === 'closed' || slot.taken || slot.inPast;
+
+        if (isDisabled) {
+            return "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed";
+        }
+        if (isSelected) {
+            return "border-brand-purple bg-brand-purple text-white shadow-md transform scale-105";
+        }
+        return "border-gray-200 hover:border-brand-purple hover:bg-purple-50 text-brand-purple";
+    };
 
     if (!isOpen) return null;
 
@@ -118,17 +167,43 @@ export function BookingModal({ date, isOpen, onClose }) {
                                 </button>
                             ) : (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-                                    <h4 className="font-semibold text-gray-700">Créneaux disponibles</h4>
+                                    <h4 className="font-semibold text-gray-700 flex justify-between items-center">
+                                        Critères disponibles
+                                        {isLoadingSlots && <Loader className="animate-spin text-brand-purple" size={16} />}
+                                    </h4>
+
+                                    {slotError && (
+                                        <div className="text-red-500 text-sm bg-red-50 p-2 rounded">{slotError}</div>
+                                    )}
+
                                     <div className="grid grid-cols-3 gap-3">
-                                        {slots.map(time => (
+                                        {!isLoadingSlots && availableSlots.length === 0 && !slotError && (
+                                            <div className="col-span-3 text-center text-gray-400 text-sm py-4">Aucun créneau disponible ce jour.</div>
+                                        )}
+                                        {availableSlots.map((slot, i) => (
                                             <button
-                                                key={time}
-                                                className="py-2 px-4 rounded-full border border-gray-200 hover:border-brand-purple hover:bg-purple-50 text-brand-purple font-medium transition-all"
+                                                key={i}
+                                                disabled={slot.status === 'closed' || slot.taken || slot.inPast}
+                                                onClick={() => setSelectedSlot(slot.time)}
+                                                className={`py-2 px-2 rounded-lg border text-sm font-medium transition-all ${getSlotStyle(slot)}`}
                                             >
-                                                {time}
+                                                {slot.time}
                                             </button>
                                         ))}
                                     </div>
+
+                                    {/* Confirmation Button */}
+                                    {selectedSlot && (
+                                        <motion.button
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            onClick={handleConfirm}
+                                            className="w-full mt-4 py-4 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Check size={20} />
+                                            Confirmer pour {selectedSlot}
+                                        </motion.button>
+                                    )}
                                 </div>
                             )}
 

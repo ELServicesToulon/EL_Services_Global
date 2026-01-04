@@ -362,6 +362,12 @@ function legacyDoPost(e) {
           }
           return respondJson_({ status: 'error', message: 'api_saveLivraisonReport missing' });
 
+        case 'getSlots':
+          if (typeof api_getSlots === 'function') {
+            return respondJson_(api_getSlots(payload.date));
+          }
+          return respondJson_({ status: 'error', message: 'api_getSlots missing' });
+
         default:
           return respondJson_({ status: 'error', message: 'Unknown action specified.' });
       }

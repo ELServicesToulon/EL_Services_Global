@@ -851,3 +851,32 @@ function reservationIdExiste(idReservation) {
     return false;
   }
 }
+
+/**
+ * API Wrapper pour obtenir les créneaux disponibles.
+ * Appelé depuis le frontend V2.
+ * @param {string} dateString Date au format YYYY-MM-DD
+ * @returns {Object} Réponse standard API { status: 'success', slots: [...] }
+ */
+function api_getSlots(dateString) {
+  try {
+    if (!dateString) throw new Error("Date manquante");
+    
+    // On utilise la durée de base par défaut (30 min)
+    // TODO: Si le frontend envoie une durée spécifique (ex: panier complexe), l'utiliser.
+    const duree = typeof DUREE_BASE !== 'undefined' ? DUREE_BASE : 30;
+    
+    const slots = obtenirEtatCreneauxPourDate(dateString, duree);
+    
+    return {
+      status: 'success',
+      data: slots
+    };
+  } catch (e) {
+    Logger.log("api_getSlots Error: " + e.toString());
+    return {
+      status: 'error',
+      message: e.message
+    };
+  }
+}
