@@ -15,7 +15,9 @@ export default function PublicBooking() {
         isReturn: false,
         isSaturday: false,
         isUrgent: false,
-        residentMode: null // 'standard' | 'urgence'
+        residentMode: null, // 'standard' | 'urgence'
+        selectedDate: null,
+        selectedSlot: null
     })
 
     const [priceResult, setPriceResult] = useState(null)
@@ -237,12 +239,46 @@ export default function PublicBooking() {
                             <div className="pt-4 border-t border-gray-100">
                                 <h4 className="text-sm font-bold text-slate-700 mb-4">Choisir une date</h4>
                                 <CapsuleCalendar
-                                    onSelectDate={(date) => console.log('Selected date:', date)}
-                                    selectedDate={null}
+                                    onSelectDate={(date) => setConfig(c => ({ ...c, selectedDate: date }))}
+                                    selectedDate={config.selectedDate}
                                 />
                             </div>
 
-                            <button className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30 transform transition-all active:scale-[0.98]">
+                            {/* Slot Selection */}
+                            {config.selectedDate && (
+                                <div className="pt-4 border-t border-gray-100 animate-fade-in">
+                                    <h4 className="text-sm font-bold text-slate-700 mb-2">Choisir un créneau</h4>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {['Matin (08h - 12h)', 'Après-midi (13h - 17h)', 'Soir (18h - 20h)'].map((slot) => (
+                                            <div
+                                                key={slot}
+                                                onClick={() => setConfig(c => ({ ...c, selectedSlot: slot }))}
+                                                className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${config.selectedSlot === slot
+                                                    ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500'
+                                                    : 'bg-white border-gray-200 hover:border-blue-300'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center space-x-3">
+                                                    <Clock size={18} className={config.selectedSlot === slot ? 'text-blue-600' : 'text-gray-400'} />
+                                                    <span className={`text-sm font-medium ${config.selectedSlot === slot ? 'text-blue-900' : 'text-gray-600'}`}>{slot}</span>
+                                                </div>
+                                                {config.selectedSlot === slot && <Check size={18} className="text-blue-600" />}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => {
+                                    if (!config.selectedDate) return alert('Veuillez choisir une date')
+                                    if (!config.selectedSlot) return alert('Veuillez choisir un créneau')
+                                    // Simulation de validation
+                                    navigate('/login')
+                                }}
+                                disabled={!config.selectedDate || !config.selectedSlot}
+                                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30 transform transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
                                 Confirmer la réservation
                             </button>
                         </div>
