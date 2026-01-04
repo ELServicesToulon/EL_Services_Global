@@ -1,0 +1,71 @@
+<style>
+/* * Styles.html - Styles globaux pour Projet_ELS
+ * Inclut les correctifs pour la compatibilité avec les navigateurs tactiles (Tesla).
+ */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+h1, h2, h3 {
+    color: #004d40;
+}
+
+/* --- CORRECTION POUR COMPATIBILITÉ TACTILE / TESLA --- */
+
+/* Assurer une taille minimale des éléments interactifs pour une bonne zone de clic */
+button, 
+input[type="text"], 
+input[type="number"], 
+input[type="email"],
+input[type="password"],
+textarea, 
+select,
+.btn {
+    min-height: 44px !important; /* Force la hauteur minimale de la cible tactile (recommandé) */
+    padding: 10px 15px; /* Augmente le padding interne */
+    box-sizing: border-box;
+}
+
+/* Supprimer l'apparence native des menus déroulants qui buguent souvent sur les navigateurs exotiques */
+select {
+    -webkit-appearance: none; 
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23004d40' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    padding-right: 40px !important;
+}
+
+/* Règle pour l'input et textarea */
+input[type="text"], 
+input[type="number"], 
+input[type="email"],
+input[type="password"],
+textarea {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%; /* S'assurer qu'ils prennent toute la largeur disponible */
+    font-size: 16px; /* Empêche le zoom automatique sur iOS */
+}
+
+/* Autres styles existants (non modifiés, mais gardés pour la complétude) */
+.header {
+    background-color: #00796b;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>

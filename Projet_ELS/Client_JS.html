@@ -227,8 +227,12 @@
                     e.preventDefault();
                     const email = emailConnexionInput.value.trim();
                     if (email) {
+                        // Bypass OTP/Link : Direct Connection
                         const unlock = lockButton(formulaireConnexionClient.querySelector('button[type="submit"]'));
-                        demanderLienConnexion(email, unlock);
+                        // Simulate link params for compatibility
+                        linkEmail = email;
+                        // We can leave exp/sig empty as CLIENT_PORTAL_SIGNED_LINKS is false
+                        validerEtChargerClient(email, unlock);
                     }
                 });
             }
