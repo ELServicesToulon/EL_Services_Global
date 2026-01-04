@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Truck, Clock, ShieldCheck, MapPin, Phone, ChevronRight, UserCircle, Mail } from 'lucide-react'
+import { MobileWidget } from '../components/MobileWidget'
 
 export default function Landing() {
     const navigate = useNavigate()
@@ -68,6 +69,9 @@ export default function Landing() {
                                     Nous Contacter
                                 </button>
                             </div>
+
+                            {/* Mobile Quick Access Widget */}
+                            <MobileWidget />
 
                             <div className="flex items-center gap-6 pt-4 text-sm font-medium text-gray-500">
                                 <div className="flex items-center">
