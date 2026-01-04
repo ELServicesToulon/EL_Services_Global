@@ -4,3 +4,9 @@ livraison/**
 Resideur_Connector.gs
 OneShotCleaner.gs
 **/Sentinel_Node.js
+
+# Exclure le build PWA/Vite qui cause des erreurs de déploiement
+pwa/**
+temp_check/**
+tests/**
+examples/**
