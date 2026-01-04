@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Truck, Clock, ShieldCheck, MapPin, Phone, ChevronRight, UserCircle } from 'lucide-react'
+import { Truck, Clock, ShieldCheck, MapPin, Phone, ChevronRight, UserCircle, Mail } from 'lucide-react'
 
 export default function Landing() {
     const navigate = useNavigate()
@@ -219,6 +219,10 @@ export default function Landing() {
                             <div className="flex items-center">
                                 <Phone className="h-4 w-4 mr-2" />
                                 07 68 59 18 88
+                            </div>
+                            <div className="flex items-center">
+                                <Mail className="h-4 w-4 mr-2" />
+                                contact@mediconvoi.fr
                             </div>
                         </div>
                     </div>
