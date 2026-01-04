@@ -149,6 +149,9 @@ function obtenirToutesReservationsAdmin(authToken) {
         dateLimiteSync.setDate(dateLimiteSync.getDate() - 30);
 
         if (eventId && dateHeureSheet > dateLimiteSync) {
+          // OPTIMIZATION: Skipping Calendar sync for bulk admin view to prevent timeouts.
+          // Relying on Sheet data for speed.
+          /*
           try {
             const evenementRessource = Calendar.Events.get(getSecret('ID_CALENDRIER'), eventId);
             // On met à jour avec les infos du calendrier si elles existent, car elles sont plus précises
@@ -157,6 +160,7 @@ function obtenirToutesReservationsAdmin(authToken) {
           } catch (err) {
             Logger.log(`Avertissement: Événement Calendar ${eventId} introuvable pour la résa ${ligne[indices["ID Réservation"]]}. Utilisation de l'heure du Sheet.`);
           }
+          */
         }
 
         const details = String(ligne[indices["Détails"]]);

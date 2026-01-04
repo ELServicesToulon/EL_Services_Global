@@ -22,7 +22,7 @@ const ADRESSE_ENTREPRISE = "80 Avenue du Général de Gaulle, 83160 La Valette-d
 /** @const {string} Adresse e-mail de contact de l'entreprise. */
 const EMAIL_ENTREPRISE = "mediconvoi@gmail.com";
 /** @const {string} Adresse e-mail recevant les notifications administratives. */
-const ADMIN_EMAIL = "mediconvoi@gmail.com";
+const ADMIN_EMAIL = "contact@mediconvoi.fr";
 
 /** @const {string} URL de base du portail client (WebApp). A définir si URL personnalisée. */
 // TODO: Renseignez ici l'URL de déploiement de votre WebApp pour garantir les liens dans les emails.

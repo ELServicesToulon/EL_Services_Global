@@ -101,39 +101,11 @@ foreach ($projName in $projects.Keys) {
     }
 }
 
-# 2. Deploy Web App (V2)
-Write-Host "`n=== STARTING WEB APP DEPLOYMENT (V2) ===" -ForegroundColor Cyan
-if (Test-Path "V2_App") {
-    Push-Location "V2_App"
-    try {
-        Write-Host "1. Building V2 App..."
-        # Optional: npm install if needed, but assuming env is ready
-        npm run build
-        if ($LASTEXITCODE -ne 0) { throw "Build failed for V2_App" }
-        Write-Host "Build Successful." -ForegroundColor Green
-    }
-    catch {
-        Write-Error "Error building V2_App: $_"
-        exit 1
-    }
-    finally {
-        Pop-Location
-    }
+# 2. Deploy Web App (V2) - MOVED TO Mediconvoi_V2 REPOSITORY
+# Write-Host "`n=== STARTING WEB APP DEPLOYMENT (V2) ===" -ForegroundColor Cyan
+# The V2 App logic has been migrated to its own workspace/repository.
+# See ../Mediconvoi_V2
 
-    try {
-        Write-Host "2. Deploying to o2switch..."
-        node final_deploy_v2.js
-        if ($LASTEXITCODE -ne 0) { throw "Deployment script failed" }
-        Write-Host "Deployment Successful." -ForegroundColor Green
-    }
-    catch {
-        Write-Error "Error deploying V2_App: $_"
-        exit 1
-    }
-}
-else {
-    Write-Warning "V2_App folder not found!"
-}
 
 # 3. Git Sync (Global)
 Write-Host "`n=== STARTING GIT SYNC ===" -ForegroundColor Cyan
