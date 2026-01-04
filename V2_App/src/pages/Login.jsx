@@ -8,6 +8,7 @@ export default function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('') // We might use Magic Link, but let's prep for password too or just Magic Link.
     // User asked for "Login (Email + Magic Link)" in the plan.
+    const [passwordMode, setPasswordMode] = useState(false)
     const [message, setMessage] = useState(null)
     const navigate = useNavigate()
 
@@ -23,20 +24,38 @@ export default function Login() {
         setLoading(true)
         setMessage(null)
 
-        // Magic Link Login
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-                emailRedirectTo: window.location.origin + '/dashboard',
-            },
-        })
+        if (passwordMode) {
+            // Password Login
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            })
 
-        if (error) {
-            setMessage({ type: 'error', text: error.message })
+            if (error) {
+                setMessage({ type: 'error', text: error.message })
+                setLoading(false)
+            } else {
+                // Success leads to redirect via onAuthStateChange or just manual check,
+                // but usually the useEffect above will catch the session change or the promise resolves with data.
+                // We can manually navigate or wait for the listener.
+                navigate('/dashboard')
+            }
         } else {
-            setMessage({ type: 'success', text: 'Lien de connexion envoyé ! Vérifiez votre boîte mail.' })
+            // Magic Link Login
+            const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: {
+                    emailRedirectTo: window.location.origin + '/dashboard',
+                },
+            })
+
+            if (error) {
+                setMessage({ type: 'error', text: error.message })
+            } else {
+                setMessage({ type: 'success', text: 'Lien de connexion envoyé ! Vérifiez votre boîte mail.' })
+            }
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     return (
@@ -77,6 +96,25 @@ export default function Login() {
                             </div>
                         </div>
 
+                        {passwordMode && (
+                            <div className="space-y-2 animate-fade-in">
+                                <label className="text-sm font-medium text-gray-300 ml-1">Mot de passe</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Lock className="h-5 w-5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-xl leading-5 bg-gray-900/50 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         <button
                             type="submit"
                             disabled={loading}
@@ -86,10 +124,23 @@ export default function Login() {
                                 <Loader2 className="animate-spin h-5 w-5" />
                             ) : (
                                 <>
-                                    Recevoir mon lien magique <ArrowRight className="ml-2 h-4 w-4" />
+                                    {passwordMode ? 'Se connecter' : 'Recevoir mon lien magique'} <ArrowRight className="ml-2 h-4 w-4" />
                                 </>
                             )}
                         </button>
+
+                        <div className="flex justify-center">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setPasswordMode(!passwordMode)
+                                    setMessage(null)
+                                }}
+                                className="text-xs text-gray-400 hover:text-white underline underline-offset-2 transition-colors"
+                            >
+                                {passwordMode ? 'Utiliser un lien magique (sans mot de passe)' : 'Je préfère utiliser mon mot de passe'}
+                            </button>
+                        </div>
                     </form>
 
                     {message && (

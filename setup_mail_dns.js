@@ -49,62 +49,51 @@ async function main() {
             console.log(`\n------------------------------------------------`);
             console.log(`🌍 Domain: ${zone.name} (${zone.status})`);
 
-            // We only really care about mediconvoi.fr for now, but good to check all
-            if (zone.name !== 'mediconvoi.fr') {
-                console.log("Skipping (only targeting mediconvoi.fr for safety)");
-                continue;
-            }
-
             // 1. Ensure 'mail' A record exists and is NOT proxied (Grey Cloud)
-            const mailRecords = await cfRequest(`/zones/${zone.id}/dns_records?type=A&name=mail.${zone.name}`);
+            // Actually, for o2switch, using mx.o2switch.net is preferred over mail.domain.com usually
+            // But let's stick to the o2switch standard recommendations:
+            // MX: m.o2switch.net (priority 10) OR mx.o2switch.net
 
-            if (mailRecords.length === 0) {
-                console.log(`   ❌ 'mail' A Record missing. Creating...`);
-                await createRecord(zone.id, 'A', 'mail', TARGET_IP, false); // false = not proxied
-            } else {
-                const rec = mailRecords[0];
-                if (rec.content !== TARGET_IP || rec.proxied === true) {
-                    console.log(`   ⚠️ 'mail' record invalid (IP: ${rec.content}, Proxy: ${rec.proxied}). Updating...`);
-                    await updateRecord(zone.id, rec.id, 'A', 'mail', TARGET_IP, false);
-                } else {
-                    console.log(`   ✅ 'mail' A Record OK (Not Proxied)`);
-                }
-            }
+            // Standard o2switch MX setup:
+            const targetMX = "mx.o2switch.net";
 
-            // 2. Ensure MX record exists pointing to mail.<domain>
+            // 2. Ensure MX record exists pointing to mx.o2switch.net
             const mxRecords = await cfRequest(`/zones/${zone.id}/dns_records?type=MX&name=${zone.name}`);
-            const expectedMxVal = `mail.${zone.name}`;
 
-            if (mxRecords.length === 0) {
-                console.log(`   ❌ MX Record missing. Creating...`);
-                await createRecord(zone.id, 'MX', '@', expectedMxVal, false, 0); // priority 0
+            // Filter our target
+            const validMx = mxRecords.find(r => r.content === targetMX);
+
+            if (!validMx) {
+                console.log(`   ❌ MX Record for o2switch missing. Creating...`);
+                // Remove other MX records to be clean? Maybe risky if they use Google Suite.
+                // Let's just add it with priority 10
+                await createRecord(zone.id, 'MX', '@', targetMX, false, 10);
             } else {
-                // Check if our expected MX exists
-                const validMx = mxRecords.find(r => r.content === expectedMxVal);
-                if (!validMx) {
-                    console.log(`   ⚠️ MX Record points to ${mxRecords[0].content}. Adding correct MX...`);
-                    // We might want to delete others, but adding the correct one is safer first step.
-                    // Actually, let's delete invalid ones if they are clearly wrong (e.g. generic placeholders)
-                    // For now, just create if not found.
-                    await createRecord(zone.id, 'MX', '@', expectedMxVal, false, 0);
-                } else {
-                    console.log(`   ✅ MX Record OK (${validMx.content})`);
-                }
+                console.log(`   ✅ MX Record OK (${validMx.content})`);
             }
 
             // 3. SPF Record (Basic)
-            // v=spf1 a mx ip4:109.234.166.100 ~all
+            // v=spf1 include:mx.o2switch.net ~all
             const txtRecords = await cfRequest(`/zones/${zone.id}/dns_records?type=TXT&name=${zone.name}`);
             const spfRecord = txtRecords.find(r => r.content.includes('v=spf1'));
 
-            const expectedSpf = "v=spf1 a mx ip4:109.234.166.100 ~all";
+            const expectedSpfPart = "include:mx.o2switch.net";
 
             if (!spfRecord) {
-                console.log(`   ❌ SPF Record missing. Creating...`);
-                await createRecord(zone.id, 'TXT', '@', expectedSpf, false);
+                console.log(`   ❌ SPF Record missing. Creating default o2switch SPF...`);
+                await createRecord(zone.id, 'TXT', '@', "v=spf1 include:mx.o2switch.net ~all", false);
             } else {
-                console.log(`   ℹ️ SPF Record exists: ${spfRecord.content}`);
-                // Don't overwrite existing SPF blindly as it might have other services
+                if (!spfRecord.content.includes(expectedSpfPart)) {
+                    console.log(`   ⚠️ SPF Record exists but missing o2switch include: ${spfRecord.content}`);
+                    // We can append it
+                    let newContent = spfRecord.content.replace("~all", "").replace("-all", "").trim();
+                    if (!newContent.endsWith("include:mx.o2switch.net")) {
+                        newContent += " include:mx.o2switch.net ~all";
+                        await updateRecord(zone.id, spfRecord.id, 'TXT', '@', newContent, false);
+                    }
+                } else {
+                    console.log(`   ✅ SPF Record OK`);
+                }
             }
 
         }

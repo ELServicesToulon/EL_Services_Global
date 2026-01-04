@@ -8,8 +8,8 @@ async function inspect() {
         console.log("🔌 Tentative de connexion FTP (Main User: yuda1395)...");
         await client.access({
             host: "ftp.yuda1395.odns.fr",
-            user: "yuda1395", // Probable cPanel username based on hostname
-            password: "1970-Manolo-145",
+            user: "yuda1395", // Confirmed cPanel username
+            password: "Manolo-145",
             secure: false
         });
         console.log("✅ Connecté en tant que Root/Main user !");
@@ -41,7 +41,7 @@ async function inspect() {
             await client.access({
                 host: "ftp.yuda1395.odns.fr",
                 user: "elservicestoulon@gmail.com",
-                password: "1970-Manolo-145",
+                password: "Manolo-145",
                 secure: false
             });
             console.log("✅ Connecté avec l'email !");
