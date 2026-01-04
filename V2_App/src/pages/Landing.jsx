@@ -1,12 +1,29 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { Truck, Clock, ShieldCheck, MapPin, Phone, ChevronRight, UserCircle, Mail } from 'lucide-react'
 import { MobileWidget } from '../components/MobileWidget'
+import { BookingModal } from '../components/BookingModal'
+import { addDays } from 'date-fns'
 
 export default function Landing() {
     const navigate = useNavigate()
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+    const [bookingDate, setBookingDate] = useState(addDays(new Date(), 1)) // Default to tomorrow
+
+    const handleBookingConfirm = (details) => {
+        console.log("Booking Confirmed:", details);
+        // For now, redirect to login as if to complete the booking
+        navigate('/login', { state: { booking: details } });
+    };
 
     return (
         <div className="font-sans text-gray-800 bg-white">
+            <BookingModal
+                isOpen={isBookingModalOpen}
+                onClose={() => setIsBookingModalOpen(false)}
+                date={bookingDate}
+                onConfirm={handleBookingConfirm}
+            />
             {/* Navigation */}
             <nav className="fixed w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,7 +79,7 @@ export default function Landing() {
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <button onClick={() => navigate('/booking')} className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center">
+                                <button onClick={() => setIsBookingModalOpen(true)} className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center">
                                     Commander une course
                                     <ChevronRight className="ml-2 h-5 w-5" />
                                 </button>

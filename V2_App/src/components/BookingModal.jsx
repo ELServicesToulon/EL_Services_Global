@@ -48,8 +48,17 @@ export function BookingModal({ date, isOpen, onClose }) {
 
     const handleConfirm = () => {
         if (!selectedSlot) return;
-        // Ici on pourrait déclencher l'action de réservation réelle via une prop onBook(slot, details)
-        alert(`Réservation confirmée pour ${selectedSlot} (${stops} arrêts)`);
+
+        // Pass the booking details to the parent
+        if (typeof onConfirm === 'function') {
+            onConfirm({
+                date: date,
+                time: selectedSlot,
+                stops: stops,
+                returnToPharmacy: returnToPharmacy,
+                estimatedPrice: estimatedPrice
+            });
+        }
         onClose();
     };
 
