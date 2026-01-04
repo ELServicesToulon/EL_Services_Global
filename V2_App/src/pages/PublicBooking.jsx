@@ -229,7 +229,7 @@ export default function PublicBooking() {
                                 </div>
                                 <div className="flex justify-between items-center text-xs text-slate-400">
                                     <span>{config.stops} arrêt(s){config.isReturn ? ' + retour' : ''}</span>
-                                    <span>HT</span>
+                                    <span></span>
                                 </div>
                             </div>
 
@@ -296,7 +296,7 @@ function TariffRow({ label, price, desc, isUrgent, onClick }) {
             </div>
             <div className="text-right">
                 <div className={`font-bold ${isUrgent ? 'text-red-700' : 'text-slate-900'}`}>{formatCurrency(price)}</div>
-                <div className="text-[10px] text-gray-400">HT / course</div>
+                <div className="text-[10px] text-gray-400">/ course</div>
             </div>
         </div>
     )
