@@ -652,14 +652,12 @@ function creerReservationAdmin(data) {
       prix = Math.round(prix * 100) / 100;
 
       const creneauxDisponibles = obtenirCreneauxDisponiblesPourDate(occ.dateStr, duree);
-      if (!Array.isArray(creneauxDisponibles) || creneauxDisponibles.length === 0) {
-        if (!residentBypass) {
-          throw new Error(`Aucun créneau disponible pour le ${formaterDatePersonnalise(occ.dateObj, 'EEEE d MMMM yyyy')}.`);
-        }
-      } else if (!creneauxDisponibles.includes(data.startTime)) {
-        if (!residentBypass) {
-          throw new Error(`Le créneau ${data.startTime} n'est plus disponible pour le ${formaterDatePersonnalise(occ.dateObj, 'EEEE d MMMM yyyy')}.`);
-        }
+      const slotDisponible = Array.isArray(creneauxDisponibles) && creneauxDisponibles.includes(data.startTime);
+
+      // En tant qu'admin, on autorise le forçage (override) du créneau même s'il n'est pas "disponible" (passé, complet, etc.)
+      // On se contente de logger l'information plutôt que de bloquer.
+      if (!slotDisponible) {
+        Logger.log(`[Admin Override] Créneau ${data.startTime} forcé par l'admin le ${occ.dateStr}. Disponibles: ${JSON.stringify(creneauxDisponibles)}`);
       }
 
       const idReservation = 'RESA-' + Utilities.getUuid();
