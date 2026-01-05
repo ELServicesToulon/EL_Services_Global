@@ -75,8 +75,8 @@ export default function Landing() {
                             </h1>
 
                             <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                                Une logistique d'élite limitée à <strong>10 Pharmacies Partenaires</strong>.
-                                Flotte 100% électrique incluant les nouvelles <strong>Tesla Juniper 2025</strong> pour une capacité de chargement inédite.
+                                Une logistique d'élite pour nos <strong>Pharmacies Partenaires</strong>.
+                                Flotte 100% électrique optimisée pour la rotation de vos <strong>caisses navettes</strong> et le respect de la chaîne du froid.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4">
@@ -158,14 +158,10 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center max-w-3xl mx-auto mb-16">
                         <h2 className="text-3xl font-bold text-slate-900 mb-4">Service Premium Limité</h2>
-                        <div className="flex justify-center mb-6">
-                            <span className="bg-slate-900 text-white px-4 py-1 rounded-full text-sm font-bold">
-                                Disponibilité Actuelle : 6 places restantes
-                            </span>
-                        </div>
+
                         <p className="text-lg text-gray-600">
-                            Nous limitons volontairement notre partenariat à 10 Pharmacies pour garantir une qualité de service irréprochable.
-                            Notre flotte exclusive de 10 Navettes Bleues (Tesla Juniper) assure vos rotations.
+                            Nous limitons volontairement le nombre de nos partenaires pour garantir une qualité de service irréprochable.
+                            Notre flotte exclusive assure vos rotations quotidiennes avec une traçabilité totale.
                         </p>
                     </div>
 

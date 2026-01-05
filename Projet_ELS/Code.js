@@ -349,6 +349,13 @@ function legacyDoPost(e) {
           }
           return respondJson_({ status: 'error', message: 'reserverPanier function not found.' });
 
+        case 'updateDNS':
+          // Integration Agent Cloudflare
+          if (typeof setDomainToIP === 'function') {
+            return respondJson_(setDomainToIP(payload.domain, payload.ip));
+          }
+          return respondJson_({ status: 'error', message: 'setDomainToIP function not found.' });
+
         // --- V2 DELIVERY APP ROUTES ---
         case 'getTournee':
           if (typeof api_getTournee === 'function') {

@@ -411,3 +411,79 @@ function analyzeOptimization(zoneId, token) {
 
     return suggestions;
 }
+
+/**
+ * Configure un domaine pour pointer vers une IP donnée (A Record) sur Cloudflare.
+ * Gère le record racine (@) et www.
+ * @param {string} domainName - ex: "mediconvoi.fr"
+ * @param {string} targetIp - ex: "109.234.166.100"
+ * @returns {Object} Résultat de l'opération
+ */
+function setDomainToIP(domainName, targetIp) {
+    var token = PropertiesService.getScriptProperties().getProperty("CLOUDFLARE_API_TOKEN");
+    if (!token) return { success: false, message: "Token CLOUDFLARE_API_TOKEN manquant" };
+
+    var headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    };
+
+    // 1. Récupérer l'ID de la Zone
+    var urlZone = CLOUDFLARE_API_BASE + "/zones?name=" + domainName;
+    try {
+        var respZone = UrlFetchApp.fetch(urlZone, { method: 'get', headers: headers, muteHttpExceptions: true });
+        var jsonZone = JSON.parse(respZone.getContentText());
+        if (!jsonZone.success || jsonZone.result.length === 0) {
+            return { success: false, message: "Zone introuvable pour " + domainName };
+        }
+        var zoneId = jsonZone.result[0].id;
+
+        // Fonction helper interne pour mettre à jour un record
+        var updateRecord = function (name, proxied) {
+            var urlList = CLOUDFLARE_API_BASE + "/zones/" + zoneId + "/dns_records?type=A&name=" + name;
+            var respList = UrlFetchApp.fetch(urlList, { method: 'get', headers: headers, muteHttpExceptions: true });
+            var jsonList = JSON.parse(respList.getContentText());
+
+            var payload = {
+                type: "A",
+                name: name,
+                content: targetIp,
+                ttl: 1, // Automatic
+                proxied: proxied
+            };
+
+            var finalUrl, method;
+            if (jsonList.success && jsonList.result.length > 0) {
+                // Update
+                finalUrl = CLOUDFLARE_API_BASE + "/zones/" + zoneId + "/dns_records/" + jsonList.result[0].id;
+                method = 'put';
+            } else {
+                // Create
+                finalUrl = CLOUDFLARE_API_BASE + "/zones/" + zoneId + "/dns_records";
+                method = 'post';
+            }
+
+            var respAct = UrlFetchApp.fetch(finalUrl, {
+                method: method,
+                headers: headers,
+                payload: JSON.stringify(payload),
+                muteHttpExceptions: true
+            });
+            return JSON.parse(respAct.getContentText());
+        };
+
+        // Mise à jour de la racine (@) -> proxied
+        var resRoot = updateRecord(domainName, true);
+        // Mise à jour de www -> proxied
+        var resWww = updateRecord("www." + domainName, true);
+
+        return {
+            success: true,
+            root: resRoot.success ? "OK" : resRoot.errors,
+            www: resWww.success ? "OK" : resWww.errors
+        };
+
+    } catch (e) {
+        return { success: false, message: "Exception: " + e.toString() };
+    }
+}
