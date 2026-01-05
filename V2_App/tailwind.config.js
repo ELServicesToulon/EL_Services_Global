@@ -8,14 +8,15 @@ export default {
         extend: {
             colors: {
                 brand: {
-                    purple: '#6B46C1', // Approximate from screenshot
-                    blue: '#3182CE',   // Approximate
-                    light: '#F7FAFC',
+                    purple: '#8e44ad',
+                    blue: '#3498db',
+                    light: '#5dade2',
+                    bg: '#f7f9fc',
                     dark: '#2D3748'
                 }
             },
             fontFamily: {
-                sans: ['Inter', 'sans-serif'], // Assuming a clean sans-serif
+                sans: ['Montserrat', 'sans-serif'],
             }
         },
     },

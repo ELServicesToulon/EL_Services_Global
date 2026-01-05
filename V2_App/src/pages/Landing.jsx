@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Truck, Clock, ShieldCheck, MapPin, Phone, ChevronRight, UserCircle, Mail } from 'lucide-react'
 import { MobileWidget } from '../components/MobileWidget'
+import logo from '../assets/logo.png'
 import { BookingModal } from '../components/BookingModal'
 import { addDays } from 'date-fns'
 
@@ -29,22 +30,22 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-20 items-center">
                         <div className="flex items-center space-x-2">
-                            <img src="/logo.png" alt="Mediconvoi" className="h-10 w-auto" />
-                            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-blue-500">
+                            <img src={logo} alt="Mediconvoi" className="h-10 w-auto" />
+                            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-purple to-brand-blue">
                                 Mediconvoi
                             </span>
                         </div>
                         <div className="hidden md:flex space-x-8 items-center">
-                            <a href="#services" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Services</a>
-                            <a href="#about" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">À Propos</a>
-                            <a href="#contact" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Contact</a>
+                            <a href="#services" className="text-gray-600 hover:text-brand-purple transition-colors font-medium">Services</a>
+                            <a href="#about" className="text-gray-600 hover:text-brand-purple transition-colors font-medium">À Propos</a>
+                            <a href="#contact" className="text-gray-600 hover:text-brand-purple transition-colors font-medium">Contact</a>
                         </div>
                         <div>
                             <button
                                 onClick={() => navigate('/login')}
                                 className="flex items-center space-x-2 bg-slate-900 text-white px-5 py-2.5 rounded-full hover:bg-slate-800 transition-all font-medium shadow-lg shadow-slate-900/20"
                             >
-                                <UserCircle className="h-5 w-5" />
+                                <img src={logo} alt="Espace Pro" className="h-5 w-auto" />
                                 <span>Espace Pro</span>
                             </button>
                         </div>
@@ -55,22 +56,22 @@ export default function Landing() {
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
                 <div className="absolute inset-0 bg-blue-50/50 -z-10"></div>
-                <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-blue-100/50 to-transparent -z-10"></div>
+                <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-brand-light/50 to-transparent -z-10"></div>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="space-y-8">
-                            <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-semibold">
+                            <div className="inline-flex items-center space-x-2 bg-blue-100 text-brand-purple px-4 py-1.5 rounded-full text-sm font-semibold">
                                 <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-blue"></span>
                                 </span>
                                 <span>Service Logistique VIP & Sur Mesure</span>
                             </div>
 
                             <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-tight">
                                 Transport Exclusif <br />
-                                <span className="text-blue-600">Pharmacies & EHPAD</span>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-purple to-brand-blue">Pharmacies & EHPAD</span>
                             </h1>
 
                             <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
@@ -79,11 +80,11 @@ export default function Landing() {
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <button onClick={() => setIsBookingModalOpen(true)} className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center">
+                                <button onClick={() => setIsBookingModalOpen(true)} className="px-8 py-4 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-full font-bold hover:shadow-lg hover:shadow-brand-purple/30 transition-all shadow-xl flex items-center justify-center transform hover:-translate-y-1">
                                     Commander une course
                                     <ChevronRight className="ml-2 h-5 w-5" />
                                 </button>
-                                <button className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-gray-50 transition-all flex items-center justify-center">
+                                <button className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-bold hover:bg-gray-50 transition-all flex items-center justify-center">
                                     Nous Contacter
                                 </button>
                             </div>
@@ -114,7 +115,7 @@ export default function Landing() {
                                     <div className="flex items-center justify-between border-b border-gray-100 pb-4">
                                         <div className="flex items-center space-x-3">
                                             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <Truck className="h-5 w-5 text-blue-600" />
+                                                <img src={logo} alt="Delivery" className="h-6 w-auto" />
                                             </div>
                                             <div>
                                                 <div className="font-bold text-slate-800">Livraison en cours</div>

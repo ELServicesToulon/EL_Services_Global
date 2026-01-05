@@ -118,7 +118,7 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg shadow-blue-900/50 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-full text-sm font-bold text-white bg-gradient-to-r from-brand-purple to-brand-blue hover:from-brand-purple hover:to-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-purple shadow-lg shadow-brand-purple/40 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <Loader2 className="animate-spin h-5 w-5" />

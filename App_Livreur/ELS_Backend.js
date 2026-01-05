@@ -393,7 +393,52 @@ function includeTemplate(filename) {
 // ==============================================================================
 
 /**
- * Autorisation chauffeur (webapp livraison) basee sur un code partage.
+ * Vérifie si le token correspond à un code livreur dans la feuille "Livreurs".
+ * @param {string} token Le code à vérifier.
+ * @return {boolean} True si le code est trouvé.
+ */
+function isCodeInLivreursSheet(token) {
+  if (!token) return false;
+
+  // Liste des noms de feuilles potentiels pour les livreurs
+  const sheetNames = ["Livreurs", "Chauffeurs", "Equipe"];
+  let sheetData = [];
+
+  for (var i = 0; i < sheetNames.length; i++) {
+    // getSheetData retourne [] si fail, mais loggue une erreur.
+    // On accepte les logs pour l'instant.
+    var potentialData = getSheetData(sheetNames[i]);
+    if (potentialData && potentialData.length > 1) {
+      sheetData = potentialData;
+      break;
+    }
+  }
+
+  if (!sheetData || sheetData.length < 2) return false;
+
+  const headers = sheetData[0].map(function (h) { return String(h).toLowerCase().trim(); });
+  // Chercher une colonne "Code", "Code Livreur", "Pin", "Mot de passe"
+  const codeIndex = headers.findIndex(function (h) {
+    return h === "code" || h === "code livreur" || h === "pin" || h === "mot de passe" || h === "token";
+  });
+
+  if (codeIndex === -1) return false;
+
+  const cleanToken = String(token).trim();
+
+  // Parcours des lignes
+  for (var j = 1; j < sheetData.length; j++) {
+    const rowCode = String(sheetData[j][codeIndex] || "").trim();
+    if (rowCode === cleanToken && rowCode !== "") {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Autorisation chauffeur (webapp livraison) basee sur un code partage ou un code individuel.
  * @param {string} authToken Code fourni par le chauffeur.
  * @returns {boolean}
  */
@@ -401,17 +446,22 @@ function isLivreurAuthorized_(authToken) {
   try {
     const token = (authToken || '').toString().trim();
     if (!token) return false;
-    // On utilise une propriété de script
+
+    // 1. Check Shared Secret (Backup / Admin)
     const config = getConfig();
     const shared = config.ELS_SHARED_SECRET;
 
-    // Securité: Refuser l'accès si le secret n'est pas configuré
-    if (!shared || shared === "A_DEFINIR_DANS_PROPERTIES") {
-      Logger.log("ERREUR SECURITE: ELS_SHARED_SECRET non configuré.");
-      return false;
+    if (shared && shared !== "A_DEFINIR_DANS_PROPERTIES" && token === shared) {
+      return true;
     }
 
-    return token === shared;
+    // 2. Check Sheet "Livreurs"
+    if (isCodeInLivreursSheet(token)) {
+      return true;
+    }
+
+    Logger.log("Auth failed for token: " + token);
+    return false;
   } catch (err) {
     Logger.log('isLivreurAuthorized_ error: ' + err.toString());
     return false;
