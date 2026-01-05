@@ -20,17 +20,3 @@ body {
   width: 100%;
   min-height: 100vh;
 }
-
-@theme {
-  --font-sans: 'Montserrat', system-ui, sans-serif;
-
-  --color-brand-purple: #8e44ad;
-  --color-brand-blue: #3498db;
-  --color-brand-light: #5dade2;
-  --color-brand-bg: #f7f9fc;
-  --color-brand-dark: #2D3748;
-
-  --color-primary: #3b82f6;
-  /* Keep existing if needed, or remove */
-  --color-primary-hover: #2563eb;
-}

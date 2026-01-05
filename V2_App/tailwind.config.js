@@ -13,12 +13,16 @@ export default {
                     light: '#5dade2',
                     bg: '#f7f9fc',
                     dark: '#2D3748'
+                },
+                primary: {
+                    DEFAULT: '#3b82f6',
+                    hover: '#2563eb'
                 }
             },
             fontFamily: {
-                sans: ['Montserrat', 'sans-serif'],
+                sans: ['Montserrat', 'system-ui', 'sans-serif'],
             }
-        },
+        }
     },
     plugins: [],
 }
