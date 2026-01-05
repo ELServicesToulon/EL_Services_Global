@@ -241,21 +241,34 @@
       document.querySelectorAll('.theme-selector, #btn-theme, #menu-theme').forEach(el => el && el.remove());
     });
   </script>
+  <div id="admin-config-data" class="hidden" data-resident-enabled="<?= FORFAIT_RESIDENT_ENABLED ? 'true' : 'false' ?>"
+    data-resident-standard-label="<?= FORFAIT_RESIDENT.STANDARD_LABEL ?>"
+    data-resident-standard-price="<?= FORFAIT_RESIDENT.STANDARD_PRICE ?>"
+    data-resident-urgence-label="<?= FORFAIT_RESIDENT.URGENCE_LABEL ?>"
+    data-resident-urgence-price="<?= FORFAIT_RESIDENT.URGENCE_PRICE ?>"
+    data-resident-duration-hours="<?= FORFAIT_RESIDENT.DURATION_HOURS ?>" data-duree-base="<?= DUREE_BASE ?>"
+    data-duree-arret-sup="<?= DUREE_ARRET_SUP ?>">
+  </div>
   <script>
     (function () {
-      const config = window.ADMIN_CONFIG || {};
-      const residentConfig = {
-        enabled: <?= FORFAIT_RESIDENT_ENABLED ? 'true' : 'false' ?>,
-        standardLabel: <?= JSON.stringify(FORFAIT_RESIDENT.STANDARD_LABEL) ?>,
-        standardPrice: <?= FORFAIT_RESIDENT.STANDARD_PRICE ?>,
-        urgenceLabel: <?= JSON.stringify(FORFAIT_RESIDENT.URGENCE_LABEL) ?>,
-        urgencePrice: <?= FORFAIT_RESIDENT.URGENCE_PRICE ?>,
-        durationHours: <?= FORFAIT_RESIDENT.DURATION_HOURS ?>
+      var dataEl = document.getElementById('admin-config-data');
+      if (!dataEl) return;
+      var ds = dataEl.dataset;
+
+      var config = window.ADMIN_CONFIG || {};
+      var residentConfig = {
+        enabled: ds.residentEnabled === 'true',
+        standardLabel: ds.residentStandardLabel,
+        standardPrice: Number(ds.residentStandardPrice),
+        urgenceLabel: ds.residentUrgenceLabel,
+        urgencePrice: Number(ds.residentUrgencePrice),
+        durationHours: Number(ds.residentDurationHours)
       };
-      residentConfig.durationMinutes = Number(residentConfig.durationHours) * 60;
+      residentConfig.durationMinutes = (residentConfig.durationHours || 0) * 60;
+
       window.ADMIN_CONFIG = Object.assign({}, config, {
-        dureeBase: <?= DUREE_BASE ?>,
-        dureeArretSup: <?= DUREE_ARRET_SUP ?>,
+        dureeBase: Number(ds.dureeBase),
+        dureeArretSup: Number(ds.dureeArretSup),
         forfaitResident: residentConfig
       });
     }());
