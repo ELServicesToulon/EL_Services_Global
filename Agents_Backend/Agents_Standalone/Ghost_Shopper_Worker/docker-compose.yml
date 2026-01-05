@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  ghost-shopper:
+    build: .
+    container_name: ghost_shopper
+    restart: always
+    volumes:
+      - ./screenshots:/app/screenshots
+    # Pas de ports exposés nécessaire, c'est un worker qui sort vers le web
