@@ -1,4 +1,6 @@
-const SHEET_TRACE = "TRACE_Livraisons";
+# Unlock the keyring (you will be prompted for your login password)
+export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
+gnome-keyring-daemon --unlock < /dev/nullconst SHEET_TRACE = "TRACE_Livraisons";
 const SHEET_RESERVATIONS = "Réservations";
 
 /**
