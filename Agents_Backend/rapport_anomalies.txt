@@ -250,3 +250,7 @@ Call log:
 
 [2026-01-06T14:54:34.426Z] [MARKETING] Trafic: 19 visiteurs. SEO: 85/100
 [2026-01-06T14:55:08.140Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
+[2026-01-06T15:00:08.167Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
+[2026-01-06T15:00:35.349Z] [NETWORK] 🔥 Portail Client : DOWN (Timeout/Error: timeout of 5000ms exceeded)
+⚠️ Mediconvoi Core : ERREUR 404 (5ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 5000ms exceeded)
