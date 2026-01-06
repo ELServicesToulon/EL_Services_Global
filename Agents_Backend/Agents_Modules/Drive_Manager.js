@@ -11,6 +11,7 @@ const { google } = require('googleapis');
 // --- CONFIGURATION ---
 const KEY_FILE_PATH = path.join(__dirname, '..', 'keys', 'service-account.json');
 const ROOT_FOLDER_ID = process.env.GESTION_ELS_FOLDER_ID || '1HLBar6IvpJgrG_lfyRSKwNwib6U__w9U';
+const EXTERNAL_FOLDER_ID = '144qdIbP-njNmy-m6F425s6WxRjntN4yb';
 
 const SCOPES = [
     'https://www.googleapis.com/auth/drive',
@@ -384,5 +385,7 @@ module.exports = {
     moveFile,
     uploadFile,
     findFolder,
-    ensureFolder
+    findFolder,
+    ensureFolder,
+    EXTERNAL_FOLDER_ID
 };
