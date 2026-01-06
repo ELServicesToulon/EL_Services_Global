@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { TARIFS, FORFAIT_RESIDENT, computePrice, formatCurrency } from '../lib/pricing'
-import { Truck, Clock, Calendar, Check, X, ShieldCheck, MapPin, Plus, Minus, Info } from 'lucide-react'
+import { getSlotPeriodsForDate } from '../lib/slots'
+import { supabase } from '../lib/supabaseClient'
+import { Truck, Clock, Calendar, Check, X, ShieldCheck, MapPin, Plus, Minus, Info, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import CapsuleCalendar from '../components/CapsuleCalendar'
 
@@ -8,6 +10,13 @@ export default function PublicBooking() {
     const navigate = useNavigate()
     const [showConfigModal, setShowConfigModal] = useState(false)
     const [showResidentModal, setShowResidentModal] = useState(false)
+
+    // Slot availability state
+    const [slotPeriods, setSlotPeriods] = useState([])
+    const [loadingSlots, setLoadingSlots] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
+    const [userEmail, setUserEmail] = useState('')
+    const [message, setMessage] = useState(null)
 
     // Booking State
     const [config, setConfig] = useState({
@@ -22,6 +31,18 @@ export default function PublicBooking() {
 
     const [priceResult, setPriceResult] = useState(null)
 
+    // Fetch slot availability when date changes
+    useEffect(() => {
+        if (config.selectedDate) {
+            setLoadingSlots(true)
+            setConfig(c => ({ ...c, selectedSlot: null }))
+            getSlotPeriodsForDate(config.selectedDate)
+                .then(periods => setSlotPeriods(periods))
+                .catch(err => console.error('Error fetching slots:', err))
+                .finally(() => setLoadingSlots(false))
+        }
+    }, [config.selectedDate])
+
     useEffect(() => {
         if (config.residentMode) {
             setPriceResult({
@@ -33,6 +54,56 @@ export default function PublicBooking() {
             setPriceResult(res)
         }
     }, [config])
+
+    // Submit booking to Supabase
+    const handleSubmitBooking = async () => {
+        if (!config.selectedDate || !config.selectedSlot) {
+            setMessage({ type: 'error', text: 'Veuillez choisir une date et un créneau' })
+            return
+        }
+        if (!userEmail || !userEmail.includes('@')) {
+            setMessage({ type: 'error', text: 'Veuillez entrer un email valide' })
+            return
+        }
+
+        setSubmitting(true)
+        setMessage(null)
+
+        // Check if user is logged in
+        const { data: { session } } = await supabase.auth.getSession()
+
+        const booking = {
+            user_id: session?.user?.id || null,
+            email: userEmail,
+            scheduled_date: config.selectedDate,
+            time_slot: config.selectedSlot,
+            stops_count: config.stops,
+            has_return: config.isReturn,
+            is_urgent: config.isUrgent,
+            is_saturday: config.isSaturday,
+            resident_mode: config.residentMode,
+            price_estimated: priceResult?.total || 0,
+            status: 'pending'
+        }
+
+        const { error } = await supabase.from('bookings').insert(booking)
+
+        setSubmitting(false)
+
+        if (error) {
+            console.error('Booking error:', error)
+            setMessage({ type: 'error', text: 'Erreur lors de la réservation. Réessayez.' })
+        } else {
+            setMessage({ type: 'success', text: 'Réservation confirmée ! Un email vous sera envoyé.' })
+            // Reset form after 2s
+            setTimeout(() => {
+                setShowConfigModal(false)
+                setConfig({ stops: 1, isReturn: false, isSaturday: false, isUrgent: false, residentMode: null, selectedDate: null, selectedSlot: null })
+                setUserEmail('')
+                setMessage(null)
+            }, 2000)
+        }
+    }
 
     const openConfigModal = (type) => {
         const isSat = type === 'Samedi'
@@ -248,38 +319,72 @@ export default function PublicBooking() {
                             {config.selectedDate && (
                                 <div className="pt-4 border-t border-gray-100 animate-fade-in">
                                     <h4 className="text-sm font-bold text-slate-700 mb-2">Choisir un créneau</h4>
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {['Matin (08h - 12h)', 'Après-midi (13h - 17h)', 'Soir (18h - 20h)'].map((slot) => (
-                                            <div
-                                                key={slot}
-                                                onClick={() => setConfig(c => ({ ...c, selectedSlot: slot }))}
-                                                className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${config.selectedSlot === slot
-                                                    ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500'
-                                                    : 'bg-white border-gray-200 hover:border-blue-300'
+                                    {loadingSlots ? (
+                                        <div className="flex items-center justify-center py-4">
+                                            <Loader2 className="animate-spin h-6 w-6 text-blue-500" />
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {slotPeriods.map((period) => (
+                                                <div
+                                                    key={period.id}
+                                                    onClick={() => period.available && setConfig(c => ({ ...c, selectedSlot: `${period.label} (${period.range})` }))}
+                                                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                                                        !period.available 
+                                                            ? 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-50'
+                                                            : config.selectedSlot === `${period.label} (${period.range})`
+                                                                ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500 cursor-pointer'
+                                                                : 'bg-white border-gray-200 hover:border-blue-300 cursor-pointer'
                                                     }`}
-                                            >
-                                                <div className="flex items-center space-x-3">
-                                                    <Clock size={18} className={config.selectedSlot === slot ? 'text-blue-600' : 'text-gray-400'} />
-                                                    <span className={`text-sm font-medium ${config.selectedSlot === slot ? 'text-blue-900' : 'text-gray-600'}`}>{slot}</span>
+                                                >
+                                                    <div className="flex items-center space-x-3">
+                                                        <Clock size={18} className={config.selectedSlot === `${period.label} (${period.range})` ? 'text-blue-600' : 'text-gray-400'} />
+                                                        <div>
+                                                            <span className={`text-sm font-medium ${config.selectedSlot === `${period.label} (${period.range})` ? 'text-blue-900' : 'text-gray-600'}`}>
+                                                                {period.label} ({period.range})
+                                                            </span>
+                                                            {!period.available && <span className="text-xs text-red-500 ml-2">Complet</span>}
+                                                        </div>
+                                                    </div>
+                                                    {config.selectedSlot === `${period.label} (${period.range})` && <Check size={18} className="text-blue-600" />}
                                                 </div>
-                                                {config.selectedSlot === slot && <Check size={18} className="text-blue-600" />}
-                                            </div>
-                                        ))}
-                                    </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Email Input */}
+                            {config.selectedSlot && (
+                                <div className="pt-4 border-t border-gray-100 animate-fade-in">
+                                    <label className="text-sm font-bold text-slate-700 mb-2 block">Votre email</label>
+                                    <input
+                                        type="email"
+                                        value={userEmail}
+                                        onChange={(e) => setUserEmail(e.target.value)}
+                                        placeholder="nom@pharmacie.fr"
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Message Display */}
+                            {message && (
+                                <div className={`p-3 rounded-xl text-sm ${message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
+                                    {message.text}
                                 </div>
                             )}
 
                             <button
-                                onClick={() => {
-                                    if (!config.selectedDate) return alert('Veuillez choisir une date')
-                                    if (!config.selectedSlot) return alert('Veuillez choisir un créneau')
-                                    // Simulation de validation
-                                    navigate('/login')
-                                }}
-                                disabled={!config.selectedDate || !config.selectedSlot}
-                                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30 transform transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={handleSubmitBooking}
+                                disabled={!config.selectedDate || !config.selectedSlot || !userEmail || submitting}
+                                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30 transform transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                             >
-                                Confirmer la réservation
+                                {submitting ? (
+                                    <Loader2 className="animate-spin h-5 w-5" />
+                                ) : (
+                                    'Confirmer la réservation'
+                                )}
                             </button>
                         </div>
                     </div>

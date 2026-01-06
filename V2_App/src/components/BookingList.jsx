@@ -1,16 +1,16 @@
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { Clock, MapPin, Package, MoreHorizontal, CheckCircle, XCircle, Loader, AlertOctagon } from 'lucide-react'
+import { Clock, MapPin, Package, Pencil, CheckCircle, XCircle, Loader, AlertOctagon } from 'lucide-react'
 
 const statusStyles = {
-    pending: { bg: 'bg-yellow-50', text: 'text-yellow-700', label: 'En attente' },
-    confirmed: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'Confirmée' },
-    in_progress: { bg: 'bg-indigo-50', text: 'text-indigo-700', label: 'En cours' },
-    completed: { bg: 'bg-green-50', text: 'text-green-700', label: 'Livrée' },
-    cancelled: { bg: 'bg-red-50', text: 'text-red-700', label: 'Annulée' }
+    pending: { bg: 'bg-yellow-50', text: 'text-yellow-700', label: 'En attente', icon: Clock },
+    confirmed: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'Confirmée', icon: CheckCircle },
+    in_progress: { bg: 'bg-indigo-50', text: 'text-indigo-700', label: 'En cours', icon: Loader },
+    completed: { bg: 'bg-green-50', text: 'text-green-700', label: 'Livrée', icon: CheckCircle },
+    cancelled: { bg: 'bg-red-50', text: 'text-red-700', label: 'Annulée', icon: XCircle }
 }
 
-export default function BookingList({ bookings, loading }) {
+export default function BookingList({ bookings, loading, onEdit }) {
 
     if (loading) {
         return (
@@ -86,10 +86,16 @@ export default function BookingList({ bookings, loading }) {
                                 <Package className="w-3.5 h-3.5 mr-1" />
                                 {booking.packages_count} colis
                             </div>
-                            {/* Placeholder for future actions details */}
-                            <button className="text-gray-400 hover:text-blue-600 transition-colors">
-                                <MoreHorizontal className="w-5 h-5" />
-                            </button>
+                            {/* Bouton Modifier (seulement si pas terminée ou annulée) */}
+                            {!['completed', 'cancelled'].includes(booking.status) && onEdit && (
+                                <button 
+                                    onClick={() => onEdit(booking)}
+                                    className="flex items-center px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                                >
+                                    <Pencil className="w-4 h-4 mr-1" />
+                                    Modifier
+                                </button>
+                            )}
                         </div>
                     </div>
                 )

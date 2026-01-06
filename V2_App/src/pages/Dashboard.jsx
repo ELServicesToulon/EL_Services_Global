@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import BookingForm from '../components/BookingForm'
 import BookingList from '../components/BookingList'
-import { LogOut, Truck, User, Bell } from 'lucide-react'
+import InvoiceList from '../components/InvoiceList'
+import EditBookingModal from '../components/EditBookingModal'
+import { LogOut, Truck, User, Bell, FileText } from 'lucide-react'
 
 import logo from '../assets/logo.png'
 
@@ -12,6 +14,7 @@ export default function Dashboard() {
     const [user, setUser] = useState(null)
     const [bookings, setBookings] = useState([])
     const [loadingBookings, setLoadingBookings] = useState(true)
+    const [editingBooking, setEditingBooking] = useState(null)
 
     // Check Auth & Fetch Data
     useEffect(() => {
@@ -106,7 +109,16 @@ export default function Dashboard() {
                             <button onClick={() => user && fetchBookings(user.id)} className="text-sm text-blue-600 hover:text-blue-700 font-medium">Actualiser</button>
                         </div>
 
-                        <BookingList bookings={bookings} loading={loadingBookings} />
+                        <BookingList 
+                            bookings={bookings} 
+                            loading={loadingBookings} 
+                            onEdit={(booking) => setEditingBooking(booking)}
+                        />
+
+                        {/* Section Factures */}
+                        <div className="mt-8">
+                            <InvoiceList userId={user?.id} userEmail={user?.email} />
+                        </div>
                     </div>
 
                     {/* Colonne Droite: Formulaire */}
@@ -118,6 +130,14 @@ export default function Dashboard() {
 
                 </div>
             </main>
+
+            {/* Modale d'édition */}
+            <EditBookingModal
+                booking={editingBooking}
+                isOpen={!!editingBooking}
+                onClose={() => setEditingBooking(null)}
+                onUpdate={() => user && fetchBookings(user.id)}
+            />
         </div>
     )
 }

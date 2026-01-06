@@ -14,6 +14,8 @@ const path = require('path');
 const ArchiveKeeper = require('./Agents_Modules/Archive_Keeper');
 const NetworkOverseer = require('./Agents_Modules/Network_Overseer');
 const AgentConnector = require('./Agents_Modules/Agent_Connector');
+const DriveManager = require('./Agents_Modules/Drive_Manager');
+const AgentFixer = require('./Agents_Modules/Agent_Fixer');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -256,6 +258,28 @@ async function main() {
             const mktReport = await AgentMarketing.runCycle();
             if (mktReport) await remoteLog('MARKETING', mktReport);
         }, 3600000);
+    }
+
+    // --- 6. DRIVE MANAGER (Initial + 1h) ---
+    if (DriveManager) {
+        const initDrive = await DriveManager.runOrganizationCycle();
+        if (initDrive) await remoteLog('DRIVE', initDrive);
+
+        setInterval(async () => {
+            const driveReport = await DriveManager.runOrganizationCycle();
+            if (driveReport) await remoteLog('DRIVE', driveReport);
+        }, 3600000);
+    }
+
+    // --- 7. AGENT FIXER (Initial + 2h) ---
+    if (AgentFixer) {
+        const initFixer = await AgentFixer.runFixerCycle(false);
+        if (initFixer) await remoteLog('FIXER', initFixer);
+
+        setInterval(async () => {
+            const fixerReport = await AgentFixer.runFixerCycle(false);
+            if (fixerReport) await remoteLog('FIXER', fixerReport);
+        }, 7200000); // 2h
     }
 
     console.log('\n⏳ En attente... (Ctrl+C pour arrêter)');
