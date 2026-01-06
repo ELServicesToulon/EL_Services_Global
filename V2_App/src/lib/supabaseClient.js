@@ -6,6 +6,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 let supabaseInstance = null
 
 try {
+    console.log("Supabase Init Debug:", { url: supabaseUrl, keyPrefix: supabaseAnonKey ? supabaseAnonKey.substring(0, 5) : 'N/A' });
     if (supabaseUrl && supabaseAnonKey) {
         supabaseInstance = createClient(supabaseUrl, supabaseAnonKey)
     } else {
