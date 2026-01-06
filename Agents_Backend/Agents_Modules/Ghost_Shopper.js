@@ -241,7 +241,7 @@ async function runGhostShopperCycle() {
 
                     const day = days[i];
                     console.log(` -> Test jour ${i + 1}/${days.length}...`);
-                    await day.click();
+                    await day.click({ force: true });
                     try { await workingScope.waitForSelector('#indicateur-chargement', { state: 'hidden', timeout: 5000 }); } catch (e) { }
                     await page.waitForTimeout(2000);
 
