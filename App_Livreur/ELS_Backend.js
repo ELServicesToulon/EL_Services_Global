@@ -401,36 +401,30 @@ function isCodeInLivreursSheet(token) {
   if (!token) return false;
 
   // Liste des noms de feuilles potentiels pour les livreurs
-  const sheetNames = ["Livreurs", "Chauffeurs", "Equipe"];
-  let sheetData = [];
-
-  for (var i = 0; i < sheetNames.length; i++) {
-    // getSheetData retourne [] si fail, mais loggue une erreur.
-    // On accepte les logs pour l'instant.
-    var potentialData = getSheetData(sheetNames[i]);
-    if (potentialData && potentialData.length > 1) {
-      sheetData = potentialData;
-      break;
-    }
-  }
-
-  if (!sheetData || sheetData.length < 2) return false;
-
-  const headers = sheetData[0].map(function (h) { return String(h).toLowerCase().trim(); });
-  // Chercher une colonne "Code", "Code Livreur", "Pin", "Mot de passe"
-  const codeIndex = headers.findIndex(function (h) {
-    return h === "code" || h === "code livreur" || h === "pin" || h === "mot de passe" || h === "token";
-  });
-
-  if (codeIndex === -1) return false;
-
+  const sheetNames = ["Livreurs", "Livreur", "Chauffeurs", "Equipe", "Utilisateurs"];
   const cleanToken = String(token).trim();
 
-  // Parcours des lignes
-  for (var j = 1; j < sheetData.length; j++) {
-    const rowCode = String(sheetData[j][codeIndex] || "").trim();
-    if (rowCode === cleanToken && rowCode !== "") {
-      return true;
+  for (var i = 0; i < sheetNames.length; i++) {
+    const currentSheetName = sheetNames[i];
+    const sheetData = getSheetData(currentSheetName);
+
+    // Si la feuille est vide ou n'existe pas, on passe à la suivante
+    if (!sheetData || sheetData.length < 2) continue;
+
+    const headers = sheetData[0].map(function (h) { return String(h).toLowerCase().trim(); });
+    // Chercher une colonne "Code", "Code Livreur", "Pin", "Mot de passe"
+    const codeIndex = headers.findIndex(function (h) {
+      return h === "code" || h === "code livreur" || h === "pin" || h === "mot de passe" || h === "token" || h === "code d'accès" || h === "access code";
+    });
+
+    if (codeIndex === -1) continue; // Colonne code introuvable dans cette feuille
+
+    // Parcours des lignes de cette feuille
+    for (var j = 1; j < sheetData.length; j++) {
+      const rowCode = String(sheetData[j][codeIndex] || "").trim();
+      if (rowCode === cleanToken && rowCode !== "") {
+        return true; // Code trouvé !
+      }
     }
   }
 
