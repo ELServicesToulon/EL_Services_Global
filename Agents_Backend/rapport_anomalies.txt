@@ -363,3 +363,13 @@ Call log:
 ║ <3 Playwright Team                                                      ║
 ╚═════════════════════════════════════════════════════════════════════════╝
 [2026-01-06T19:21:43.613Z] [MARKETING] Trafic: 55 visiteurs. SEO: 85/100
+[2026-01-06T19:25:27.498Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (8ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T19:32:14.022Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (9ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T19:35:24.842Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (4ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T19:42:12.170Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (5ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T19:45:25.282Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (5ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
