@@ -59,3 +59,14 @@ Ce fichier sert de mémoire persistante pour le projet. Il permet à l'agent (et
 - ...
 
 ---
+
+### 2026-01-06 - Nouvelle Session
+**Objectif**: securité
+**Actions**:
+- [ ] (À remplir par l'agent/dev)
+**Décisions**:
+- ...
+**Prochaines Étapes**:
+- ...
+
+---

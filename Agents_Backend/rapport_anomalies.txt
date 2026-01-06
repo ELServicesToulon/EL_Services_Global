@@ -324,3 +324,6 @@ Call log:
 ⚠️ Mediconvoi Core : ERREUR 404 (7ms)
 🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 5000ms exceeded)
 [2026-01-06T18:50:21.695Z] [MARKETING] Trafic: 44 visiteurs. SEO: 85/100
+[2026-01-06T18:50:35.512Z] [NETWORK] 🔥 Portail Client : DOWN (Timeout/Error: timeout of 5000ms exceeded)
+⚠️ Mediconvoi Core : ERREUR 404 (9ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 5000ms exceeded)
