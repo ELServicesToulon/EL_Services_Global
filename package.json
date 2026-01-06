@@ -4,7 +4,8 @@
   "description": "Solution complète de gestion logistique pour EL Services (Livraison, Pharmacie, EHPAD).",
   "scripts": {
     "test": "playwright test",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "memory": "node agent_memory.js"
   },
   "keywords": [
     "google-apps-script",

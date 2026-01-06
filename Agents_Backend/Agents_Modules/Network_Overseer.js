@@ -6,7 +6,7 @@
 const axios = require('axios');
 
 const MONITORING_TARGETS = [
-    { name: 'Portail Client', type: 'gas', id: 'AKfycbyWUC3njn-hIU1pdgElOQX9FlXUclS3YC-Nat4Ujlw' },
+    { name: 'Portail Client', type: 'gas', id: 'AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb' },
     { name: 'App Livreur', type: 'gas', id: 'AKfycbyC1PWyq5xnYa3HaLtuRtahsnjpkiTryQxqy5jgYHrR6pDwLgAlkM3ecxjSAAgEOYWKGg' },
     { name: 'Mediconvoi Vitrine', type: 'web', url: 'https://mediconvoi.fr' },
     { name: 'Mediconvoi Core', type: 'web', url: 'http://vps-7848861f.vps.ovh.net' },
@@ -27,7 +27,7 @@ async function runHealthCheck() {
 
         try {
             const start = Date.now();
-            const res = await axios.get(url, { validateStatus: false, timeout: 5000, maxRedirects: 5 });
+            const res = await axios.get(url, { validateStatus: false, timeout: 20000, maxRedirects: 5 });
             const duration = Date.now() - start;
 
             if (res.status >= 400) {

@@ -34,15 +34,17 @@ async function main() {
         return;
     }
 
-    // Cas spécial pour Ghost Shopper (Simulé pour l'instant car le code est "disabled" dans Sentinel)
+    // Cas spécial pour Ghost Shopper (Réel)
     if (agentName === 'GHOST_SHOPPER') {
-        console.log("👻 [WORKER] Ghost Shopper : Initialisation du navigateur...");
-
-        // Simulation d'une tâche de 5 secondes
-        await new Promise(r => setTimeout(r, 5000));
-
-        console.log("👻 [WORKER] Ghost Shopper : Navigation terminée. Panier validé.");
-        console.log("RAPPORT_JSON: { \"success\": true, \"steps\": [\"Home\", \"Login\", \"Cart\"], \"total\": 45.00 }");
+        console.log("👻 [WORKER] Ghost Shopper : Lancement de l'agent réel...");
+        try {
+            const { runGhostShopperCycle } = require('./Agents_Modules/Ghost_Shopper');
+            const report = await runGhostShopperCycle();
+            console.log(`RAPPORT_JSON: ${JSON.stringify(report)}`);
+        } catch (e) {
+            console.error("🔥 [WORKER] Erreur execution Ghost Shopper:", e);
+            console.log(`RAPPORT_JSON: ${JSON.stringify({ success: false, error: e.message, steps: [] })}`);
+        }
         return;
     }
 

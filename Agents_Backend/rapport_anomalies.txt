@@ -220,3 +220,33 @@
 [2026-01-01T21:51:07.123Z] [MARKETING] Trafic: 39 visiteurs. SEO: 85/100
 [2026-01-01T22:40:33.167Z] [MARKETING] Trafic: 30 visiteurs. SEO: 85/100
 [2026-01-01T22:51:07.129Z] [MARKETING] Trafic: 33 visiteurs. SEO: 85/100
+[2026-01-06T14:46:41.366Z] [MARKETING] Trafic: 45 visiteurs. SEO: 85/100
+[2026-01-06T14:46:43.976Z] [GHOST_SHOPPER] Succès Distribué. Etapes: Home, Login, Cart
+[2026-01-06T14:50:21.662Z] [MARKETING] Trafic: 45 visiteurs. SEO: 85/100
+[2026-01-06T14:51:35.113Z] [GHOST_SHOPPER] Echec Distribué: elementHandle.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div role="dialog" aria-modal="true" class="modale-overlay" id="modale-selection-creneau" aria-labelledby="modale-selection-titre">…</div> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div role="dialog" aria-modal="true" class="modale-overlay" id="modale-selection-creneau" aria-labelledby="modale-selection-titre">…</div> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    49 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - <div role="dialog" aria-modal="true" class="modale-overlay" id="modale-selection-creneau" aria-labelledby="modale-selection-titre">…</div> intercepts pointer events[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+[2026-01-06T14:54:34.426Z] [MARKETING] Trafic: 19 visiteurs. SEO: 85/100
+[2026-01-06T14:55:08.140Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
