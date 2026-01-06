@@ -9,7 +9,7 @@ const MONITORING_TARGETS = [
     { name: 'Portail Client', type: 'gas', id: 'AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb' },
     { name: 'App Livreur', type: 'gas', id: 'AKfycbyC1PWyq5xnYa3HaLtuRtahsnjpkiTryQxqy5jgYHrR6pDwLgAlkM3ecxjSAAgEOYWKGg' },
     { name: 'Mediconvoi Vitrine', type: 'web', url: 'https://mediconvoi.fr' },
-    { name: 'Mediconvoi Core', type: 'web', url: 'https://37.59.124.82.sslip.io' },
+    { name: 'Mediconvoi Core', type: 'web', url: 'http://127.0.0.1:3000' },
     { name: 'Mediconvoi Sentinelle', type: 'web', url: 'http://87.106.1.4' }
 ];
 
