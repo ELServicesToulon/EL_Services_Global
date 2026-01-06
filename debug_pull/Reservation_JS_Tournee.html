@@ -4,46 +4,74 @@
  * MODULE JAVASCRIPT - GESTION DE LA TOURNÉE
  * =================================================================
  */
+</script>
+<style>
+/* TOOLTIP STYLES */
+.tooltip-container {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  border-bottom: 1px dotted #666; /* Visual hint */
+}
+.tooltip-content {
+  visibility: hidden;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 10px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%; /* Position above */
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.85em;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+.tooltip-content::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+.tooltip-container:hover .tooltip-content,
+.tooltip-container:focus .tooltip-content,
+.tooltip-container:active .tooltip-content {
+  visibility: visible;
+  opacity: 1;
+}
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.tooltip-row.total {
+  border-top: 1px solid #555;
+  padding-top: 4px;
+  margin-top: 4px;
+  font-weight: bold;
+}
+</style>
+<script>
 
 /**
  * Copie client de la logique de tarification.
  */
+/**
+ * Copie client de la logique de tarification.
+ * OBSOLÈTE : Remplacé par api_obtenirEstimationTournee (Server-Side).
+ */
 function calculerInfosTourneeClient(totalStops, returnToPharmacy, dateString, startTime) {
-  const DUREE_BASE_NUM = parseInt(configServeur.DUREE_BASE, 10);
-  const DUREE_ARRET_SUP_NUM = parseInt(configServeur.DUREE_ARRET_SUP, 10);
-  const KM_BASE_NUM = parseInt(configServeur.KM_BASE, 10);
-  const KM_ARRET_SUP_NUM = parseInt(configServeur.KM_ARRET_SUP, 10);
-  const extraStops = Math.max(0, totalStops - 1);
-  const extraRetour = returnToPharmacy ? 1 : 0;
-  const totalSegments = extraStops + extraRetour;
-  let duree = DUREE_BASE_NUM + (totalSegments * DUREE_ARRET_SUP_NUM);
-  let km = KM_BASE_NUM + (totalSegments * KM_ARRET_SUP_NUM);
-  const heureNormalisee = startTime.replace('h', ':');
-  const dateCourse = new Date(`${dateString}T${heureNormalisee}`);
-  const maintenant = new Date();
-  let urgent = false;
-  let samedi = false;
-  if (dateCourse.getDay() === 6) {
-    samedi = true;
-  } else if ((dateCourse.getTime() - maintenant.getTime()) / 60000 < configServeur.URGENT_THRESHOLD_MINUTES) {
-    urgent = true;
-  }
-  const tarif = computeCoursePrice({ totalStops, retour: returnToPharmacy, urgent, samedi });
-  const typeCourse = samedi ? 'Samedi' : urgent ? 'Urgent' : 'Normal';
-  const details = formatCourseLabel(duree, totalStops, returnToPharmacy);
-  const prix = Number(tarif?.total) || 0;
-  const prixFormate = typeof tarif?.formattedTotal === 'string' && tarif.formattedTotal.length
-    ? tarif.formattedTotal
-    : `${prix.toFixed(2)} €`;
-  return {
-    prix: prix,
-    prixFormate: prixFormate,
-    duree: duree,
-    km: km,
-    details: details,
-    typeCourse: typeCourse,
-    tarif: tarif
-  };
+    // Legacy support or fallback if needed, but primarily unused now.
+    console.warn("calculerInfosTourneeClient is deprecated. Use server-side estimation.");
+    return { prix: 0, duree: 0, km: 0, details: '', typeCourse: 'Normal', prixFormate: '0.00 €' };
 }
 
 /**
@@ -55,12 +83,90 @@ function ouvrirConfigurationTournee(dateString) {
   const dateFormatee = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   window.etat.tourneeEnCours = { date: dateString, totalStops: 1, returnToPharmacy: false };
   ui.titreModaleConfig.textContent = `Configurer la tournée du ${dateFormatee}`;
+  ui.titreModaleConfig.textContent = `Configurer la tournée du ${dateFormatee}`;
   ui.valeurArretsSup.textContent = '1';
   ui.interrupteurRetour.checked = false;
+  
+  // Réinitialisation champ adresse si présent (ou ajout si nécessaire dans le futur)
+  // Pour l'instant on se concentre sur la modale de configuration qui a peut-être besoin d'un champ adresse ?
+  // L'utilisateur parle de "rentrer adresses PDL", cela suggère un champ input.
+  // S'il n'existe pas dans le DOM, le plan d'implementation suggérait d'utiliser l'existant.
+  // Nous allons ajouter un champ de recherche PDL dans la modale si absent, ou hooker sur celui existant.
+  // SUPPOSITION: Il y a un endroit pour définir le lieu. Sinon on l'ajoute.
+  
+  // V2 UI check: La modale config actuelle a "Arrêts sup" et "Retour". 
+  // Pas de champ adresse explicite dans le code visible.
+  // On va ajouter le champ adresse pour le "Lieu de prise en charge" ou "Destination" si ce n'est pas déjà le client.
+  // Mais la demande est "rentrer facilement les adresses PDL".
+  
+  // Injection dynamique du champ adresse s'il n'est pas là
+  let containerAdresse = document.getElementById('container-pdl-autocomplete');
+  if (!containerAdresse) {
+      const parent = ui.interrupteurRetour.closest('.mb-4').parentNode;
+      containerAdresse = document.createElement('div');
+      containerAdresse.id = 'container-pdl-autocomplete';
+      containerAdresse.className = 'mb-4';
+      containerAdresse.innerHTML = `
+        <label class="block text-sm font-medium text-gray-700 mb-1">Point de Livraison (PDL)</label>
+        <div class="relative">
+            <input type="text" id="input-pdl-search" list="pdl-suggestions" 
+                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                   placeholder="Rechercher une pharmacie, EHPAD..." autocomplete="off">
+            <datalist id="pdl-suggestions"></datalist>
+            <div id="pdl-spinner" class="absolute right-2 top-2 hidden">
+               <svg class="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+               </svg>
+            </div>
+        </div>
+      `;
+      // Insert before the config options
+      parent.insertBefore(containerAdresse, ui.interrupteurRetour.closest('.mb-4'));
+      
+      // Attach events
+      const input = containerAdresse.querySelector('#input-pdl-search');
+      const datalist = containerAdresse.querySelector('#pdl-suggestions');
+      const spinner = containerAdresse.querySelector('#pdl-spinner');
+      let debounceTimer;
+      
+      input.addEventListener('input', function(e) {
+         const val = e.target.value;
+         if (val.length < 2) return;
+         
+         clearTimeout(debounceTimer);
+         debounceTimer = setTimeout(() => {
+            spinner.classList.remove('hidden');
+            google.script.run
+                .withSuccessHandler(results => {
+                    spinner.classList.add('hidden');
+                    datalist.innerHTML = '';
+                    results.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = `${item.label}, ${item.adresse}`; // Format for input
+                        // Data attributes not supported in datalist options standardly accessible, 
+                        // but value is what works.
+                        // We can maybe try to store metadata elsewhere if needed.
+                        datalist.appendChild(opt);
+                    });
+                })
+                .withFailureHandler(() => { spinner.classList.add('hidden'); })
+                .api_rechercherEtablissements(val);
+         }, 300);
+      });
+  } else {
+      // Clear previous value
+      const input = document.getElementById('input-pdl-search');
+      if (input) input.value = '';
+  }
+
   mettreAJourResumeTournee();
   ui.modaleConfigTournee.classList.remove('hidden');
 }
 
+/**
+ * Met à jour le résumé (prix, durée, km) dans la modale de configuration.
+ */
 /**
  * Met à jour le résumé (prix, durée, km) dans la modale de configuration.
  */
@@ -70,47 +176,91 @@ function mettreAJourResumeTournee() {
   const returnToPharmacy = ui.interrupteurRetour.checked;
   window.etat.tourneeEnCours.totalStops = totalStops;
   window.etat.tourneeEnCours.returnToPharmacy = returnToPharmacy;
-  const estimation = calculerInfosTourneeClient(totalStops, returnToPharmacy, window.etat.tourneeEnCours.date, '12h00');
-  ui.resumeConfigTournee.textContent = '';
-  const divDuree = document.createElement('div');
-  const spanDuree = document.createElement('span');
-  spanDuree.textContent = 'Durée estimée';
-  const strongDuree = document.createElement('strong');
-  strongDuree.textContent = `${estimation.duree} min`;
-  divDuree.appendChild(spanDuree);
-  divDuree.appendChild(strongDuree);
+  
+  // Affichage temporaire de chargement
+  ui.resumeConfigTournee.innerHTML = '<div class="spinner-border"></div> Calcul en cours...';
 
-  const divPrix = document.createElement('div');
-  const spanPrix = document.createElement('span');
-  spanPrix.textContent = 'Prix estimé';
-  const strongPrix = document.createElement('strong');
-  strongPrix.textContent = `~ ${estimation.prixFormate}`;
-  divPrix.appendChild(spanPrix);
-  divPrix.appendChild(strongPrix);
-  // Normalisation de l'affichage du prix (euro, fallback)
-  (function(){
-    try {
-      const prixStrong = divPrix.querySelector('strong');
-      const prixNumber = Number(estimation.prix);
-      if (prixStrong) {
-        prixStrong.textContent = Number.isFinite(prixNumber) ? `~ ${estimation.prixFormate.replace('€', '\u20AC')}` : '—';
-      }
-    } catch(e) {}
-  })();
+  google.script.run
+    .withSuccessHandler(function(estimation) {
+        if (!estimation || !estimation.success) {
+            ui.resumeConfigTournee.textContent = "Erreur de calcul.";
+            return;
+        }
+        
+        // Update local state if needed (though tourneeEnCours needs duree mostly for booking)
+        // We'll store it just in case
+        window.etat.dernierCalcul = estimation;
 
-  const divKm = document.createElement('div');
-  const spanKm = document.createElement('span');
-  spanKm.textContent = 'Distance';
-  const strongKm = document.createElement('strong');
-  strongKm.textContent = `~ ${estimation.km} km`;
-  divKm.appendChild(spanKm);
-  divKm.appendChild(strongKm);
+        ui.resumeConfigTournee.textContent = '';
+        const divDuree = document.createElement('div');
+        const spanDuree = document.createElement('span');
+        spanDuree.textContent = 'Durée estimée';
+        const strongDuree = document.createElement('strong');
+        strongDuree.textContent = `${estimation.duree} min`;
+        divDuree.appendChild(spanDuree);
+        divDuree.appendChild(strongDuree);
 
-  ui.resumeConfigTournee.appendChild(divDuree);
-  ui.resumeConfigTournee.appendChild(divPrix);
-  ui.resumeConfigTournee.appendChild(divKm);
+        const divPrix = document.createElement('div');
+        const spanPrix = document.createElement('span');
+        spanPrix.textContent = 'Prix estimé';
+        const strongPrix = document.createElement('strong');
+        // Structure HTML pour le tooltip
+        let prixDisplay = `~ ${estimation.prixFormate}`;
+        try {
+           if (estimation.prixFormate) prixDisplay = `~ ${estimation.prixFormate.replace('€', '\u20AC')}`;
+        } catch(e){}
 
-  mettreAJourRecapSelectionResident();
+        if (estimation.breakdown && estimation.breakdown.breakdown) {
+            const bd = estimation.breakdown.breakdown;
+            const tooltipHtml = `
+              <div class="tooltip-container">
+                ${prixDisplay}
+                <div class="tooltip-content">
+                    <div class="tooltip-row"><span>Base:</span> <span>${bd.base.toFixed(2)} €</span></div>
+                    <div class="tooltip-row"><span>Suppléments:</span> <span>${bd.supplements.toFixed(2)} €</span></div>
+                    ${bd.retour > 0 ? `<div class="tooltip-row"><span>Retour:</span> <span>${bd.retour.toFixed(2)} €</span></div>` : ''}
+                    ${bd.urgent > 0 ? `<div class="tooltip-row"><span>Urgence:</span> <span>${bd.urgent.toFixed(2)} €</span></div>` : ''}
+                    ${bd.samedi > 0 ? `<div class="tooltip-row"><span>Samedi:</span> <span>${bd.samedi.toFixed(2)} €</span></div>` : ''}
+                    ${bd.remise > 0 ? `<div class="tooltip-row" style="color:#2ecc71"><span>Remise:</span> <span>-${bd.remise.toFixed(2)} €</span></div>` : ''}
+                    <div class="tooltip-row total"><span>Total:</span> <span>${estimation.prix.toFixed(2)} €</span></div>
+                </div>
+              </div>
+            `;
+            strongPrix.innerHTML = tooltipHtml;
+        } else {
+            strongPrix.textContent = prixDisplay;
+        }
+
+        divPrix.appendChild(spanPrix);
+        divPrix.appendChild(strongPrix);
+
+        // Pas besoin de normalisation supplémentaire car géré ci-dessus
+
+
+        const divKm = document.createElement('div');
+        const spanKm = document.createElement('span');
+        spanKm.textContent = 'Distance';
+        const strongKm = document.createElement('strong');
+        strongKm.textContent = `~ ${estimation.km} km`;
+        divKm.appendChild(spanKm);
+        divKm.appendChild(strongKm);
+
+        ui.resumeConfigTournee.appendChild(divDuree);
+        ui.resumeConfigTournee.appendChild(divPrix);
+        ui.resumeConfigTournee.appendChild(divKm);
+
+        mettreAJourRecapSelectionResident();
+    })
+    .withFailureHandler(function(err) {
+        ui.resumeConfigTournee.textContent = "Erreur de connexion serveur.";
+        console.error(err);
+    })
+    .api_obtenirEstimationTournee(
+        window.etat.tourneeEnCours.date, 
+        '12h00', // Heure fictive pour l'estimation "générique" de la journée (urgence/samedi checked by server)
+        totalStops, 
+        returnToPharmacy
+    );
 }
 
 function mettreAJourBoutonsResident() {
@@ -181,7 +331,15 @@ function gererDemandeCreneaux(e) {
   basculerIndicateurChargement(true);
   const { tourneeEnCours } = window.etat;
   const infosTournee = calculerInfosTourneeClient(tourneeEnCours.totalStops, tourneeEnCours.returnToPharmacy, tourneeEnCours.date, '12h00');
+  const infosTournee = calculerInfosTourneeClient(tourneeEnCours.totalStops, tourneeEnCours.returnToPharmacy, tourneeEnCours.date, '12h00');
   tourneeEnCours.duree = infosTournee.duree;
+  
+  // Capture PDL Address
+  const inputPdl = document.getElementById('input-pdl-search');
+  if (inputPdl && inputPdl.value) {
+      tourneeEnCours.lieu = inputPdl.value;
+  }
+  
   const autresCoursesPanier = window.etat.panier
     .filter(item => item.date === tourneeEnCours.date)
     .map(item => ({ startTime: item.startTime, duree: item.duree }));
@@ -428,7 +586,9 @@ function ajouterTourneeAuPanier(isRecurrentItem = false, recurrenceData = null) 
     resident: residentActif,
     residentMode: residentMode,
     residentPrix: Number.isFinite(residentPrix) ? residentPrix : null,
-    residentLibelle: residentLibelle
+    residentPrix: Number.isFinite(residentPrix) ? residentPrix : null,
+    residentLibelle: residentLibelle,
+    lieu: tourneeEnCours.lieu || '' // Persist PDL info
   };
   window.etat.panier.push(nouvelleTournee);
   afficherPanier();

@@ -678,7 +678,34 @@ function calculerInfosTourneeBase(totalStops, returnToPharmacy, dateString, star
   const tarif = computeCoursePrice({ totalStops, retour: returnToPharmacy, urgent, samedi });
   const typeCourse = samedi ? 'Samedi' : urgent ? 'Urgent' : 'Normal';
   const details = formatCourseLabel_(duree, totalStops, returnToPharmacy);
-  return { prix: tarif.total, duree: duree, km: km, details: details, typeCourse: typeCourse };
+  return { prix: tarif.total, duree: duree, km: km, details: details, typeCourse: typeCourse, formattedTotal: tarif.formattedTotal };
+}
+
+/**
+ * API Publique pour le calcul de devis tournee (Frontend V2).
+ */
+function api_obtenirEstimationTournee(dateString, startTime, totalStops, returnToPharmacy) {
+    try {
+        // Validation basique
+        if (!dateString || !startTime) throw new Error("Paramètres manquants");
+        
+        const infos = calculerInfosTourneeBase(totalStops, returnToPharmacy, dateString, startTime);
+        
+        // On retourne tout ce dont le front a besoin
+        return {
+            success: true,
+            prix: infos.prix,
+            prixFormate: infos.formattedTotal || (infos.prix.toFixed(2) + " €"),
+            duree: infos.duree,
+            km: infos.km,
+            details: infos.details,
+            typeCourse: infos.typeCourse,
+            breakdown: infos.tarif // Exposure for Tooltip
+        };
+    } catch (e) {
+        Logger.log("Erreur api_obtenirEstimationTournee: " + e.toString());
+        return { success: false, error: e.message };
+    }
 }
 
 /**

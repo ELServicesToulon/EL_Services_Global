@@ -239,16 +239,8 @@ function obtenirCreneauxDisponiblesPourDate(dateString, duree, idEvenementAIgnor
 
       if (finCreneau > finJournee) break;
 
-      let estLibre = true;
-      for (const indispo of indisponibilitesNormalisees) {
-        if (indispo.id === idPropreAIgnorer) continue;
-        const debutIndispo = indispo.start;
-        const finAvecTampon = new Date(indispo.end.getTime() + DUREE_TAMPON_MINUTES * 60000);
-        if (debutCreneau < finAvecTampon && finCreneau > debutIndispo) {
-          estLibre = false;
-          break;
-        }
-      }
+      // Utilisation du helper pour la logique de disponibilité (préparation V2 multi-chauffeurs)
+      let estLibre = estCreneauLibre_(debutCreneau, finCreneau, indisponibilitesNormalisees, idPropreAIgnorer);
 
       if (estLibre) {
         creneauxPotentiels.push(debutCreneau);
@@ -321,11 +313,7 @@ function obtenirEtatCreneauxPourDate(dateString, duree, idEvenementAIgnorer = nu
       const finCreneau = new Date(debutCreneau.getTime() + duree * 60000);
       if (finCreneau > finJournee) break;
 
-      const taken = indisponibilitesNormalisees.some(indispo => {
-        if (indispo.id === idPropreAIgnorer) return false;
-        const finAvecTampon = new Date(indispo.end.getTime() + DUREE_TAMPON_MINUTES * 60000);
-        return debutCreneau < finAvecTampon && finCreneau > indispo.start;
-      });
+      const taken = !estCreneauLibre_(debutCreneau, finCreneau, indisponibilitesNormalisees, idPropreAIgnorer);
       const inPast = estAujourdHui && debutCreneau < maintenant;
 
       creneaux.push({ time: formaterDateEnHHMM(debutCreneau), status: taken ? 'closed' : 'open', taken, inPast });
@@ -432,5 +420,46 @@ function obtenirDonneesCalendrierPublic(mois, annee) {
     Logger.log(`ERREUR dans obtenirDonneesCalendrierPublic: ${e.toString()}`);
     return { disponibilite: {} };
   }
+}
+
+/**
+ * Vérifie si un créneau est libre en fonction des indisponibilités.
+ * Préparé pour la gestion future de la capacité (multi-véhicules).
+ * 
+ * @param {Date} debut Le début du créneau souhaité.
+ * @param {Date} fin La fin du créneau souhaité.
+ * @param {Array} indisponibilites Liste des objets {start, end, id}.
+ * @param {string} [idIgnorer] ID optionnel à ignorer (ex: modification de sa propre course).
+ * @returns {boolean} True si le créneau est disponible.
+ */
+function estCreneauLibre_(debut, fin, indisponibilites, idIgnorer) {
+  // CONFIGURATION V2 : CAPACITÉ
+  // Pour l'instant, capacité = 1 (un seul chauffeur).
+  // En V2, on pourra augmenter ce chiffre ou le rendre dynamique selon le type de véhicule.
+  const CAPACITE_SIMULTANEE = 1;
+
+  let chevauchements = 0;
+
+  for (const indispo of indisponibilites) {
+    if (idIgnorer && indispo.id === idIgnorer) continue;
+
+    // Calcul du tampon (buffer)
+    // Note: Le tampon est ajouté à la fin de l'événement existant pour laisser du temps de trajet.
+    const debutIndispo = indispo.start;
+    const finIndispo = indispo.end;
+    
+    // Le tampon s'applique-t-il ici ? 
+    // Oui, on considère que l'indisponibilité s'étend de [start] à [end + TAMPON]
+    const finAvecTampon = new Date(finIndispo.getTime() + (typeof DUREE_TAMPON_MINUTES !== 'undefined' ? DUREE_TAMPON_MINUTES : 15) * 60000);
+
+    // Test d'intersection strict
+    // [DebutDemande, FinDemande] vs [DebutIndispo, FinIndispo + Tampon]
+    // Check overlap: start1 < end2 && start2 < end1
+    if (debut < finAvecTampon && fin > debutIndispo) {
+      chevauchements++;
+    }
+  }
+
+  return chevauchements < CAPACITE_SIMULTANEE;
 }
 

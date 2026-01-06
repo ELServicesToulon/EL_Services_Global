@@ -474,3 +474,31 @@ Call log:
 [2m  - attempting click action[22m
 [2m    - scrolling into view if needed[22m
 
+[2026-01-06T21:08:48.917Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:16:31.090Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:18:48.076Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:26:30.571Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:28:49.210Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:36:32.219Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:38:48.573Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:46:31.423Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:48:48.871Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:56:31.327Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T21:58:19.767Z] [MARKETING] Trafic: 18 visiteurs. SEO: 85/100
+[2026-01-06T21:58:48.238Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T22:06:02.614Z] [MARKETING] Trafic: 30 visiteurs. SEO: 85/100
+[2026-01-06T22:06:30.505Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T22:08:48.133Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
