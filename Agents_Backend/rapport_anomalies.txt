@@ -411,3 +411,31 @@ Call log:
 🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
 [2026-01-06T20:05:26.765Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (12ms)
 🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T20:12:14.461Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (8ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T20:14:56.516Z] [MARKETING] Trafic: 55 visiteurs. SEO: 85/100
+[2026-01-06T20:15:26.422Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (5ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-06T20:17:02.831Z] [MARKETING] Trafic: 32 visiteurs. SEO: 85/100
+[2026-01-06T20:19:16.274Z] [GHOST_SHOPPER] Echec Distribué: browserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell
+╔═════════════════════════════════════════════════════════════════════════╗
+║ Looks like Playwright Test or Playwright was just installed or updated. ║
+║ Please run the following command to download new browsers:              ║
+║                                                                         ║
+║     npx playwright install                                              ║
+║                                                                         ║
+║ <3 Playwright Team                                                      ║
+╚═════════════════════════════════════════════════════════════════════════╝
+[2026-01-06T20:19:42.333Z] [MARKETING] Trafic: 48 visiteurs. SEO: 85/100
+[2026-01-06T20:21:42.006Z] [GHOST_SHOPPER] Echec Distribué: browserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell
+╔═════════════════════════════════════════════════════════════════════════╗
+║ Looks like Playwright Test or Playwright was just installed or updated. ║
+║ Please run the following command to download new browsers:              ║
+║                                                                         ║
+║     npx playwright install                                              ║
+║                                                                         ║
+║ <3 Playwright Team                                                      ║
+╚═════════════════════════════════════════════════════════════════════════╝
+[2026-01-06T20:22:06.823Z] [MARKETING] Trafic: 50 visiteurs. SEO: 85/100
+[2026-01-06T20:25:24.704Z] [NETWORK] ⚠️ Mediconvoi Core : ERREUR 404 (5ms)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)

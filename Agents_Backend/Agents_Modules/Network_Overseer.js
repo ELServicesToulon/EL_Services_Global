@@ -9,7 +9,7 @@ const MONITORING_TARGETS = [
     { name: 'Portail Client', type: 'gas', id: 'AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb' },
     { name: 'App Livreur', type: 'gas', id: 'AKfycbyC1PWyq5xnYa3HaLtuRtahsnjpkiTryQxqy5jgYHrR6pDwLgAlkM3ecxjSAAgEOYWKGg' },
     { name: 'Mediconvoi Vitrine', type: 'web', url: 'https://mediconvoi.fr' },
-    { name: 'Mediconvoi Core', type: 'web', url: 'http://vps-7848861f.vps.ovh.net' },
+    { name: 'Mediconvoi Core', type: 'web', url: 'https://37.59.124.82.sslip.io' },
     { name: 'Mediconvoi Sentinelle', type: 'web', url: 'http://87.106.1.4' }
 ];
 
@@ -31,8 +31,9 @@ async function runHealthCheck() {
             const duration = Date.now() - start;
 
             if (res.status >= 400) {
-                if (res.status === 403 && target.type === 'gas') {
-                    // 403 = Service en ligne mais accès restreint (Google Auth)
+                // 403 for GAS (Google Auth) or 401 for Kong/Supabase (Unauthorized) means service is reachable
+                if ((res.status === 403 && target.type === 'gas') || (res.status === 401 && target.name.includes('Core'))) {
+                   // Service en ligne mais d'accès restreint
                 } else {
                     report.push(`⚠️ ${target.name} : ERREUR ${res.status} (${duration}ms)`);
                 }
