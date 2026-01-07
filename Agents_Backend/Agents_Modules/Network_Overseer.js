@@ -39,7 +39,7 @@ async function runHealthCheck() {
                 }
             } else {
                 // Check Security (HTTP vs HTTPS) for web targets
-                if (target.type === 'web' && url.startsWith('http:')) {
+                if (target.type === 'web' && url.startsWith('http:') && !url.includes('127.0.0.1') && !url.includes('localhost')) {
                     report.push(`🔓 ${target.name} : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)`);
                 }
             }

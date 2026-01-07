@@ -1,6 +1,6 @@
 # 🔧 Rapport Diagnostic - 07/01/2026
 
-Généré le: 07/01/2026 19:53:11
+Généré le: 07/01/2026 21:13:39
 
 ---
 
@@ -20,7 +20,7 @@ Généré le: 07/01/2026 19:53:11
 
 - **Agent**: GHOST_SHOPPER
 - **Occurrences**: 9
-- **Dernière**: 07/01/2026 12:13:10
+- **Dernière**: 07/01/2026 21:12:26
 
 **Solution:**
 ```bash
@@ -28,13 +28,6 @@ npx playwright install chromium
 ```
 
 ## 🟡 Avertissements
-
-### Page trop lente à charger
-
-- **Agent**: GHOST_SHOPPER
-- **Occurrences**: 9
-
-**Suggestion:** Augmenter le timeout ou optimiser la page cible
 
 ### Élément UI non visible - possible changement de page
 
@@ -46,7 +39,14 @@ npx playwright install chromium
 ### Service accessible en HTTP au lieu de HTTPS
 
 - **Agent**: NETWORK
-- **Occurrences**: 308
+- **Occurrences**: 333
 
 **Suggestion:** Configurer certificat SSL via Certbot sur le serveur
+
+### Page trop lente à charger
+
+- **Agent**: GHOST_SHOPPER
+- **Occurrences**: 9
+
+**Suggestion:** Augmenter le timeout ou optimiser la page cible
 

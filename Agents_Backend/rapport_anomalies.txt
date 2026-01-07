@@ -1361,3 +1361,60 @@ Call log:
 [2026-01-07T19:53:13.600Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
 [2026-01-07T19:53:17.862Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
 [2026-01-07T19:53:17.875Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T20:01:50.946Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T20:01:51.112Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T20:02:00.009Z] [MARKETING] Trafic: 43 visiteurs. SEO: 85/100
+[2026-01-07T20:02:00.279Z] [MARKETING] Trafic: 13 visiteurs. SEO: 85/100
+[2026-01-07T20:02:03.295Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T20:02:03.363Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T20:02:03.491Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T20:02:03.541Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T20:02:09.921Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T20:02:10.049Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T20:02:15.678Z] [GHOST_SHOPPER] Succès Distribué. Etapes: Navigation Initiale: 200 en 372ms, Action: Clic "Commander une course", Modale: Configurer la tournée visible, Modale: Créneau 08:00 sélectionné, Modale: Validation effectuée, Login: Formulaire soumis, Login: UI Erreur validée ("Invalid login credentials")
+[2026-01-07T20:02:16.020Z] [GHOST_SHOPPER] Echec Distribué: Bouton 'Commander une course' introuvable sur la Landing Page
+[2026-01-07T20:02:16.143Z] [GHOST_SHOPPER] Echec Distribué: Bouton 'Commander une course' introuvable sur la Landing Page
+[2026-01-07T20:02:20.252Z] [MARKETING] Trafic: 36 visiteurs. SEO: 85/100
+[2026-01-07T20:02:20.400Z] [MARKETING] Trafic: 37 visiteurs. SEO: 85/100
+[2026-01-07T20:02:23.267Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T20:02:23.321Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T20:02:23.849Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T20:02:23.930Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T20:02:42.567Z] [GHOST_SHOPPER] Echec Distribué: page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('input[type="email"]') to be visible
+
+[2026-01-07T20:12:07.497Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T20:12:09.060Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T20:12:21.894Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T20:12:26.185Z] [GHOST_SHOPPER] Echec Distribué: browserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell
+╔═════════════════════════════════════════════════════════════════════════╗
+║ Looks like Playwright Test or Playwright was just installed or updated. ║
+║ Please run the following command to download new browsers:              ║
+║                                                                         ║
+║     npx playwright install                                              ║
+║                                                                         ║
+║ <3 Playwright Team                                                      ║
+╚═════════════════════════════════════════════════════════════════════════╝
+[2026-01-07T20:12:29.098Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T20:12:29.107Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T20:12:30.123Z] [MARKETING] Trafic: 50 visiteurs. SEO: 85/100
+[2026-01-07T20:12:33.029Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T20:12:33.068Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T20:12:40.104Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T20:12:40.249Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T20:12:48.636Z] [MARKETING] Trafic: 42 visiteurs. SEO: 85/100
+[2026-01-07T20:12:48.785Z] [MARKETING] Trafic: 47 visiteurs. SEO: 85/100
+[2026-01-07T20:12:51.700Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T20:12:51.758Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T20:12:51.780Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T20:12:51.816Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T20:13:05.096Z] [GHOST_SHOPPER] Succès Distribué. Etapes: Navigation Initiale: 200 en 279ms, Action: Clic "Commander une course", Modale: Configurer la tournée visible, Modale: Créneau 08:00 sélectionné, Modale: Validation effectuée, Login: Formulaire soumis, Login: UI Erreur validée ("Invalid login credentials")
+[2026-01-07T20:13:28.839Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T20:13:36.766Z] [MARKETING] Trafic: 29 visiteurs. SEO: 85/100
+[2026-01-07T20:13:39.788Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T20:13:39.863Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T20:13:53.737Z] [GHOST_SHOPPER] Succès Distribué. Etapes: Navigation Initiale: 200 en 288ms, Action: Clic "Commander une course", Modale: Configurer la tournée visible, Modale: Créneau 08:00 sélectionné, Modale: Validation effectuée, Login: Formulaire soumis, Login: UI Erreur validée ("Invalid login credentials")
+[2026-01-07T20:22:08.510Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T20:22:09.630Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T20:22:39.097Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
