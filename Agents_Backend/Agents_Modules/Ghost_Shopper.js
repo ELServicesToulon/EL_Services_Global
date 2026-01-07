@@ -19,6 +19,18 @@ const PERF_THRESHOLDS = {
     API_RESPONSE: 1000  // Max 1sec pour une réponse serveur
 };
 
+/**
+ * Attente intelligente de la disparition du loader
+ */
+async function waitForOverlay(page) {
+    try {
+        // On attend que l'indicateur de chargement soit masqué ou détaché
+        await page.waitForSelector('#indicateur-chargement', { state: 'hidden', timeout: 10000 });
+    } catch (e) {
+        // On ignore le timeout si l'élément n'existait déjà pas
+    }
+}
+
 async function runGhostShopperCycle() {
     console.log('[CLIENT EXPERT] 🚀 Démarrage de la session QA + Parcours V2...');
 
@@ -88,7 +100,8 @@ async function runGhostShopperCycle() {
             report.issues.push(`[PERF] Chargement initial lent: ${loadTime}ms (Objectif: <${PERF_THRESHOLDS.PAGE_LOAD}ms)`);
         }
 
-        await page.waitForTimeout(2000); // UI stabilization
+        await waitForOverlay(page);
+        await page.waitForTimeout(1000); // UI stabilization
 
         // --- ETAPE 2 : LANDING - BUTTON COMMANDER ---
         console.log(' -> Recherche du bouton "Commander une course"...');
@@ -108,7 +121,8 @@ async function runGhostShopperCycle() {
         console.log(' -> Interaction Modale Réservation...');
         
         // Attente de la modale
-        await page.waitForSelector('text=Configurer la tournée', { timeout: 5000 });
+        await waitForOverlay(page);
+        await page.waitForSelector('text=Configurer la tournée', { timeout: 10000 });
         report.steps.push('Modale: Configurer la tournée visible');
 
         // Bouton "Voir les créneaux"
@@ -119,6 +133,8 @@ async function runGhostShopperCycle() {
         }
 
         // Sélection d'un créneau (le premier disponible)
+        await waitForOverlay(page);
+        
         // Les slots sont des boutons avec border et texte heure (ex: "08:00")
         // On cherche un bouton qui n'est pas disabled
         const slotButtons = await page.$$('button:has-text(":")'); // Heuristique simple

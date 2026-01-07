@@ -1306,3 +1306,58 @@ Call log:
 [2026-01-07T18:03:16.061Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
 [2026-01-07T18:03:17.754Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
 [2026-01-07T18:03:18.240Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:13:15.815Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:13:17.170Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:13:18.723Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:23:14.756Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:23:14.934Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:23:18.228Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:33:15.639Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:33:15.774Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:33:18.492Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:43:15.399Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:43:20.093Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:43:26.755Z] [NETWORK] 🔥 Portail Client : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:52:51.539Z] [GHOST_SHOPPER] Echec Distribué: Bouton 'Commander une course' introuvable sur la Landing Page
+[2026-01-07T18:52:51.624Z] [GHOST_SHOPPER] Echec Distribué: Bouton 'Commander une course' introuvable sur la Landing Page
+[2026-01-07T18:53:04.801Z] [MARKETING] Trafic: 43 visiteurs. SEO: 85/100
+[2026-01-07T18:53:05.667Z] [MARKETING] Trafic: 57 visiteurs. SEO: 85/100
+[2026-01-07T18:53:08.065Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T18:53:08.460Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T18:53:08.656Z] [MARKETING] Trafic: 39 visiteurs. SEO: 85/100
+[2026-01-07T18:53:09.162Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T18:53:09.458Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T18:53:11.861Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T18:53:12.166Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T18:53:13.524Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:53:15.785Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:53:18.055Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T18:53:29.016Z] [GHOST_SHOPPER] Echec Distribué: page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('input[type="email"]') to be visible
+
+[2026-01-07T19:03:15.336Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:03:16.761Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:03:19.220Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:13:14.137Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:13:14.505Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:13:16.387Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:23:14.946Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:23:17.100Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:23:19.204Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:33:16.042Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:33:16.044Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:33:18.584Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:43:16.075Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:43:17.561Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:43:18.015Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:53:04.834Z] [MARKETING] Trafic: 43 visiteurs. SEO: 85/100
+[2026-01-07T19:53:05.673Z] [MARKETING] Trafic: 42 visiteurs. SEO: 85/100
+[2026-01-07T19:53:08.447Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T19:53:08.661Z] [MARKETING] Trafic: 51 visiteurs. SEO: 85/100
+[2026-01-07T19:53:09.526Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T19:53:12.157Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T19:53:13.600Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:53:17.862Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T19:53:17.875Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)

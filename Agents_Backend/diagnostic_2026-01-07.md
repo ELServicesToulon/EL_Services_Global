@@ -1,6 +1,6 @@
 # 🔧 Rapport Diagnostic - 07/01/2026
 
-Généré le: 07/01/2026 17:53:11
+Généré le: 07/01/2026 19:53:11
 
 ---
 
@@ -46,7 +46,7 @@ npx playwright install chromium
 ### Service accessible en HTTP au lieu de HTTPS
 
 - **Agent**: NETWORK
-- **Occurrences**: 274
+- **Occurrences**: 308
 
 **Suggestion:** Configurer certificat SSL via Certbot sur le serveur
 
