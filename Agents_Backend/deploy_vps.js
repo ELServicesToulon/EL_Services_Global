@@ -121,6 +121,7 @@ conn.on('ready', () => {
     }));
 
     // Install dependencies and run
+    const runCommands = [
         `cd ${REMOTE_DIR} && npm install`,
         `cd ${REMOTE_DIR} && npx playwright install --with-deps`,
         // PM2: Try reload/restart, fallback to start

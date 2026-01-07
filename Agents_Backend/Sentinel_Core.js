@@ -17,6 +17,7 @@ const AgentConnector = require('./Agents_Modules/Agent_Connector');
 const DriveManager = require('./Agents_Modules/Drive_Manager');
 const AgentFixer = require('./Agents_Modules/Agent_Fixer');
 const SecurityAgent = require('./Agents_Modules/Security_Agent');
+const ChatAgent = require('./Agents_Modules/Chat_Agent');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -317,11 +318,26 @@ async function main() {
         }, 14400000); // 4h
     }
 
+    // --- 9. CHAT AGENT (Listener Permanent) ---
+    if (ChatAgent) {
+        await ChatAgent.init();
+    }
+
     console.log('\n⏳ En attente... (Ctrl+C pour arrêter)');
 
-    // Heartbeat visuel
+    // Heartbeat visuel & Memory Monitor
+    let peakMemory = 0;
     setInterval(() => {
-        process.stdout.write(`\r[${new Date().toLocaleTimeString()}] Active. Mem: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`);
+        const used = process.memoryUsage().heapUsed / 1024 / 1024;
+        if (used > peakMemory) peakMemory = used;
+        
+        // Alerte si Heap > 1GB
+        if (used > 1024) { 
+            console.warn(`⚠️ [MEMORY] High Heap Usage: ${Math.round(used)}MB`);
+            remoteLog('MEMORY', `High Heap Usage: ${Math.round(used)}MB`);
+        }
+
+        process.stdout.write(`\r[${new Date().toLocaleTimeString()}] Active. Mem: ${Math.round(used)}MB (Peak: ${Math.round(peakMemory)}MB)`);
     }, 60000);
 }
 

@@ -103,6 +103,15 @@ async function main() {
         console.log("NOTE: 'Mediconvoi_Vitrine' detected but skipped to prevent conflict with V2 App at root.");
     }
 
+    // Build V2 App first
+    console.log("\nBuilding V2 Application...");
+    try {
+        await runCommand("npm run build", path.join(__dirname, "V2_App"));
+    } catch (e) {
+        console.error("V2 Build Failed. Aborting.");
+        process.exit(1);
+    }
+
     for (const deploy of deployments) {
         const fullScriptPath = path.join(__dirname, deploy.dir, deploy.script);
         const fullDir = path.join(__dirname, deploy.dir);
