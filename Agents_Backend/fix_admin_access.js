@@ -1,3 +1,4 @@
+const Vault = require('./Agents_Modules/Vault');
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -5,7 +6,7 @@ const { createClient } = require('@supabase/supabase-js');
 // API URL from .env (API_EXTERNAL_URL)
 const SUPABASE_URL = 'https://37.59.124.82.sslip.io';
 // SERVICE_ROLE_KEY from .env (Line 9)
-const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q';
+const SERVICE_KEY = Vault.get('SERVICE_KEY');
 
 const TARGET_EMAIL = 'contact@mediconvoi.fr';
 

@@ -89,6 +89,11 @@ function analyzeRecentLogs(minutes = 60) {
     for (const log of recentLogs) {
         for (const [pattern, issueInfo] of Object.entries(KNOWN_ISSUES)) {
             if (log.message.includes(pattern)) {
+                // Ignore false positives for local services (Core/Studio)
+                if (pattern === 'HTTP non sécurisé' && (log.message.includes('Core') || log.message.includes('Studio'))) {
+                    continue;
+                }
+
                 issues.push({
                     ...issueInfo,
                     timestamp: log.timestamp,

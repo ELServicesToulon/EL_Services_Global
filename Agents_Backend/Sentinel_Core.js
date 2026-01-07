@@ -16,6 +16,7 @@ const NetworkOverseer = require('./Agents_Modules/Network_Overseer');
 const AgentConnector = require('./Agents_Modules/Agent_Connector');
 const DriveManager = require('./Agents_Modules/Drive_Manager');
 const AgentFixer = require('./Agents_Modules/Agent_Fixer');
+const SecurityAgent = require('./Agents_Modules/Security_Agent');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -103,8 +104,10 @@ if (GhostShopper) {
 const TeslaMonitor = require('./Agents_Modules/Tesla_Monitor');
 const AgentMarketing = require('./Agents_Modules/Agent_Marketing');
 
+const Vault = require('./Agents_Modules/Vault');
+
 // --- CONFIGURATION ---
-const KEY_FILE_PATH = path.join(__dirname, 'keys', 'service-account.json');
+const KEY_FILE_PATH = Vault.getPath('SERVICE_ACCOUNT_KEY');
 const SHEET_NAME_TARGET = 'Projet_ELS_Journal_Agents';
 const LOG_FILE_LOCAL = path.join(__dirname, 'rapport_anomalies.txt');
 
@@ -280,6 +283,18 @@ async function main() {
             const fixerReport = await AgentFixer.runFixerCycle(false);
             if (fixerReport) await remoteLog('FIXER', fixerReport);
         }, 7200000); // 2h
+    }
+
+    // --- 8. SECURITY AGENT (Initial + 4h) ---
+    if (SecurityAgent) {
+        // Premier scan rapide au démarrage
+        const initSecurity = await SecurityAgent.runSecurityCycle();
+        if (initSecurity) await remoteLog('SECURITY', initSecurity);
+
+        setInterval(async () => {
+            const securityReport = await SecurityAgent.runSecurityCycle();
+            if (securityReport) await remoteLog('SECURITY', securityReport);
+        }, 14400000); // 4h
     }
 
     console.log('\n⏳ En attente... (Ctrl+C pour arrêter)');

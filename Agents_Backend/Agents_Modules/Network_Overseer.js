@@ -5,9 +5,11 @@
 
 const axios = require('axios');
 
+const Vault = require('./Vault');
+
 const MONITORING_TARGETS = [
-    { name: 'Portail Client', type: 'gas', id: 'AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb' },
-    { name: 'App Livreur', type: 'gas', id: 'AKfycbyC1PWyq5xnYa3HaLtuRtahsnjpkiTryQxqy5jgYHrR6pDwLgAlkM3ecxjSAAgEOYWKGg' },
+    { name: 'Portail Client', type: 'gas', id: Vault.get('GAS_PORTAIL_ID') },
+    { name: 'App Livreur', type: 'gas', id: Vault.get('GAS_LIVREUR_ID') },
     { name: 'Mediconvoi Vitrine', type: 'web', url: 'https://mediconvoi.fr' },
     { name: 'Mediconvoi Core (API)', type: 'web', url: 'http://127.0.0.1:8000' },
     { name: 'Mediconvoi Core (Studio)', type: 'web', url: 'http://127.0.0.1:3000' }
@@ -27,7 +29,12 @@ async function runHealthCheck() {
 
         try {
             const start = Date.now();
-            const res = await axios.get(url, { validateStatus: false, timeout: 20000, maxRedirects: 5 });
+            const res = await axios.get(url, { 
+                validateStatus: false, 
+                timeout: 20000, 
+                maxRedirects: 5,
+                headers: { 'User-Agent': 'Mediconvoi-Sentinel/1.0' }
+            });
             const duration = Date.now() - start;
 
             if (res.status >= 400) {

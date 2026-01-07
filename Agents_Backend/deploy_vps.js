@@ -1,12 +1,13 @@
 const { Client } = require('ssh2');
 const fs = require('fs');
 const path = require('path');
+const Vault = require('./Agents_Modules/Vault'); // Ensure Vault is accessible
 
 const config = {
-    host: '37.59.124.82', // IP VPS OVH
+    host: Vault.get('VPS_HOST'),
     port: 22,
-    username: 'ubuntu', // Utilisateur par défaut OVH Cloud
-    password: '1970-Manolo-145' // Mot de passe fourni
+    username: Vault.get('VPS_USER'),
+    password: Vault.get('VPS_PASS')
 };
 
 const conn = new Client();
@@ -120,13 +121,12 @@ conn.on('ready', () => {
     }));
 
     // Install dependencies and run
-    const runCommands = [
         `cd ${REMOTE_DIR} && npm install`,
         `cd ${REMOTE_DIR} && npx playwright install --with-deps`,
-        `cd ${REMOTE_DIR} && pm2 start Sentinel_Core.js --name sentinel`,
+        // PM2: Try reload/restart, fallback to start
+        `cd ${REMOTE_DIR} && (pm2 reload sentinel || pm2 start Sentinel_Core.js --name sentinel)`,
         `cd ${REMOTE_DIR} && pm2 save`,
         `cd ${REMOTE_DIR} && pm2 startup`
-    ];
 
     runCommands.forEach(cmd => {
         chain = chain.then(() => new Promise((resolve, reject) => {
