@@ -95,11 +95,31 @@ if (GhostShopper) {
         }
     };
 
-    // Lancement différé initial
-    setTimeout(runDistributedGhostShopper, 5000);
+    // --- SCHEDULING INTELLIGENT (OFF-PEAK) ---
+    // Ghost Shopper est lourd, on ne le lance qu'entre 1h et 5h du matin
+    let lastGhostShopperRun = null;
 
-    // Puis périodique
-    setInterval(runDistributedGhostShopper, 14400000); // 4h
+    const checkAndRunGhostShopper = async () => {
+        const now = new Date();
+        const hour = now.getHours();
+        const todayStr = now.toISOString().split('T')[0];
+
+        // Vérification de la plage horaire (1h - 5h)
+        if (hour >= 1 && hour < 5) {
+            // Vérification si déjà lancé aujourd'hui
+            if (lastGhostShopperRun !== todayStr) {
+                console.log(`🌙 [OFF-PEAK] Fenêtre 1h-5h détectée. Lancement de Ghost Shopper...`);
+                await runDistributedGhostShopper();
+                lastGhostShopperRun = todayStr;
+            }
+        }
+    };
+
+    // Vérification toutes les 30 minutes
+    setInterval(checkAndRunGhostShopper, 1800000); 
+
+    // Premier check au démarrage (au cas où on redémarre la nuit)
+    setTimeout(checkAndRunGhostShopper, 10000);
 }
 const TeslaMonitor = require('./Agents_Modules/Tesla_Monitor');
 const AgentMarketing = require('./Agents_Modules/Agent_Marketing');
