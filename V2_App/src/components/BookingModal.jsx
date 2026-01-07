@@ -219,7 +219,7 @@ export function BookingModal({ date, isOpen, onClose }) {
                                             className="w-full mt-4 py-4 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2"
                                         >
                                             <Check size={20} />
-                                            Confirmer pour {selectedSlot}
+                                            Confirmer pour {selectedSlot} (DEBUG)
                                         </button>
                                     )}
                                 </div>

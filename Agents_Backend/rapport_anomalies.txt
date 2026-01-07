@@ -1469,3 +1469,4 @@ Call log:
 [2026-01-07T22:03:29.039Z] [ORCHESTRATOR] Démarrage du système (v2.0).
 [2026-01-07T22:03:30.428Z] [MARKETING] Trafic: 36 visiteurs. SEO: 85/100
 [2026-01-07T22:03:33.604Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T22:52:02.775Z] [NETWORK] ⚠️ Mediconvoi Core (Studio) : ERREUR 404 (3ms)

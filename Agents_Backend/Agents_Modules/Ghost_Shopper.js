@@ -167,9 +167,19 @@ async function runGhostShopperCycle() {
             // On essaie de continuer si jamais un créneau était pré-sélectionné (peu probable)
         }
 
-        // Confirmer (Bouton Vert "Confirmer pour ...")
+        // Confirmer (Bouton Vert) - Check for Debug Text to confirm version
         await page.waitForTimeout(1000);
-        const btnConfirmer = await page.locator('#btn-confirm-booking');
+        const btnConfirmer = await page.getByText('Confirmer pour'); // Partial match works
+        // Verify full text to see if DEBUG is there
+        const fullText = await btnConfirmer.textContent();
+        console.log(` -> Bouton trouvé. Texte: "${fullText}"`);
+
+        if (fullText.includes("DEBUG")) {
+             console.log("✅ VERSION DEBUG ACTIVER (Code à jour)");
+        } else {
+             console.log("❌ ANCIENNE VERSION DETECTEE (Cache encore actif)");
+        }
+        
         if (await btnConfirmer.isVisible()) {
             await page.waitForTimeout(500); // Wait for animation
             await btnConfirmer.click({ force: true });
