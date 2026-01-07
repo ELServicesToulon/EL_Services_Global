@@ -96,6 +96,13 @@ export default function Dashboard() {
                             <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
                                 {user?.email?.charAt(0).toUpperCase()}
                             </div>
+                            <button 
+                                onClick={handleLogout}
+                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                title="Se déconnecter"
+                            >
+                                <LogOut className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 </header>

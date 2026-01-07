@@ -1,6 +1,6 @@
 # 🔧 Rapport Diagnostic - 07/01/2026
 
-Généré le: 07/01/2026 15:36:54
+Généré le: 07/01/2026 17:53:11
 
 ---
 
@@ -32,7 +32,7 @@ npx playwright install chromium
 ### Page trop lente à charger
 
 - **Agent**: GHOST_SHOPPER
-- **Occurrences**: 4
+- **Occurrences**: 9
 
 **Suggestion:** Augmenter le timeout ou optimiser la page cible
 
@@ -46,7 +46,7 @@ npx playwright install chromium
 ### Service accessible en HTTP au lieu de HTTPS
 
 - **Agent**: NETWORK
-- **Occurrences**: 238
+- **Occurrences**: 274
 
 **Suggestion:** Configurer certificat SSL via Certbot sur le serveur
 
