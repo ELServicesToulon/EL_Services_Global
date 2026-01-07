@@ -1,6 +1,6 @@
 # 🔧 Rapport Diagnostic - 07/01/2026
 
-Généré le: 07/01/2026 08:05:57
+Généré le: 07/01/2026 08:13:44
 
 ---
 
@@ -19,8 +19,8 @@ Généré le: 07/01/2026 08:05:57
 ### Playwright browser non installé
 
 - **Agent**: GHOST_SHOPPER
-- **Occurrences**: 7
-- **Dernière**: 07/01/2026 08:04:57
+- **Occurrences**: 8
+- **Dernière**: 07/01/2026 08:13:15
 
 **Solution:**
 ```bash
@@ -39,7 +39,7 @@ npx playwright install chromium
 ### Élément UI non visible - possible changement de page
 
 - **Agent**: GHOST_SHOPPER
-- **Occurrences**: 7
+- **Occurrences**: 8
 
 **Suggestion:** Ajouter waitForSelector avec timeout plus long ou vérifier le sélecteur CSS
 
