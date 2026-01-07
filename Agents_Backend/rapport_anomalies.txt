@@ -1158,3 +1158,12 @@ Call log:
 
 [2026-01-07T14:13:38.296Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
 [2026-01-07T14:13:41.933Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T14:23:35.730Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T14:23:38.915Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T14:33:34.586Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T14:33:39.450Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T14:36:39.636Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T14:36:50.764Z] [MARKETING] Trafic: 12 visiteurs. SEO: 85/100
+[2026-01-07T14:36:54.243Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T14:36:54.320Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T14:37:05.527Z] [GHOST_SHOPPER] Succès Distribué. Etapes: Navigation Initiale: 200 en 334ms, Action: Clic "Commander une course", Modale: Configurer la tournée visible, Modale: Créneau 08:00 sélectionné, Modale: Validation effectuée, Login: Formulaire soumis, Login: UI Erreur validée ("Invalid login credentials")

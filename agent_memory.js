@@ -57,6 +57,12 @@ function appendSession(objective) {
     console.log(`\n✅ Session enregistrée dans ${JOURNAL_FILE}. Au travail !`);
 }
 
+if (process.argv.includes('--auto')) {
+    console.log("🚀 Mode automatique détecté.");
+    appendSession("Démarrage automatique du système (Boot)");
+    process.exit(0);
+}
+
 console.log("\n🤖 --- AGENT MÉMOIRE MEDICONVOI --- 🤖\n");
 
 const context = readLastState();
