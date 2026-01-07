@@ -10,14 +10,14 @@ async function deploy() {
 
     // Configuration
     const config = {
-        host: "trychat.o2switch.net", // Fallback if truchat is wrong, but user said truchat
+        host: "ftp.yuda1395.odns.fr",
         user: "yuda1395",
-        password: "ha45-3GNJ-4JN!",
+        password: "1970Manolo145",
         secure: false // Try without implicit TLS first if issues, or true
     }
 
-    // User specified "truchat.o2switch.net"
-    config.host = "truchat.o2switch.net"
+    // User specified "truchat.o2switch.net" - Overrided by working creds
+    // config.host = "truchat.o2switch.net"
 
     try {
         console.log("Connecting to FTP...")
@@ -53,6 +53,7 @@ async function deploy() {
     }
     finally {
         client.close()
+        if (config.failed) process.exit(1); 
     }
 }
 
