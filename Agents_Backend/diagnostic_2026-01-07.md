@@ -1,6 +1,6 @@
 # 🔧 Rapport Diagnostic - 07/01/2026
 
-Généré le: 07/01/2026 07:00:13
+Généré le: 07/01/2026 08:05:57
 
 ---
 
@@ -19,8 +19,8 @@ Généré le: 07/01/2026 07:00:13
 ### Playwright browser non installé
 
 - **Agent**: GHOST_SHOPPER
-- **Occurrences**: 6
-- **Dernière**: 07/01/2026 04:59:34
+- **Occurrences**: 7
+- **Dernière**: 07/01/2026 08:04:57
 
 **Solution:**
 ```bash
@@ -46,7 +46,7 @@ npx playwright install chromium
 ### Service accessible en HTTP au lieu de HTTPS
 
 - **Agent**: NETWORK
-- **Occurrences**: 102
+- **Occurrences**: 116
 
 **Suggestion:** Configurer certificat SSL via Certbot sur le serveur
 
