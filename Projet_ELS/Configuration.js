@@ -20,7 +20,7 @@ const NOM_ENTREPRISE = "Mediconvoi";
 /** @const {string} Adresse postale de l'entreprise pour les documents légaux. */
 const ADRESSE_ENTREPRISE = "80 Avenue du Général de Gaulle, 83160 La Valette-du-Var";
 /** @const {string} Adresse e-mail de contact de l'entreprise. */
-const EMAIL_ENTREPRISE = "mediconvoi@gmail.com";
+const EMAIL_ENTREPRISE = "contact@mediconvoi.fr";
 /** @const {string} Adresse e-mail recevant les notifications administratives. */
 const ADMIN_EMAIL = "elservicestoulon@gmail.com";
 
@@ -773,8 +773,8 @@ function TEST_Configuration() {
 function SETUP_INIT_PROPERTIES() {
   var props = {
     "ID_DOSSIER_FACTURES": "1IGMRLuYcBnGzjWS9StI6slZjnkz8fa84",
-    "ADMIN_EMAIL": "elservicestoulon@gmail.com",
-    "NOM_ENTREPRISE": "EL Services",
+    "ADMIN_EMAIL": "contact@mediconvoi.fr",
+    "NOM_ENTREPRISE": "Mediconvoi",
     "GEMINI_API_KEY": "REMPLACER_PAR_VOTRE_CLE", // À CONFIGURER DANS SCRIPT PROPERTIES
     "RIB_ENTREPRISE": "FR76 4061 8804 7600 0403 5757 187",
     "ID_DOSSIER_ARCHIVES": "1HLBar6IvpJgrG_lfyRSKwNwib6U__w9U",
@@ -782,7 +782,7 @@ function SETUP_INIT_PROPERTIES() {
     "ID_CALENDRIER": "elservicestoulon@gmail.com",
     "ADRESSE_ENTREPRISE": "255 B Avenue Marcel Castié, 83000 Toulon",
     "ELS_SHARED_SECRET": "A_DEFINIR_DANS_PROPERTIES",
-    "EMAIL_ENTREPRISE": "elservicestoulon@gmail.com",
+    "EMAIL_ENTREPRISE": "contact@mediconvoi.fr",
     "ID_DOSSIER_TEMPORAIRE": "1Rel3nGZBfUnt36WuuJ_IJVRmskEAFN9Y",
     "TRACE_SECRET": "A_DEFINIR_DANS_PROPERTIES",
     "ID_LOGO": "1p10Rb3QBn3tUUs2M5zNiQzPn1YxnoPIW",

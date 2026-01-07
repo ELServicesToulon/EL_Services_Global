@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useState } from 'react'
 import { Truck, Clock, ShieldCheck, MapPin, Phone, ChevronRight, UserCircle, Mail } from 'lucide-react'
 import { MobileWidget } from '../components/MobileWidget'
@@ -29,12 +29,12 @@ export default function Landing() {
             <nav className="fixed w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-20 items-center">
-                        <div className="flex items-center space-x-2">
+                        <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                             <img src={logo} alt="Mediconvoi" className="h-10 w-auto" />
                             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-purple to-brand-blue">
                                 Mediconvoi
                             </span>
-                        </div>
+                        </Link>
                         <div className="hidden md:flex space-x-8 items-center">
                             <a href="#services" className="text-gray-600 hover:text-brand-purple transition-colors font-medium">Services</a>
                             <a href="#about" className="text-gray-600 hover:text-brand-purple transition-colors font-medium">À Propos</a>
@@ -61,13 +61,16 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="space-y-8">
-                            <div className="inline-flex items-center space-x-2 bg-blue-100 text-brand-purple px-4 py-1.5 rounded-full text-sm font-semibold">
+                            <button 
+                                onClick={() => setIsBookingModalOpen(true)}
+                                className="inline-flex items-center space-x-2 bg-blue-100 text-brand-purple px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-blue-200 transition-colors"
+                            >
                                 <span className="relative flex h-2 w-2">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-blue"></span>
                                 </span>
                                 <span>Service Logistique VIP & Sur Mesure</span>
-                            </div>
+                            </button>
 
                             <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-tight">
                                 Transport Exclusif <br />
@@ -93,18 +96,24 @@ export default function Landing() {
                             <MobileWidget />
 
                             <div className="flex items-center gap-6 pt-4 text-sm font-medium text-gray-500">
-                                <div className="flex items-center">
+                                <button 
+                                    onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
+                                    className="flex items-center hover:text-brand-purple transition-colors"
+                                >
                                     <ShieldCheck className="h-5 w-5 text-green-500 mr-2" />
                                     Certifié HDS
-                                </div>
-                                <div className="flex items-center">
+                                </button>
+                                <button 
+                                    onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                                    className="flex items-center hover:text-brand-purple transition-colors"
+                                >
                                     <Clock className="h-5 w-5 text-blue-500 mr-2" />
                                     24/7 Disponible
-                                </div>
+                                </button>
                             </div>
                         </div>
 
-                        <div className="relative hidden lg:block">
+                        <div className="relative hidden lg:block cursor-pointer" onClick={() => navigate('/login')}>
                             {/* Abstract decorative shapes representing map/logistics */}
                             <div className="absolute top-10 right-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
                             <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-cyan-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -198,6 +207,38 @@ export default function Landing() {
                     </div>
                 </div>
             </section>
+            {/* Pricing Section */}
+            <section className="py-24 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center max-w-3xl mx-auto mb-16">
+                        <h2 className="text-3xl font-bold text-slate-900 mb-4">Tarification Transparente</h2>
+                        <p className="text-lg text-gray-600">
+                            Des tarifs adaptés à vos besoins, sans frais cachés.
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-4 gap-6">
+                        {[
+                            { title: 'Normal', price: '15,00 €', desc: '1 retrait + 1 livraison + 30 mn + 9 km' },
+                            { title: 'Samedi', price: '25,00 €', desc: '1 retrait + 1 livraison + 30 mn + 9 km' },
+                            { title: 'Pré-collecte', price: '30,00 €', desc: 'Retrait veille + livraison lendemain' },
+                            { title: 'Urgence', price: '50,00 €', desc: 'Retrait & livraison immédiate PUI/Site' }
+                        ].map((item, i) => (
+                            <button 
+                                key={i} 
+                                onClick={() => setIsBookingModalOpen(true)}
+                                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left border border-gray-100 group"
+                            >
+                                <div className="mb-4">
+                                    <h4 className="font-bold text-xl text-slate-900 group-hover:text-brand-purple transition-colors mb-2">{item.title}</h4>
+                                    <span className="inline-block bg-blue-50 text-brand-blue font-bold px-4 py-1.5 rounded-full text-lg">{item.price}</span>
+                                </div>
+                                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
             {/* CTA Bottom */}
             <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
@@ -220,10 +261,10 @@ export default function Landing() {
             <footer className="bg-slate-950 text-slate-400 py-12 border-t border-slate-900">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-4 gap-8">
                     <div className="col-span-1 md:col-span-2">
-                        <div className="flex items-center space-x-2 mb-4">
-                            <img src="/logo.png" alt="Mediconvoi" className="h-8 w-auto" />
+                        <Link to="/" className="flex items-center space-x-2 mb-4 hover:opacity-80 transition-opacity w-fit">
+                            <img src={logo} alt="Mediconvoi" className="h-8 w-auto" />
                             <span className="text-xl font-bold text-white">Mediconvoi</span>
-                        </div>
+                        </Link>
                         <p className="max-w-xs text-sm">
                             La référence du transport médical sécurisé. Nous connectons les acteurs de santé pour une meilleure prise en charge des patients.
                         </p>
@@ -238,24 +279,29 @@ export default function Landing() {
                     </div>
                     <div>
                         <h4 className="text-white font-bold mb-4">Contact</h4>
-                        <div className="space-y-2 text-sm">
-                            <div className="flex items-center">
-                                <MapPin className="h-4 w-4 mr-2" />
+                        <div className="space-y-4 text-sm">
+                            <a href="https://maps.google.com/?q=255+B+Avenue+Marcel+Castié,+83000+Toulon" target="_blank" rel="noopener noreferrer" className="flex items-center hover:text-white transition-colors">
+                                <MapPin className="h-4 w-4 mr-2 text-brand-blue" />
                                 255 B Avenue Marcel Castié, 83000 Toulon
-                            </div>
-                            <div className="flex items-center">
-                                <Phone className="h-4 w-4 mr-2" />
+                            </a>
+                            <a href="tel:0768591888" className="flex items-center hover:text-white transition-colors">
+                                <Phone className="h-4 w-4 mr-2 text-brand-blue" />
                                 07 68 59 18 88
-                            </div>
-                            <div className="flex items-center">
-                                <Mail className="h-4 w-4 mr-2" />
+                            </a>
+                            <a href="mailto:contact@mediconvoi.fr" className="flex items-center hover:text-white transition-colors">
+                                <Mail className="h-4 w-4 mr-2 text-brand-blue" />
                                 contact@mediconvoi.fr
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
-                <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-slate-900 text-center text-xs">
-                    © 2025 Mediconvoi. Tous droits réservés.
+                <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-slate-900 text-center text-xs flex flex-col md:flex-row justify-between items-center text-slate-500">
+                    <p>© 2026 Mediconvoi. Tous droits réservés.</p>
+                    <div className="flex space-x-6 mt-4 md:mt-0">
+                        <Link to="/legal?tab=mentions" className="hover:text-white transition-colors">Mentions Légales</Link>
+                        <Link to="/legal?tab=privacy" className="hover:text-white transition-colors">Confidentialité</Link>
+                        <Link to="/legal?tab=cgu" className="hover:text-white transition-colors">CGU</Link>
+                    </div>
                 </div>
             </footer>
         </div>

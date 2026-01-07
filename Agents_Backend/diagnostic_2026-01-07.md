@@ -1,6 +1,6 @@
 # 🔧 Rapport Diagnostic - 07/01/2026
 
-Généré le: 07/01/2026 10:13:44
+Généré le: 07/01/2026 13:40:47
 
 ---
 
@@ -19,8 +19,8 @@ Généré le: 07/01/2026 10:13:44
 ### Playwright browser non installé
 
 - **Agent**: GHOST_SHOPPER
-- **Occurrences**: 8
-- **Dernière**: 07/01/2026 08:13:15
+- **Occurrences**: 9
+- **Dernière**: 07/01/2026 12:13:10
 
 **Solution:**
 ```bash
@@ -39,14 +39,14 @@ npx playwright install chromium
 ### Élément UI non visible - possible changement de page
 
 - **Agent**: GHOST_SHOPPER
-- **Occurrences**: 12
+- **Occurrences**: 13
 
 **Suggestion:** Ajouter waitForSelector avec timeout plus long ou vérifier le sélecteur CSS
 
 ### Service accessible en HTTP au lieu de HTTPS
 
 - **Agent**: NETWORK
-- **Occurrences**: 148
+- **Occurrences**: 209
 
 **Suggestion:** Configurer certificat SSL via Certbot sur le serveur
 

@@ -7,11 +7,13 @@ import PublicBooking from './pages/PublicBooking'
 import DeliveryTour from './pages/DeliveryTour'
 import DeliveryStop from './pages/DeliveryStop'
 import DeliveryReport from './pages/DeliveryReport'
+import Legal from './pages/Legal'
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/legal" element={<Legal />} />
       <Route path="/login" element={<Login />} />
       <Route path="/booking" element={<PublicBooking />} />
       <Route path="/dashboard" element={<Dashboard />} />

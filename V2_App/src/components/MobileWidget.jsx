@@ -18,11 +18,19 @@ export function MobileWidget() {
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
 
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-slate-600 font-bold text-xs uppercase tracking-wider flex items-center gap-2">
+                    <button 
+                        onClick={() => window.location.reload()}
+                        className="text-slate-600 font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:text-brand-purple transition-colors"
+                    >
                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                         Accès Rapide
-                    </h3>
-                    <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">v2.0</span>
+                    </button>
+                    <button 
+                        onClick={() => window.open('https://github.com/mediconvoi/v2-changelog', '_blank')}
+                        className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono hover:bg-slate-200 transition-colors"
+                    >
+                        v2.0
+                    </button>
                 </div>
 
                 <div className="grid grid-cols-4 gap-4">
