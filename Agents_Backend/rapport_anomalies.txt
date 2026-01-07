@@ -921,3 +921,24 @@ Call log:
 
 [2026-01-07T08:44:11.187Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
 🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-07T08:50:53.948Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T08:51:14.873Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+⚠️ Mediconvoi Sentinelle : ERREUR 404 (4ms)
+[2026-01-07T08:53:51.661Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: connect ECONNREFUSED 87.106.1.4:80)
+[2026-01-07T09:00:54.109Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T09:01:10.377Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+⚠️ Mediconvoi Sentinelle : ERREUR 404 (3ms)
+[2026-01-07T09:03:51.954Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: connect ECONNREFUSED 87.106.1.4:80)
+[2026-01-07T09:10:55.124Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T09:11:10.726Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+⚠️ Mediconvoi Sentinelle : ERREUR 404 (3ms)
+[2026-01-07T09:13:41.454Z] [MARKETING] Trafic: 50 visiteurs. SEO: 85/100
+[2026-01-07T09:13:44.717Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T09:13:44.912Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T09:13:59.992Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: connect ECONNREFUSED 87.106.1.4:80)
+[2026-01-07T09:20:54.436Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T09:21:09.377Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+⚠️ Mediconvoi Sentinelle : ERREUR 404 (5ms)
