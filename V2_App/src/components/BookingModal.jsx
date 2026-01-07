@@ -77,6 +77,9 @@ export function BookingModal({ date, isOpen, onClose }) {
         return "border-gray-200 hover:border-brand-purple hover:bg-purple-50 text-brand-purple";
     };
 
+    // Debug Render
+    console.log("BookingModal Rendered. Open:", isOpen, "Selected:", selectedSlot);
+
     if (!isOpen) return null;
 
     return (
@@ -95,6 +98,11 @@ export function BookingModal({ date, isOpen, onClose }) {
                     animate={{ scale: 1, opacity: 1 }}
                     className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden relative z-10"
                 >
+                    {/* ... */}
+                    {/* Assuming content is unchanged above */}
+                    
+                    {/* REPLACING JUST THE BUTTON BLOCK IS RISKY WITH CONTEXT. I'LL REPLACE THE WHOLE RETURN IF NEEDED BUT TOOL SUPPORTS CHUNK */}
+
                     {/* Header */}
                     <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                         <div>
@@ -203,6 +211,7 @@ export function BookingModal({ date, isOpen, onClose }) {
 
                                     {selectedSlot && (
                                         <button
+                                            id="btn-confirm-booking"
                                             onClick={() => {
                                                 console.log("Modal: Confirm Button Clicked");
                                                 handleConfirm();

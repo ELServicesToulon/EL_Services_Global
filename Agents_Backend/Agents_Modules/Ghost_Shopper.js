@@ -91,7 +91,7 @@ async function runGhostShopperCycle() {
         const tStart = Date.now();
 
         // 1. Accès au Portail V2
-        const targetUrl = 'https://mediconvoi.fr';
+        const targetUrl = 'https://mediconvoi.fr?v=' + Date.now();
         console.log(` -> Navigation vers ${targetUrl}...`);
 
         const navResponse = await page.goto(targetUrl, { timeout: 60000, waitUntil: 'domcontentloaded' });
@@ -169,9 +169,11 @@ async function runGhostShopperCycle() {
 
         // Confirmer (Bouton Vert "Confirmer pour ...")
         await page.waitForTimeout(1000);
-        const btnConfirmer = await page.getByText('Confirmer pour');
+        const btnConfirmer = await page.locator('#btn-confirm-booking');
         if (await btnConfirmer.isVisible()) {
-            await btnConfirmer.click();
+            await page.waitForTimeout(500); // Wait for animation
+            await btnConfirmer.click({ force: true });
+            console.log(' -> Clic Confirm effectué (Forced ID)');
             report.steps.push('Modale: Validation effectuée');
         } else if (slotSelected) {
             report.issues.push('[UX] Bouton de confirmation non apparu après sélection');
