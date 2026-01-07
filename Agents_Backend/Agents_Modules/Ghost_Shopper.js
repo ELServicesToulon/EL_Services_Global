@@ -53,14 +53,17 @@ async function runGhostShopperCycle() {
     // --- 🕵️‍♂️ SETUP DES SONDES (MONITORING) ---
 
     // 1. Sonde Console (JS Errors)
+    // 1. Sonde Console (JS Errors & Logs)
     page.on('console', msg => {
-        if (msg.type() === 'error' || msg.type() === 'warning') {
-            const text = msg.text();
-            // Ignorer les warnings bénins de React/Vite en dev ou analytics
-            if (text.includes('DevTools') || text.includes('third-party cookie') || text.includes('React Router')) return;
+        const text = msg.text();
+        // Still ignore React warnings
+        if (text.includes('DevTools') || text.includes('third-party cookie') || text.includes('React Router')) return;
 
+        if (msg.type() === 'error' || msg.type() === 'warning') {
             report.issues.push(`[JS ${msg.type().toUpperCase()}] ${text}`);
-            console.log(`⚠️ JS: ${text}`);
+            console.log(`⚠️ JS (${msg.type()}): ${text}`);
+        } else {
+             console.log(`ℹ️ JS (log): ${text}`);
         }
     });
 

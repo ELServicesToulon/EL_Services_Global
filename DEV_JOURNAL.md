@@ -163,3 +163,32 @@ Ce fichier sert de mémoire persistante pour le projet. Il permet à l'agent (et
 - ...
 
 ---
+
+### 2026-01-07 - Intégration Chatbot & Déploiement Total
+
+**Objectif**: Mise en place d'un assistant IA sur le portail V2 et sécurisation du serveur.
+
+**Actions Réalisées**:
+- [x] **Chatbot Front (V2_App)** : Création composant `Chatbot.jsx` avec logo, connecté à Supabase (Realtime).
+- [x] **Chatbot Back (Agents_Backend)** : Création module `Chat_Agent.js`. Gestion des requêtes utilisateurs via Gemini API.
+- [x] **Intégration Ghost Shopper** : Le Chatbot peut déclencher un audit site ("Ghost Shopper") sur demande.
+- [x] **Correction Serveur** : Fix crash `Sentinel_Core.js` (doublon variable) et ajout Monitoring Mémoire (Peak tracking).
+- [x] **Déploiement Total** :
+    - Build Vite V2 -> Upload FTP (`public_html`).
+    - Backend VPS -> Update Code & Redémarrage PM2.
+    - Git Sync -> Push Master.
+
+**Décisions Techniques**:
+- Utilisation de Supabase pour le pont Frontend <-> Backend (Table `chat_messages`).
+- Ajout d'un moniteur de mémoire interne dans Sentinel pour prévenir les OOM.
+
+**État Actuel**:
+- Site V2 : En ligne avec Chatbot opérationnel.
+- Backend : Stable (Sentinel v2.0).
+- Monitoring : Actif.
+
+**Prochaines Étapes**:
+- Surveiller les logs via `pm2 logs sentinel`.
+- Tester le chatbot en conditions réelles avec des utilisateurs.
+
+---

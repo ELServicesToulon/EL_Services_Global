@@ -13,6 +13,7 @@ export default function Landing() {
 
     const handleBookingConfirm = (details) => {
         console.log("Booking Confirmed:", details);
+        console.log("Landing: Navigating to /login...");
         // For now, redirect to login as if to complete the booking
         navigate('/login', { state: { booking: details } });
     };
