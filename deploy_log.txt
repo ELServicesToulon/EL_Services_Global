@@ -1,0 +1,11 @@
+=== STARTING GLOBAL DEPLOYMENT ===
+
+--- Processing Project: App_Livreur ---
+No changes detected since last deploy (01/07/2026 10:22:40). Skipping.
+Tip: To force deploy, modify a file or delete BuildInfo.js.
+
+--- Processing Project: Projet_ELS ---
+BuildInfo.js missing. Forcing deploy.
+Generated BuildInfo.js (2026-01-07 10:22)
+1. Clasp Push...
+- Pushing files…
