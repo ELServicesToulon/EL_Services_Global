@@ -1103,3 +1103,58 @@ Call log:
 [2026-01-07T13:00:58.178Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
 [2026-01-07T13:01:13.323Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
 ⚠️ Mediconvoi Sentinelle : ERREUR 404 (5ms)
+[2026-01-07T13:03:11.384Z] [ARCHIVE] Backup : 2 fichiers sécurisés.
+[2026-01-07T13:04:17.987Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-07T13:05:36.631Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
+[2026-01-07T13:05:52.494Z] [ARCHIVE] Backup : 1 fichiers sécurisés.
+[2026-01-07T13:10:55.299Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T13:11:10.586Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+⚠️ Mediconvoi Sentinelle : ERREUR 404 (4ms)
+[2026-01-07T13:13:41.458Z] [MARKETING] Trafic: 16 visiteurs. SEO: 85/100
+[2026-01-07T13:13:44.724Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T13:13:44.864Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T13:14:12.957Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-07T13:20:55.793Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T13:21:10.297Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+⚠️ Mediconvoi Sentinelle : ERREUR 404 (5ms)
+[2026-01-07T13:24:11.829Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-07T13:30:53.031Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T13:30:59.753Z] [MARKETING] Trafic: 11 visiteurs. SEO: 85/100
+[2026-01-07T13:31:03.164Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T13:31:07.736Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+⚠️ Mediconvoi Sentinelle : ERREUR 404 (5ms)
+[2026-01-07T13:34:11.939Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-07T13:40:44.447Z] [MARKETING] Trafic: 15 visiteurs. SEO: 85/100
+[2026-01-07T13:40:47.853Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T13:40:53.289Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T13:41:08.939Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+⚠️ Mediconvoi Sentinelle : ERREUR 404 (7ms)
+[2026-01-07T13:44:10.682Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-07T13:48:46.849Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T13:48:57.493Z] [MARKETING] Trafic: 22 visiteurs. SEO: 85/100
+[2026-01-07T13:49:04.372Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T13:49:04.483Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T13:49:13.174Z] [GHOST_SHOPPER] Succès Distribué. Etapes: Navigation Initiale: 200 en 595ms, ℹ️ Champ CP non trouvé (Bypass), Login: Formulaire non trouvé (Déjà connecté ?), Formulaire: 0/5 champs identifiés et remplis
+[2026-01-07T13:50:52.566Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T13:54:10.098Z] [NETWORK] 🔓 Mediconvoi Core : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+🔥 Mediconvoi Sentinelle : DOWN (Timeout/Error: timeout of 20000ms exceeded)
+[2026-01-07T14:03:14.811Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T14:03:19.469Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-07T14:03:26.169Z] [MARKETING] Trafic: 13 visiteurs. SEO: 85/100
+[2026-01-07T14:03:29.296Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T14:03:29.372Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T14:03:30.392Z] [MARKETING] Trafic: 58 visiteurs. SEO: 85/100
+[2026-01-07T14:03:33.827Z] [DRIVE] Structure: Janvier 2026
+[2026-01-07T14:03:33.897Z] [FIXER] Diagnostic: 1 critiques, 3 warnings
+[2026-01-07T14:03:40.870Z] [GHOST_SHOPPER] Succès Distribué. Etapes: Navigation Initiale: 200 en 352ms, Action: Clic "Commander une course", Modale: Configurer la tournée visible, Modale: Créneau 08:00 sélectionné, Modale: Validation effectuée, Login: Formulaire soumis, Login: UI Erreur validée ("Invalid login credentials")
+[2026-01-07T14:04:10.049Z] [GHOST_SHOPPER] Echec Distribué: page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('input[type="email"]') to be visible
+
+[2026-01-07T14:13:38.296Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)
+[2026-01-07T14:13:41.933Z] [NETWORK] 🔓 Mediconvoi Core (Studio) : AVERTISSEMENT SÉCURITÉ (HTTP non sécurisé)

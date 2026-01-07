@@ -1,75 +1,123 @@
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb/exec';
+import { supabase } from './supabaseClient';
+import { format, isBefore, parseISO, startOfDay, addMinutes } from 'date-fns';
 
+// Configuration du service
+const SERVICE_CONFIG = {
+    START_HOUR: 8,
+    END_HOUR: 18,
+    SLOT_DURATION_MINUTES: 30, // 30 minutes
+    MAX_CONCURRENT_BOOKINGS: 1 // 1 livreur
+};
+
+/**
+ * Récupère les tournées pour un livreur donné (email).
+ * @param {string} email
+ */
 export async function fetchTournee(email) {
+    // Migration Supabase: On cherche les réservations assignées à ce livreur ou globales
+    // Pour l'instant, on liste les bookings du jour pour l'admin/livreur
     try {
-        // use no-cors if simple GET, but we use POST for actions usually to avoid some cache issues
-        // However, Apps Script CORS is tricky.
-        // Best method: POST with text/plain (no preflight) to avoid CORS issues if possible, 
-        // OR standard fetch if the GAS script handles OPTIONS (it usually doesn't by default).
+        const today = format(new Date(), 'yyyy-MM-dd');
+        
+        // TODO: Adapter selon le modèle de données réel (table 'tours' ou 'bookings')
+        const { data, error } = await supabase
+            .from('bookings')
+            .select(`
+                *,
+                client:users(email, user_metadata)
+            `)
+            .eq('scheduled_date', today)
+            .neq('status', 'cancelled')
+            .order('time_slot', { ascending: true });
 
-        // Actually, GAS Web App redirects. 'fetch' follows redirects.
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Opaque response. We CANNOT read data with no-cors.
-            // Wait, for READING data we CANNOT use no-cors. We MUST use cors.
-            // Google Apps Script supports CORS requests *if* the script returns correct headers?
-            // Actually GAS handles headers automatically for GET/POST.
+        if (error) throw error;
 
-            // Standard approach: POST with content-type 'application/x-www-form-urlencoded' is often safest.
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                action: 'getTournee',
-                email: email
-            })
-        });
-
-        // The issue: GAS returns 302 Redirect. Fetch follows automatically.
-        // If we get an opaque response (due to CORS misconfig), we fail.
-        // Let's try standard fetch.
-
-        const data = await response.json();
-
-        if (data.status === 'success') {
-            return data.data;
-        } else {
-            throw new Error(data.message || 'API Error');
-        }
-
+        return {
+            date: today,
+            stops: data || []
+        };
     } catch (error) {
-        console.warn("API Fetch failed, falling back to mock (or error handling).", error);
-        // During dev/transition, if API fails, maybe we still want to show something?
-        // But user said "REMPLACE", so maybe error is better.
+        console.error("Erreur fetchTournee:", error);
         throw error;
     }
 }
 
+/**
+ * Envoie un rapport de livraison.
+ * @param {object} reportData 
+ */
 export async function sendReport(reportData) {
-    // reportData: { livreurId, etablissementId, statut, note, lat, lng }
-    await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            action: 'saveLivraisonReport',
-            ...reportData
-        })
-    });
+    try {
+        const { error } = await supabase
+            .from('delivery_reports')
+            .insert([reportData]);
+
+        if (error) throw error;
+        return { success: true };
+    } catch (error) {
+        console.error("Erreur sendReport:", error);
+        // Fallback si la table n'existe pas encore, on log juste
+        return { success: false, error: error.message };
+    }
 }
 
+/**
+ * Récupère les créneaux disponibles pour une date donnée.
+ * Remplace l'appel Apps Script 'getSlots'.
+ * @param {string} date (YYYY-MM-DD)
+ */
 export async function fetchSlots(date) {
-    // date: YYYY-MM-DD
-    const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            action: 'getSlots',
-            date: date
-        })
-    });
-    const data = await response.json();
-    if (data.status === 'success') {
-        return data.data; // List of { time, status, taken, inPast }
+    try {
+        // 1. Générer les créneaux théoriques
+        const allSlots = [];
+        for (let h = SERVICE_CONFIG.START_HOUR; h < SERVICE_CONFIG.END_HOUR; h++) {
+            for (let m = 0; m < 60; m += SERVICE_CONFIG.SLOT_DURATION_MINUTES) {
+                const time = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                allSlots.push(time);
+            }
+        }
+
+        // 2. Récupérer les réservations existantes pour cette date
+        const { data: bookings, error } = await supabase
+            .from('bookings')
+            .select('time_slot')
+            .eq('scheduled_date', date)
+            .neq('status', 'cancelled');
+
+        if (error) throw error;
+
+        // 3. Compter les occupations
+        const takenMap = {};
+        bookings?.forEach(b => {
+            // b.time_slot peut être "08:30"
+            if (b.time_slot) takenMap[b.time_slot] = (takenMap[b.time_slot] || 0) + 1;
+        });
+
+        // 4. Formater comme attendu par le frontend
+        // Format attendu: { time: "08:00", status: "open"|"closed", taken: bool, inPast: bool }
+        const now = new Date();
+        const checkDate = parseISO(date);
+        const isToday = format(now, 'yyyy-MM-dd') === date;
+
+        return allSlots.map(time => {
+            const [h, m] = time.split(':').map(Number);
+            const slotDate = new Date(checkDate);
+            slotDate.setHours(h, m, 0, 0);
+
+            const isPast = isToday && isBefore(slotDate, now);
+            const count = takenMap[time] || 0;
+            const isTaken = count >= SERVICE_CONFIG.MAX_CONCURRENT_BOOKINGS;
+
+            return {
+                time: time,
+                status: (isTaken || isPast) ? 'closed' : 'open',
+                taken: isTaken,
+                inPast: isPast
+            };
+        });
+
+    } catch (error) {
+        console.error("Erreur fetchSlots Supabase:", error);
+        throw new Error("Impossible de charger les créneaux (Supabase).");
     }
-    throw new Error(data.message || 'Error fetching slots');
 }

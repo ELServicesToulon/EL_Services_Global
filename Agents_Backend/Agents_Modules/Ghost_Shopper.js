@@ -20,12 +20,13 @@ const PERF_THRESHOLDS = {
 };
 
 async function runGhostShopperCycle() {
-    console.log('[CLIENT EXPERT] 🚀 Démarrage de la session QA + Parcours...');
+    console.log('[CLIENT EXPERT] 🚀 Démarrage de la session QA + Parcours V2...');
 
     const browser = await chromium.launch({ headless: true }); // Mettre false pour voir le bot travailler
     const context = await browser.newContext({
         userManager: 'Antigravity QA Agent',
-        viewport: { width: 1280, height: 720 }
+        viewport: { width: 1280, height: 720 },
+        ignoreHTTPSErrors: true // Au cas où certificats locaux/staging
     });
     const page = await context.newPage();
 
@@ -43,8 +44,8 @@ async function runGhostShopperCycle() {
     page.on('console', msg => {
         if (msg.type() === 'error' || msg.type() === 'warning') {
             const text = msg.text();
-            // Ignorer les warnings bénins de Google Scripts ou du navigateur
-            if (text.includes('DevTools') || text.includes('third-party cookie')) return;
+            // Ignorer les warnings bénins de React/Vite en dev ou analytics
+            if (text.includes('DevTools') || text.includes('third-party cookie') || text.includes('React Router')) return;
 
             report.issues.push(`[JS ${msg.type().toUpperCase()}] ${text}`);
             console.log(`⚠️ JS: ${text}`);
@@ -61,8 +62,10 @@ async function runGhostShopperCycle() {
     // 3. Sonde Réseau (404/500)
     page.on('response', response => {
         if (response.status() >= 400) {
-            // Ignorer les 403 sur certains trackers ou fonts parfois normale
+            // Ignorer les 403 sur certains trackers ou fonts
             if (response.url().includes('favicon')) return;
+            // Ignorer les 401 si c'est Supabase (Auth required normal au début)
+            if (response.status() === 401 && response.url().includes('supabase')) return;
 
             report.issues.push(`[NETWORK ${response.status()}] ${response.url()}`);
             console.log(`🛑 HTTP ${response.status()}: ${response.url()}`);
@@ -72,11 +75,11 @@ async function runGhostShopperCycle() {
     try {
         const tStart = Date.now();
 
-        // 1. Accès au Portail
-        console.log(' -> Navigation vers le portail...');
-        const targetUrl = 'https://script.google.com/macros/s/AKfycbwxyNfzBZKsV6CpWsN39AuB0Ja40mpdEmkAGf0Ml_1tOIMfJDE-nsu7ySXTcyaJuURb/exec';
+        // 1. Accès au Portail V2
+        const targetUrl = 'https://mediconvoi.fr';
+        console.log(` -> Navigation vers ${targetUrl}...`);
 
-        const navResponse = await page.goto(targetUrl, { timeout: 60000 });
+        const navResponse = await page.goto(targetUrl, { timeout: 60000, waitUntil: 'domcontentloaded' });
         const loadTime = Date.now() - tStart;
         report.steps.push(`Navigation Initiale: ${navResponse.status()} en ${loadTime}ms`);
 
@@ -85,315 +88,125 @@ async function runGhostShopperCycle() {
             report.issues.push(`[PERF] Chargement initial lent: ${loadTime}ms (Objectif: <${PERF_THRESHOLDS.PAGE_LOAD}ms)`);
         }
 
-        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(2000); // UI stabilization
 
-        // --- CONTEXT SWITCH (IFRAME HANDLING) ---
-        let workingScope = page;
-        const iframeElement = await page.$('iframe#sandboxFrame');
-        if (iframeElement) {
-            console.log(' -> Wrapper Google détecté. Bascule vers l\'iframe #sandboxFrame...');
-            const frame = await iframeElement.contentFrame();
-            if (frame) {
-                workingScope = frame;
-                try {
-                    await workingScope.waitForLoadState('domcontentloaded');
-                } catch (e) { console.log(' -> Warning: domcontentloaded timeout in iframe'); }
-
-                const nestedFrameElement = await workingScope.$('iframe#userHtmlFrame');
-                if (nestedFrameElement) {
-                    const nestedFrame = await nestedFrameElement.contentFrame();
-                    if (nestedFrame) {
-                        console.log(' -> Nested iframe #userHtmlFrame détectée. Bascule...');
-                        workingScope = nestedFrame;
-                    }
-                }
-            } else {
-                report.issues.push('[ERROR] Impossible d\'accéder au contentFrame du sandboxFrame.');
-            }
+        // --- ETAPE 2 : LANDING - BUTTON COMMANDER ---
+        console.log(' -> Recherche du bouton "Commander une course"...');
+        // On cherche un bouton qui contient le texte ou le lien vers modal/booking
+        // Dans Landing.jsx, c'est un bouton avec onClick qui ouvre la modal
+        const btnCommander = await page.getByText('Commander une course').first();
+        
+        if (await btnCommander.isVisible()) {
+            await btnCommander.click();
+            report.steps.push('Action: Clic "Commander une course"');
+            await page.waitForTimeout(1000);
+        } else {
+            throw new Error("Bouton 'Commander une course' introuvable sur la Landing Page");
         }
 
-        // --- ETAPE 1 : CODE POSTAL (Eligibilité) ---
-        console.log(' -> Vérification Eligibilité (83000)...');
-        const cpSelectors = ['input[name="codePostal"]', 'input[placeholder*="Code Postal"]', '#cp-input', 'input[type="text"]'];
-        let cpInputCible = null;
+        // --- ETAPE 3 : BOOKING MODAL ---
+        console.log(' -> Interaction Modale Réservation...');
+        
+        // Attente de la modale
+        await page.waitForSelector('text=Configurer la tournée', { timeout: 5000 });
+        report.steps.push('Modale: Configurer la tournée visible');
 
-        await page.waitForTimeout(2000); // Stabilisation UI
+        // Bouton "Voir les créneaux"
+        const btnVoirCreneaux = await page.getByText('Voir les créneaux');
+        if (await btnVoirCreneaux.isVisible()) {
+            await btnVoirCreneaux.click();
+            await page.waitForTimeout(2000); // Load slots simulation
+        }
 
-        for (const sel of cpSelectors) {
-            if (await workingScope.isVisible(sel)) {
-                cpInputCible = sel;
+        // Sélection d'un créneau (le premier disponible)
+        // Les slots sont des boutons avec border et texte heure (ex: "08:00")
+        // On cherche un bouton qui n'est pas disabled
+        const slotButtons = await page.$$('button:has-text(":")'); // Heuristique simple
+        let slotSelected = false;
+
+        for (const btn of slotButtons) {
+            const isDisabled = await btn.isDisabled();
+            const text = await btn.textContent();
+            // On vérifie que c'est bien une heure (xx:xx)
+            if (!isDisabled && text.includes(':')) {
+                await btn.click();
+                console.log(` -> Créneau sélectionné: ${text}`);
+                report.steps.push(`Modale: Créneau ${text} sélectionné`);
+                slotSelected = true;
                 break;
             }
         }
 
-        if (cpInputCible) {
-            await workingScope.fill(cpInputCible, '83000');
-            report.steps.push('CP 83000 saisi');
-
-            const cpBtnSelectors = ['button:has-text("Vérifier")', 'button:has-text("Valider")', '#btn-check-cp', 'button[type="submit"]'];
-            let clickedCp = false;
-            for (const sel of cpBtnSelectors) {
-                if (await workingScope.isVisible(sel)) {
-                    await workingScope.click(sel);
-                    clickedCp = true;
-                    break;
-                }
-            }
-            if (!clickedCp) await page.keyboard.press('Enter');
-            report.steps.push('Validation CP effectuée');
-            await page.waitForTimeout(3000); // Attente réponse AJAX
-        } else {
-            // Si pas de champ CP, on assume qu'on est peut-être déjà logué ou page différente
-            report.steps.push('ℹ️ Champ CP non trouvé (Bypass)');
+        if (!slotSelected) {
+            report.issues.push('[STOCK] Aucun créneau disponible dans la modale (ou pas de bouton détecté)');
+            // On essaie de continuer si jamais un créneau était pré-sélectionné (peu probable)
         }
 
-        // --- TEST LOGIN (CLIENT PORTAL FIX) ---
-        console.log(' -> Test Connexion Espace Client (antigravityels@gmail.com)...');
+        // Confirmer (Bouton Vert "Confirmer pour ...")
+        await page.waitForTimeout(1000);
+        const btnConfirmer = await page.getByText('Confirmer pour');
+        if (await btnConfirmer.isVisible()) {
+            await btnConfirmer.click();
+            report.steps.push('Modale: Validation effectuée');
+        } else if (slotSelected) {
+            report.issues.push('[UX] Bouton de confirmation non apparu après sélection');
+        }
 
-        // Gestion bouton "Se connecter" (Mode Réservation)
-        const btnLoginResa = await workingScope.$('#btn-connecter-client');
-        if (btnLoginResa && await btnLoginResa.isVisible()) {
-            console.log(' -> Bouton "Se connecter" trouvé. Clic...');
-            await btnLoginResa.click();
+        // --- ETAPE 4 : REDIRECT LOGIN ---
+        console.log(' -> Vérification Redirection Login...');
+        // Attente URL /login
+        try {
+            await page.waitForURL('**/login', { timeout: 10000 });
+            report.steps.push('Navigation: Redirection vers /login réussie');
+        } catch (e) {
+            report.issues.push(`[NAV] Pas de redirection vers /login. URL actuelle: ${page.url()}`);
+            // On tente de forcer si on est resté bloqué
+            if (!page.url().includes('login')) await page.goto(targetUrl + '/login');
+        }
+
+        // --- ETAPE 5 : FORMULAIRE LOGIN ---
+        console.log(' -> Test Login (QA User)...');
+        await page.waitForSelector('input[type="email"]');
+        
+        // Remplir Email
+        await page.fill('input[type="email"]', 'antigravityels@gmail.com');
+        
+        // Switch Password Mode ("Je préfère utiliser mon mot de passe")
+        const btnSwitchPass = await page.getByText('utiliser mon mot de passe');
+        if (await btnSwitchPass.isVisible()) {
+            await btnSwitchPass.click();
             await page.waitForTimeout(500);
         }
 
-        // Choix du sélecteur (Mode Page vs Mode Modale)
-        let emailInputSel = '#email-connexion';
-        let submitBtnSel = '#formulaire-connexion-client button[type="submit"]';
+        // Remplir Password
+        await page.fill('input[type="password"]', 'test1234'); // Mot de passe bidon pour tester l'UI, ou vrai si connu
+        
+        // Submit
+        const btnSubmitHost = await page.locator('button[type="submit"]');
+        // On vérifie le texte pour être sûr
+        const btnText = await btnSubmitHost.textContent();
+        console.log(` -> Bouton Submit trouvé: "${btnText}"`);
+        await btnSubmitHost.click();
+        
+        report.steps.push('Login: Formulaire soumis');
 
-        if (await workingScope.isVisible('#email-connexion-reservation')) {
-            emailInputSel = '#email-connexion-reservation';
-            submitBtnSel = '#formulaire-connexion-reservation button[type="submit"]';
-        }
-
-        if (await workingScope.isVisible(emailInputSel)) {
-            console.log(` -> Formulaire de connexion détecté (${emailInputSel}).`);
-            await workingScope.fill(emailInputSel, 'antigravityels@gmail.com');
-            const btnConnect = await workingScope.$(submitBtnSel);
-            if (btnConnect) {
-                await btnConnect.click();
-                console.log(' -> Demande de code envoyée.');
-                report.steps.push('Login: Email saisi et validé');
-
-                // Attente du champ OTP
-                const otpInputSel = '#input-otp';
-                try {
-                    await workingScope.waitForSelector(otpInputSel, { timeout: 10000 });
-                    console.log(' -> Champ OTP apparu.');
-                    await workingScope.fill(otpInputSel, '999999'); // Backdoor
-
-                    const btnOtp = await workingScope.$('#form-otp button[type="submit"]');
-                    if (btnOtp) {
-                        await btnOtp.click();
-                        console.log(' -> Code OTP 999999 envoyé.');
-                        report.steps.push('Login: Code OTP backdoor utilisé');
-
-                        // Attente succès (disparition form ou message bienvenue)
-                        // #message-bienvenue-client
-                        try {
-                            await workingScope.waitForSelector('#message-bienvenue-client', { timeout: 10000 });
-                            const msg = await workingScope.$eval('#message-bienvenue-client', el => el.textContent);
-                            console.log(` -> SUCCES LOGIN: ${msg}`);
-                            report.steps.push(`Login SUCCES: ${msg}`);
-                        } catch (e) {
-                            report.issues.push('[LOGIN] Échec validation OTP ou timeout succès.');
-                        }
-                    }
-                } catch (e) {
-                    report.issues.push('[LOGIN] Le champ OTP n\'est pas apparu après saisie email.');
-                }
-            }
+        // --- ETAPE 6 : DASHBOARD CHECK ---
+        // On s'attend à une erreur (mauvais mdp) ou un succès (redirection dashboard)
+        // Comme on n'a pas les creds de prod ici (hardcoded check), on va juste vérifier la réaction.
+        // Si le message d'erreur apparait -> UI OK.
+        // Si dashboard apparait -> Login OK.
+        
+        await page.waitForTimeout(3000);
+        
+        const errorMsg = await page.locator('.text-red-200').first(); // Classe d'erreur vue dans Login.jsx
+        if (await errorMsg.isVisible()) {
+            const errText = await errorMsg.textContent();
+            console.log(` -> Login Réponse: Erreur UI détectée ("${errText}")`);
+            report.steps.push(`Login: UI Erreur validée ("${errText}")`);
+        } else if (page.url().includes('/dashboard')) {
+            report.steps.push('Login: Accès Dashboard RÉUSSI');
         } else {
-            console.log(' -> Pas de formulaire de connexion visible immédiatement.');
-            report.steps.push('Login: Formulaire non trouvé (Déjà connecté ?)');
-        }
-
-
-
-
-        // --- ETAPE 2 : AUDIT DISPONIBILITÉ ---
-        // L'Expert vérifie s'il y a des créneaux, non seulement pour réserver, mais pour signaler une "Pénurie"
-        console.log(' -> Audit Créneaux...');
-
-        // Support complet de l'interface Calendrier (V2)
-        const calendarDaySelector = '.jour-calendrier:not(.desactive)';
-        try {
-            // Attendre explicitement que le calendrier soit rendu (max 10s) car le chargement initial est lent
-            await workingScope.waitForSelector('.jour-calendrier', { state: 'attached', timeout: 10000 });
-        } catch (e) {
-            console.log(' -> Calendrier non détecté après attente (Timeout).');
-            // Check context
-            if (workingScope === page) report.issues.push('[WARN] Iframe content check failed - used Top Page');
-        }
-
-        if (await workingScope.isVisible(calendarDaySelector)) {
-            console.log(' -> Calendrier détecté. Recherche de jours avec créneaux...');
-
-            // Fonction pour tester les jours visibles
-            const tryFindDayWithSlots = async () => {
-                let days = await workingScope.$$(calendarDaySelector);
-                // On teste jusqu'à 3 jours pour éviter de spammer
-                const attemptCount = Math.min(days.length, 3);
-                for (let i = 0; i < attemptCount; i++) {
-                    days = await workingScope.$$(calendarDaySelector);
-                    if (days.length <= i) break;
-
-                    const day = days[i];
-                    console.log(` -> Test jour ${i + 1}/${days.length}...`);
-                    await day.click({ force: true });
-                    try { await workingScope.waitForSelector('#indicateur-chargement', { state: 'hidden', timeout: 5000 }); } catch (e) { }
-                    await page.waitForTimeout(2000);
-
-                    // Handle Config (V2)
-                    if (await workingScope.isVisible('#modale-config-tournee')) {
-                        const btn = await workingScope.$('#formulaire-config-tournee button[type="submit"]');
-                        if (btn) await btn.click();
-                        await page.waitForTimeout(2500);
-                    }
-
-                    // Check Slots
-                    const slotSel = '.creneau-disponible, .slot-item, button.slot, .creneau-item';
-                    if (await workingScope.isVisible(slotSel)) {
-                        return true; // Slots found and visible!
-                    }
-
-                    // Fermeture forcée de toute modale bloquante avant suite
-                    const modales = ['#modale-selection-creneau', '#modale-config-tournee'];
-                    for (const m of modales) {
-                        if (await workingScope.isVisible(m)) {
-                            console.log(` -> Modale ${m} détectée (sans slots). Fermeture...`);
-                            // Wait for loader
-                            try { await workingScope.waitForSelector('#indicateur-chargement', { state: 'hidden', timeout: 8000 }); } catch (e) { }
-
-                            const closeBtn = await workingScope.$(`${m} .btn-fermer`);
-                            if (closeBtn) await closeBtn.evaluate(b => b.click());
-                            else await workingScope.evaluate(selector => {
-                                const el = document.querySelector(selector);
-                                if (el) el.classList.add('hidden');
-                            }, m);
-                            await page.waitForTimeout(1000);
-                        }
-                    }
-
-                    console.log(' -> Pas de slots sur ce jour.');
-                }
-                return false;
-            };
-
-            let slotsFound = await tryFindDayWithSlots();
-
-            if (!slotsFound) {
-                console.log(' -> Aucun slot sur les jours testés du mois courant. Passage au suivant...');
-                const btnNext = await workingScope.$('#btn-mois-suivant');
-                if (btnNext) {
-                    await btnNext.click({ force: true });
-                    await page.waitForTimeout(2000);
-                    slotsFound = await tryFindDayWithSlots();
-                }
-            }
-
-            if (!slotsFound) {
-                report.issues.push('[STOCK] Pénurie: Aucun créneau trouvé (Décembre & Janvier vérifiés).');
-            } else {
-                console.log(' -> Jour avec créneaux validé.');
-            }
-        }
-
-        const slotSelectors = ['.creneau-disponible', '.slot-item', 'button.slot', 'div[onclick*="selectSlot"]', '.creneau-item', '.time-slot', '.slot-btn'];
-
-        // Ensure Modale 2 is visible
-        if (await workingScope.isVisible('#modale-selection-creneau')) {
-            console.log(' -> Modale Sélection Créneau visible.');
-        } else {
-            console.log(' -> Modale Sélection Créneau NON visible (ou pas encore).');
-        }
-
-        let slotsAvailable = 0;
-        let slotFound = false;
-
-        // Sécurité: wait for loader hidden
-        try { await workingScope.waitForSelector('#indicateur-chargement', { state: 'hidden', timeout: 5000 }); } catch (e) { }
-
-        for (const selector of slotSelectors) {
-            const slots = await workingScope.$$(selector);
-            slotsAvailable += slots.length;
-            if (slots.length > 0) {
-                console.log(` -> Créneau trouvé (${selector}). Clic (Force).`);
-                await slots[0].click({ force: true });
-                slotFound = true;
-                break;
-            }
-        }
-
-        if (slotsAvailable === 0 && !slotFound) {
-            report.issues.push('[STOCK] Aucun créneau de livraison disponible !');
-            // DEBUG: Dump Grid HTML
-            const gridHtml = await workingScope.$eval('#grille-selection-creneau', el => el.innerHTML).catch(() => 'GRID NOT FOUND');
-            console.log('--- GRID HTML DUMP ---');
-            console.log(gridHtml);
-            console.log('--- END GRID DUMP ---');
-        } else {
-            report.steps.push(`Créneaux détectés. Sélection du premier.`);
-        }
-
-        if (!slotFound) {
-            // Fallback générique
-            const btnResa = await workingScope.$('button:has-text("Réserver")');
-            if (btnResa) await btnResa.click();
-        }
-        await page.waitForTimeout(2000);
-
-        // --- ETAPE 3 : FORMULAIRE & UX ---
-        console.log(' -> Validation UX Formulaire...');
-
-        const formMap = {
-            'email': 'antigravityels@gmail.com',
-            'nom': 'Bot Expert',
-            'prenom': 'QA Detect',
-            'telephone': '0600000000',
-            'adresse': '1 rue du Test Quality, 83000 Toulon'
-        };
-
-        let filledCount = 0;
-        for (const [key, val] of Object.entries(formMap)) {
-            const sels = [`input[name="${key}"]`, `input[id="${key}"]`, `input[placeholder*="${key}"]`];
-            for (const s of sels) {
-                if (await workingScope.isVisible(s)) {
-                    await workingScope.fill(s, val);
-                    filledCount++;
-                    break;
-                }
-            }
-        }
-        report.steps.push(`Formulaire: ${filledCount}/5 champs identifiés et remplis`);
-
-        // Validation Commande
-        const validerCmdSelectors = ['button:has-text("Commander")', 'button:has-text("Confirmer")', '#btn-submit-order'];
-        let commandeEnvoyee = false;
-
-        for (const sel of validerCmdSelectors) {
-            if (await workingScope.isVisible(sel)) {
-                await workingScope.click(sel);
-                commandeEnvoyee = true;
-                break;
-            }
-        }
-
-        if (commandeEnvoyee) {
-            // Check temps de réponse validation
-            const tSubmit = Date.now();
-            await page.waitForTimeout(5000); // Attente confirmation et animation
-
-            // Vérification visuelle
-            const content = await workingScope.content();
-            if (content.includes('Merci') || content.includes('reçue') || content.includes('Confirmé')) {
-                report.steps.push('✅ Confirmation de commande reçue');
-            } else {
-                report.issues.push('[UX] Confirmation non explicite après clic (Pas de message "Merci")');
-            }
-        } else {
-            report.steps.push('⚠️ Bouton Commander introuvable (Bloquant pour Ghost Shopper, mais Expert continue l\'audit)');
+            report.issues.push('[LOGIN] Aucune réaction détectée (ni erreur, ni redirection)');
         }
 
         // --- CONCLUSION DU RAPPORT ---

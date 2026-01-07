@@ -24,7 +24,7 @@ async function deploy() {
         await client.access(config)
         console.log("Connected!")
 
-        const remoteRoot = "/public.html"
+        const remoteRoot = "/public_html"
         const localDist = path.join(__dirname, "dist")
 
         console.log(`Clearing remote folder: ${remoteRoot}...`)
