@@ -8,7 +8,7 @@ const axios = require('axios');
 const Vault = require('./Vault');
 
 const MONITORING_TARGETS = [
-    { name: 'Portail Client', type: 'gas', id: Vault.get('GAS_PORTAIL_ID') },
+    // { name: 'Portail Client', type: 'gas', id: Vault.get('GAS_PORTAIL_ID') }, // LEGACY - DISABLED
     { name: 'App Livreur', type: 'gas', id: Vault.get('GAS_LIVREUR_ID') },
     { name: 'Mediconvoi Vitrine', type: 'web', url: 'https://mediconvoi.fr' },
     { name: 'Mediconvoi Core (API)', type: 'web', url: 'http://127.0.0.1:8000' },
