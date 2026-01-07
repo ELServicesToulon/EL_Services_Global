@@ -1,6 +1,6 @@
 # 🔧 Rapport Diagnostic - 07/01/2026
 
-Généré le: 07/01/2026 08:13:44
+Généré le: 07/01/2026 09:40:47
 
 ---
 
@@ -39,14 +39,14 @@ npx playwright install chromium
 ### Élément UI non visible - possible changement de page
 
 - **Agent**: GHOST_SHOPPER
-- **Occurrences**: 8
+- **Occurrences**: 11
 
 **Suggestion:** Ajouter waitForSelector avec timeout plus long ou vérifier le sélecteur CSS
 
 ### Service accessible en HTTP au lieu de HTTPS
 
 - **Agent**: NETWORK
-- **Occurrences**: 116
+- **Occurrences**: 138
 
 **Suggestion:** Configurer certificat SSL via Certbot sur le serveur
 

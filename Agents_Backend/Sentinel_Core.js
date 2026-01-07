@@ -21,7 +21,7 @@ const AgentFixer = require('./Agents_Modules/Agent_Fixer');
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
 // Simulation locale : on peut mettre 'localhost' si un serveur SSH tourne, 
 // ou laisser vide pour simuler le fallback ou le dispatch mock.
-const WORKER_IP = process.env.WORKER_IP || null; // ex: '87.106.1.4'
+const WORKER_IP = process.env.WORKER_IP || null; // ex: '123.123.123.123'
 
 // Simulation GhostShopper (Activé via Dispatch)
 const GhostShopper = { name: 'GHOST_SHOPPER' };

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script de sécurisation de base pour serveur Ubuntu (OVH/IONOS)
+# Script de sécurisation de base pour serveur Ubuntu (OVH)
 # Usage: sudo ./secure_server.sh
 # ----------------------------------------------------------------------
 

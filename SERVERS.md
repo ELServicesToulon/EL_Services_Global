@@ -25,19 +25,16 @@ Document source: [Google Doc](https://docs.google.com/document/d/1iFMe257KEFPOeb
   - Stockage: 100 Go
 - **IP**: (IPv4/IPv6 configurées sur le VPS)
 
-## 3. IONOS (Mediconvoi Sentinelle)
-- **Nom**: Mediconvoi Sentinelle
-- **IP**: `87.106.1.4`
-- **OS**: Ubuntu 24.04 + n8n
-- **Type**: Machine virtuelle (VPS 1 1 10)
-- **Configuration**:
-  - vCores: 1
-  - RAM: 1 Go
+
+
+## 4. OVH (Nouvelle Sentinelle Consolidée)
+- **IP**: `37.59.124.82`
+- **Rôle**: Orchestration et Core.
   - Stockage: 10 Go NVMe SSD
 - **Services**:
   - n8n
   - Plesk (License à générer)
 
-## 4. Autres Services
+## 5. Autres Services
 - **Supabase**: [Dashboard](https://supabase.com/dashboard/project/hppkmqmalkfbhexggovp)
 - **Vercel**: [Projets](https://vercel.com/lecourts-projects)

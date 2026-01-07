@@ -15,20 +15,17 @@ graph TD
     subgraph "External Hosting"
         WEB1[Medcargo<br/>(O2switch)]
         WEB2[Mediconvoi Core<br/>(OVH VPS)]
-        WEB3[Mediconvoi Sentinelle<br/>(IONOS VPS)]
     end
 
     A -->|HTTP GET / Health Check| GAS1
     A -->|HTTP GET / Health Check| GAS2
     A -->|HTTP GET / Health Check| WEB1
     A -->|HTTP GET / Health Check| WEB2
-    A -->|HTTP GET / Health Check| WEB3
 
     style GAS1 fill:#ccf,stroke:#333
     style GAS2 fill:#ccf,stroke:#333
     style WEB1 fill:#cfc,stroke:#333
     style WEB2 fill:#cfc,stroke:#333
-    style WEB3 fill:#cfc,stroke:#333
 ```
 
 ## Legend
