@@ -6,7 +6,6 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const path = require('path');
-const fs = require('fs');
 
 const SECRETS = {
     // Google Apps Script IDs
@@ -35,8 +34,23 @@ const SECRETS = {
     WEBAPP_URL: { required: false, description: "Legacy Main Webapp URL" },
     SIRET:  { required: false, description: "SIRET Entreprise" },
     EMAIL_ENTREPRISE: { required: false, description: "Email Contact" },
-
-    // Livreur Specific
+    ADMIN_EMAIL: { required: false, description: "Email Admin" },
+    
+    // Business Info
+    NOM_ENTREPRISE: { required: false, description: "Nom de l'entreprise" },
+    ADRESSE_ENTREPRISE: { required: false, description: "Adresse de l'entreprise" },
+    IBAN: { required: false, description: "IBAN Entreprise" },
+    BIC_ENTREPRISE: { required: false, description: "BIC Entreprise" },
+    
+    // Tesla/Tessie
+    VIN_TESLA_JUNIPER_2025: { required: false, description: "VIN du véhicule Tesla" },
+    
+    // Secrets
+    ELS_SHARED_SECRET: { required: false, description: "Secret partagé ELS" },
+    TRACE_SECRET: { required: false, description: "Secret de traçabilité" },
+    SERVICE_KEY: { required: false, description: "Clé de service Supabase" },
+    
+    // Livreur Specific (Legacy)
     CFG_ENABLE_ASSISTANT_OVERRIDE: { required: false, description: "Configuration Assistant Override" },
     ASSISTANT_TOKENS_202512: { required: false, description: "Legacy Assistant Tokens usage" },
     GEMINI_API_KEY_LIVREUR: { required: false, description: "Clé Gemini Livreur (Legacy)" },
@@ -93,8 +107,8 @@ const Vault = {
                 console.error(`[VAULT] ❌ Manquant: ${key}`);
                 allGood = false;
             } else if (value) {
-                // Masquer la valeur pour l'affichage
-                const masked = value.length > 4 ? `${value.substring(0, 4)}...` : '****';
+                // Clé présente (masquée pour la sécurité)
+                // const masked = value.length > 4 ? `${value.substring(0, 4)}...` : '****';
                 // console.log(`[VAULT] ✅ ${key}: ${masked}`);
             }
         }

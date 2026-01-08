@@ -4,6 +4,14 @@
   "description": "Solution complète de gestion logistique pour EL Services (Livraison, Pharmacie, EHPAD).",
   "scripts": {
     "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:landing": "playwright test landing.spec.js",
+    "test:booking": "playwright test booking.spec.js",
+    "test:auth": "playwright test auth.spec.js",
+    "test:legal": "playwright test legal.spec.js",
+    "test:api": "playwright test api-health.spec.js",
+    "test:report": "playwright show-report",
     "lint": "eslint .",
     "memory": "node agent_memory.js"
   },

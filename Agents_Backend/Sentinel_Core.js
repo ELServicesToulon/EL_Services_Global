@@ -25,6 +25,7 @@ const KeyGuardian = require('./Agents_Modules/Key_Guardian');
 const HoneypotAgent = require('./Agents_Modules/Honeypot_Agent');
 const SecretaryAgent = require('./Agents_Modules/Secretary_Agent');
 const DeploymentAgent = require('./Agents_Modules/Deployment_Agent');
+const BrowserServer = require('./Agents_Modules/Browser_Server');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -77,7 +78,7 @@ if (GhostShopper) {
                 const localCmd = `GHOST_MODE=${mode} node ${path.join(__dirname, 'Worker_Launcher.js')} GHOST_SHOPPER`;
 
                 const stdout = await new Promise((resolve, reject) => {
-                    exec(localCmd, (error, stdout, stderr) => {
+                    exec(localCmd, (error, stdout) => {
                         if (error) reject(error);
                         else resolve(stdout);
                     });
@@ -241,6 +242,11 @@ async function main() {
     }
 
     console.log('🚀 Lancement des cycles initiaux...');
+
+    // --- 0. BROWSER SERVER (Persistent Chromium for agents) ---
+    if (BrowserServer) {
+        await BrowserServer.start();
+    }
 
     // --- 1. ARCHIVAGE (Initial + 5 min) ---
     if (ArchiveKeeper) {
