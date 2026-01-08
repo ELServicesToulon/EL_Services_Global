@@ -92,6 +92,11 @@ async function main() {
             dir: "V2_App"
         },
         {
+            name: "Livreur App",
+            script: "deploy_ftp_livreur.js",
+            dir: "ELS_Livreur_App"
+        },
+        {
             name: "Agents Backend (VPS)",
             script: "deploy_local.js",
             dir: "Agents_Backend"
@@ -109,6 +114,15 @@ async function main() {
         await runCommand("npm run build", path.join(__dirname, "V2_App"));
     } catch (e) {
         console.error("V2 Build Failed. Aborting.");
+        process.exit(1);
+    }
+
+    // Build Livreur App
+    console.log("\nBuilding ELS Livreur App...");
+    try {
+        await runCommand("npm run build", path.join(__dirname, "ELS_Livreur_App"));
+    } catch (e) {
+        console.error("Livreur Build Failed. Aborting.");
         process.exit(1);
     }
 
