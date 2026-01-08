@@ -2,6 +2,7 @@
  * @file Dashboard_Server.js
  * @description Serveur API léger pour le Dashboard SuperAdmin.
  * Il expose l'état des agents, les logs et les conseils de l'Adjoint.
+ * Documentation API disponible sur /api-docs
  */
 
 const express = require('express');
@@ -11,11 +12,23 @@ const path = require('path');
 const { exec } = require('child_process');
 const ChiefAdvisor = require('./Agents_Modules/Chief_Advisor_Agent');
 
+// Swagger UI
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
+
 const app = express();
 const PORT = 3333;
 
 app.use(cors());
 app.use(express.json());
+
+// --- SWAGGER API DOCS ---
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Antigravity Dashboard API'
+}));
+
 
 // --- DATA CACHE ---
 let advisorTipCache = {

@@ -11,9 +11,11 @@ const path = require('path');
 const { exec } = require('child_process');
 const LogAggregator = require('./Log_Aggregator');
 const Agent_Base = require('./Agent_Base');
+const SharedKnowledge = require('./Shared_Knowledge'); // COGNITIVE UPGRADE
 
 // --- CONFIGURATION ---
 const FIXES_LOG_FILE = path.join(__dirname, '..', 'fixes_applied.log');
+
 
 // Patterns de problèmes connus et leurs solutions
 const KNOWN_ISSUES = {
@@ -63,9 +65,28 @@ class AgentFixer extends Agent_Base {
         const recentLogs = LogAggregator.getRecentLogs(minutes);
         const issues = [];
         
+        // 1. Fusionner les problèmes codés en dur ET les leçons apprises (Mémoire)
+        const LEARNED_ISSUES = SharedKnowledge.getKnownErrors();
+        
+        // On convertit LEARNED_ISSUES au format KNOWN_ISSUES pour traitement uniforme
+        const ALL_PATTERNS = { ...KNOWN_ISSUES };
+        
+        Object.keys(LEARNED_ISSUES).forEach(signature => {
+            // On ne surcharge pas les hardcoded
+            if (!ALL_PATTERNS[signature]) {
+                ALL_PATTERNS[signature] = {
+                    agent: 'LEARNED_FROM_AI',
+                    severity: 'warning',
+                    description: `Problème appris: ${signature.substring(0, 30)}...`,
+                    fix: { type: 'ai_suggestion', suggestion: LEARNED_ISSUES[signature].fix }
+                };
+            }
+        });
+
         for (const log of recentLogs) {
             let matched = false;
-            for (const [pattern, issueInfo] of Object.entries(KNOWN_ISSUES)) {
+            for (const [pattern, issueInfo] of Object.entries(ALL_PATTERNS)) {
+
                 if (log.message.includes(pattern)) {
                     if (pattern === 'HTTP non sécurisé' && (log.message.includes('Core') || log.message.includes('Studio'))) continue;
 
@@ -229,6 +250,15 @@ class AgentFixer extends Agent_Base {
                 issue.aiAnalysis = analysis;
                 // On met à jour le fix pour le rapport
                 issue.fix = { type: 'ai_suggestion', suggestion: analysis.fix_suggestion };
+                
+                // --- APPRENTISSAGE EXPONENTIEL ---
+                // Si l'IA est confiante, on mémorise ce pattern pour le futur
+                if (analysis.fix_suggestion && analysis.fix_suggestion !== "Consulter les logs manuellement.") {
+                     const errorSignature = issue.originalMessage.substring(0, 80); // On prend le début comme signature
+                     SharedKnowledge.learnErrorFix(errorSignature, analysis.fix_suggestion);
+                     this.log(`🧠 [LEARNING] Nouveau pattern d'erreur mémorisé: "${errorSignature}"`);
+                }
+
                 this.log(`💡 Suggestion IA : ${analysis.fix_suggestion}`);
             }
         }

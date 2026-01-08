@@ -23,3 +23,17 @@ node_modules/
 # TODO: Passer les secrets de Configuration.js dans des variables d'environnement ou ScriptProperties.
 credentials.json
 .cloudflare_env
+
+# --- AI LEARNING & MEMORY (Anti-Leak) ---
+Agents_Backend/Advisors_Memory/
+DEV_JOURNAL.md
+
+# --- AGENT LOGS (Sensitive Data Protection) ---
+Agents_Backend/boot_log.txt
+Agents_Backend/rapport_anomalies.txt
+Agents_Backend/sentinel_out.log
+Agents_Backend/sentinel_err.log
+Agents_Backend/maintenance_log.txt
+Agents_Backend/service_check_log.txt
+Agents_Backend/dashboard.log
+

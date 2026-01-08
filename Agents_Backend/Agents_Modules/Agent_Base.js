@@ -7,8 +7,10 @@
 const axios = require('axios');
 const fs = require('fs');
 const Vault = require('./Vault');
+const SharedKnowledge = require('./Shared_Knowledge'); // COGNITIVE UPGRADE
 
 class Agent_Base {
+
     constructor(name) {
         this.name = name || 'UNKNOWN_AGENT';
         this.version = '1.0.0';
@@ -80,6 +82,14 @@ class Agent_Base {
         this.log(`📄 Proposition sauvegardée dans ${proposalFile}`);
         
         return proposal;
+    }
+
+    /**
+     * Enregistre un succès dans la mémoire collective
+     */
+    async memorizeSuccess(task, strategyUsed) {
+        SharedKnowledge.learnStrategy(task, strategyUsed);
+        this.log(`🧠 Succès mémorisé pour "${task}"`);
     }
 
     /**
