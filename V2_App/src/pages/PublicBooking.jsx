@@ -118,328 +118,250 @@ export default function PublicBooking() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 text-slate-800 font-sans">
+        <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-slate-800 font-sans antialiased">
 
             {/* Header / Nav */}
-            <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+            <header className="bg-white/90 backdrop-blur-md shadow-md border-b border-gray-200/60 sticky top-0 z-30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <div className="bg-blue-600 p-1.5 rounded-lg">
+                    <div className="flex items-center space-x-2 cursor-pointer transition-transform hover:scale-105" onClick={() => navigate('/')}>
+                        <div className="bg-blue-600 p-1.5 rounded-lg shadow-sm">
                             <Truck className="h-5 w-5 text-white" />
                         </div>
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-blue-500">
-                            Mediconvoi
-                        </span>
+                        <span className="font-semibold text-lg text-gray-700">My Awesome Service</span>
                     </div>
-                    <button className="text-sm font-medium text-gray-500 hover:text-blue-600">Connexion Client</button>
+                    <div>
+                        {/* Placeholder for navigation items */}
+                        {/* <button className="text-blue-600 hover:text-blue-800 font-medium">Login</button> */}
+                    </div>
                 </div>
             </header>
 
-            <main className="max-w-6xl mx-auto px-4 py-8">
-                <div className="text-center mb-10">
-                    <h1 className="text-3xl font-bold text-slate-900">Réserver une course</h1>
-                    <p className="text-gray-500 mt-2">Choisissez le type de prestation adaptée à vos besoins</p>
-                </div>
-
-                {/* Tariffs Grid - Mimicking Google Apps Script Layout */}
-                <div className="grid md:grid-cols-2 gap-8 mb-12">
-
-                    {/* Colonne Tournées */}
-                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden relative group hover:ring-2 hover:ring-blue-500/20 transition-all">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
-                        <div className="p-6">
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                                    <Truck className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold">Tournées</h2>
-                                    <p className="text-xs text-gray-400">Officines & EHPAD</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <TariffRow
-                                    label="Normal"
-                                    price={TARIFS.Normal.base}
-                                    desc="1 retrait + 1 livraison (Lun-Ven)"
-                                    onClick={() => openConfigModal('Normal')}
-                                />
-                                <TariffRow
-                                    label="Samedi"
-                                    price={TARIFS.Samedi.base}
-                                    desc="Majoré le weekend"
-                                    onClick={() => openConfigModal('Samedi')}
-                                />
-                                <TariffRow
-                                    label="Urgent"
-                                    price={TARIFS.Urgent.base}
-                                    desc="Intervention < 45mn"
-                                    isUrgent
-                                    onClick={() => openConfigModal('Urgent')}
-                                />
-
-                                <div className="mt-6 pt-4 border-t border-gray-100">
-                                    <div className="flex justify-between items-center text-sm text-gray-500">
-                                        <span>Suppléments par arrêt</span>
-                                        <div className="flex space-x-1">
-                                            {TARIFS.Normal.arrets.slice(0, 3).map((p, i) => (
-                                                <span key={i} className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">+{formatCurrency(p)}</span>
-                                            ))}
-                                            <span className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            {/* Hero Section */}
+            <section className="py-12 md:py-20">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 tracking-tight">
+                        Réservez Votre Transport Facilement et Rapidement
+                    </h1>
+                    <p className="text-lg text-gray-600 mb-8">
+                        Planifiez votre prochain transport en quelques clics. Choisissez parmi nos options flexibles et profitez d'un service de qualité.
+                    </p>
+                    <div className="space-x-4">
+                        <button
+                            onClick={() => openConfigModal(null)}
+                            className="transition-colors duration-300 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                            Réserver un Transport Standard
+                        </button>
+                        <button
+                            onClick={() => openResidentModal('standard')}
+                            className="transition-colors duration-300 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                            Forfait Résident
+                        </button>
                     </div>
+                </div>
+            </section>
 
-                    {/* Colonne Résident */}
-                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden relative group hover:ring-2 hover:ring-green-500/20 transition-all">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
-                        <div className="p-6">
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-3 bg-green-50 text-green-600 rounded-xl">
-                                    <ShieldCheck className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold">Forfait Résident</h2>
-                                    <p className="text-xs text-gray-400">PUI Sainte Musse / Domicile</p>
-                                </div>
+            {/* Features Section */}
+            <section className="py-12 bg-white/80 backdrop-blur-sm shadow-inner">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-3xl font-semibold text-gray-800 mb-8 text-center">Pourquoi Choisir Notre Service ?</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                        <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+                                <Clock className="h-6 w-6" />
                             </div>
+                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Ponctualité Garantie</h3>
+                            <p className="text-gray-600">Nous respectons vos délais. Soyez assuré d'un service ponctuel et fiable.</p>
+                        </div>
 
-                            <div className="space-y-3">
-                                <TariffRow
-                                    label="Standard"
-                                    price={FORFAIT_RESIDENT.STANDARD_PRICE}
-                                    desc={FORFAIT_RESIDENT.STANDARD_LABEL}
-                                    onClick={() => openResidentModal('standard')}
-                                />
-                                <TariffRow
-                                    label="Urgence"
-                                    price={FORFAIT_RESIDENT.URGENCE_PRICE}
-                                    desc={FORFAIT_RESIDENT.URGENCE_LABEL}
-                                    isUrgent
-                                    onClick={() => openResidentModal('urgence')}
-                                />
+                        <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 mb-4">
+                                <Check className="h-6 w-6" />
                             </div>
+                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Réservation Facile</h3>
+                            <p className="text-gray-600">Notre plateforme intuitive vous permet de réserver en quelques étapes simples.</p>
+                        </div>
 
-                            <div className="mt-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <h3 className="text-sm font-bold text-slate-700 mb-2">Demande d'intégration EHPAD</h3>
-                                <p className="text-xs text-gray-500 mb-3">Vous gérez un établissement ? Contactez-nous pour intégrer nos tournées régulières.</p>
-                                <button className="w-full py-2 bg-white border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
-                                    Formulaire de demande
+                        <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 text-orange-600 mb-4">
+                                <MapPin className="h-6 w-6" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Large Couverture</h3>
+                            <p className="text-gray-600">Nous desservons une vaste zone géographique pour répondre à tous vos besoins de transport.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            {/* Modals */}
+            {showConfigModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-semibold text-gray-800">Configuration de la Réservation</h2>
+                            <button onClick={() => setShowConfigModal(false)} className="text-gray-500 hover:text-gray-700">
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+
+                        {/* Calendar */}
+                        <div className="mb-4">
+                            <label htmlFor="date" className="block text-gray-700 text-sm font-bold mb-2">Sélectionner une date:</label>
+                            <CapsuleCalendar onDateSelect={(date) => setConfig(c => ({ ...c, selectedDate: date }))} />
+                        </div>
+
+                        {/* Slot selection */}
+                        {config.selectedDate && (
+                            <div className="mb-4">
+                                <label htmlFor="slot" className="block text-gray-700 text-sm font-bold mb-2">Sélectionner un créneau:</label>
+                                {loadingSlots ? (
+                                    <div className="text-center"><Loader2 className="inline-block animate-spin" /> Chargement des créneaux...</div>
+                                ) : (
+                                    <select
+                                        id="slot"
+                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        value={config.selectedSlot || ''}
+                                        onChange={(e) => setConfig(c => ({ ...c, selectedSlot: e.target.value }))}
+                                    >
+                                        <option value="" disabled>Choisissez un créneau</option>
+                                        {slotPeriods.map(slot => (
+                                            <option key={slot} value={slot}>{slot}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Stops Count */}
+                        <div className="mb-4">
+                            <label htmlFor="stops" className="block text-gray-700 text-sm font-bold mb-2">Nombre d'arrêts:</label>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => setConfig(c => ({ ...c, stops: Math.max(1, c.stops - 1) }))}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                >
+                                    <Minus />
+                                </button>
+                                <input
+                                    type="number"
+                                    id="stops"
+                                    className="shadow appearance-none border rounded w-16 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center"
+                                    value={config.stops}
+                                    readOnly
+                                />
+                                <button
+                                    onClick={() => setConfig(c => ({ ...c, stops: c.stops + 1 }))}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                >
+                                    <Plus />
                                 </button>
                             </div>
                         </div>
-                    </div>
 
-                </div>
-
-                <div className="text-center text-xs text-gray-400 pb-4">
-                    <p>TVA non applicable (art. 293B du CGI)</p>
-                    <p className="mt-2 opacity-50 font-mono">v2.4 - Mise à jour: {new Date().toLocaleString('fr-FR')}</p>
-                </div>
-
-            </main>
-
-            {/* CONFIG MODAL */}
-            {showConfigModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-in max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white flex justify-between items-start sticky top-0 z-10">
-                            <div>
-                                <h3 className="text-lg font-bold">Configurer la tournée</h3>
-                                <p className="text-slate-400 text-sm">Ajustez le nombre d'arrêts</p>
-                            </div>
-                            <button onClick={() => setShowConfigModal(false)} className="p-1 hover:bg-white/10 rounded-full transition-colors">
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-
-                        <div className="p-6 space-y-8">
-                            {/* Counter */}
-                            <div className="flex items-center justify-between">
-                                <label className="font-medium text-slate-700">Arrêts (départ inclus)</label>
-                                <div className="flex items-center space-x-4 bg-gray-50 rounded-xl p-1 border border-gray-200">
-                                    <button
-                                        onClick={() => setConfig(c => ({ ...c, stops: Math.max(1, c.stops - 1) }))}
-                                        className="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50 active:scale-95 transition-all text-slate-600"
-                                    >
-                                        <Minus className="h-4 w-4" />
-                                    </button>
-                                    <span className="text-xl font-bold w-6 text-center">{config.stops}</span>
-                                    <button
-                                        onClick={() => setConfig(c => ({ ...c, stops: c.stops + 1 }))}
-                                        className="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-gray-50 active:scale-95 transition-all text-blue-600"
-                                    >
-                                        <Plus className="h-4 w-4" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Return Switch */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <label className="font-medium text-slate-700">Retour pharmacie</label>
-                                    <span className="text-xs text-gray-500">Ajoute une étape de retour</span>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={config.isReturn}
-                                        onChange={(e) => setConfig(c => ({ ...c, isReturn: e.target.checked }))}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
-                            </div>
-
-                            {/* Result Preview */}
-                            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm text-slate-600">Estimation</span>
-                                    <span className="text-2xl font-bold text-blue-700">{priceResult ? formatCurrency(priceResult.total) : '...'}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-xs text-slate-400">
-                                    <span>{config.stops} arrêt(s){config.isReturn ? ' + retour' : ''}</span>
-                                    <span></span>
-                                </div>
-                            </div>
-
-                            {/* Calendar Section */}
-                            <div className="pt-4 border-t border-gray-100">
-                                <h4 className="text-sm font-bold text-slate-700 mb-4">Choisir une date</h4>
-                                <CapsuleCalendar
-                                    onSelectDate={(date) => setConfig(c => ({ ...c, selectedDate: date }))}
-                                    selectedDate={config.selectedDate}
+                        {/* Return Trip */}
+                        <div className="mb-4">
+                            <label className="inline-flex items-center">
+                                <input
+                                    type="checkbox"
+                                    className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-0"
+                                    checked={config.isReturn}
+                                    onChange={() => setConfig(c => ({ ...c, isReturn: !c.isReturn }))}
                                 />
-                            </div>
-
-                            {/* Slot Selection */}
-                            {config.selectedDate && (
-                                <div className="pt-4 border-t border-gray-100 animate-fade-in">
-                                    <h4 className="text-sm font-bold text-slate-700 mb-2">Choisir un créneau</h4>
-                                    {loadingSlots ? (
-                                        <div className="flex items-center justify-center py-4">
-                                            <Loader2 className="animate-spin h-6 w-6 text-blue-500" />
-                                        </div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {slotPeriods.map((period) => (
-                                                <div
-                                                    key={period.id}
-                                                    onClick={() => period.available && setConfig(c => ({ ...c, selectedSlot: `${period.label} (${period.range})` }))}
-                                                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
-                                                        !period.available 
-                                                            ? 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-50'
-                                                            : config.selectedSlot === `${period.label} (${period.range})`
-                                                                ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500 cursor-pointer'
-                                                                : 'bg-white border-gray-200 hover:border-blue-300 cursor-pointer'
-                                                    }`}
-                                                >
-                                                    <div className="flex items-center space-x-3">
-                                                        <Clock size={18} className={config.selectedSlot === `${period.label} (${period.range})` ? 'text-blue-600' : 'text-gray-400'} />
-                                                        <div>
-                                                            <span className={`text-sm font-medium ${config.selectedSlot === `${period.label} (${period.range})` ? 'text-blue-900' : 'text-gray-600'}`}>
-                                                                {period.label} ({period.range})
-                                                            </span>
-                                                            {!period.available && <span className="text-xs text-red-500 ml-2">Complet</span>}
-                                                        </div>
-                                                    </div>
-                                                    {config.selectedSlot === `${period.label} (${period.range})` && <Check size={18} className="text-blue-600" />}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Email Input */}
-                            {config.selectedSlot && (
-                                <div className="pt-4 border-t border-gray-100 animate-fade-in">
-                                    <label className="text-sm font-bold text-slate-700 mb-2 block">Votre email</label>
-                                    <input
-                                        type="email"
-                                        value={userEmail}
-                                        onChange={(e) => setUserEmail(e.target.value)}
-                                        placeholder="nom@pharmacie.fr"
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                            )}
-
-                            {/* Message Display */}
-                            {message && (
-                                <div className={`p-3 rounded-xl text-sm ${message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
-                                    {message.text}
-                                </div>
-                            )}
-
-                            <button
-                                onClick={handleSubmitBooking}
-                                disabled={!config.selectedDate || !config.selectedSlot || !userEmail || submitting}
-                                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30 transform transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                            >
-                                {submitting ? (
-                                    <Loader2 className="animate-spin h-5 w-5" />
-                                ) : (
-                                    'Confirmer la réservation'
-                                )}
-                            </button>
+                                <span className="ml-2 text-gray-700 font-medium">Voyage Retour</span>
+                            </label>
                         </div>
+
+                        {/* Price estimate */}
+                        {priceResult && (
+                            <div className="mb-4 border-t pt-4">
+                                <p className="text-gray-700">
+                                    Prix estimé: <span className="font-semibold">{formatCurrency(priceResult.total)}</span>
+                                    {priceResult.isFixed && <span className="text-sm text-green-600"> (Forfait)</span>}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Email Input */}
+                        <div className="mb-6">
+                            <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                            <input
+                                type="email"
+                                id="email"
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                placeholder="Votre email"
+                                value={userEmail}
+                                onChange={(e) => setUserEmail(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                            onClick={handleSubmitBooking}
+                            disabled={submitting}
+                            className={`transition-colors duration-300 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {submitting ? <Loader2 className="inline-block animate-spin mr-2" /> : <Check className="inline-block mr-2" />}
+                            Confirmer la Réservation
+                        </button>
+
+                        {/* Message */}
+                        {message && (
+                            <div className={`mt-4 p-3 rounded-md ${message.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                {message.text}
+                            </div>
+                        )}
+
                     </div>
                 </div>
             )}
 
-            {/* RESIDENT MODAL */}
+            {/* Resident Modal */}
             {showResidentModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-in">
-                        <div className="p-6 bg-gradient-to-br from-emerald-900 to-emerald-800 text-white flex justify-between items-start">
-                            <div>
-                                <h3 className="text-lg font-bold">Confirmer Forfait Résident</h3>
-                                <p className="text-emerald-200 text-sm">{config.residentMode === 'standard' ? 'Standard' : 'Urgence'}</p>
-                            </div>
-                            <button onClick={() => setShowResidentModal(false)} className="p-1 hover:bg-white/10 rounded-full transition-colors">
-                                <X className="h-5 w-5" />
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-semibold text-gray-800">Forfait Résident</h2>
+                            <button onClick={() => setShowResidentModal(false)} className="text-gray-500 hover:text-gray-700">
+                                <X className="h-6 w-6" />
                             </button>
                         </div>
-                        <div className="p-6 space-y-6">
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                                Ce forfait inclut la gestion complète du dossier résident : retrait des documents, passage à la PUI Sainte Musse et livraison.
-                            </p>
 
-                            <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex justify-between items-center">
-                                <span className="font-medium text-emerald-900">Total Forfait</span>
-                                <span className="text-2xl font-bold text-emerald-700">{priceResult ? formatCurrency(priceResult.total) : '...'}</span>
-                            </div>
+                        <p className="text-gray-700 mb-4">Choisissez votre type de forfait résident:</p>
 
-                            <button className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-600/30 transform transition-all active:scale-[0.98]">
-                                Choisir un créneau
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => {
+                                setConfig(prev => ({ ...prev, residentMode: 'standard', selectedDate: new Date().toISOString().slice(0, 10) }))
+                                setShowResidentModal(false)
+                                setShowConfigModal(true)
+                            }}
+                            className="transition-colors duration-300 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 block w-full text-center mb-2"
+                        >
+                            Forfait Standard
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setConfig(prev => ({ ...prev, residentMode: 'urgence', selectedDate: new Date().toISOString().slice(0, 10) }))
+                                setShowResidentModal(false)
+                                setShowConfigModal(true)
+                            }}
+                            className="transition-colors duration-300 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 block w-full text-center"
+                        >
+                            Forfait Urgence
+                        </button>
+
                     </div>
                 </div>
             )}
-        </div>
-    )
-}
 
-function TariffRow({ label, price, desc, isUrgent, onClick }) {
-    return (
-        <div
-            onClick={onClick}
-            className={`flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all border ${isUrgent ? 'bg-red-50 border-red-100 hover:bg-red-100' : 'bg-gray-50 border-gray-100 hover:bg-blue-50 hover:border-blue-100'}`}
-        >
-            <div>
-                <div className={`font-bold ${isUrgent ? 'text-red-700' : 'text-slate-700'}`}>{label}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{desc}</div>
-            </div>
-            <div className="text-right">
-                <div className={`font-bold ${isUrgent ? 'text-red-700' : 'text-slate-900'}`}>{formatCurrency(price)}</div>
-                <div className="text-[10px] text-gray-400">/ course</div>
-            </div>
+            {/* Footer */}
+            <footer className="bg-white border-t border-gray-200 py-6 mt-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+                    <p>&copy; {new Date().getFullYear()} My Awesome Service. Tous droits réservés.</p>
+                </div>
+            </footer>
+
         </div>
     )
 }
