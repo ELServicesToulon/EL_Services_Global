@@ -29,12 +29,14 @@ export default function Chatbot() {
   const [isListening, setIsListening] = useState(false);
 
   useEffect(() => {
+    if (!sessionId) return;
+
     // Realtime Subscription
     const channel = supabase
       .channel('chat_app')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sid}` },
+        { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
         (payload) => {
           const newMsg = payload.new;
           if (newMsg.sender === 'bot') {
@@ -51,7 +53,7 @@ export default function Chatbot() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [sessionId]);
 
   // Auto-scroll
   useEffect(() => {
