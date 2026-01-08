@@ -91,7 +91,7 @@ async function runGhostShopperCycle() {
         const tStart = Date.now();
 
         // 1. Accès au Portail V2
-        const targetUrl = 'https://mediconvoi.fr/test_chatbot.html';
+        const targetUrl = 'https://mediconvoi.fr/test_chatbot.html?v=' + Date.now();
         console.log(` -> Navigation vers ${targetUrl}...`);
 
         const navResponse = await page.goto(targetUrl, { timeout: 60000, waitUntil: 'domcontentloaded' });
@@ -123,7 +123,10 @@ async function runGhostShopperCycle() {
             report.steps.push('Action: Clic "Commander une course"');
             await page.waitForTimeout(1000);
         } else {
-            throw new Error("Bouton 'Commander une course' introuvable sur la Landing Page");
+             const htmlContent = await page.content();
+             console.log("DEBUG HTML DUMP:", htmlContent.substring(0, 500) + "..."); // Log first 500 chars
+             report.issues.push(`[EXPERT ERROR] Bouton 'Commander une course' introuvable. Content: ${htmlContent.substring(0, 200)}`);
+             throw new Error("Bouton 'Commander une course' introuvable sur la Landing Page");
         }
 
         // --- ETAPE 3 : BOOKING MODAL ---

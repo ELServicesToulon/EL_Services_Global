@@ -16,7 +16,6 @@ function App() {
     <>
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="*" element={<Landing />} />      {/* Fallback for test_chatbot.html */}
       <Route path="/legal" element={<Legal />} />
       <Route path="/login" element={<Login />} />
       <Route path="/booking" element={<PublicBooking />} />
