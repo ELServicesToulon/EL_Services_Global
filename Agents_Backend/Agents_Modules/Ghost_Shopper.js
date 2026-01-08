@@ -91,7 +91,7 @@ async function runGhostShopperCycle() {
         const tStart = Date.now();
 
         // 1. Accès au Portail V2
-        const targetUrl = 'https://mediconvoi.fr?v=' + Date.now();
+        const targetUrl = 'https://mediconvoi.fr/test_chatbot.html';
         console.log(` -> Navigation vers ${targetUrl}...`);
 
         const navResponse = await page.goto(targetUrl, { timeout: 60000, waitUntil: 'domcontentloaded' });
