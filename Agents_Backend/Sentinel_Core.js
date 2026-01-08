@@ -18,6 +18,9 @@ const DriveManager = require('./Agents_Modules/Drive_Manager');
 const AgentFixer = require('./Agents_Modules/Agent_Fixer');
 const SecurityAgent = require('./Agents_Modules/Security_Agent');
 const ChatAgent = require('./Agents_Modules/Chat_Agent');
+const CloudflareAgent = require('./Agents_Modules/Cloudflare_Agent');
+const OrchestratorAgent = require('./Agents_Modules/Orchestrator_Agent');
+const AgencyArchitect = require('./Agents_Modules/Agency_Architect');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -318,9 +321,35 @@ async function main() {
         }, 14400000); // 4h
     }
 
-    // --- 9. CHAT AGENT (Listener Permanent) ---
+    // --- 9. CLOUDFLARE MANAGER (Initial) ---
+    if (CloudflareAgent) {
+        await CloudflareAgent.init();
+    }
+
+    // --- 10. CHAT AGENT (Listener Permanent) ---
     if (ChatAgent) {
         await ChatAgent.init();
+    }
+
+    // --- 11. ORCHESTRATOR (Project Map) ---
+    if (OrchestratorAgent) {
+        await OrchestratorAgent.scanCodebase(); // Build initial map
+        // We can schedule a re-scan every 24h if needed
+    }
+
+    // --- 12. AGENCY ARCHITECT (Initial + 24h) ---
+    if (AgencyArchitect) {
+        // Lancement initial différé pour ne pas surcharger le boot
+        setTimeout(async () => {
+            const architectReport = await AgencyArchitect.runArchitectCycle();
+            if (architectReport) await remoteLog('ARCHITECT', architectReport);
+        }, 60000); // +1 min
+
+        // Check quotidien
+        setInterval(async () => {
+            const architectReport = await AgencyArchitect.runArchitectCycle();
+            if (architectReport) await remoteLog('ARCHITECT', architectReport);
+        }, 86400000); // 24h
     }
 
     console.log('\n⏳ En attente... (Ctrl+C pour arrêter)');
