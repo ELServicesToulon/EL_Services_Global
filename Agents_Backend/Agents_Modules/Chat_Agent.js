@@ -11,6 +11,8 @@ const Agent_Base = require('./Agent_Base');
 const { createClient } = require('@supabase/supabase-js');
 const GhostShopper = require('./Ghost_Shopper');
 const CloudflareAgent = require('./Cloudflare_Agent');
+const SecretaryAgent = require('./Secretary_Agent');
+const ChiefAdvisorAgent = require('./Chief_Advisor_Agent');
 require('dotenv').config();
 
 // Configuration Supabase
@@ -119,8 +121,22 @@ class Chat_Agent extends Agent_Base {
                      reply = "❌ Erreur critique lors de la tentative de purge.";
                 }
 
+            } else if (lowerMsg.includes('classe') || lowerMsg.includes('range') || lowerMsg.includes('drive')) {
+                await this.sendReply(msg.session_id, "📁 Je m'occupe immédiatement du rangement de votre Drive avec l'aide de ma secrétaire experte. Un instant...");
+                reply = await SecretaryAgent.autopilotDriveClassification();
+
+            } else if (lowerMsg.includes('mail') || lowerMsg.includes('relance') || lowerMsg.includes('écris')) {
+                // Tentative d'extraction simplifiée du nom du client
+                const clientMatch = msg.content.match(/pour ([\w\s]+)/i);
+                const clientName = clientMatch ? clientMatch[1] : "notre client";
+                reply = await SecretaryAgent.prepareRelance(clientName, "n/a");
+
+            } else if (lowerMsg.includes('conseil') || lowerMsg.includes('stratég') || lowerMsg.includes('adjoint') || lowerMsg.includes('chef')) {
+                await this.sendReply(msg.session_id, "🧠 Je transmets votre demande à votre Adjoint (IA Centrale) pour une analyse approfondie...");
+                reply = await ChiefAdvisorAgent.consult(msg.content);
+
             } else {
-                // CONVERSATION GENERALE
+                // CONVERSATION GENERALE (Fallback sur Advisor si complexe, ou Gemini simple)
                 reply = await this.askGemini(msg.content);
             }
 

@@ -1,0 +1,88 @@
+/**
+ * @file Dashboard_Server.js
+ * @description Serveur API léger pour le Dashboard SuperAdmin.
+ * Il expose l'état des agents, les logs et les conseils de l'Adjoint.
+ */
+
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+const ChiefAdvisor = require('./Agents_Modules/Chief_Advisor_Agent');
+
+const app = express();
+const PORT = 3333;
+
+app.use(cors());
+app.use(express.json());
+
+// --- DATA CACHE ---
+let advisorTipCache = {
+    content: "Analyse du système en cours...",
+    timestamp: 0
+};
+
+// --- ROUTES ---
+
+// 1. État global des agents (Mocké pour la démo + lecture logs réels)
+app.get('/api/agents', (req, res) => {
+    // Liste des agents définis
+    const agents = [
+        { id: 'sentinel', name: 'Sentinel Core', role: 'Orchestrateur', status: 'running' },
+        { id: 'network', name: 'Network Overseer', role: 'Surveillance', status: 'running' },
+        { id: 'security', name: 'Security Agent', role: 'Cybersécurité', status: 'running' },
+        { id: 'advisor', name: 'Chief Advisor', role: 'Stratégie', status: 'idle' },
+        { id: 'secretary', name: 'Secretary Agent', role: 'Administratif', status: 'idle' },
+        { id: 'ghost', name: 'Ghost Shopper', role: 'Tests User', status: 'stopped' }
+    ];
+
+    // Enrichir avec les derniers logs si dispos
+    // (Simplification : on renvoie le statut théorique pour l'instant)
+    res.json(agents);
+});
+
+// 2. Conseil de l'Adjoint (Cache 1h)
+app.get('/api/advisor/tip', async (req, res) => {
+    const now = Date.now();
+    // Refresh si cache > 1h
+    if (now - advisorTipCache.timestamp > 3600000) {
+        try {
+            const advice = await ChiefAdvisor.askGemini("Donne-moi un conseil stratégique court (1 phrase) pour l'administrateur système aujourd'hui.");
+            advisorTipCache = { content: advice, timestamp: now };
+        } catch (e) {
+            advisorTipCache = { content: "Impossible de contacter l'Advisor pour le moment.", timestamp: now };
+        }
+    }
+    res.json({ tip: advisorTipCache.content });
+});
+
+// 3. Événements majeurs (Lecture rapport anomalies)
+app.get('/api/events', (req, res) => {
+    const logPath = path.join(__dirname, 'rapport_anomalies.txt');
+    let events = [];
+    if (fs.existsSync(logPath)) {
+        const content = fs.readFileSync(logPath, 'utf8');
+        const lines = content.split('\n').slice(-5).reverse(); // 5 derniers
+        events = lines.map((line, i) => ({ id: i, text: line }));
+    }
+    res.json(events);
+});
+
+// 4. Action: Redémarrer un agent
+app.post('/api/control/:agentId', (req, res) => {
+    const { agentId } = req.params;
+    const { action } = req.body;
+    
+    console.log(`Commande reçue : ${action} sur ${agentId}`);
+    
+    // Simulation d'action
+    setTimeout(() => {
+        res.json({ success: true, message: `Commande ${action} envoyée à ${agentId}` });
+    }, 1000);
+});
+
+// Lancement du serveur
+app.listen(PORT, () => {
+    console.log(`🛡️ Dashboard API Server running on port ${PORT}`);
+});

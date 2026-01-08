@@ -8,7 +8,9 @@ import DeliveryTour from './pages/DeliveryTour'
 import DeliveryStop from './pages/DeliveryStop'
 import DeliveryReport from './pages/DeliveryReport'
 import Legal from './pages/Legal'
+import SuperAdmin from './pages/SuperAdmin'
 import Chatbot from './components/Chatbot/Chatbot'
+import { CookieBanner } from './components/CookieBanner'
 
 
 function App() {
@@ -21,6 +23,7 @@ function App() {
       <Route path="/booking" element={<PublicBooking />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/supervision" element={<SuperAdmin />} />
 
       {/* Delivery App Routes */}
       <Route path="/delivery" element={<DeliveryTour />} />
@@ -28,6 +31,7 @@ function App() {
       <Route path="/delivery/report/:tourId" element={<DeliveryReport />} />
     </Routes>
     <Chatbot />
+    <CookieBanner />
     </>
   )
 }

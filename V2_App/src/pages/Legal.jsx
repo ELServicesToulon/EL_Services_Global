@@ -66,14 +66,16 @@ export default function Legal() {
                             <section>
                                 <h3>Éditeur du site</h3>
                                 <p>
-                                    <strong>Mediconvoi</strong><br/>
+                                    <strong>EL Services</strong> (Nom commercial : <strong>Mediconvoi</strong>)<br/>
+                                    Propriétaire : Etienne LOBEL<br/>
                                     255 B Avenue Marcel Castié, 83000 Toulon<br/>
-                                    SIRET : [NUMÉRO SIRET]<br/>
-                                    TVA applicable<br/>
-                                    Responsable de la publication : le dirigeant de Mediconvoi.
+                                    SIRET : 480 913 060 00020<br/>
+                                    RCS : Toulon<br/>
+                                    TVA : Non applicable (art. 293 B du CGI)<br/>
+                                    Responsable de la publication : Etienne LOBEL.
                                 </p>
                                 <p>
-                                    Contact : <a href="mailto:contact@mediconvoi.fr">contact@mediconvoi.fr</a>
+                                    Contact : <a href="mailto:contact@mediconvoi.fr" className="text-brand-purple hover:underline">contact@mediconvoi.fr</a> | Téléphone : 07 68 59 18 88
                                 </p>
                             </section>
 
@@ -81,7 +83,7 @@ export default function Legal() {
                                 <h3>Hébergeur</h3>
                                 <p>
                                     Le site est hébergé sur une infrastructure Cloud sécurisée.<br/>
-                                    <strong>O2 Switch</strong> (pour le déploiement final)<br/>
+                                    <strong>O2 Switch</strong><br/>
                                     Chemin des Pardiaux, 63000 Clermont-Ferrand
                                 </p>
                             </section>
@@ -99,7 +101,7 @@ export default function Legal() {
                             <section>
                                 <h3>Propriété intellectuelle</h3>
                                 <p>
-                                    L'ensemble des contenus, textes, visuels, logos et éléments graphiques présents sur ce site sont protégés par le droit d'auteur et les droits de propriété intellectuelle. Toute reproduction ou diffusion, totale ou partielle, sans autorisation écrite préalable est interdite.
+                                    L'ensemble des contenus, textes, visuels, logos et éléments graphiques présents sur ce site sont protégés par le droit d'auteur et les droits de propriété intellectuelle. Toute reproduction ou diffusion, totale ou partielle, sans l'autorisation écrite préalable de <strong>EL Services</strong> est interdite.
                                 </p>
                             </section>
 
@@ -109,7 +111,7 @@ export default function Legal() {
                                     Mediconvoi met en œuvre des traitements de données personnelles nécessaires à la gestion des réservations, à la facturation et au suivi client. Ces traitements sont décrits en détail dans l'onglet "Confidentialité".
                                 </p>
                                 <p>
-                                    Pour toute demande relative à l'exercice de vos droits (accès, rectification, opposition, suppression, limitation ou portabilité), contactez <a href="mailto:contact@mediconvoi.fr">contact@mediconvoi.fr</a>.
+                                    Pour toute demande relative à l'exercice de vos droits (accès, rectification, opposition, suppression, limitation ou portabilité), contactez <a href="mailto:contact@mediconvoi.fr" className="text-brand-purple hover:underline">contact@mediconvoi.fr</a>.
                                 </p>
                             </section>
 

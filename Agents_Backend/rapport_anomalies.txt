@@ -1576,3 +1576,46 @@ Call log:
 [2026-01-08T13:16:59.287Z] [DRIVE] Structure: Janvier 2026
 [2026-01-08T13:17:31.714Z] [MARKETING] Trafic: 32 visiteurs. SEO: 85/100
 [2026-01-08T13:17:35.032Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T13:23:57.776Z] [MARKETING] Trafic: 19 visiteurs. SEO: 85/100
+[2026-01-08T13:23:59.988Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (62ms)
+[2026-01-08T13:24:01.185Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T13:26:20.664Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (51ms)
+[2026-01-08T13:26:59.134Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (53ms)
+[2026-01-08T13:27:01.039Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (54ms)
+[2026-01-08T13:27:35.177Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (220ms)
+[2026-01-08T13:34:06.131Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (55ms)
+[2026-01-08T13:36:20.402Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (52ms)
+[2026-01-08T13:36:59.283Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (45ms)
+[2026-01-08T13:37:00.081Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (46ms)
+[2026-01-08T13:37:33.098Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (53ms)
+[2026-01-08T13:43:59.145Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (60ms)
+[2026-01-08T13:46:18.540Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (50ms)
+[2026-01-08T13:46:57.111Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (67ms)
+[2026-01-08T13:46:57.121Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (49ms)
+[2026-01-08T13:47:33.028Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (51ms)
+[2026-01-08T13:53:59.781Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (55ms)
+[2026-01-08T13:56:17.118Z] [MARKETING] Trafic: 44 visiteurs. SEO: 85/100
+[2026-01-08T13:56:19.447Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (52ms)
+[2026-01-08T13:56:29.147Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T13:56:59.227Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (62ms)
+[2026-01-08T13:56:59.301Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (51ms)
+[2026-01-08T13:57:33.151Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (57ms)
+[2026-01-08T14:04:01.455Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (75ms)
+[2026-01-08T14:06:20.602Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (49ms)
+[2026-01-08T14:06:59.342Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (51ms)
+[2026-01-08T14:06:59.546Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (61ms)
+[2026-01-08T14:07:37.423Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (84ms)
+[2026-01-08T14:13:59.328Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (67ms)
+[2026-01-08T14:16:18.678Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (60ms)
+[2026-01-08T14:16:55.716Z] [MARKETING] Trafic: 58 visiteurs. SEO: 85/100
+[2026-01-08T14:16:55.782Z] [MARKETING] Trafic: 15 visiteurs. SEO: 85/100
+[2026-01-08T14:16:57.098Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (53ms)
+[2026-01-08T14:16:57.153Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (41ms)
+[2026-01-08T14:16:59.230Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T14:16:59.236Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T14:17:31.735Z] [MARKETING] Trafic: 39 visiteurs. SEO: 85/100
+[2026-01-08T14:17:33.182Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (50ms)
+[2026-01-08T14:17:35.083Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T14:23:57.779Z] [MARKETING] Trafic: 48 visiteurs. SEO: 85/100
+[2026-01-08T14:24:01.120Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T14:24:01.416Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (56ms)

@@ -23,6 +23,7 @@ const OrchestratorAgent = require('./Agents_Modules/Orchestrator_Agent');
 const AgencyArchitect = require('./Agents_Modules/Agency_Architect');
 const KeyGuardian = require('./Agents_Modules/Key_Guardian');
 const HoneypotAgent = require('./Agents_Modules/Honeypot_Agent');
+const SecretaryAgent = require('./Agents_Modules/Secretary_Agent');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -297,6 +298,17 @@ async function main() {
         setInterval(async () => {
             const driveReport = await DriveManager.runOrganizationCycle();
             if (driveReport) await remoteLog('DRIVE', driveReport);
+        }, 3600000);
+    }
+
+    // --- 7. SECRETAIRE EXPERTE (Initial + 1h) ---
+    if (SecretaryAgent) {
+        const initSec = await SecretaryAgent.runCycle();
+        if (initSec) await remoteLog('SECRETARY', initSec);
+
+        setInterval(async () => {
+            const secReport = await SecretaryAgent.runCycle();
+            if (secReport) await remoteLog('SECRETARY', secReport);
         }, 3600000);
     }
 
