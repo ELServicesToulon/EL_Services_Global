@@ -34,7 +34,13 @@ const SECRETS = {
     ID_LOGO: { required: false, description: "Drive File Logo" },
     WEBAPP_URL: { required: false, description: "Legacy Main Webapp URL" },
     SIRET:  { required: false, description: "SIRET Entreprise" },
-    EMAIL_ENTREPRISE: { required: false, description: "Email Contact" }
+    EMAIL_ENTREPRISE: { required: false, description: "Email Contact" },
+
+    // Livreur Specific
+    CFG_ENABLE_ASSISTANT_OVERRIDE: { required: false, description: "Configuration Assistant Override" },
+    ASSISTANT_TOKENS_202512: { required: false, description: "Legacy Assistant Tokens usage" },
+    GEMINI_API_KEY_LIVREUR: { required: false, description: "Clé Gemini Livreur (Legacy)" },
+    GOOGLE_MAPS_API_KEY_LIVREUR: { required: false, description: "Clé Maps Livreur (Legacy)" }
 };
 
 const Vault = {
