@@ -13,7 +13,10 @@ const GhostShopper = require('./Ghost_Shopper');
 const CloudflareAgent = require('./Cloudflare_Agent');
 const SecretaryAgent = require('./Secretary_Agent');
 const ChiefAdvisorAgent = require('./Chief_Advisor_Agent');
+const SharedKnowledge = require('./Shared_Knowledge'); // CONNECTED BRAIN
+
 require('dotenv').config();
+
 
 // Configuration Supabase
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -84,6 +87,17 @@ class Chat_Agent extends Agent_Base {
         try {
             let reply = "";
             const lowerMsg = msg.content.toLowerCase();
+
+            // 0. MEMORY RECALL (Deepening)
+            // L'agent vérifie si le problème décrit est déjà connu dans la mémoire collective
+            const knownErrors = SharedKnowledge.getKnownErrors();
+            for (const [pattern, info] of Object.entries(knownErrors)) {
+                if (msg.content.includes(pattern) || (pattern.length > 10 && msg.content.includes(pattern.substring(0, 20)))) {
+                    const confidence = Math.round(info.confidence * 100);
+                    await this.sendReply(msg.session_id, `💡 <b>Rappel Mémoire (${confidence}%)</b>: J'ai déjà rencontré ce problème ("${pattern}"). \n\n👉 <b>Solution suggérée :</b> ${info.fix}`);
+                    return; // On a trouvé une solution en mémoire, on s'arrête là (Efficiency)
+                }
+            }
 
             // DETECT INTENT: Ghost Shopper / Audit
             const triggers = ['audit', 'check', 'vérifie', 'verifie', 'status', 'état', 'ghost shopper', 'test'];

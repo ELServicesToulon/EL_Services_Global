@@ -26,6 +26,8 @@ const HoneypotAgent = require('./Agents_Modules/Honeypot_Agent');
 const SecretaryAgent = require('./Agents_Modules/Secretary_Agent');
 const DeploymentAgent = require('./Agents_Modules/Deployment_Agent');
 const BrowserServer = require('./Agents_Modules/Browser_Server');
+const RiskMitigator = require('./Agents_Modules/Risk_Mitigator'); // EVOLUTION SPONTANÉE
+
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -424,6 +426,19 @@ async function main() {
             const devReport = await DeploymentAgent.runDeploymentCycle();
             if (devReport) await remoteLog('DEPLOY', devReport);
         }, 900000); 
+    }
+
+    // --- 16. RISK MITIGATOR (Initial + 5 min + every 4h) ---
+    if (RiskMitigator) {
+        setTimeout(async () => {
+             const riskReport = await RiskMitigator.runRiskAnalysisCycle();
+             if (riskReport) await remoteLog('RISK', riskReport);
+        }, 300000);
+
+        setInterval(async () => {
+             const riskReport = await RiskMitigator.runRiskAnalysisCycle();
+             if (riskReport) await remoteLog('RISK', riskReport);
+        }, 14400000);
     }
 
     console.log('\n⏳ En attente... (Ctrl+C pour arrêter)');
