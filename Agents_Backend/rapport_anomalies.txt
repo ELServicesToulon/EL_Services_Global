@@ -1619,3 +1619,181 @@ Call log:
 [2026-01-08T14:23:57.779Z] [MARKETING] Trafic: 48 visiteurs. SEO: 85/100
 [2026-01-08T14:24:01.120Z] [DRIVE] Structure: Janvier 2026
 [2026-01-08T14:24:01.416Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (56ms)
+[2026-01-08T14:26:20.529Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (60ms)
+[2026-01-08T14:26:59.164Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (52ms)
+[2026-01-08T14:26:59.164Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (59ms)
+[2026-01-08T14:27:35.293Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (196ms)
+[2026-01-08T14:34:01.391Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (64ms)
+[2026-01-08T14:36:22.184Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (61ms)
+[2026-01-08T14:36:59.567Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (78ms)
+[2026-01-08T14:37:01.801Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (52ms)
+[2026-01-08T14:37:35.155Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (50ms)
+[2026-01-08T14:45:36.026Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-08T14:45:38.705Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-08T14:45:41.200Z] [MARKETING] Trafic: 20 visiteurs. SEO: 85/100
+[2026-01-08T14:45:42.349Z] [MARKETING] Trafic: 36 visiteurs. SEO: 85/100
+[2026-01-08T14:45:44.459Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T14:45:44.832Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T14:45:46.321Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T14:45:46.790Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T14:45:46.855Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🆕 Nouveau fichier ajouté à la surveillance : Agents_Modules/Chief_Advisor_Agent.js
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Network_Overseer.js a été MODIFIÉ sans autorisation !
+🆕 Nouveau fichier ajouté à la surveillance : Agents_Modules/Secretary_Agent.js
+🆕 Nouveau fichier ajouté à la surveillance : Dashboard_Server.js
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **Situation Critique : Compromission potentielle du système.**
+
+Plusieurs fichiers critiques (agents et cœur du système) ont été modifiés sans autorisation (Agent_Fixer.js, Chat_Agent.js, Cloudflare_Agent.js, Network_Overseer.js, Sentinel_Core.js). De plus, de nouveaux fichiers suspects (Chief_Advisor_Agent.js, Secretary_Agent.js, Dashboard_Server.js) ont été ajoutés.
+
+**Les alertes d'intégrité sont critiques et indiquent une possible intrusion.**
+
+**Confirmation :** Les actions automatiques de migration du Vault sont *pertinentes* afin de protéger les secrets potentiellement compromis et de limiter la propagation de l'attaque. Elles doivent être complétées d'une investigation approfondie et d'une réponse à incident.
+
+[2026-01-08T14:45:48.382Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Network_Overseer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **ALERTE CRITIQUE : Compromission d'intégrité majeure.**
+
+Plusieurs fichiers cœur du système (agents et noyau) ont été modifiés sans autorisation. Ceci indique potentiellement une intrusion et une manipulation malveillante du code.
+
+**Pertinence des actions Vault :** Étant donné la nature des fichiers compromis, la migration des secrets vers Vault est une action **ABSULUMENT** pertinente et critique pour limiter les dégâts potentiels et protéger les informations sensibles. Il faut également investiguer immédiatement l'origine de ces modifications.
+
+[2026-01-08T14:45:48.588Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-08T14:45:49.408Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-08T14:45:50.015Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-08T14:45:54.820Z] [MARKETING] Trafic: 42 visiteurs. SEO: 85/100
+[2026-01-08T14:45:58.344Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T14:45:58.674Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T14:46:00.623Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Network_Overseer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **ALERTE CRITIQUE :** Violation d'intégrité sur des fichiers clés du système d'agents et du noyau Sentinel. Modification non autorisée détectée dans `Agent_Fixer.js`, `Chat_Agent.js`, `Cloudflare_Agent.js`, `Network_Overseer.js`, et `Sentinel_Core.js`.
+
+**Impact :** Compromission potentielle de la sécurité et du fonctionnement du système. Risque élevé d'exécution de code malveillant.
+
+**Actions :** Les migrations Vault sont pertinentes pour sécuriser les secrets potentiellement compromis. Nécessité d'une investigation immédiate et de mesures de remédiation.
+
+[2026-01-08T14:46:02.845Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-08T14:46:20.243Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-08T14:46:21.595Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-08T14:46:34.407Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-08T14:46:51.122Z] [ARCHITECT] Nouvel agent proposé : Sentinel_Threat_Predictor
+[2026-01-08T14:46:52.208Z] [ARCHITECT] Nouvel agent proposé : Sentinel_Threat_Predictor
+[2026-01-08T14:47:05.046Z] [ARCHITECT] Nouvel agent proposé : Anomaly_Predictor
+[2026-01-08T14:55:45.147Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (50ms)
+[2026-01-08T14:55:46.403Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (58ms)
+[2026-01-08T14:55:58.200Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (55ms)
+[2026-01-08T15:45:41.207Z] [MARKETING] Trafic: 12 visiteurs. SEO: 85/100
+[2026-01-08T15:45:42.351Z] [MARKETING] Trafic: 46 visiteurs. SEO: 85/100
+[2026-01-08T15:45:44.811Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T15:45:45.217Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T15:45:46.723Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T15:45:47.145Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T15:45:54.824Z] [MARKETING] Trafic: 12 visiteurs. SEO: 85/100
+[2026-01-08T15:45:58.799Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T15:45:59.054Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T16:01:31.937Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-08T16:01:33.620Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-08T16:01:37.368Z] [MARKETING] Trafic: 21 visiteurs. SEO: 85/100
+[2026-01-08T16:01:37.784Z] [MARKETING] Trafic: 55 visiteurs. SEO: 85/100
+[2026-01-08T16:01:39.201Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-08T16:01:40.797Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T16:01:40.834Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T16:01:41.169Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T16:01:41.635Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T16:01:42.641Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Network_Overseer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+🆕 Nouveau fichier ajouté à la surveillance : verify_omni_scan.js
+🆕 Nouveau fichier ajouté à la surveillance : whitelist_myself.js
+
+🧠 Analyse IA : ALERTE CRITIQUE : Modifications non autorisées détectées sur des fichiers sensibles du système de sécurité (agents, core). Ajout de nouveaux fichiers suspects (verify_omni_scan.js, whitelist_myself.js).
+
+Situation : Compromission potentielle du système.
+
+Actions automatiques (migrations Vault) potentiellement pertinentes pour protéger les secrets, mais une investigation approfondie est impérative pour identifier l'étendue de la compromission et prendre les mesures de remédiation appropriées.
+
+[2026-01-08T16:01:42.861Z] [MARKETING] Trafic: 46 visiteurs. SEO: 85/100
+[2026-01-08T16:01:43.066Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Network_Overseer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **ANALYSE :**
+
+*   **ALERTE CRITIQUE :** Multiples violations d'intégrité détectées sur des fichiers sensibles (Agents et Core). Ceci indique une modification non autorisée potentielle, suggérant une compromission du système.
+
+*   **ACTIONS :** Vu la nature critique des fichiers compromis (Agents et Core), les migrations Vault sont **PERTINENTES** pour isoler et protéger les secrets potentiellement exposés. Il est impératif de les lancer immédiatement.
+
+[2026-01-08T16:01:44.379Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-08T16:01:44.811Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-08T16:01:45.987Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T16:01:46.361Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T16:01:49.069Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Network_Overseer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : Oui, des alertes d'intégrité critiques sont présentes.
+
+**Résumé:** Plusieurs fichiers essentiels du système, notamment des agents et le noyau de Sentinel, ont été modifiés sans autorisation. Cela indique une compromission potentielle du système.
+
+**Actions Automatiques:** Les migrations Vault sont *probablement* pertinentes, car une compromission de ce type pourrait viser à accéder ou à modifier des secrets. Cependant, il est impératif de :
+
+1.  **Confirmer la source de la modification:** Déterminer si la modification est malveillante ou le résultat d'une action légitime (mais non autorisée).
+2.  **Analyser les modifications:** Examiner en détail les différences entre les versions originales et modifiées des fichiers pour évaluer l'étendue de la compromission.
+3.  **Avant d'effectuer la migration Vault:** S'assurer que les nouveaux secrets n'ont pas été compromis par l'attaquant. Une rotation aveugle pourrait simplement lui donner accès aux nouveaux secrets également.
+
+En résumé, migrer les secrets est une bonne première étape, mais une investigation approfondie est indispensable.
+
+[2026-01-08T16:01:50.653Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-08T16:02:15.774Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-08T16:02:16.417Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-08T16:02:21.997Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-08T16:02:46.574Z] [ARCHITECT] Nouvel agent proposé : Anomaly_Detector
+[2026-01-08T16:02:47.484Z] [ARCHITECT] Nouvel agent proposé : Threat_Anticipator
+[2026-01-08T16:02:52.788Z] [ARCHITECT] Nouvel agent proposé : Dynamic_Risk_Assessor
+[2026-01-08T16:15:50.195Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-08T16:15:53.880Z] [MARKETING] Trafic: 19 visiteurs. SEO: 85/100
+[2026-01-08T16:15:56.983Z] [DRIVE] Structure: Janvier 2026
+[2026-01-08T16:15:57.318Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-08T16:15:58.793Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Network_Overseer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **ALERTE CRITIQUE : INTRUSION.**
+
+Plusieurs fichiers critiques du système de sécurité (agents et noyau) ont été modifiés sans autorisation. Situation potentiellement grave, indiquant une compromission du système.
+
+La migration vers Vault (si configurée) est *essentielle et urgente* pour protéger les secrets qui pourraient avoir été compromis. Il faut également lancer une analyse approfondie des modifications pour identifier l'étendue de l'intrusion et les vecteurs d'attaque.
+
+[2026-01-08T16:16:01.498Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-08T16:16:33.231Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-08T16:17:04.364Z] [ARCHITECT] Nouvel agent proposé : Revenue_Optimizer

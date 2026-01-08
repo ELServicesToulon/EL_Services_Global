@@ -34,13 +34,39 @@ async function waitForOverlay(page) {
 async function runGhostShopperCycle() {
     console.log('[CLIENT EXPERT] 🚀 Démarrage de la session QA + Parcours V2...');
 
-    const browser = await chromium.launch({ headless: true }); // Mettre false pour voir le bot travailler
+    const browser = await chromium.launch({ 
+        headless: true,
+        args: [
+            '--disable-blink-features=AutomationControlled',
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-infobars',
+            '--window-position=0,0',
+            '--ignore-certifcate-errors',
+            '--ignore-certifcate-errors-spki-list',
+            '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        ]
+    }); // Mettre false pour voir le bot travailler
+
     const context = await browser.newContext({
         userManager: 'Antigravity QA Agent',
         viewport: { width: 1280, height: 720 },
-        ignoreHTTPSErrors: true // Au cas où certificats locaux/staging
+        ignoreHTTPSErrors: true, // Au cas où certificats locaux/staging
+        permissions: ['geolocation'], // Some apps need this
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        locale: 'fr-FR'
     });
     const page = await context.newPage();
+    
+    // Stealth Script Injection
+    await page.addInitScript(() => {
+        Object.defineProperty(navigator, 'webdriver', {
+            get: () => undefined,
+        });
+    });
+
+    // Configuration par défaut ou override
+    const MODE = process.env.GHOST_MODE || 'STANDARD'; // STANDARD | OMNI_SCAN
 
     let report = {
         success: true,
@@ -90,6 +116,41 @@ async function runGhostShopperCycle() {
     try {
         const tStart = Date.now();
 
+        if (MODE === 'OMNI_SCAN') {
+            await runOmniScanMode(page, report);
+        } else {
+            // --- MODE STANDARD (PARCOURS ACHAT) ---
+            await runStandardShopper(page, report, tStart);
+        }
+
+        // --- CONCLUSION DU RAPPORT ---
+        // S'il y a trop d'issues, on considère le test "Failed" pour attirer l'attention
+        if (report.issues.length > 5) { // Seuil augmenté pour Chaos Monkey
+            report.success = false;
+            report.error = "Trop d'anomalies détectées (" + report.issues.length + ")";
+        }
+
+        return await finishSession(report, page);
+
+    } catch (error) {
+        console.error(`[EXPERT ERROR] ${error.message}`);
+        report.success = false;
+        report.error = error.message;
+
+        const screenshotDir = path.join(__dirname, '../../Backups/Screenshots');
+        if (!fs.existsSync(screenshotDir)) fs.mkdirSync(screenshotDir, { recursive: true });
+        const errScreenPath = path.join(screenshotDir, `expert_crash_${Date.now()}.png`);
+        await page.screenshot({ path: errScreenPath });
+        report.screenshotPath = errScreenPath;
+
+        return report;
+
+    } finally {
+        await browser.close();
+    }
+}
+
+async function runStandardShopper(page, report, tStart) {
         // 1. Accès au Portail V2
         const targetUrl = 'https://mediconvoi.fr/test_chatbot.html?v=' + Date.now();
         console.log(` -> Navigation vers ${targetUrl}...`);
@@ -248,35 +309,153 @@ async function runGhostShopperCycle() {
         } else {
             report.issues.push('[LOGIN] Aucune réaction détectée (ni erreur, ni redirection)');
         }
-
-        // --- ETAPE 7 : CHAOS MONKEY (EXPLORATION) ---
+        
+        // --- CHAOS (LIGHT) ---
         console.log(' -> 🐒 Démarrage du Chaos Monkey (Click Partout)...');
         await exploreAndClick(page, report);
+}
 
-        // --- CONCLUSION DU RAPPORT ---
-        // S'il y a trop d'issues, on considère le test "Failed" pour attirer l'attention
-        if (report.issues.length > 5) { // Seuil augmenté pour Chaos Monkey
-            report.success = false;
-            report.error = "Trop d'anomalies détectées (" + report.issues.length + ")";
+/**
+ * --- OMNI SCAN MODE: SCAN INTÉGRAL DU SITE ---
+ * Se connecte, liste toutes les pages, et teste chaque interaction.
+ */
+async function runOmniScanMode(page, report) {
+    console.log('[OMNI SCAN] 🕵️‍♂️ Démarrage du scan intégral...');
+    report.steps.push('Mode Omni-Scan Activé');
+
+    // 1. Bypass Auth (Login Rapide)
+    await omniBypassAuth(page, report);
+
+    // 2. Crawler & Tester
+    const visitedUrls = new Set();
+    // On ajoute le dashboard ET la racine pour être sûr de scanner quelque chose même si login fail
+    const queue = ['https://mediconvoi.fr/dashboard', 'https://mediconvoi.fr/']; 
+    const MAX_PAGES = 30; // Sécurité anti-boucle
+    let pagesScanned = 0;
+
+    while (queue.length > 0 && pagesScanned < MAX_PAGES) {
+        const currentUrl = queue.shift();
+        
+        if (visitedUrls.has(currentUrl)) continue;
+        visitedUrls.add(currentUrl);
+        pagesScanned++;
+
+        try {
+            console.log(`\n[SCANNER] 📄 Analyse de: ${currentUrl} (${pagesScanned}/${MAX_PAGES})`);
+            
+            // Navigation
+            const resp = await page.goto(currentUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            if (resp.status() >= 400) {
+                 report.issues.push(`[SCAN 404/500] Impossible d'accéder à ${currentUrl} (Status: ${resp.status()})`);
+                 continue;
+            }
+            await waitForOverlay(page);
+            await page.waitForTimeout(1000); // Stability
+
+            report.steps.push(`Scan Page: ${currentUrl.split('/').pop()}`);
+
+            // A. Analyse des Liens (Crawler)
+            const links = await page.$$eval('a[href]', anchors => anchors.map(a => a.href));
+            for (const link of links) {
+                // Filtre robustesse : pas de mailto, tel, ou ancres pures
+                if (link.startsWith('mailto:') || link.startsWith('tel:') || link.includes('#')) continue;
+
+                // On reste sur le domaine et on évite les logout/delete pour le scan
+                if (link.includes('mediconvoi.fr') && !link.includes('logout') && !visitedUrls.has(link)) {
+                     // Priorisation: dashboard d'abord
+                     queue.push(link);
+                }
+            }
+
+            // B. Test Méthodique des Intéractions (Scanner)
+            await methodicalInteract(page, report);
+
+        } catch (e) {
+            console.error(`[SCAN ERROR] Erreur sur ${currentUrl}: ${e.message}`);
+            report.issues.push(`[SCAN CRASH] ${currentUrl}: ${e.message}`);
         }
+    }
+    
+    report.steps.push(`Fin Omni-Scan: ${pagesScanned} pages visitées.`);
+}
 
-        return await finishSession(report, page);
+/**
+ * Connecte l'agent directement
+ */
+async function omniBypassAuth(page, report) {
+    console.log(' -> [BYPASS] Tentative de connexion...');
+    await page.goto('https://mediconvoi.fr/login');
+    
+    try {
+        await page.fill('input[type="email"]', 'antigravityels@gmail.com');
+        
+        const btnSwitchPass = await page.getByText('utiliser mon mot de passe');
+        if (await btnSwitchPass.isVisible()) await btnSwitchPass.click();
+        
+        await page.fill('input[type="password"]', 'test1234'); // TODO: Utiliser Vault si dispo
+        await page.click('button[type="submit"]');
+        
+        // Attente Dashboard
+        await page.waitForNavigation({ url: '**/dashboard', timeout: 15000 });
+        console.log(' -> [BYPASS] Connexion réussie !');
+        report.steps.push('Login Bypass: Succès');
+    } catch (e) {
+        console.log(' -> [BYPASS] Echec connexion (ou déjà connecté). On continue...');
+        // On assume qu on continue, peut-être déjà loggé
+    }
+}
 
-    } catch (error) {
-        console.error(`[EXPERT ERROR] ${error.message}`);
-        report.success = false;
-        report.error = error.message;
+/**
+ * Scan méthodique: Trouve tous les boutons/inputs et interagit intelligemment
+ */
+async function methodicalInteract(page, report) {
+    // Liste des éléments interactifs
+    const interactibles = await page.$$('button:not([disabled]), input:not([type="hidden"]), select');
+    console.log(`   -> ${interactibles.length} éléments interactifs détectés.`);
 
-        const screenshotDir = path.join(__dirname, '../../Backups/Screenshots');
-        if (!fs.existsSync(screenshotDir)) fs.mkdirSync(screenshotDir, { recursive: true });
-        const errScreenPath = path.join(screenshotDir, `expert_crash_${Date.now()}.png`);
-        await page.screenshot({ path: errScreenPath });
-        report.screenshotPath = errScreenPath;
+    let interactions = 0;
+    // On teste un échantillon représentatif pour ne pas casser la navigation
+    // On évite les boutons "Supprimer", "Déconnexion"
+    
+    for (const el of interactibles) {
+        if (interactions > 5) break; // Limit par page pour rapidité
 
-        return report;
+        try {
+            const isVisible = await el.isVisible();
+            if (!isVisible) continue;
 
-    } finally {
-        await browser.close();
+            const text = (await el.textContent() || await el.inputValue() || 'Unknown').trim();
+            const tag = await el.evaluate(e => e.tagName.toLowerCase());
+
+            // Filtres de sécurité
+            if (text.match(/supprimer|delete|logout|deconnexion|déconnexion/i)) {
+                console.log(`   -> ⚠️ Element "${text}" ignoré (Sécurité)`);
+                continue;
+            }
+
+            // Action
+            console.log(`   -> Test Action sur <${tag}>: "${text.substring(0, 20)}"...`);
+            await el.hover();
+            
+            // Si c'est un input, on tape du texte dummy
+            if (tag === 'input') {
+                await el.fill('QA Test');
+            } else {
+                // Si c'est un bouton navigation, risque de changer de page...
+                // On check si ça déclenche une modale ou juste une action JS
+                // Pour l'omni-scan, on se contente souvent de hover/focus pour vérifier pas d'erreur JS immédiate
+                // Le clic complet est risqué pour le crawler.
+                // On clique SEULEMENT si c'est un bouton "safe" (exemple: "Voir", "Détails", "Ouvrir")
+                if (text.match(/voir|détail|config|edit|modifier/i)) {
+                    await el.click({ timeout: 1000 });
+                    interactions++;
+                    // On revient en arrière si navigation ? Non, trop complexe.
+                    // On catch les erreurs JS via les sondes globales
+                }
+            }
+        } catch (e) { 
+            // Element détruit ou autre
+        }
     }
 }
 

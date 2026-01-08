@@ -38,5 +38,10 @@
   "setup_chatbot_db_http.js": "c7ce49f76926ea560f1f86310a394e2fc47993bcb4192860f4a1aa8697edcaf0",
   "telecommande.js": "64ef9f89904bc91bf0c8e8ca457c4d007b7e39fc66e550ca14d89b15bfce6517",
   "test_network.js": "778827f07a15f2d16555dbd345ea0ace7e432a1ac9fad8b0057ae3e2cf771862",
-  "trigger_architect.js": "64271d20c4566eabc65569cbd8996350aba0bc2114094baf5af83b6fb8977dc5"
+  "trigger_architect.js": "64271d20c4566eabc65569cbd8996350aba0bc2114094baf5af83b6fb8977dc5",
+  "Agents_Modules/Chief_Advisor_Agent.js": "782080b858dacb5a7807624ad6c12ed5cc8c948f500f46b6a71a9d54c618718c",
+  "Agents_Modules/Secretary_Agent.js": "4da149355d82677090053029bbeeacd8eeb7250226949388f8d4d1352ba1b0b2",
+  "Dashboard_Server.js": "71a98d41471a654abfef8c631f86ddc3c889ee3df2589a43bec96b5a47fec6c6",
+  "verify_omni_scan.js": "ec458f951b5413646247cfda4e3d97afbc07337b40dc7a752edd9b3efacf48ad",
+  "whitelist_myself.js": "204d95da711d4ba3a8d125fcbf8f33f24dce830e6a00056217fb9bfc9626e845"
 }

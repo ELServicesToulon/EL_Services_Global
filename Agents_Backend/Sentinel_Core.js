@@ -42,21 +42,22 @@ const GhostShopper = { name: 'GHOST_SHOPPER' };
 if (GhostShopper) {
     console.log('👻 Ghost Shopper : Armé (Mode Distribué).');
 
-    const runDistributedGhostShopper = async () => {
-        console.log('👻 Ghost Shopper : Tentative de lancement...');
+    const runDistributedGhostShopper = async (mode = 'STANDARD') => {
+        console.log(`👻 Ghost Shopper : Tentative de lancement (Mode: ${mode})...`);
 
         try {
             let report = null;
 
             if (WORKER_IP) {
                 // MODE REMOTE (SSH)
-                await remoteLog('ORCHESTRATOR', `Dispatching GhostShopper to Worker ${WORKER_IP}...`);
+                await remoteLog('ORCHESTRATOR', `Dispatching GhostShopper (${mode}) to Worker ${WORKER_IP}...`);
 
                 // Configurer le connecteur (Credentials à sécuriser en prod via .env)
                 AgentConnector.configure(WORKER_IP, 'root', process.env.WORKER_PASS || 'password');
 
-                // Exécuter le launcher sur le worker
-                const output = await AgentConnector.executeCommand('node /root/sentinel/Worker_Launcher.js GHOST_SHOPPER');
+                // Exécuter le launcher sur le worker avec la variable d'env
+                const cmd = `export GHOST_MODE=${mode} && node /root/sentinel/Worker_Launcher.js GHOST_SHOPPER`;
+                const output = await AgentConnector.executeCommand(cmd);
                 console.log('👻 [REMOTE] Output:', output);
 
                 // Parser le résultat (on cherche la ligne RAPPORT_JSON)
@@ -69,10 +70,10 @@ if (GhostShopper) {
 
             } else {
                 // MODE LOCAL / SIMULATION (Fallback)
-                console.log('👻 [LOCAL] Pas de Worker IP. Lancement local (Simulation)...');
+                console.log(`👻 [LOCAL] Pas de Worker IP. Lancement local (Mode: ${mode})...`);
                 // On appelle le Launcher localement via child_process pour simuler l'isolation
                 const { exec } = require('child_process');
-                const localCmd = `node ${path.join(__dirname, 'Worker_Launcher.js')} GHOST_SHOPPER`;
+                const localCmd = `GHOST_MODE=${mode} node ${path.join(__dirname, 'Worker_Launcher.js')} GHOST_SHOPPER`;
 
                 const stdout = await new Promise((resolve, reject) => {
                     exec(localCmd, (error, stdout, stderr) => {

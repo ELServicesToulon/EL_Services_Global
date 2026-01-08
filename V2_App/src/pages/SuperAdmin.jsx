@@ -200,7 +200,7 @@ export default function SuperAdmin() {
 
             {/* Android Install Instructions (Visible only on mobile) */}
             <div className="mt-8 mx-4 p-4 bg-blue-900/20 border border-blue-900/50 rounded-xl text-center md:hidden">
-                <p className="text-blue-200 text-sm">Pour installer sur Android :<br/>Menu Chrome > "Ajouter à l'écran d'accueil"</p>
+                <p className="text-blue-200 text-sm">Pour installer sur Android :<br/>Menu Chrome &gt; "Ajouter à l'écran d'accueil"</p>
             </div>
         </div>
     );

@@ -1,83 +1,127 @@
 /**
  * @file Chief_Advisor_Agent.js
  * @description "Le Chef de Projet / Adjoint" - Agent central IA (Gemini).
- * Conseiller stratégique, analyseur de situation globale et bras droit de l'administrateur.
+ * Version 3.0 : Mémoire Dynamique d'Expérience.
  */
 
 const Agent_Base = require('./Agent_Base');
 const fs = require('fs');
 const path = require('path');
 
+const MEMORY_DIR = path.join(__dirname, '..', 'Advisors_Memory');
+
 class ChiefAdvisorAgent extends Agent_Base {
     constructor() {
         super('CHIEF_ADVISOR');
-        this.version = '2.0.0';
+        this.version = '3.0.0';
         this.context = `
             Tu es l'IA Centrale, le "Chef de Projet" et "Adjoint Direct" de l'administrateur (User).
-            Tu as une vue d'ensemble sur tous les agents (Marketing, Sécurité, Drive, Chat, etc.).
-            Ton rôle est de :
-            1. Conseiller l'utilisateur sur la stratégie (Tech, Business, Orga).
-            2. Synthétiser l'activité des autres agents.
-            3. Proposer des améliorations proactives.
-            4. Répondre aux questions complexes qui demandent une analyse transverse.
             
-            Ton ton est : Professionnel, Stratège, Loyal, Direct et Proactif.
+            TA MÉMOIRE DYNAMIQUE :
+            Tu possèdes un dossier "Mental" où tu stockes tes directives et expériences passées.
+            Utilise ces informations pour maintenir une cohérence à long terme.
+            
+            TES MISSIONS :
+            1. Conseiller sur la stratégie globale.
+            2. Synthétiser l'activité des agents.
+            3. Apprendre de tes erreurs et succès (Mise à jour de ta mémoire).
+            
+            TON STYLE :
+            Professionnel, Stratège, Loyal, Direct, Proactif.
         `;
+        
+        this.initMemory();
+    }
+
+    initMemory() {
+        if (!fs.existsSync(MEMORY_DIR)) {
+            fs.mkdirSync(MEMORY_DIR, { recursive: true });
+        }
+        // Fichier Index principal
+        if (!fs.existsSync(path.join(MEMORY_DIR, 'master_plan.md'))) {
+            fs.writeFileSync(path.join(MEMORY_DIR, 'master_plan.md'), "# Plan Maître & Directives Stratégiques\n\n- Objectif 1: Sécurité Maximale (Sentinel)\n- Objectif 2: Autonomie (Agents Indépendants)\n- Objectif 3: Performance (V2 App)");
+        }
     }
 
     /**
-     * Analyse l'état global du système (via les rapports disponibles)
+     * Lit un fichier de mémoire spécifique
+     */
+    readMemory(topic) {
+        const filePath = path.join(MEMORY_DIR, `${topic}.md`);
+        if (fs.existsSync(filePath)) {
+            return fs.readFileSync(filePath, 'utf8');
+        }
+        return null;
+    }
+
+    /**
+     * Écrit/Met à jour une note mémorielle
+     */
+    saveDirectives(topic, content) {
+        const filePath = path.join(MEMORY_DIR, `${topic}.md`);
+        fs.writeFileSync(filePath, content, 'utf8');
+        this.log(`🧠 Mémoire mise à jour : ${topic}`);
+    }
+
+    /**
+     * Récupère le contexte complet (Plan Maitre + Notes pertinentes)
+     */
+    getFullMemoryContext() {
+        let memory = "--- MÉMOIRE LONG TERME ---\n";
+        const files = fs.readdirSync(MEMORY_DIR);
+        files.forEach(file => {
+            if (file.endsWith('.md')) {
+                const content = fs.readFileSync(path.join(MEMORY_DIR, file), 'utf8');
+                memory += `\n[Fichier: ${file}]\n${content}\n`;
+            }
+        });
+        return memory;
+    }
+
+    /**
+     * Analyse l'état global du système
      */
     async analyzeSytemHealth() {
-        // Lecture des fichiers de logs/rapports générés par les autres agents
-        const logsDir = path.join(__dirname, '..');
-        const reportFiles = [
-            'diagnostic_2026-01-08.md', // Exemple, idéalement dynamique
-            'rapport_anomalies.txt',
-            'fixes_applied.log'
-        ];
-
-        let systemContext = "Voici les derniers rapports système :\n";
-
-        for (const file of reportFiles) {
-            try {
-                const filePath = path.join(logsDir, file);
-                if (fs.existsSync(filePath)) {
-                    const content = fs.readFileSync(filePath, 'utf8').substring(0, 2000); // Limit size
-                    systemContext += `--- Fichier: ${file} ---\n${content}\n\n`;
-                }
-            } catch (e) {
-                // Ignore missing files
-            }
-        }
-
+        const memoryContext = this.getFullMemoryContext();
+        // ... (Logique analyse logs existante) ...
+        // On simplifie pour l'exemple, on reprend la logique de base + mémoire
+        
         const prompt = `
             ${this.context}
-            Analyse ces rapports techniques et fais-moi un résumé exécutif de la situation.
-            Quels sont les points d'attention ? Que préconises-tu pour la suite ?
+            ${memoryContext}
             
-            ${systemContext}
+            Analyse les logs système récents (simulés ici pour l'exemple ou lus via LogAggregator).
+            Donne moi un état des lieux par rapport au Plan Maître.
         `;
-
+        
         return await this.askGemini(prompt);
     }
 
     /**
-     * Répond à une consultation directe de l'utilisateur
+     * Consultation avec accès mémoire
      */
     async consult(userQuery) {
         this.log(`🤔 Consultation reçue : "${userQuery}"`);
         
+        const memoryContext = this.getFullMemoryContext();
+        
         const prompt = `
             ${this.context}
-            L'administrateur te demande : "${userQuery}"
             
-            Réponds en tant que Chef de Projet et Adjoint. Prends de la hauteur.
-            Si la question est technique, donne la vision architecturale.
-            Si la question est business, donne la vision stratégique.
+            ${memoryContext}
+            
+            L'administrateur demande : "${userQuery}"
+            
+            Réponds en utilisant ta connaissance du projet stockée en mémoire.
+            Si la demande de l'utilisateur implique un changement de stratégie, propose de mettre à jour le fichier 'master_plan.md'.
         `;
 
-        return await this.askGemini(prompt);
+        const response = await this.askGemini(prompt);
+        
+        // Auto-apprentissage (rudimentaire) : Si la réponse contient une "Nouvelle Règle", on pourrait l'extraire.
+        // Pour l'instant on reste sur du RAG simple (Retrieval Augmented Generation).
+        
+        return response;
     }
 }
 
