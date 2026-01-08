@@ -6,13 +6,19 @@
 
 const axios = require('axios');
 const fs = require('fs');
-require('dotenv').config();
+const Vault = require('./Vault');
 
 class Agent_Base {
     constructor(name) {
         this.name = name || 'UNKNOWN_AGENT';
         this.version = '1.0.0';
-        this.geminiKey = process.env.GEMINI_API_KEY;
+        // Utilisation du Vault pour récupérer la clé de manière robuste
+        try {
+            this.geminiKey = Vault.get('GEMINI_API_KEY');
+        } catch (e) {
+            console.warn(`[${this.name}] ⚠️ GEMINI_API_KEY non trouvée via Vault.`);
+            this.geminiKey = process.env.GEMINI_API_KEY;
+        }
     }
 
     /**

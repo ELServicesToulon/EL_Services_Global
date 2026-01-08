@@ -1,6 +1,6 @@
 # 🏗️ PROJECT ARCHITECTURE (Live Map)
 
-Updated: 2026-01-08T09:17:35.488Z
+Updated: 2026-01-08T09:24:01.871Z
 
 ## 🤖 Agents Detected
 - **Agency_Architect**
@@ -70,6 +70,7 @@ Updated: 2026-01-08T09:17:35.488Z
 - `fix_admin_access.js` imports `Vault.js`
 - `manual_check_ghost_shopper.js` imports `Ghost_Shopper.js`
 - `test_network.js` imports `Network_Overseer.js`
+- `trigger_architect.js` imports `Agency_Architect.js`
 
 ## 📂 File Index
 - [Agency_Architect.js](Agents_Modules/Agency_Architect.js) (3.2 KB)
@@ -95,7 +96,7 @@ Updated: 2026-01-08T09:17:35.488Z
 - [INFRASTRUCTURE.md](INFRASTRUCTURE.md) (3.2 KB)
 - [Maintenance_Agent.js](Maintenance_Agent.js) (1.8 KB)
 - [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (7.5 KB)
-- [PROJECT_MAP.json](PROJECT_MAP.json) (38.0 KB)
+- [PROJECT_MAP.json](PROJECT_MAP.json) (38.2 KB)
 - [SECURITY_PROTOCOLS.md](SECURITY_PROTOCOLS.md) (2.4 KB)
 - [SETUP_KEYS.md](SETUP_KEYS.md) (1.6 KB)
 - [Sentinel_Core.js](Sentinel_Core.js) (14.1 KB)
@@ -123,3 +124,4 @@ Updated: 2026-01-08T09:17:35.488Z
 - [setup_chatbot_db_http.js](setup_chatbot_db_http.js) (1.6 KB)
 - [telecommande.js](telecommande.js) (1.4 KB)
 - [test_network.js](test_network.js) (0.4 KB)
+- [trigger_architect.js](trigger_architect.js) (0.3 KB)

@@ -25,7 +25,12 @@ const SECRETS = {
     // VPS Configuration
     VPS_HOST: { required: false, description: "IP du VPS" },
     VPS_USER: { required: false, description: "Utilisateur VPS" },
-    VPS_PASS: { required: false, description: "Mot de passe VPS" }
+    VPS_HOST: { required: false, description: "IP du VPS" },
+    VPS_USER: { required: false, description: "Utilisateur VPS" },
+    VPS_PASS: { required: false, description: "Mot de passe VPS" },
+
+    // AI Configuration
+    GEMINI_API_KEY: { required: false, description: "Clé API Gemini pour l'intelligence des agents" }
 };
 
 const Vault = {

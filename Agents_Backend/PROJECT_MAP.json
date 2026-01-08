@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-08T09:17:35.467Z",
+  "timestamp": "2026-01-08T09:24:01.860Z",
   "files": [
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agency_Architect.js",
@@ -178,14 +178,14 @@
       "name": "PROJECT_ARCHITECTURE.md",
       "size": 7711,
       "relative": "PROJECT_ARCHITECTURE.md",
-      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-08T09:16:59.708Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
+      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-08T09:17:35.488Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_MAP.json",
       "name": "PROJECT_MAP.json",
-      "size": 38950,
+      "size": 39076,
       "relative": "PROJECT_MAP.json",
-      "contentSnippet": "{\n  \"timestamp\": \"2026-01-08T09:16:59.685Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agency_Architect.js\",\n      \"name\": \"Agency_Architect.js\",\n      \"size\": 3227,\n      \"relative\": \"Agents_Modules/Agency_Architect.js\",\n      \"contentSnippet\": \"/**\\n * @file Agency_Architect.js\\n * @description \\\"L'Aiguilleur Orchestrateur\\\".\\n * Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\\n */\\n\\nconst Agent_Base = require('./Agent_Base');\\nconst fs = require('fs');\\nconst path = require('path');\\n\",\n      \"description\": \"@description \\\"L'Aiguilleur Orchestrateur\\\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\""
+      "contentSnippet": "{\n  \"timestamp\": \"2026-01-08T09:17:35.467Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agency_Architect.js\",\n      \"name\": \"Agency_Architect.js\",\n      \"size\": 3227,\n      \"relative\": \"Agents_Modules/Agency_Architect.js\",\n      \"contentSnippet\": \"/**\\n * @file Agency_Architect.js\\n * @description \\\"L'Aiguilleur Orchestrateur\\\".\\n * Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\\n */\\n\\nconst Agent_Base = require('./Agent_Base');\\nconst fs = require('fs');\\nconst path = require('path');\\n\",\n      \"description\": \"@description \\\"L'Aiguilleur Orchestrateur\\\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\""
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/SECURITY_PROTOCOLS.md",
@@ -379,6 +379,13 @@
       "size": 375,
       "relative": "test_network.js",
       "contentSnippet": "const { runHealthCheck } = require('./Agents_Modules/Network_Overseer');\n\nasync function test() {\n    console.log(\"Testing Network Overseer...\");\n    const report = await runHealthCheck();\n    if (report) {\n        console.log(\"Report generated:\");\n        console.log(report);\n    } else {\n        console.log(\"No issues reported (Report is null/empty).\");"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/trigger_architect.js",
+      "name": "trigger_architect.js",
+      "size": 299,
+      "relative": "trigger_architect.js",
+      "contentSnippet": "const Architect = require('./Agents_Modules/Agency_Architect');\n(async () => {\n    try {\n        console.log(\"Triggering Architect Cycle...\");\n        const result = await Architect.runArchitectCycle();\n        console.log(\"Result:\", result);\n    } catch (e) {\n        console.error(e);\n    }\n})();"
     }
   ],
   "agents": [
@@ -566,6 +573,11 @@
       "type": "dependency",
       "from": "test_network.js",
       "to": "Network_Overseer.js"
+    },
+    {
+      "type": "dependency",
+      "from": "trigger_architect.js",
+      "to": "Agency_Architect.js"
     }
   ]
 }
