@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabaseClient'
 import { Truck, Clock, Calendar, Check, X, ShieldCheck, MapPin, Plus, Minus, Info, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import CapsuleCalendar from '../components/CapsuleCalendar'
+import { motion } from 'framer-motion'
 
 export default function PublicBooking() {
     const navigate = useNavigate()
@@ -118,250 +119,341 @@ export default function PublicBooking() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-slate-800 font-sans antialiased">
+        <motion.div
+            className="min-h-screen bg-slate-900 text-white font-sans antialiased overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+            {/* Aurora Gradients */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-full blur-3xl opacity-40"></div>
+                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-pink-500 to-red-500 rounded-full blur-3xl opacity-40"></div>
+            </div>
+
 
             {/* Header / Nav */}
-            <header className="bg-white/90 backdrop-blur-md shadow-md border-b border-gray-200/60 sticky top-0 z-30">
+            <header className="bg-slate-900/90 backdrop-blur-md shadow-md border-b border-white/10 sticky top-0 z-30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 cursor-pointer transition-transform hover:scale-105" onClick={() => navigate('/')}>
-                        <div className="bg-blue-600 p-1.5 rounded-lg shadow-sm">
-                            <Truck className="h-5 w-5 text-white" />
-                        </div>
-                        <span className="font-semibold text-lg text-gray-700">My Awesome Service</span>
-                    </div>
-                    <div>
-                        {/* Placeholder for navigation items */}
-                        {/* <button className="text-blue-600 hover:text-blue-800 font-medium">Login</button> */}
-                    </div>
+                    <motion.div
+                        className="flex items-center space-x-2 cursor-pointer transition-transform hover:scale-105"
+                        onClick={() => navigate('/')}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <div
+                            className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500"
+                        />
+                        <span className="font-bold text-lg">LOGOMARK</span>
+                    </motion.div>
+                    <nav className="space-x-4">
+                        <motion.button
+                            className="py-2 px-4 rounded-md bg-white/5 hover:bg-white/10 transition-colors"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            Sign In
+                        </motion.button>
+                    </nav>
                 </div>
             </header>
 
-            {/* Hero Section */}
-            <section className="py-12 md:py-20">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 tracking-tight">
-                        Réservez Votre Transport Facilement et Rapidement
-                    </h1>
-                    <p className="text-lg text-gray-600 mb-8">
-                        Planifiez votre prochain transport en quelques clics. Choisissez parmi nos options flexibles et profitez d'un service de qualité.
-                    </p>
-                    <div className="space-x-4">
-                        <button
-                            onClick={() => openConfigModal(null)}
-                            className="transition-colors duration-300 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                            Réserver un Transport Standard
-                        </button>
-                        <button
-                            onClick={() => openResidentModal('standard')}
-                            className="transition-colors duration-300 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
-                            Forfait Résident
-                        </button>
-                    </div>
+            {/* Main Content */}
+            <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+                {/* Hero Section */}
+                <section className="mb-16">
+                    <motion.h1
+                        className="text-6xl font-extrabold mb-4 tracking-tight leading-tight"
+                        initial={{ opacity: 0, y: -50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7, delay: 0.2 }}
+                    >
+                        Book Your Ride. <br />
+                        <span className="text-purple-400">Effortless.</span>
+                    </motion.h1>
+                    <motion.p
+                        className="text-lg text-slate-400 mb-8"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                    >
+                        Seamless scheduling for your transportation needs.
+                    </motion.p>
+                </section>
+
+                {/* Booking Options - Bento Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Standard Booking */}
+                    <motion.div
+                        className="bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-white/10 hover:border-purple-400 transition-colors"
+                        whileHover={{ y: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => openConfigModal('Standard')}
+                    >
+                        <div className="flex items-center space-x-3 mb-4">
+                            <Truck className="w-6 h-6 text-purple-400" />
+                            <h3 className="text-xl font-semibold">Standard</h3>
+                        </div>
+                        <p className="text-slate-400">Quick and reliable transport.</p>
+                    </motion.div>
+
+                    {/* Saturday Booking */}
+                    <motion.div
+                        className="bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-white/10 hover:border-purple-400 transition-colors"
+                        whileHover={{ y: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => openConfigModal('Samedi')}
+                    >
+                        <div className="flex items-center space-x-3 mb-4">
+                            <Calendar className="w-6 h-6 text-pink-400" />
+                            <h3 className="text-xl font-semibold">Saturday</h3>
+                        </div>
+                        <p className="text-slate-400">Weekend transport option.</p>
+                    </motion.div>
+
+                    {/* Urgent Booking */}
+                    <motion.div
+                        className="bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-white/10 hover:border-purple-400 transition-colors"
+                        whileHover={{ y: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => openConfigModal('Urgent')}
+                    >
+                        <div className="flex items-center space-x-3 mb-4">
+                            <Clock className="w-6 h-6 text-red-400" />
+                            <h3 className="text-xl font-semibold">Urgent</h3>
+                        </div>
+                        <p className="text-slate-400">Fast delivery for critical needs.</p>
+                    </motion.div>
+
+                    {/* Resident Standard */}
+                    <motion.div
+                        className="bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-white/10 hover:border-purple-400 transition-colors"
+                        whileHover={{ y: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => openResidentModal('standard')}
+                    >
+                        <div className="flex items-center space-x-3 mb-4">
+                            <ShieldCheck className="w-6 h-6 text-green-400" />
+                            <h3 className="text-xl font-semibold">Resident Standard</h3>
+                        </div>
+                        <p className="text-slate-400">Standard resident booking.</p>
+                    </motion.div>
+
+                    {/* Resident Urgent */}
+                    <motion.div
+                        className="bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 border border-white/10 hover:border-purple-400 transition-colors"
+                        whileHover={{ y: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => openResidentModal('urgence')}
+                    >
+                        <div className="flex items-center space-x-3 mb-4">
+                            <MapPin className="w-6 h-6 text-orange-400" />
+                            <h3 className="text-xl font-semibold">Resident Urgent</h3>
+                        </div>
+                        <p className="text-slate-400">Urgent resident booking.</p>
+                    </motion.div>
                 </div>
-            </section>
+            </main>
 
-            {/* Features Section */}
-            <section className="py-12 bg-white/80 backdrop-blur-sm shadow-inner">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-semibold text-gray-800 mb-8 text-center">Pourquoi Choisir Notre Service ?</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-                        <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-4">
-                                <Clock className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Ponctualité Garantie</h3>
-                            <p className="text-gray-600">Nous respectons vos délais. Soyez assuré d'un service ponctuel et fiable.</p>
-                        </div>
-
-                        <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 mb-4">
-                                <Check className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Réservation Facile</h3>
-                            <p className="text-gray-600">Notre plateforme intuitive vous permet de réserver en quelques étapes simples.</p>
-                        </div>
-
-                        <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 text-orange-600 mb-4">
-                                <MapPin className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Large Couverture</h3>
-                            <p className="text-gray-600">Nous desservons une vaste zone géographique pour répondre à tous vos besoins de transport.</p>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
 
             {/* Modals */}
             {showConfigModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-semibold text-gray-800">Configuration de la Réservation</h2>
-                            <button onClick={() => setShowConfigModal(false)} className="text-gray-500 hover:text-gray-700">
-                                <X className="h-6 w-6" />
-                            </button>
-                        </div>
+                <motion.div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                >
+                    <motion.div
+                        className="bg-slate-800 rounded-2xl shadow-lg p-8 max-w-md w-full border border-white/10"
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0.8 }}
+                    >
+                        <h2 className="text-2xl font-bold mb-4">Configure Your Booking</h2>
 
-                        {/* Calendar */}
                         <div className="mb-4">
-                            <label htmlFor="date" className="block text-gray-700 text-sm font-bold mb-2">Sélectionner une date:</label>
+                            <label className="block text-sm font-medium mb-2">Select Date</label>
                             <CapsuleCalendar onDateSelect={(date) => setConfig(c => ({ ...c, selectedDate: date }))} />
                         </div>
 
-                        {/* Slot selection */}
                         {config.selectedDate && (
                             <div className="mb-4">
-                                <label htmlFor="slot" className="block text-gray-700 text-sm font-bold mb-2">Sélectionner un créneau:</label>
+                                <label className="block text-sm font-medium mb-2">Select Time Slot</label>
                                 {loadingSlots ? (
-                                    <div className="text-center"><Loader2 className="inline-block animate-spin" /> Chargement des créneaux...</div>
+                                    <div className="flex items-center justify-center"><Loader2 className="animate-spin" /></div>
                                 ) : (
-                                    <select
-                                        id="slot"
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        value={config.selectedSlot || ''}
-                                        onChange={(e) => setConfig(c => ({ ...c, selectedSlot: e.target.value }))}
-                                    >
-                                        <option value="" disabled>Choisissez un créneau</option>
+                                    <div className="grid grid-cols-2 gap-2">
                                         {slotPeriods.map(slot => (
-                                            <option key={slot} value={slot}>{slot}</option>
+                                            <button
+                                                key={slot}
+                                                className={`rounded-md py-2 px-4 text-sm ${config.selectedSlot === slot ? 'bg-purple-500 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'} transition-colors`}
+                                                onClick={() => setConfig(c => ({ ...c, selectedSlot: slot }))}
+                                            >
+                                                {slot}
+                                            </button>
                                         ))}
-                                    </select>
+                                    </div>
                                 )}
                             </div>
                         )}
 
-                        {/* Stops Count */}
                         <div className="mb-4">
-                            <label htmlFor="stops" className="block text-gray-700 text-sm font-bold mb-2">Nombre d'arrêts:</label>
+                            <label className="block text-sm font-medium mb-2">Number of Stops</label>
                             <div className="flex items-center space-x-2">
                                 <button
+                                    className="rounded-full p-2 bg-slate-700 hover:bg-slate-600 transition-colors"
                                     onClick={() => setConfig(c => ({ ...c, stops: Math.max(1, c.stops - 1) }))}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                 >
-                                    <Minus />
+                                    <Minus className="w-4 h-4" />
                                 </button>
-                                <input
-                                    type="number"
-                                    id="stops"
-                                    className="shadow appearance-none border rounded w-16 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center"
-                                    value={config.stops}
-                                    readOnly
-                                />
+                                <span>{config.stops}</span>
                                 <button
+                                    className="rounded-full p-2 bg-slate-700 hover:bg-slate-600 transition-colors"
                                     onClick={() => setConfig(c => ({ ...c, stops: c.stops + 1 }))}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                 >
-                                    <Plus />
+                                    <Plus className="w-4 h-4" />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Return Trip */}
                         <div className="mb-4">
-                            <label className="inline-flex items-center">
-                                <input
-                                    type="checkbox"
-                                    className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-0"
-                                    checked={config.isReturn}
-                                    onChange={() => setConfig(c => ({ ...c, isReturn: !c.isReturn }))}
-                                />
-                                <span className="ml-2 text-gray-700 font-medium">Voyage Retour</span>
-                            </label>
+                            <label className="block text-sm font-medium mb-2">Return Trip?</label>
+                            <button
+                                className={`rounded-md py-2 px-4 text-sm ${config.isReturn ? 'bg-purple-500 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'} transition-colors`}
+                                onClick={() => setConfig(c => ({ ...c, isReturn: !config.isReturn }))}
+                            >
+                                {config.isReturn ? 'Yes' : 'No'}
+                            </button>
                         </div>
 
-                        {/* Price estimate */}
                         {priceResult && (
-                            <div className="mb-4 border-t pt-4">
-                                <p className="text-gray-700">
-                                    Prix estimé: <span className="font-semibold">{formatCurrency(priceResult.total)}</span>
-                                    {priceResult.isFixed && <span className="text-sm text-green-600"> (Forfait)</span>}
-                                </p>
+                            <div className="mb-4">
+                                <p className="text-lg font-semibold">Estimated Price: {formatCurrency(priceResult.total)}</p>
+                                {priceResult.isFixed && <p className="text-sm text-slate-400">Fixed Price</p>}
                             </div>
                         )}
 
-                        {/* Email Input */}
-                        <div className="mb-6">
-                            <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2">Email</label>
                             <input
                                 type="email"
-                                id="email"
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="Votre email"
+                                className="w-full rounded-md bg-slate-700 border-none text-white py-2 px-3"
                                 value={userEmail}
-                                onChange={(e) => setUserEmail(e.target.value)}
+                                onChange={e => setUserEmail(e.target.value)}
                             />
                         </div>
 
-                        {/* Submit Button */}
-                        <button
-                            onClick={handleSubmitBooking}
-                            disabled={submitting}
-                            className={`transition-colors duration-300 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            {submitting ? <Loader2 className="inline-block animate-spin mr-2" /> : <Check className="inline-block mr-2" />}
-                            Confirmer la Réservation
-                        </button>
-
-                        {/* Message */}
                         {message && (
-                            <div className={`mt-4 p-3 rounded-md ${message.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                            <div className={`rounded-md py-2 px-4 mb-4 ${message.type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white`}>
                                 {message.text}
                             </div>
                         )}
 
-                    </div>
-                </div>
-            )}
-
-            {/* Resident Modal */}
-            {showResidentModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-semibold text-gray-800">Forfait Résident</h2>
-                            <button onClick={() => setShowResidentModal(false)} className="text-gray-500 hover:text-gray-700">
-                                <X className="h-6 w-6" />
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                className="rounded-md py-2 px-4 bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
+                                onClick={() => setShowConfigModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="rounded-md py-2 px-4 bg-purple-500 hover:bg-purple-600 text-white transition-colors"
+                                onClick={handleSubmitBooking}
+                                disabled={submitting}
+                            >
+                                {submitting ? <Loader2 className="animate-spin" /> : 'Book Now'}
                             </button>
                         </div>
-
-                        <p className="text-gray-700 mb-4">Choisissez votre type de forfait résident:</p>
-
-                        <button
-                            onClick={() => {
-                                setConfig(prev => ({ ...prev, residentMode: 'standard', selectedDate: new Date().toISOString().slice(0, 10) }))
-                                setShowResidentModal(false)
-                                setShowConfigModal(true)
-                            }}
-                            className="transition-colors duration-300 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 block w-full text-center mb-2"
-                        >
-                            Forfait Standard
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                setConfig(prev => ({ ...prev, residentMode: 'urgence', selectedDate: new Date().toISOString().slice(0, 10) }))
-                                setShowResidentModal(false)
-                                setShowConfigModal(true)
-                            }}
-                            className="transition-colors duration-300 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 block w-full text-center"
-                        >
-                            Forfait Urgence
-                        </button>
-
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             )}
 
-            {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 py-6 mt-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-                    <p>&copy; {new Date().getFullYear()} My Awesome Service. Tous droits réservés.</p>
-                </div>
-            </footer>
+            {showResidentModal && (
+                <motion.div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                >
+                    <motion.div
+                        className="bg-slate-800 rounded-2xl shadow-lg p-8 max-w-md w-full border border-white/10"
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0.8 }}
+                    >
+                        <h2 className="text-2xl font-bold mb-4">Resident Booking</h2>
 
-        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2">Select Date</label>
+                            <CapsuleCalendar onDateSelect={(date) => setConfig(c => ({ ...c, selectedDate: date }))} />
+                        </div>
+
+                        {config.selectedDate && (
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">Select Time Slot</label>
+                                {loadingSlots ? (
+                                    <div className="flex items-center justify-center"><Loader2 className="animate-spin" /></div>
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {slotPeriods.map(slot => (
+                                            <button
+                                                key={slot}
+                                                className={`rounded-md py-2 px-4 text-sm ${config.selectedSlot === slot ? 'bg-purple-500 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'} transition-colors`}
+                                                onClick={() => setConfig(c => ({ ...c, selectedSlot: slot }))}
+                                            >
+                                                {slot}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {priceResult && (
+                            <div className="mb-4">
+                                <p className="text-lg font-semibold">Estimated Price: {formatCurrency(priceResult.total)}</p>
+                                {priceResult.isFixed && <p className="text-sm text-slate-400">Fixed Price</p>}
+                            </div>
+                        )}
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2">Email</label>
+                            <input
+                                type="email"
+                                className="w-full rounded-md bg-slate-700 border-none text-white py-2 px-3"
+                                value={userEmail}
+                                onChange={e => setUserEmail(e.target.value)}
+                            />
+                        </div>
+
+                        {message && (
+                            <div className={`rounded-md py-2 px-4 mb-4 ${message.type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white`}>
+                                {message.text}
+                            </div>
+                        )}
+
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                className="rounded-md py-2 px-4 bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
+                                onClick={() => setShowResidentModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="rounded-md py-2 px-4 bg-purple-500 hover:bg-purple-600 text-white transition-colors"
+                                onClick={handleSubmitBooking}
+                                disabled={submitting}
+                            >
+                                {submitting ? <Loader2 className="animate-spin" /> : 'Book Now'}
+                            </button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+
+
+        </motion.div>
     )
 }

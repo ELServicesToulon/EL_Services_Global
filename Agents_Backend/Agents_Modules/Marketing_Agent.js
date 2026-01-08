@@ -22,23 +22,24 @@ class Marketing_Agent extends Agent_Base {
         this.log(`🎨 Analyse visuelle en cours pour : ${context}...`);
 
         const prompt = `
-            Tu es un Expert en UI/UX et Marketing Visuel de classe mondiale (Apple/Airbnb level).
-            Ton but : Transformer une interface fonctionnelle mais basique en une expérience **Premium, Moderne et Engageante**.
+            Tu es un Visionnaire du Design "Nouvelle Génération" (Gen Z, Cyberpunk-Light, Awwwards Winner).
+            Ton but : Remplacer l'interface corporate ennuyeuse par une expérience **New Gen, Disruptive et Hypnotique**.
 
             Contexte : ${context}
             
             Code Actuel (React/Tailwind) :
-            ${codeContent.substring(0, 5000)} // Truncate pour éviter surcharge
+            ${codeContent.substring(0, 5000)}
 
-            Directives de Design :
-            1. **Wow Factor** : Utilise des gradients subtils, des ombres douces (glassmorphism), de la typographie soignée.
-            2. **Call-to-Action (CTA)** : Rends les boutons irrésistibles (effets hover, gradients).
-            3. **Copywriting** : Améliore les textes pour être plus persuasifs et professionnels.
-            4. **Structure** : Garde la logique fonctionnelle (hooks, states) INTACTE, mais refonds le JSX/CSS retourné.
+            Directives "New Gen" :
+            1. **Aesthetic** : Dark Mode par défaut (bg-slate-900), Gradients "Aurora" (flous colorés en arrière-plan), Bento Grid Layouts.
+            2. **Typography** : TITRES ENORMES (text-6xl+), graisses contrastées, polices sans-serif géométriques.
+            3. **Interactions** : Tout doit bouger (Framer Motion). Effets de survol "Glow".
+            4. **Tone** : Minimaliste mais impactant. Évite le blabla corporate.
+            5. **Composants** : Utilise des cartes translucides (backdrop-blur-xl), des bordures fines (border-white/10).
             
             Renvoie UNIQUEMENT le code complet du composant redesigné.
             Assure-toi que TOUS les imports et la logique (handleSubmit, etc.) sont conservés.
-            Ne supprime aucune fonctionnalité. Ajoute de la beauté.
+            Ne supprime aucune fonctionnalité. Rends-le FUTURISTE.
         `;
 
         const response = await this.askGemini(prompt);
