@@ -22,15 +22,19 @@ class Key_Guardian extends Agent_Base {
             this.log('Testing GEMINI_API_KEY...');
             const key = Vault.get('GEMINI_API_KEY');
             if (key) {
-                // Simple test call with a tiny prompt
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
-                await axios.post(url, { contents: [{ parts: [{ text: "Hello" }] }] });
-                report.push('✅ GEMINI_API_KEY: Valide');
+                // Utilisation de la méthode robuste de la classe parent
+                // (Gère le fallback de modèles)
+                const answer = await this.askGemini("Réponds 'OK' si tu me reçois.");
+                if (answer) {
+                    report.push(`✅ GEMINI_API_KEY: Valide (Réponse: ${answer.trim().slice(0, 20)}...)`);
+                } else {
+                    report.push('❌ GEMINI_API_KEY: Erreur (Pas de réponse)');
+                }
             } else {
                 report.push('❌ GEMINI_API_KEY: Manquante');
             }
         } catch (e) {
-            report.push(`❌ GEMINI_API_KEY: Erreur (${e.response ? e.response.status : e.message})`);
+            report.push(`❌ GEMINI_API_KEY: Exception (${e.message})`);
         }
 
         // 2. Check GOOGLE_MAPS_API_KEY (Geocoding test)
