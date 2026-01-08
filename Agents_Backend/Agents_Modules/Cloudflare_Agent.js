@@ -28,6 +28,14 @@ class CloudflareAgent {
             this.headers['X-Auth-Email'] = this.email;
             this.headers['X-Auth-Key'] = this.apiKey;
         }
+
+        // IPs jamais bannies (Sécurité)
+        this.WHITELIST = [
+            '127.0.0.1',
+            '::1',
+            process.env.VPS_IP || '0.0.0.0', // IP du VPS lui-même
+            '66.249.66.1', // Exemple GoogleBot (à affiner si besoin)
+        ];
     }
 
     /**
@@ -101,12 +109,103 @@ class CloudflareAgent {
         console.error(`[${this.name}] ❌ Erreur (${context}): ${msg}`);
     }
 
+    /**
+     * Bannit une IP via le Pare-feu Cloudflare (IP Access Rules).
+     * @param {string} ip - L'adresse IP à bannir.
+     * @param {string} reason - La raison du ban (pour les logs/commentaires).
+     */
+    async banIP(ip, reason = 'Banned by Sentinel Active Defense') {
+        if (!this.zoneId) await this.init();
+        if (!this.zoneId) return { success: false, error: "Zone ID inconnue" };
+        
+        // CHECK WHITELIST
+        if (this.WHITELIST.includes(ip)) {
+            console.warn(`[${this.name}] ⚠️ TENTATIVE DE BAN SUR IP WHITELISTÉE (${ip}) - IGNORÉE.`);
+            return { success: false, error: 'IP Whitelisted' };
+        }
+
+        console.log(`[${this.name}] ⛔ BAN IP demandé pour ${ip} (${reason})...`);
+
+        try {
+            const body = {
+                mode: 'block',
+                configuration: {
+                    target: 'ip',
+                    value: ip
+                },
+                notes: reason
+            };
+
+            const resp = await axios.post(
+                `https://api.cloudflare.com/client/v4/zones/${this.zoneId}/firewall/access_rules/rules`,
+                body,
+                { headers: this.headers }
+            );
+
+            if (resp.data.success) {
+                console.log(`[${this.name}] 🛡️ IP ${ip} BANNIE avec succès.`);
+                return { success: true, result: resp.data.result };
+            } else {
+                console.error(`[${this.name}] ❌ Echec Ban IP:`, JSON.stringify(resp.data.errors));
+                return { success: false, errors: resp.data.errors };
+            }
+        } catch (error) {
+            this.logError('banIP', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Change le niveau de sécurité du site (ex: 'under_attack').
+     * @param {string} level - 'off', 'essentially_off', 'low', 'medium', 'high', 'under_attack'
+     */
+    async setSecurityLevel(level) {
+        if (!this.zoneId) await this.init();
+        if (!this.zoneId) return { success: false, error: "Zone ID inconnue" };
+        
+        const validLevels = ['off', 'essentially_off', 'low', 'medium', 'high', 'under_attack'];
+        if (!validLevels.includes(level)) {
+            return { success: false, error: `Niveau invalide. Attendus: ${validLevels.join(', ')}` };
+        }
+
+        console.log(`[${this.name}] 🛡️ Changement niveau sécurité -> ${level}...`);
+
+        try {
+            const resp = await axios.patch(
+                `https://api.cloudflare.com/client/v4/zones/${this.zoneId}/settings/security_level`,
+                { value: level },
+                { headers: this.headers }
+            );
+
+            if (resp.data.success) {
+                console.log(`[${this.name}] ✅ Niveau de sécurité réglé sur : ${level}`);
+                return { success: true, result: resp.data.result };
+            } else {
+                console.error(`[${this.name}] ❌ Echec Security Level:`, JSON.stringify(resp.data.errors));
+                return { success: false, errors: resp.data.errors };
+            }
+        } catch (error) {
+            this.logError('setSecurityLevel', error);
+            return { success: false, error: error.message };
+        }
+    }
+
     // --- Interface pour Sentinel ---
     async executeOrder(order) {
-        if (order.action === 'purge_cache') {
-            return await this.purgeCache(true);
+        try {
+            switch (order.action) {
+                case 'purge_cache':
+                    return await this.purgeCache(true);
+                case 'ban_ip':
+                    return await this.banIP(order.ip, order.reason);
+                case 'set_security':
+                    return await this.setSecurityLevel(order.level);
+                default:
+                    return { success: false, error: `Unknown action: ${order.action}` };
+            }
+        } catch (e) {
+            return { success: false, error: e.message };
         }
-        return { success: false, error: 'Unknown action' };
     }
 }
 

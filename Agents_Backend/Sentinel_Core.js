@@ -22,6 +22,7 @@ const CloudflareAgent = require('./Agents_Modules/Cloudflare_Agent');
 const OrchestratorAgent = require('./Agents_Modules/Orchestrator_Agent');
 const AgencyArchitect = require('./Agents_Modules/Agency_Architect');
 const KeyGuardian = require('./Agents_Modules/Key_Guardian');
+const HoneypotAgent = require('./Agents_Modules/Honeypot_Agent');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -314,11 +315,29 @@ async function main() {
     if (SecurityAgent) {
         // Premier scan rapide au démarrage
         const initSecurity = await SecurityAgent.runSecurityCycle();
-        if (initSecurity) await remoteLog('SECURITY', initSecurity);
+        if (initSecurity) {
+            await remoteLog('SECURITY', initSecurity);
+            
+            // RÉACTION ACTIVE : Si intégrité compromise -> LOCKDOWN
+            if (initSecurity.includes('ALERTE INTEGRITÉ') && CloudflareAgent) {
+                console.warn('🚨 LOCKDOWN TRIGGERED: File Integrity Compromised!');
+                await CloudflareAgent.setSecurityLevel('under_attack');
+                await remoteLog('SENTINEL', '🚨 LOCKDOWN ACTIVATED due to Integrity Alert.');
+            }
+        }
 
         setInterval(async () => {
             const securityReport = await SecurityAgent.runSecurityCycle();
-            if (securityReport) await remoteLog('SECURITY', securityReport);
+            if (securityReport) {
+                await remoteLog('SECURITY', securityReport);
+                
+                // RÉACTION ACTIVE
+                if (securityReport.includes('ALERTE INTEGRITÉ') && CloudflareAgent) {
+                    console.warn('🚨 LOCKDOWN TRIGGERED: File Integrity Compromised!');
+                    await CloudflareAgent.setSecurityLevel('under_attack');
+                    await remoteLog('SENTINEL', '🚨 LOCKDOWN ACTIVATED due to Integrity Alert.');
+                }
+            }
         }, 14400000); // 4h
     }
 
@@ -327,18 +346,23 @@ async function main() {
         await CloudflareAgent.init();
     }
 
-    // --- 10. CHAT AGENT (Listener Permanent) ---
+    // --- 10. HONEYPOT AGENT (Listener Permanent) ---
+    if (HoneypotAgent) {
+        await HoneypotAgent.init();
+    }
+
+    // --- 11. CHAT AGENT (Listener Permanent) ---
     if (ChatAgent) {
         await ChatAgent.init();
     }
 
-    // --- 11. ORCHESTRATOR (Project Map) ---
+    // --- 12. ORCHESTRATOR (Project Map) ---
     if (OrchestratorAgent) {
         await OrchestratorAgent.scanCodebase(); // Build initial map
         // We can schedule a re-scan every 24h if needed
     }
 
-    // --- 12. AGENCY ARCHITECT (Initial + 24h) ---
+    // --- 13. AGENCY ARCHITECT (Initial + 24h) ---
     if (AgencyArchitect) {
         // Lancement initial différé pour ne pas surcharger le boot
         setTimeout(async () => {
@@ -353,7 +377,7 @@ async function main() {
         }, 86400000); // 24h
     }
 
-    // --- 13. KEY GUARDIAN (Initial + 24h) ---
+    // --- 14. KEY GUARDIAN (Initial + 24h) ---
     if (KeyGuardian) {
         // Run very early to validate env
         setTimeout(async () => {

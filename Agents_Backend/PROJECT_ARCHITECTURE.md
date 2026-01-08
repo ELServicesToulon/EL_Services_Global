@@ -1,6 +1,6 @@
 # 🏗️ PROJECT ARCHITECTURE (Live Map)
 
-Updated: 2026-01-08T09:24:01.871Z
+Updated: 2026-01-08T12:56:29.372Z
 
 ## 🤖 Agents Detected
 - **Agency_Architect**
@@ -23,6 +23,8 @@ Updated: 2026-01-08T09:24:01.871Z
   - @description Agent de gestion du dossier Google Drive "Gestion ELS" Organise les fichiers, synchronise avec Supabase et archive les emails.
 - **Ghost_Shopper**
   - @description AGENT HYBRIDE: GHOST SHOPPER + CLIENT EXPERT (Backend QA) Combine la simulation de parcours utilisateur (Ghost Shopper) avec l'analyse technique pointue (Client Expert). NOUVELLES CAPACITÉS : 1. 🕵️‍♂️ Console Spy : Détecte les erreurs JavaScript invisibles à l'utilisateur. 2. 🕸️ Network Sniffer : Repère les images manquantes (404) ou erreurs API (500). 3. ⚡ Performance Audit : Mesure les temps de chargement réels.
+- **Key_Guardian**
+  - @description Agent chargé de la validation des clés API critiques. S'assure que le Vault contient des clés actives et alerte en cas de problème.
 - **Log_Aggregator**
   - @description Agent qui collecte et affiche les logs de tous les autres agents en temps réel. Exécution à la volée (immédiate) avec affichage formaté.
 - **Network_Overseer**
@@ -39,11 +41,15 @@ Updated: 2026-01-08T09:24:01.871Z
 ## 🔗 Relationships
 - `Agency_Architect.js` imports `Agent_Base.js`
 - Class **Agency_Architect** extends **Agent_Base** (in Agency_Architect.js)
+- `Agent_Base.js` imports `Vault.js`
 - `Agent_Fixer.js` imports `Log_Aggregator.js`
 - `Chat_Agent.js` imports `Agent_Base.js`
 - `Chat_Agent.js` imports `Ghost_Shopper.js`
 - `Chat_Agent.js` imports `Cloudflare_Agent.js`
 - Class **Chat_Agent** extends **Agent_Base** (in Chat_Agent.js)
+- `Key_Guardian.js` imports `Agent_Base.js`
+- `Key_Guardian.js` imports `Vault.js`
+- Class **Key_Guardian** extends **Agent_Base** (in Key_Guardian.js)
 - `Network_Overseer.js` imports `Vault.js`
 - `Security_Agent.js` imports `Vault.js`
 - `Security_Agent.js` imports `Vault.js`
@@ -59,6 +65,7 @@ Updated: 2026-01-08T09:24:01.871Z
 - `Sentinel_Core.js` imports `Cloudflare_Agent.js`
 - `Sentinel_Core.js` imports `Orchestrator_Agent.js`
 - `Sentinel_Core.js` imports `Agency_Architect.js`
+- `Sentinel_Core.js` imports `Key_Guardian.js`
 - `Sentinel_Core.js` imports `Tesla_Monitor.js`
 - `Sentinel_Core.js` imports `Agent_Marketing.js`
 - `Sentinel_Core.js` imports `Vault.js`
@@ -74,7 +81,7 @@ Updated: 2026-01-08T09:24:01.871Z
 
 ## 📂 File Index
 - [Agency_Architect.js](Agents_Modules/Agency_Architect.js) (3.2 KB)
-- [Agent_Base.js](Agents_Modules/Agent_Base.js) (4.0 KB)
+- [Agent_Base.js](Agents_Modules/Agent_Base.js) (4.3 KB)
 - [Agent_Connector.js](Agents_Modules/Agent_Connector.js) (2.3 KB)
 - [Agent_Fixer.js](Agents_Modules/Agent_Fixer.js) (10.8 KB)
 - [Agent_Marketing.js](Agents_Modules/Agent_Marketing.js) (1.4 KB)
@@ -83,27 +90,29 @@ Updated: 2026-01-08T09:24:01.871Z
 - [Cloudflare_Agent.js](Agents_Modules/Cloudflare_Agent.js) (4.2 KB)
 - [Drive_Manager.js](Agents_Modules/Drive_Manager.js) (11.9 KB)
 - [Ghost_Shopper.js](Agents_Modules/Ghost_Shopper.js) (14.3 KB)
+- [Key_Guardian.js](Agents_Modules/Key_Guardian.js) (2.9 KB)
 - [Log_Aggregator.js](Agents_Modules/Log_Aggregator.js) (9.8 KB)
 - [Network_Overseer.js](Agents_Modules/Network_Overseer.js) (2.3 KB)
 - [Orchestrator_Agent.js](Agents_Modules/Orchestrator_Agent.js) (8.9 KB)
 - [Security_Agent.js](Agents_Modules/Security_Agent.js) (8.1 KB)
 - [Tesla_Monitor.js](Agents_Modules/Tesla_Monitor.js) (3.4 KB)
-- [Vault.js](Agents_Modules/Vault.js) (3.3 KB)
+- [Vault.js](Agents_Modules/Vault.js) (4.3 KB)
 - [Ghost_Shopper.js](Agents_Standalone/Ghost_Shopper_Worker/Ghost_Shopper.js) (5.8 KB)
 - [README.md](Agents_Standalone/Ghost_Shopper_Worker/README.md) (1.6 KB)
 - [index.js](Agents_Standalone/Ghost_Shopper_Worker/index.js) (1.7 KB)
 - [package.json](Agents_Standalone/Ghost_Shopper_Worker/package.json) (0.4 KB)
 - [INFRASTRUCTURE.md](INFRASTRUCTURE.md) (3.2 KB)
 - [Maintenance_Agent.js](Maintenance_Agent.js) (1.8 KB)
-- [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (7.5 KB)
-- [PROJECT_MAP.json](PROJECT_MAP.json) (38.2 KB)
+- [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (7.6 KB)
+- [PROJECT_MAP.json](PROJECT_MAP.json) (38.8 KB)
 - [SECURITY_PROTOCOLS.md](SECURITY_PROTOCOLS.md) (2.4 KB)
 - [SETUP_KEYS.md](SETUP_KEYS.md) (1.6 KB)
-- [Sentinel_Core.js](Sentinel_Core.js) (14.1 KB)
+- [Sentinel_Core.js](Sentinel_Core.js) (14.6 KB)
 - [Sentinel_Node.js](Sentinel_Node.js) (5.4 KB)
 - [Service_Agent.js](Service_Agent.js) (1.1 KB)
 - [Worker_Launcher.js](Worker_Launcher.js) (2.0 KB)
 - [boot_orchestrator.js](boot_orchestrator.js) (3.8 KB)
+- [check_env_keys.js](check_env_keys.js) (0.5 KB)
 - [check_keys.js](check_keys.js) (0.3 KB)
 - [check_vps.js](check_vps.js) (0.7 KB)
 - [deploy_local.js](deploy_local.js) (2.9 KB)

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-08T09:24:01.860Z",
+  "timestamp": "2026-01-08T12:56:29.341Z",
   "files": [
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agency_Architect.js",
@@ -12,9 +12,9 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agent_Base.js",
       "name": "Agent_Base.js",
-      "size": 4086,
+      "size": 4367,
       "relative": "Agents_Modules/Agent_Base.js",
-      "contentSnippet": "/**\n * @file Agent_Base.js\n * @description Classe de base pour tous les agents.\n * Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n */\n\nconst axios = require('axios');\nconst fs = require('fs');\nrequire('dotenv').config();\n",
+      "contentSnippet": "/**\n * @file Agent_Base.js\n * @description Classe de base pour tous les agents.\n * Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n */\n\nconst axios = require('axios');\nconst fs = require('fs');\nconst Vault = require('./Vault');\n",
       "description": "@description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade."
     },
     {
@@ -82,6 +82,14 @@
       "description": "@description AGENT HYBRIDE: GHOST SHOPPER + CLIENT EXPERT (Backend QA) Combine la simulation de parcours utilisateur (Ghost Shopper) avec l'analyse technique pointue (Client Expert). NOUVELLES CAPACITÉS : 1. 🕵️‍♂️ Console Spy : Détecte les erreurs JavaScript invisibles à l'utilisateur. 2. 🕸️ Network Sniffer : Repère les images manquantes (404) ou erreurs API (500). 3. ⚡ Performance Audit : Mesure les temps de chargement réels."
     },
     {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Key_Guardian.js",
+      "name": "Key_Guardian.js",
+      "size": 2923,
+      "relative": "Agents_Modules/Key_Guardian.js",
+      "contentSnippet": "/**\n * @file Key_Guardian.js\n * @description Agent chargé de la validation des clés API critiques.\n * S'assure que le Vault contient des clés actives et alerte en cas de problème.\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst Vault = require('./Vault');\nconst axios = require('axios');\n",
+      "description": "@description Agent chargé de la validation des clés API critiques. S'assure que le Vault contient des clés actives et alerte en cas de problème."
+    },
+    {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Log_Aggregator.js",
       "name": "Log_Aggregator.js",
       "size": 10068,
@@ -124,7 +132,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Vault.js",
       "name": "Vault.js",
-      "size": 3416,
+      "size": 4368,
       "relative": "Agents_Modules/Vault.js",
       "contentSnippet": "/**\n * @file Vault.js\n * @description Module de gestion centralisée des secrets et de la configuration.\n * Charge les variables d'environnement depuis le fichier .env et valide leur présence.\n */\n\nrequire('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });\nconst path = require('path');\nconst fs = require('fs');\n",
       "description": "@description Module de gestion centralisée des secrets et de la configuration. Charge les variables d'environnement depuis le fichier .env et valide leur présence."
@@ -176,16 +184,16 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_ARCHITECTURE.md",
       "name": "PROJECT_ARCHITECTURE.md",
-      "size": 7711,
+      "size": 7822,
       "relative": "PROJECT_ARCHITECTURE.md",
-      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-08T09:17:35.488Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
+      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-08T09:24:01.871Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_MAP.json",
       "name": "PROJECT_MAP.json",
-      "size": 39076,
+      "size": 39734,
       "relative": "PROJECT_MAP.json",
-      "contentSnippet": "{\n  \"timestamp\": \"2026-01-08T09:17:35.467Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agency_Architect.js\",\n      \"name\": \"Agency_Architect.js\",\n      \"size\": 3227,\n      \"relative\": \"Agents_Modules/Agency_Architect.js\",\n      \"contentSnippet\": \"/**\\n * @file Agency_Architect.js\\n * @description \\\"L'Aiguilleur Orchestrateur\\\".\\n * Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\\n */\\n\\nconst Agent_Base = require('./Agent_Base');\\nconst fs = require('fs');\\nconst path = require('path');\\n\",\n      \"description\": \"@description \\\"L'Aiguilleur Orchestrateur\\\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\""
+      "contentSnippet": "{\n  \"timestamp\": \"2026-01-08T09:24:01.860Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agency_Architect.js\",\n      \"name\": \"Agency_Architect.js\",\n      \"size\": 3227,\n      \"relative\": \"Agents_Modules/Agency_Architect.js\",\n      \"contentSnippet\": \"/**\\n * @file Agency_Architect.js\\n * @description \\\"L'Aiguilleur Orchestrateur\\\".\\n * Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\\n */\\n\\nconst Agent_Base = require('./Agent_Base');\\nconst fs = require('fs');\\nconst path = require('path');\\n\",\n      \"description\": \"@description \\\"L'Aiguilleur Orchestrateur\\\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\""
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/SECURITY_PROTOCOLS.md",
@@ -204,7 +212,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Sentinel_Core.js",
       "name": "Sentinel_Core.js",
-      "size": 14410,
+      "size": 14981,
       "relative": "Sentinel_Core.js",
       "contentSnippet": "/**\n * @file Sentinel_Core.js\n * @description ORCHESTRATEUR PRINCIPAL ANTIGRAVITY (Backend Node.js)\n * Coordonne les agents spécialisés (Modules) et assure la liaison avec le Dashboard Google.\n * Version : 2.0 (Intégration Marketing + Client Expert Local + Logs Fichiers)\n */\n\nrequire('dotenv').config();\nconst { google } = require('googleapis');\nconst fs = require('fs');",
       "description": "@description ORCHESTRATEUR PRINCIPAL ANTIGRAVITY (Backend Node.js) Coordonne les agents spécialisés (Modules) et assure la liaison avec le Dashboard Google. Version : 2.0 (Intégration Marketing + Client Expert Local + Logs Fichiers)"
@@ -238,6 +246,13 @@
       "size": 3886,
       "relative": "boot_orchestrator.js",
       "contentSnippet": "const { spawn, execSync, exec } = require('child_process');\nconst path = require('path');\nconst fs = require('fs');\nconst { main: runMaintenance } = require('./Maintenance_Agent');\nconst { main: runServiceCheck } = require('./Service_Agent');\nconst { sendRecapEmail } = require('./email_service');\n\nconst LOG_FILE = path.join(__dirname, 'boot_log.txt');\n\nfunction log(message) {"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/check_env_keys.js",
+      "name": "check_env_keys.js",
+      "size": 507,
+      "relative": "check_env_keys.js",
+      "contentSnippet": "const dotenv = require('dotenv');\nconst fs = require('fs');\nconst path = require('path');\n\nconst envPath = path.join(__dirname, '.env');\nif (fs.existsSync(envPath)) {\n    const envConfig = dotenv.parse(fs.readFileSync(envPath));\n    console.log(\"Keys in .env:\", Object.keys(envConfig));\n    if (envConfig.GEMINI_API_KEY) {\n        console.log(\"GEMINI_API_KEY is present.\");"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/check_keys.js",
@@ -399,6 +414,7 @@
     "Cloudflare_Agent",
     "Drive_Manager",
     "Ghost_Shopper",
+    "Key_Guardian",
     "Log_Aggregator",
     "Network_Overseer",
     "Orchestrator_Agent",
@@ -417,6 +433,11 @@
       "from": "Agency_Architect",
       "to": "Agent_Base",
       "file": "Agency_Architect.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Agent_Base.js",
+      "to": "Vault.js"
     },
     {
       "type": "dependency",
@@ -443,6 +464,22 @@
       "from": "Chat_Agent",
       "to": "Agent_Base",
       "file": "Chat_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Key_Guardian.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Key_Guardian.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Key_Guardian",
+      "to": "Agent_Base",
+      "file": "Key_Guardian.js"
     },
     {
       "type": "dependency",
@@ -518,6 +555,11 @@
       "type": "dependency",
       "from": "Sentinel_Core.js",
       "to": "Agency_Architect.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Key_Guardian.js"
     },
     {
       "type": "dependency",
