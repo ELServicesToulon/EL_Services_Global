@@ -6,30 +6,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([]);
-  const [sessionId, setSessionId] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
-  const [isListening, setIsListening] = useState(false);
+  
+  const [messages, setMessages] = useState(() => {
+    return [{ 
+        id: 'init', 
+        sender: 'bot', 
+        content: "Bonjour ! Je suis l'Assistant Intelligent MediConvoi. Je peux lancer un audit technique, vérifier l'état du site ou répondre à vos questions. Comment puis-je vous aider ?" 
+    }];
+  });
 
-  useEffect(() => {
-    // Session Management
+  const [sessionId] = useState(() => {
     let sid = localStorage.getItem('chat_session_id');
     if (!sid) {
       sid = crypto.randomUUID();
       localStorage.setItem('chat_session_id', sid);
     }
-    setSessionId(sid);
+    return sid;
+  });
 
-    // Initial Message
-    if (messages.length === 0) {
-        setMessages([{ 
-            id: 'init', 
-            sender: 'bot', 
-            content: "Bonjour ! Je suis l'Assistant Intelligent MediConvoi. Je peux lancer un audit technique, vérifier l'état du site ou répondre à vos questions. Comment puis-je vous aider ?" 
-        }]);
-    }
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+  const [isListening, setIsListening] = useState(false);
 
+  useEffect(() => {
     // Realtime Subscription
     const channel = supabase
       .channel('chat_app')
