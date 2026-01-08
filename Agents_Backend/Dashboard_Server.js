@@ -95,6 +95,23 @@ app.post('/api/control/:agentId', (req, res) => {
     }, 1000);
 });
 
+// 5. Interface de Chat Direct (Pour automatisation Android/External)
+app.post('/api/chat', async (req, res) => {
+    const { prompt } = req.body;
+    if (!prompt) return res.status(400).json({ error: 'Prompt required' });
+
+    console.log(`📝 [API/CHAT] Prompt reçu: "${prompt}"`);
+    
+    try {
+        // On utilise directement le ChiefAdvisor pour traiter la demande
+        const response = await ChiefAdvisor.consult(prompt);
+        res.json({ success: true, response: response, timestamp: Date.now() });
+    } catch (e) {
+        console.error('❌ [API/CHAT] Erreur:', e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 // Lancement du serveur
 app.listen(PORT, () => {
     console.log(`🛡️ Dashboard API Server running on port ${PORT}`);

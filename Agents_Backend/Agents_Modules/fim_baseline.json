@@ -53,5 +53,16 @@
   "test_network.js": "778827f07a15f2d16555dbd345ea0ace7e432a1ac9fad8b0057ae3e2cf771862",
   "trigger_architect.js": "64271d20c4566eabc65569cbd8996350aba0bc2114094baf5af83b6fb8977dc5",
   "verify_omni_scan.js": "ec458f951b5413646247cfda4e3d97afbc07337b40dc7a752edd9b3efacf48ad",
-  "whitelist_myself.js": "204d95da711d4ba3a8d125fcbf8f33f24dce830e6a00056217fb9bfc9626e845"
+  "whitelist_myself.js": "204d95da711d4ba3a8d125fcbf8f33f24dce830e6a00056217fb9bfc9626e845",
+  "Agents_Modules/Ghost_Shopper/index.js": "5360bb3ec4aaee0cda434583b1a39ca95f100dd012d3c62797f1860f7436d8de",
+  "Agents_Modules/Marketing_Agent.js": "9c8bb8c1d3b1316f4301593a3d9fc0d4d670fa54565de7f870ec5e3518cd985e",
+  "Agents_Modules/Risk_Mitigator.js": "9331553b2840272eee0c461140a2d511941cca256848d2b0c9f132eabd854cae",
+  "Agents_Modules/Shared_Knowledge.js": "673d1c9669d165737843a64022a96d7eaa608f391e793e99e8b5b44fac29ed67",
+  "diagnose_ftp.js": "7ddfe6801ee0210421ee3264b8b956ed935223285b87f457cae93aa5c96feec3",
+  "fix_qa_user.js": "e2c3e23016ceac4c9c0a3c0ded8cc4048e961745a505ce4a090ccdfb587f8992",
+  "manual_purge.js": "b607b3953a2bf77b5a4b7f93883ffb6e11b1cc6f1554753c21e8eebb45f05676",
+  "run_redesign.js": "8992c7123ded6d2647aec5848374892554726c8f03ffdb75fe4808870c9610f4",
+  "test_risk.js": "b1e36ce33607a2539735b1f10199f29d74246104e50c2ab526d84d44e4d5a81f",
+  "trigger_evolution.js": "02b61596d22edaffc447346eeb4fbe9e495311d4a708e611d56bda9725b2faee",
+  "verify_android_api.js": "f377e7d02c4bb6fd223b93615cfd412e67c0ec0c686bdc49cabf4df9d335e739"
 }

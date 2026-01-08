@@ -1,6 +1,6 @@
 # 🏗️ PROJECT ARCHITECTURE (Live Map)
 
-Updated: 2026-01-08T16:16:01.528Z
+Updated: 2026-01-08T21:44:48.790Z
 
 ## 🤖 Agents Detected
 - **Agency_Architect**
@@ -15,30 +15,54 @@ Updated: 2026-01-08T16:16:01.528Z
   - @description Agent Marketing & SEO (Backend) Analyse le trafic (Google Analytics v4), suit le positionnement SEO et optimise la présence en ligne.
 - **Archive_Keeper**
   - @description Agent responsable de l'archivage et des sauvegardes locales.
+- **Browser_Server**
+  - @description Manages a persistent Chromium browser server for agents. Agents can connect via WebSocket endpoint for ~27% faster page loads.
 - **Chat_Agent**
   - @description Agent conversationnel (Chatbot) intégré à Sentinel. Interagit avec les utilisateurs via Supabase et utilise Gemini pour l'intelligence. Peut piloter Ghost Shopper pour des audits à la demande. Version 2.0 : Hérite de Agent_Base (Auto-Evolution Ready)
 - **Chief_Advisor_Agent**
   - @description "Le Chef de Projet / Adjoint" - Agent central IA (Gemini). Version 3.0 : Mémoire Dynamique d'Expérience.
 - **Cloudflare_Agent**
   - @description Agent dédié à la gestion de Cloudflare (Cache, DNS, Firewall). Version 3.1 : Correction fonctions manquantes.
+- **Deployment_Agent**
+  - @description Agent responsible for Continuous Deployment (CD). Monitors 'git status' and triggers 'deploy_launch_v2.js' if changes are detected.
 - **Drive_Manager**
   - @description Agent de gestion du dossier Google Drive "Gestion ELS" Organise les fichiers, synchronise avec Supabase et archive les emails.
+- **config**
+  - @description Configuration et constantes pour Ghost Shopper
+- **index**
+  - @description AGENT HYBRIDE: GHOST SHOPPER + CLIENT EXPERT (Backend QA) Point d'entrée principal - Orchestre les différents modules. CAPACITÉS : 1. 🕵️‍♂️ Console Spy : Détecte les erreurs JavaScript invisibles 2. 🕸️ Network Sniffer : Repère les 404/500 3. ⚡ Performance Audit : Mesure les temps de chargement 4. 🐒 Chaos Monkey : Clique aléatoirement pour trouver des bugs 5. 🔍 Omni-Scan : Scan intégral de toutes les pages
+- **interactions**
+  - @description Module d'interactions (Chaos Monkey + interactions méthodiques)
+- **omni_scan**
+  - @description Mode Omni-Scan : Scan intégral du site
+- **probes**
+  - @description Sondes de monitoring (console JS, network, crashes)
+- **session_utils**
+  - @description Utilitaires de session (loader wait, screenshots, finish)
+- **standard_flow**
+  - @description Parcours standard de réservation (booking flow)
 - **Ghost_Shopper**
-  - @description AGENT HYBRIDE: GHOST SHOPPER + CLIENT EXPERT (Backend QA) Combine la simulation de parcours utilisateur (Ghost Shopper) avec l'analyse technique pointue (Client Expert). NOUVELLES CAPACITÉS : 1. 🕵️‍♂️ Console Spy : Détecte les erreurs JavaScript invisibles à l'utilisateur. 2. 🕸️ Network Sniffer : Repère les images manquantes (404) ou erreurs API (500). 3. ⚡ Performance Audit : Mesure les temps de chargement réels.
+  - @description DEPRECATED - Ce fichier redirige vers le module refactoré. Le code a été découpé en modules plus petits dans le dossier Ghost_Shopper/ Structure du nouveau module : - Ghost_Shopper/index.js        : Orchestrateur principal - Ghost_Shopper/config.js       : Configuration et constantes - Ghost_Shopper/probes.js       : Sondes de monitoring - Ghost_Shopper/session_utils.js: Utilitaires de session - Ghost_Shopper/standard_flow.js: Parcours de réservation - Ghost_Shopper/omni_scan.js    : Scan intégral du site - Ghost_Shopper/interactions.js : Chaos Monkey et interactions @see ./Ghost_Shopper/index.js
 - **Honeypot_Agent**
   - @description Agent "Honeyport" qui écoute sur un port spécifique (3333). TOUTE connexion à ce port est considérée comme hostile (Scanner/Bot) et déclenche un bannissement immédiat via Cloudflare + Alerte.
 - **Key_Guardian**
   - @description Agent chargé de la validation des clés API critiques. S'assure que le Vault contient des clés actives et alerte en cas de problème.
 - **Log_Aggregator**
   - @description Agent qui collecte et affiche les logs de tous les autres agents en temps réel. Exécution à la volée (immédiate) avec affichage formaté.
+- **Marketing_Agent**
+  - @description Agent Expert en Marketing Visuel & UI/UX. Responsable de l'esthétique "Premium", du Copywriting et de l'expérience utilisateur. Utilise Gemini pour générer du code React/Tailwind de haute qualité.
 - **Network_Overseer**
   - @description Agent responsable de la surveillance réseau et santé des applications. Version 2.0 : Hérite de Agent_Base pour analyse intelligente des pannes.
 - **Orchestrator_Agent**
   - @description "L'Aiguilleur" - Agent central qui cartographie le projet et redirige les requêtes. Il maintient une carte live du projet (Agents, Core, Relations) et utilise Gemini pour le dispatch.
+- **Risk_Mitigator**
+  - @description Agent de Gestion des Risques (Proactif). Analyse les données contextuelles (Météo, Trafic, Cyber-menaces) pour anticiper les problèmes. Proposé par Agency_Architect (Evolution Autonome).
 - **Secretary_Agent**
   - @description "La Secrétaire Experte" - Agent IA spécialisé dans l'organisation, le classement du Drive, la rédaction de mails et le suivi administratif. Ton : Professionnel, chaleureux et efficace (Experte & Charmante).
 - **Security_Agent**
   - @description Agent de sécurité proactif. Scanne le code pour détecter les secrets exposés, les déplace vers le Vault (.env) et refactorise le code automatiquement. Version 2.0.0 : Hérite de Agent_Base + Intégration Gemini.
+- **Shared_Knowledge**
+  - @description Module de Gestion de la Connaissance Partagée (Shared Brain). Permet aux agents de sauvegarder des "leçons", des "patterns" d'erreur, et des "succès". Stockage persistant JSON dans Advisors_Memory.
 - **Tesla_Monitor**
   - @description Surveille la flotte Tesla en utilisant la configuration existante du projet.
 - **Vault**
@@ -48,24 +72,46 @@ Updated: 2026-01-08T16:16:01.528Z
 - `Agency_Architect.js` imports `Agent_Base.js`
 - Class **Agency_Architect** extends **Agent_Base** (in Agency_Architect.js)
 - `Agent_Base.js` imports `Vault.js`
+- `Agent_Base.js` imports `Shared_Knowledge.js`
 - `Agent_Fixer.js` imports `Log_Aggregator.js`
 - `Agent_Fixer.js` imports `Agent_Base.js`
+- `Agent_Fixer.js` imports `Shared_Knowledge.js`
 - Class **AgentFixer** extends **Agent_Base** (in Agent_Fixer.js)
 - `Chat_Agent.js` imports `Agent_Base.js`
 - `Chat_Agent.js` imports `Ghost_Shopper.js`
 - `Chat_Agent.js` imports `Cloudflare_Agent.js`
 - `Chat_Agent.js` imports `Secretary_Agent.js`
 - `Chat_Agent.js` imports `Chief_Advisor_Agent.js`
+- `Chat_Agent.js` imports `Shared_Knowledge.js`
 - Class **Chat_Agent** extends **Agent_Base** (in Chat_Agent.js)
 - `Chief_Advisor_Agent.js` imports `Agent_Base.js`
 - Class **ChiefAdvisorAgent** extends **Agent_Base** (in Chief_Advisor_Agent.js)
+- `index.js` imports `Browser_Server.js`
+- `index.js` imports `config.js`
+- `index.js` imports `probes.js`
+- `index.js` imports `session_utils.js`
+- `index.js` imports `standard_flow.js`
+- `index.js` imports `omni_scan.js`
+- `interactions.js` imports `config.js`
+- `omni_scan.js` imports `config.js`
+- `omni_scan.js` imports `session_utils.js`
+- `omni_scan.js` imports `interactions.js`
+- `standard_flow.js` imports `config.js`
+- `standard_flow.js` imports `session_utils.js`
+- `standard_flow.js` imports `interactions.js`
+- `Ghost_Shopper.js` imports `index.js`
 - `Honeypot_Agent.js` imports `Cloudflare_Agent.js`
 - `Key_Guardian.js` imports `Agent_Base.js`
 - `Key_Guardian.js` imports `Vault.js`
 - Class **Key_Guardian** extends **Agent_Base** (in Key_Guardian.js)
+- `Marketing_Agent.js` imports `Agent_Base.js`
+- Class **Marketing_Agent** extends **Agent_Base** (in Marketing_Agent.js)
 - `Network_Overseer.js` imports `Vault.js`
 - `Network_Overseer.js` imports `Agent_Base.js`
 - Class **NetworkOverseer** extends **Agent_Base** (in Network_Overseer.js)
+- `Risk_Mitigator.js` imports `Agent_Base.js`
+- `Risk_Mitigator.js` imports `Shared_Knowledge.js`
+- Class **Risk_Mitigator** extends **Agent_Base** (in Risk_Mitigator.js)
 - `Secretary_Agent.js` imports `Agent_Base.js`
 - `Secretary_Agent.js` imports `Drive_Manager.js`
 - Class **SecretaryAgent** extends **Agent_Base** (in Secretary_Agent.js)
@@ -89,6 +135,9 @@ Updated: 2026-01-08T16:16:01.528Z
 - `Sentinel_Core.js` imports `Key_Guardian.js`
 - `Sentinel_Core.js` imports `Honeypot_Agent.js`
 - `Sentinel_Core.js` imports `Secretary_Agent.js`
+- `Sentinel_Core.js` imports `Deployment_Agent.js`
+- `Sentinel_Core.js` imports `Browser_Server.js`
+- `Sentinel_Core.js` imports `Risk_Mitigator.js`
 - `Sentinel_Core.js` imports `Tesla_Monitor.js`
 - `Sentinel_Core.js` imports `Agent_Marketing.js`
 - `Sentinel_Core.js` imports `Vault.js`
@@ -98,79 +147,111 @@ Updated: 2026-01-08T16:16:01.528Z
 - `boot_orchestrator.js` imports `email_service.js`
 - `deploy_vps.js` imports `Vault.js`
 - `fix_admin_access.js` imports `Vault.js`
+- `fix_integrity_and_reset.js` imports `Cloudflare_Agent.js`
 - `manual_check_ghost_shopper.js` imports `Ghost_Shopper.js`
+- `manual_purge.js` imports `Cloudflare_Agent.js`
+- `run_redesign.js` imports `Marketing_Agent.js`
 - `test_network.js` imports `Network_Overseer.js`
+- `test_risk.js` imports `Risk_Mitigator.js`
 - `trigger_architect.js` imports `Agency_Architect.js`
+- `trigger_evolution.js` imports `Agency_Architect.js`
+- `trigger_evolution.js` imports `Agent_Fixer.js`
+- `trigger_evolution.js` imports `Shared_Knowledge.js`
 - `verify_omni_scan.js` imports `Ghost_Shopper.js`
 - `whitelist_myself.js` imports `Cloudflare_Agent.js`
 
 ## 📂 File Index
+- [knowledge_base.json](Advisors_Memory/knowledge_base.json) (1.1 KB)
 - [master_plan.md](Advisors_Memory/master_plan.md) (0.2 KB)
 - [Agency_Architect.js](Agents_Modules/Agency_Architect.js) (3.2 KB)
-- [Agent_Base.js](Agents_Modules/Agent_Base.js) (4.3 KB)
+- [Agent_Base.js](Agents_Modules/Agent_Base.js) (4.6 KB)
 - [Agent_Connector.js](Agents_Modules/Agent_Connector.js) (2.3 KB)
-- [Agent_Fixer.js](Agents_Modules/Agent_Fixer.js) (9.1 KB)
+- [Agent_Fixer.js](Agents_Modules/Agent_Fixer.js) (10.6 KB)
 - [Agent_Marketing.js](Agents_Modules/Agent_Marketing.js) (1.4 KB)
 - [Archive_Keeper.js](Agents_Modules/Archive_Keeper.js) (2.8 KB)
-- [Chat_Agent.js](Agents_Modules/Chat_Agent.js) (7.4 KB)
+- [Browser_Server.js](Agents_Modules/Browser_Server.js) (2.2 KB)
+- [Chat_Agent.js](Agents_Modules/Chat_Agent.js) (8.2 KB)
 - [Chief_Advisor_Agent.js](Agents_Modules/Chief_Advisor_Agent.js) (4.3 KB)
-- [Cloudflare_Agent.js](Agents_Modules/Cloudflare_Agent.js) (5.7 KB)
+- [Cloudflare_Agent.js](Agents_Modules/Cloudflare_Agent.js) (6.9 KB)
+- [Deployment_Agent.js](Agents_Modules/Deployment_Agent.js) (4.0 KB)
 - [Drive_Manager.js](Agents_Modules/Drive_Manager.js) (11.9 KB)
-- [Ghost_Shopper.js](Agents_Modules/Ghost_Shopper.js) (21.4 KB)
+- [config.js](Agents_Modules/Ghost_Shopper/config.js) (1.3 KB)
+- [index.js](Agents_Modules/Ghost_Shopper/index.js) (2.4 KB)
+- [interactions.js](Agents_Modules/Ghost_Shopper/interactions.js) (4.0 KB)
+- [omni_scan.js](Agents_Modules/Ghost_Shopper/omni_scan.js) (3.6 KB)
+- [probes.js](Agents_Modules/Ghost_Shopper/probes.js) (2.1 KB)
+- [session_utils.js](Agents_Modules/Ghost_Shopper/session_utils.js) (2.4 KB)
+- [standard_flow.js](Agents_Modules/Ghost_Shopper/standard_flow.js) (5.6 KB)
+- [Ghost_Shopper.js](Agents_Modules/Ghost_Shopper.js) (0.8 KB)
 - [Honeypot_Agent.js](Agents_Modules/Honeypot_Agent.js) (2.0 KB)
 - [Key_Guardian.js](Agents_Modules/Key_Guardian.js) (2.9 KB)
 - [Log_Aggregator.js](Agents_Modules/Log_Aggregator.js) (9.8 KB)
+- [Marketing_Agent.js](Agents_Modules/Marketing_Agent.js) (2.3 KB)
 - [Network_Overseer.js](Agents_Modules/Network_Overseer.js) (3.4 KB)
 - [Orchestrator_Agent.js](Agents_Modules/Orchestrator_Agent.js) (8.9 KB)
+- [Risk_Mitigator.js](Agents_Modules/Risk_Mitigator.js) (3.0 KB)
 - [Secretary_Agent.js](Agents_Modules/Secretary_Agent.js) (3.6 KB)
 - [Security_Agent.js](Agents_Modules/Security_Agent.js) (8.8 KB)
+- [Shared_Knowledge.js](Agents_Modules/Shared_Knowledge.js) (2.9 KB)
 - [Tesla_Monitor.js](Agents_Modules/Tesla_Monitor.js) (3.4 KB)
-- [Vault.js](Agents_Modules/Vault.js) (4.3 KB)
-- [fim_baseline.json](Agents_Modules/fim_baseline.json) (4.4 KB)
+- [Vault.js](Agents_Modules/Vault.js) (5.0 KB)
+- [fim_baseline.json](Agents_Modules/fim_baseline.json) (6.5 KB)
 - [Ghost_Shopper.js](Agents_Standalone/Ghost_Shopper_Worker/Ghost_Shopper.js) (5.8 KB)
 - [README.md](Agents_Standalone/Ghost_Shopper_Worker/README.md) (1.6 KB)
 - [index.js](Agents_Standalone/Ghost_Shopper_Worker/index.js) (1.7 KB)
 - [package.json](Agents_Standalone/Ghost_Shopper_Worker/package.json) (0.4 KB)
-- [Dashboard_Server.js](Dashboard_Server.js) (3.0 KB)
+- [Dashboard_Server.js](Dashboard_Server.js) (4.1 KB)
 - [INFRASTRUCTURE.md](INFRASTRUCTURE.md) (3.2 KB)
 - [Maintenance_Agent.js](Maintenance_Agent.js) (1.8 KB)
-- [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (10.9 KB)
-- [PROJECT_MAP.json](PROJECT_MAP.json) (53.6 KB)
-- [PROPOSAL_Anomaly_Detector_1767888166573.md](PROPOSAL_Anomaly_Detector_1767888166573.md) (0.8 KB)
-- [PROPOSAL_Anomaly_Predictor_1767883625045.md](PROPOSAL_Anomaly_Predictor_1767883625045.md) (0.9 KB)
-- [PROPOSAL_Dynamic_Risk_Assessor_1767888172787.md](PROPOSAL_Dynamic_Risk_Assessor_1767888172787.md) (0.9 KB)
-- [PROPOSAL_Predictive_Maintenance_Agent_1767877053024.md](PROPOSAL_Predictive_Maintenance_Agent_1767877053024.md) (1.4 KB)
-- [PROPOSAL_Sentinel_Threat_Predictor_1767883611121.md](PROPOSAL_Sentinel_Threat_Predictor_1767883611121.md) (1.0 KB)
-- [PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md](PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md) (0.9 KB)
-- [PROPOSAL_Threat_Anticipator_1767888167483.md](PROPOSAL_Threat_Anticipator_1767888167483.md) (1.1 KB)
+- [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (16.5 KB)
+- [PROJECT_MAP.json](PROJECT_MAP.json) (77.8 KB)
+- [PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md](PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md) (1.1 KB)
+- [PROPOSAL_Risk_Mitigator_1767904757575.md](PROPOSAL_Risk_Mitigator_1767904757575.md) (0.8 KB)
 - [SECURITY_PROTOCOLS.md](SECURITY_PROTOCOLS.md) (2.4 KB)
 - [SETUP_KEYS.md](SETUP_KEYS.md) (1.6 KB)
-- [Sentinel_Core.js](Sentinel_Core.js) (16.3 KB)
+- [Sentinel_Core.js](Sentinel_Core.js) (17.7 KB)
 - [Sentinel_Node.js](Sentinel_Node.js) (5.4 KB)
 - [Service_Agent.js](Service_Agent.js) (1.1 KB)
 - [Worker_Launcher.js](Worker_Launcher.js) (2.0 KB)
+- [PROPOSAL_Anomaly_Detector_1767888166573.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Anomaly_Detector_1767888166573.md) (0.8 KB)
+- [PROPOSAL_Anomaly_Predictor_1767883625045.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Anomaly_Predictor_1767883625045.md) (0.9 KB)
+- [PROPOSAL_Dynamic_Risk_Assessor_1767888172787.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Dynamic_Risk_Assessor_1767888172787.md) (0.9 KB)
+- [PROPOSAL_Predictive_Maintenance_Agent_1767877053024.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Predictive_Maintenance_Agent_1767877053024.md) (1.4 KB)
+- [PROPOSAL_Revenue_Optimizer_1767889024364.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Revenue_Optimizer_1767889024364.md) (1.2 KB)
+- [PROPOSAL_Sentinel_Threat_Predictor_1767883611121.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Sentinel_Threat_Predictor_1767883611121.md) (1.0 KB)
+- [PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md) (0.9 KB)
+- [PROPOSAL_Threat_Anticipator_1767888167483.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Threat_Anticipator_1767888167483.md) (1.1 KB)
+- [benchmark_browser.js](benchmark_browser.js) (4.3 KB)
 - [boot_orchestrator.js](boot_orchestrator.js) (3.8 KB)
 - [check_env_keys.js](check_env_keys.js) (0.5 KB)
 - [check_keys.js](check_keys.js) (0.3 KB)
 - [check_vps.js](check_vps.js) (0.7 KB)
 - [deploy_local.js](deploy_local.js) (2.9 KB)
 - [deploy_vps.js](deploy_vps.js) (6.0 KB)
+- [diagnose_ftp.js](diagnose_ftp.js) (2.1 KB)
 - [diagnostic_2026-01-06.md](diagnostic_2026-01-06.md) (0.9 KB)
 - [diagnostic_2026-01-07.md](diagnostic_2026-01-07.md) (0.8 KB)
 - [diagnostic_2026-01-08.md](diagnostic_2026-01-08.md) (0.8 KB)
 - [email_service.js](email_service.js) (1.8 KB)
 - [finish_vps_setup.js](finish_vps_setup.js) (1.8 KB)
 - [fix_admin_access.js](fix_admin_access.js) (2.1 KB)
+- [fix_integrity_and_reset.js](fix_integrity_and_reset.js) (1.3 KB)
+- [fix_qa_user.js](fix_qa_user.js) (1.5 KB)
 - [service-account.json](keys/service-account.json) (2.3 KB)
 - [manual_check_ghost_shopper.js](manual_check_ghost_shopper.js) (0.7 KB)
-- [package.json](package.json) (0.5 KB)
+- [manual_purge.js](manual_purge.js) (0.4 KB)
+- [package.json](package.json) (0.7 KB)
 - [purge_cloudflare.js](purge_cloudflare.js) (3.0 KB)
 - [rapport_agents_2026-01-06.md](rapport_agents_2026-01-06.md) (7.3 KB)
 - [read_vps_logs.js](read_vps_logs.js) (0.6 KB)
+- [run_redesign.js](run_redesign.js) (1.2 KB)
 - [setup_chatbot_db.js](setup_chatbot_db.js) (1.5 KB)
 - [setup_chatbot_db_http.js](setup_chatbot_db_http.js) (1.6 KB)
 - [telecommande.js](telecommande.js) (1.4 KB)
 - [test_network.js](test_network.js) (0.4 KB)
+- [test_risk.js](test_risk.js) (0.2 KB)
 - [trigger_architect.js](trigger_architect.js) (0.3 KB)
+- [trigger_evolution.js](trigger_evolution.js) (1.2 KB)
+- [verify_android_api.js](verify_android_api.js) (0.9 KB)
 - [verify_omni_scan.js](verify_omni_scan.js) (0.7 KB)
 - [whitelist_myself.js](whitelist_myself.js) (0.7 KB)
