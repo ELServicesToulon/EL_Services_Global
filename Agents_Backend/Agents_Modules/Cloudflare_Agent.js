@@ -120,6 +120,31 @@ class CloudflareAgent {
         } catch (error) { console.error(`setSecurityLevel: ${error.message}`); }
         return { success: false };
     }
+
+    async enableDevMode() {
+        if (!this.zoneId) await this.init();
+        console.log(`[${this.name}] 🚧 Activation du Mode Développement (Bypass Cache 3h)...`);
+        try {
+            const resp = await axios.patch(`https://api.cloudflare.com/client/v4/zones/${this.zoneId}/settings/development_mode`, { value: "on" }, { headers: this.headers });
+            if (resp.data.success) {
+                console.log(`[${this.name}] ✅ Mode Développement Activé !`);
+                return { success: true };
+            }
+        } catch (error) { console.error(`enableDevMode: ${error.message}`); }
+        return { success: false };
+    }
+    async getDNSRecords() {
+        if (!this.zoneId) await this.init();
+        console.log(`[${this.name}] 🔍 Récupération des enregistrements DNS...`);
+        try {
+            const resp = await axios.get(`https://api.cloudflare.com/client/v4/zones/${this.zoneId}/dns_records?type=A`, { headers: this.headers });
+            if (resp.data.success) {
+                resp.data.result.forEach(r => console.log(`[DNS] ${r.name} -> ${r.content} (Proxied: ${r.proxied})`));
+                return resp.data.result;
+            }
+        } catch (error) { console.error(`getDNSRecords: ${error.message}`); }
+        return [];
+    }
 }
 
 const agent = new CloudflareAgent();

@@ -24,12 +24,12 @@ async function deploy() {
         await client.access(config)
         console.log("Connected!")
 
-        const remoteRoot = "/public_html"
+        const remoteRoot = "/public.html"
         const localDist = path.join(__dirname, "dist")
 
         console.log(`Clearing remote folder: ${remoteRoot}...`)
         await client.ensureDir(remoteRoot)
-        await client.clearWorkingDir() // Be careful! This wipes public_html.
+        await client.clearWorkingDir() // Be careful! This wipes public.html.
 
         console.log(`Uploading contents of ${localDist} to ${remoteRoot}...`)
         await client.uploadFromDir(localDist, remoteRoot)
@@ -44,7 +44,7 @@ async function deploy() {
             config.secure = false
             try {
                 await client.access(config)
-                await client.uploadFromDir(path.join(__dirname, "dist"), "/public_html")
+                await client.uploadFromDir(path.join(__dirname, "dist"), "/public.html")
                 console.log("Deployment successful (Insecure Mode)!")
             } catch (retryErr) {
                 console.error("Retry failed:", retryErr)

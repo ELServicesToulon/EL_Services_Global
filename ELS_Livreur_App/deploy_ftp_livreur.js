@@ -21,7 +21,7 @@ async function deploy() {
         await client.access(config)
         console.log("Connected!")
 
-        const remoteRoot = "/public_html/livreur"
+        const remoteRoot = "/public.html/livreur"
         const localDist = path.join(__dirname, "dist")
 
         console.log(`Ensuring remote folder exists: ${remoteRoot}...`)
