@@ -21,6 +21,7 @@ const ChatAgent = require('./Agents_Modules/Chat_Agent');
 const CloudflareAgent = require('./Agents_Modules/Cloudflare_Agent');
 const OrchestratorAgent = require('./Agents_Modules/Orchestrator_Agent');
 const AgencyArchitect = require('./Agents_Modules/Agency_Architect');
+const KeyGuardian = require('./Agents_Modules/Key_Guardian');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -350,6 +351,20 @@ async function main() {
             const architectReport = await AgencyArchitect.runArchitectCycle();
             if (architectReport) await remoteLog('ARCHITECT', architectReport);
         }, 86400000); // 24h
+    }
+
+    // --- 13. KEY GUARDIAN (Initial + 24h) ---
+    if (KeyGuardian) {
+        // Run very early to validate env
+        setTimeout(async () => {
+            const report = await KeyGuardian.runGuardianCycle();
+            if (report) await remoteLog('KEY_GUARDIAN', report);
+        }, 30000); // +30 sec
+        
+        setInterval(async () => {
+             const report = await KeyGuardian.runGuardianCycle();
+            if (report) await remoteLog('KEY_GUARDIAN', report);
+        }, 86400000);
     }
 
     console.log('\n⏳ En attente... (Ctrl+C pour arrêter)');

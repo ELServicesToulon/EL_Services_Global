@@ -17,20 +17,24 @@ const SECRETS = {
     SERVICE_ACCOUNT_KEY: { required: false, default: './keys/service-account.json', description: "Chemin vers la clé JSON Google Service Account" },
     WORKER_PASS: { required: false, default: 'password', description: "Mot de passe pour les workers distants" },
     
-    // Configuration Email/SMTP (pour référence future)
-    SMTP_HOST: { required: false, description: "Hébergeur SMTP" },
-    SMTP_USER: { required: false, description: "Utilisateur SMTP" },
-    SMTP_PASS: { required: false, description: "Mot de passe SMTP" },
-
     // VPS Configuration
-    VPS_HOST: { required: false, description: "IP du VPS" },
-    VPS_USER: { required: false, description: "Utilisateur VPS" },
     VPS_HOST: { required: false, description: "IP du VPS" },
     VPS_USER: { required: false, description: "Utilisateur VPS" },
     VPS_PASS: { required: false, description: "Mot de passe VPS" },
 
-    // AI Configuration
-    GEMINI_API_KEY: { required: false, description: "Clé API Gemini pour l'intelligence des agents" }
+    // AI & APIs
+    GEMINI_API_KEY: { required: true, description: "Clé API Gemini" },
+    GOOGLE_MAPS_API_KEY: { required: false, description: "Clé API Google Maps" },
+    CLOUDFLARE_API_TOKEN: { required: false, description: "Token API Cloudflare" },
+    TOKEN_TESSIE: { required: false, description: "Token Tessie (Tesla)" },
+    
+    // Business & IDs
+    ID_DOSSIER_FACTURES: { required: false, description: "Drive Folder Failures" },
+    ID_JOURNAL_AGENTS: { required: false, description: "Drive Sheet Log" },
+    ID_LOGO: { required: false, description: "Drive File Logo" },
+    WEBAPP_URL: { required: false, description: "Legacy Main Webapp URL" },
+    SIRET:  { required: false, description: "SIRET Entreprise" },
+    EMAIL_ENTREPRISE: { required: false, description: "Email Contact" }
 };
 
 const Vault = {
