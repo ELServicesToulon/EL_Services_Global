@@ -236,8 +236,9 @@ export default function PublicBooking() {
 
                 </div>
 
-                <div className="text-center text-xs text-gray-400">
+                <div className="text-center text-xs text-gray-400 pb-4">
                     <p>TVA non applicable (art. 293B du CGI)</p>
+                    <p className="mt-2 opacity-50 font-mono">v2.4 - Mise à jour: {new Date().toLocaleString('fr-FR')}</p>
                 </div>
 
             </main>

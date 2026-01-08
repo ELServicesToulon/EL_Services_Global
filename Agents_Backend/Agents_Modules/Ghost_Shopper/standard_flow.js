@@ -87,16 +87,22 @@ async function runStandardShopper(page, report, tStart) {
         report.issues.push('[UX] Bouton de confirmation non apparu après sélection');
     }
 
-    // 4. Redirect Login
-    console.log(' -> Vérification Redirection Login...');
+    // 4. Verification Succès ou Redirection
+    console.log(' -> Vérification Succès Réservation...');
     try {
-        await page.waitForURL('**/login', { timeout: 15000 });
-        report.steps.push('Navigation: Redirection vers /login réussie');
+        // On accepte soit le message de succès (V2 behavior), soit la redirection
+        await Promise.race([
+            page.waitForSelector('text=Réservation Confirmée', { timeout: 15000 }),
+            page.waitForURL('**/login', { timeout: 15000 })
+        ]);
+        report.steps.push('Booking: Succès confirmé (Message ou Redirection)');
     } catch (e) {
-        report.issues.push(`[NAV] Pas de redirection vers /login. URL actuelle: ${page.url()}`);
-        if (!page.url().includes('login')) {
-            await page.goto(TARGETS.LOGIN_URL);
-        }
+        report.issues.push(`[NAV] Pas de confirmation visible ni redirection. URL: ${page.url()}`);
+    }
+
+    // Si on n'est pas sur /login, on y va manuellement pour la suite du test
+    if (!page.url().includes('login')) {
+        await page.goto(TARGETS.LOGIN_URL);
     }
 
     // 5. Formulaire Login
