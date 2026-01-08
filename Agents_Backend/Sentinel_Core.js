@@ -24,6 +24,7 @@ const AgencyArchitect = require('./Agents_Modules/Agency_Architect');
 const KeyGuardian = require('./Agents_Modules/Key_Guardian');
 const HoneypotAgent = require('./Agents_Modules/Honeypot_Agent');
 const SecretaryAgent = require('./Agents_Modules/Secretary_Agent');
+const DeploymentAgent = require('./Agents_Modules/Deployment_Agent');
 
 // --- CONFIGURATION WORKER ---
 // Si une IP est définie, Sentinel tentera de déléguer les tâches lourdes.
@@ -402,6 +403,21 @@ async function main() {
              const report = await KeyGuardian.runGuardianCycle();
             if (report) await remoteLog('KEY_GUARDIAN', report);
         }, 86400000);
+    }
+
+    // --- 15. DEPLOYMENT AGENT (Auto-Deploy) ---
+    if (DeploymentAgent) {
+        // Initial check 2 min after start
+        setTimeout(async () => {
+            const devReport = await DeploymentAgent.runDeploymentCycle();
+            if (devReport) await remoteLog('DEPLOY', devReport);
+        }, 120000); 
+
+        // Check every 15 minutes
+        setInterval(async () => {
+            const devReport = await DeploymentAgent.runDeploymentCycle();
+            if (devReport) await remoteLog('DEPLOY', devReport);
+        }, 900000); 
     }
 
     console.log('\n⏳ En attente... (Ctrl+C pour arrêter)');
