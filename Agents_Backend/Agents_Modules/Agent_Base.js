@@ -100,26 +100,53 @@ class Agent_Base {
             this.log('❌ Pas de clé GEMINI_API_KEY');
             return null;
         }
+
+        const performRequest = async (model) => {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiKey}`;
+            return axios.post(url, { contents: [{ parts: [{ text: prompt }] }] });
+        };
+
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.geminiKey}`;
-            const response = await axios.post(url, {
-                contents: [{ parts: [{ text: prompt }] }]
-            });
-            if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-                return response.data.candidates[0].content.parts[0].text;
+            try {
+                const response = await performRequest('gemini-2.5-flash');
+                if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return response.data.candidates[0].content.parts[0].text;
+                }
+            } catch (e1) {
+                // Fallback
+                const response = await performRequest('gemini-2.0-flash-lite');
+                if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return response.data.candidates[0].content.parts[0].text;
+                }
+            }
+        } catch (e) {
+            // GLOBAL ERROR TRAP FOR API KEY
+            const errorMsg = e.message || '';
+            // Check for checking 403 or specific text in the error response if axios provides it
+            const verboseError = e.response?.data?.error?.message || errorMsg;
+            
+            const isKeyError = verboseError.includes('403') || 
+                               verboseError.toLowerCase().includes('api key') ||
+                               verboseError.toLowerCase().includes('unregistered caller');
+
+            if (isKeyError) {
+                this.log('🚨🚨 CRITICAL SECURITY ALERT: GEMINI API KEY FAILURE 🚨🚨');
+                this.log(`Details: ${verboseError}`);
+                
+                try {
+                    fs.writeFileSync(
+                        'SECURITY_ALERT_API_KEY.flag', 
+                        `[${new Date().toISOString()}] Agent ${this.name} reported API Key failure: ${verboseError}`
+                    );
+                } catch (fsErr) {
+                    console.error('Failed to write alert flag:', fsErr);
+                }
+            } else {
+                this.log(`Gemini Error: ${verboseError}`);
             }
             return null;
-        } catch (e) {
-            // Fallback
-            try {
-                const url2 = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${this.geminiKey}`;
-                const response = await axios.post(url2, { contents: [{ parts: [{ text: prompt }] }] });
-                return response.data.candidates[0].content.parts[0].text;
-            } catch (e2) {
-                this.log(`Gemini Error: ${e.message}`);
-                return null;
-            }
         }
+        return null;
     }
 }
 
