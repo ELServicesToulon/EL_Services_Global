@@ -47,6 +47,11 @@ app.get('/api/agents', (req, res) => {
         { id: 'security', name: 'Security Agent', role: 'Cybersécurité', status: 'running' },
         { id: 'advisor', name: 'Chief Advisor', role: 'Stratégie', status: 'idle' },
         { id: 'secretary', name: 'Secretary Agent', role: 'Administratif', status: 'idle' },
+        { id: 'marketing', name: 'Marketing Agent', role: 'Design & UI/UX', status: 'idle' },
+        { id: 'watchdog', name: 'Watchdog Agent', role: 'Veille & Deep Research', status: 'active' },
+        { id: 'frontend', name: 'Frontend Agent', role: 'React UI/UX', status: 'active' },
+        { id: 'backend', name: 'Backend Agent', role: 'API & DB', status: 'active' },
+        { id: 'qa', name: 'QA Agent', role: 'Testing & Validation', status: 'active' },
         { id: 'ghost', name: 'Ghost Shopper', role: 'Tests User', status: 'stopped' }
     ];
 
@@ -113,6 +118,7 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // Lancement du serveur
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🛡️ Dashboard API Server running on port ${PORT}`);
+    console.log(`📡 Accessible via http://YOUR_VPS_IP:${PORT}/api/chat`);
 });

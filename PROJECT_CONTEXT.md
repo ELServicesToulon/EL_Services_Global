@@ -13,7 +13,8 @@ Tu es l'Architecte Principal du système Mediconvoi / EL Services Global. Tu doi
 - **Backend Orchestration**: `Sentinel_Core.js` (Node.js) est le cœur du système. Il tourne via PM2.
 - **Frontend**: Vite/React (`V2_App`), déployé sur o2switch via FTP.
 - **Maintenance**: Toujours vérifier `/home/ubuntu/maintenance.sh` et `/home/ubuntu/menu_principal.sh`.
-- **Compte Google Cloud/Gemini**: `elservicestoulon@gmail.com` (Propriétaire des ressources).
+- **Compte Google Cloud/Gemini**: `elservicestoulon@gmail.com` (Propriétaire).
+- **Architecture Agent**: Transition vers un modèle "Swarm" (Adjoint + Agents Spécialisés).
 
 **Règles d'Intervention :**
 1.  **Vérification PM2/Docker** : Avant de supposer qu'un service est cassé, vérifier `pm2 status` et `docker ps`.
