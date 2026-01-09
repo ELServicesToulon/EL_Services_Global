@@ -47,11 +47,11 @@ async function main() {
         // Simple aligned output
         console.table(rows);
         
-        console.log("\n💡 Analyse des Coûts :");
-        console.log("- Gemini 1.5 Flash est très économique ($0.075/1M).");
-        console.log("- Gemini 1.5 Pro est plus coûteux mais plus puissant.");
-        console.log("- Les versions Exp (2.0) sont souvent gratuites mais instables (Rate Limits).");
-
+        console.log("\n💡 Analyse des Coûts & Google Workspace Business Plus :");
+        console.log("- Gemini 1.5 Flash : Très économique ($0.075/1M).");
+        console.log("- Gemini 2.0 (Exp) : Gratuit pour l'instant (mais utilisation des données pour entraînement possible sauf si Pay-as-you-go).");
+        console.log("ℹ️ NOTE WORKSPACE : Avec votre abonnement Business Plus, l'usage API (via ce script) est facturé séparément (Pay-as-you-go) si vous sortez du tiers gratuit.");
+        console.log("   Pour garantir la confidentialité des données (Enterprise Grade), assurez-vous que votre projet Google Cloud est lié à votre facturation.");
     } catch (e) {
         console.error("💥 Erreur lors de la récupération des modèles :", e.message);
         if (e.response) {

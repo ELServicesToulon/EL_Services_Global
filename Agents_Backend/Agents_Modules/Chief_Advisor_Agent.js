@@ -94,7 +94,7 @@ class ChiefAdvisorAgent extends Agent_Base {
             Donne moi un état des lieux par rapport au Plan Maître.
         `;
         
-        return await this.askGemini(prompt);
+        return await this.askGemini(prompt, { model: 'gemini-3-pro-preview' });
     }
 
     /**
@@ -116,7 +116,7 @@ class ChiefAdvisorAgent extends Agent_Base {
             Si la demande de l'utilisateur implique un changement de stratégie, propose de mettre à jour le fichier 'master_plan.md'.
         `;
 
-        const response = await this.askGemini(prompt);
+        const response = await this.askGemini(prompt, { model: 'gemini-3-pro-preview' });
         
         // Auto-apprentissage (rudimentaire) : Si la réponse contient une "Nouvelle Règle", on pourrait l'extraire.
         // Pour l'instant on reste sur du RAG simple (Retrieval Augmented Generation).

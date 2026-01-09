@@ -209,7 +209,7 @@ class SecurityAgent extends Agent_Base {
             Si oui, résume la situation et confirme que les actions automatiques (migrations Vault) sont pertinentes.
             Sois bref et pro.
         `;
-        return await this.askGemini(prompt);
+        return await this.askGemini(prompt, { model: 'gemini-3-pro-preview' });
     }
 
     /**

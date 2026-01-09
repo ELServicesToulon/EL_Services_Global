@@ -95,11 +95,18 @@ class Agent_Base {
     /**
      * Wrapper pour Gemini (Similaire à Chat_Agent mais centralisé ici)
      */
-    async askGemini(prompt) {
+    /**
+     * Wrapper pour Gemini (Similaire à Chat_Agent mais centralisé ici)
+     * @param {string} prompt - Le prompt
+     * @param {object} [options] - Options (ex: { model: 'gemini-3-pro-preview' })
+     */
+    async askGemini(prompt, options = {}) {
         if (!this.geminiKey) {
             this.log('❌ Pas de clé GEMINI_API_KEY');
             return null;
         }
+
+        const preferredModel = options.model || 'gemini-2.5-flash';
 
         const performRequest = async (model) => {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiKey}`;
@@ -108,21 +115,26 @@ class Agent_Base {
 
         try {
             try {
-                const response = await performRequest('gemini-2.5-flash');
+                // Try preferred model (default 2.5-flash or overridden)
+                const response = await performRequest(preferredModel);
                 if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
                     return response.data.candidates[0].content.parts[0].text;
                 }
             } catch (e1) {
-                // Fallback
-                const response = await performRequest('gemini-2.0-flash-lite');
-                if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    return response.data.candidates[0].content.parts[0].text;
+                // If the preferred model was NOT the fallback, try the fallback
+                if (preferredModel !== 'gemini-2.0-flash-lite') {
+                    // Fallback to stable lite
+                    const response = await performRequest('gemini-2.0-flash-lite');
+                    if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        return response.data.candidates[0].content.parts[0].text;
+                    }
+                } else {
+                     throw e1; // Already tried fallback
                 }
             }
         } catch (e) {
             // GLOBAL ERROR TRAP FOR API KEY
             const errorMsg = e.message || '';
-            // Check for checking 403 or specific text in the error response if axios provides it
             const verboseError = e.response?.data?.error?.message || errorMsg;
             
             const isKeyError = verboseError.includes('403') || 

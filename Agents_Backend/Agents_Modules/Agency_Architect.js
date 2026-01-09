@@ -48,7 +48,7 @@ class Agency_Architect extends Agent_Base {
         `;
 
         try {
-            const rawResponse = await this.askGemini(prompt);
+            const rawResponse = await this.askGemini(prompt, { model: 'gemini-3-pro-preview' });
             const cleanJson = rawResponse.replace(/```json/g, '').replace(/```/g, '').trim();
             const proposal = JSON.parse(cleanJson);
 
