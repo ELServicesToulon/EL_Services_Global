@@ -2005,3 +2005,140 @@ Plusieurs fichiers clés du système (modules agents, serveur dashboard, core) o
 [2026-01-09T00:47:38.264Z] [NETWORK] 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
 ⚠️ Mediconvoi Vitrine : ERREUR 403 (1685ms)
 [2026-01-09T00:55:05.729Z] [DEPLOY] 🚀 Auto-Deployment Successful! V2 & Agents updated.
+[2026-01-09T00:55:20.357Z] [DEPLOY] 🚀 Auto-Deployment Successful! V2 & Agents updated.
+[2026-01-09T00:57:39.705Z] [DEPLOY] ⏳ Cooldown active. Next check in 146s.
+[2026-01-09T00:59:59.516Z] [DEPLOY] ⏳ Cooldown active. Next check in 21s.
+[2026-01-09T01:15:31.328Z] [NETWORK] ⚠️ Mediconvoi Core (Studio) : ERREUR 404 (77ms)
+[2026-01-09T01:27:40.435Z] [DEPLOY] ⚠️ Deployment already in progress.
+[2026-01-09T01:30:34.512Z] [DEPLOY] ⚠️ Deployment already in progress.
+[2026-01-09T01:36:56.188Z] [NETWORK] 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Cause probable : Le service "App Livreur" ne répond pas, et l'erreur de timeout suggère un problème de connectivité ou un service non opérationnel.  Il pourrait s'agir d'un problème réseau, d'une surcharge du serveur ou d'une application plantée.
+
+Commande de vérification suggérée : `curl -v http://[adresse_ip_ou_nom_de_domaine_de_l_app_livreur]:[port]`  (Remplacer avec l'adresse et le port appropriés. Si l'adresse IP est inconnue, utiliser `ping [nom_de_domaine_de_l_app_livreur]` pour la trouver). Cela permet de diagnostiquer plus précisément le problème (résolution DNS, connectivité, certificat TLS, réponse HTTP).
+
+[2026-01-09T01:42:38.290Z] [MARKETING] Trafic: 33 visiteurs. SEO: 85/100
+[2026-01-09T01:44:39.189Z] [DEPLOY] ⚠️ Deployment already in progress.
+[2026-01-09T01:48:56.326Z] [MARKETING] Trafic: 11 visiteurs. SEO: 85/100
+[2026-01-09T01:49:09.109Z] [DEPLOY] ⚠️ Deployment already in progress.
+[2026-01-09T01:49:34.769Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Base.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/interactions.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/standard_flow.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Dashboard_Server.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **ALERTE CRITIQUE : Compromission d'intégrité système.**
+
+De nombreux fichiers critiques du système (concernant des agents, le serveur dashboard et le core de Sentinel) ont été modifiés sans autorisation. Il s'agit d'une potentielle intrusion.
+
+**Actions automatiques (migrations Vault) potentiellement insuffisantes.** Si des secrets étaient stockés en clair dans ces fichiers, la migration vers Vault est utile, mais l'intégrité du code lui-même est compromise. Il faut investiguer l'origine des modifications et s'assurer qu'aucun code malveillant n'a été injecté. Une restauration à partir de backups sains est recommandée après investigation.
+
+[2026-01-09T01:54:00.585Z] [FIXER] Diagnostic V2: 2 problèmes identifiés. Voir /home/ubuntu/Documents/EL_Services_Global/Agents_Backend/diagnostic_2026-01-09_v2.md
+[2026-01-09T01:54:06.202Z] [DRIVE] Structure: Janvier 2026
+[2026-01-09T01:54:06.299Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-09T01:55:06.527Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-09T01:55:11.487Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-09T01:56:13.833Z] [DRIVE] Structure: Janvier 2026
+[2026-01-09T01:58:06.597Z] [NETWORK] 🔥 Mediconvoi Vitrine : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
+[2026-01-09T02:00:56.014Z] [FIXER] Diagnostic V2: 2 problèmes identifiés. Voir /home/ubuntu/Documents/EL_Services_Global/Agents_Backend/diagnostic_2026-01-09_v2.md
+[2026-01-09T02:01:25.849Z] [DEPLOY] ⚠️ Deployment already in progress.
+[2026-01-09T02:05:38.191Z] [DEPLOY] ⚠️ Deployment already in progress.
+[2026-01-09T02:05:41.070Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Base.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/interactions.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/standard_flow.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Dashboard_Server.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+[2026-01-09T02:06:17.407Z] [NETWORK] 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
+🔥 Mediconvoi Vitrine : DOWN (Timeout/Error: write EPIPE) -> IA: L'erreur "write EPIPE" suggère une déconnexion brutale de la connexion TCP, souvent causée par la fermeture du serveur avant que le client ait fini d'écrire. Cela peut indiquer que le serveur est tombé en panne, qu'il a redémarré ou qu'il y a un problème avec l'application.
+
+**Cause probable :** Serveur down ou problème d'application sur le serveur.
+
+**Commande de vérification :** `curl -v https://mediconvoi.fr` (pour voir les détails de la connexion et la réponse HTTP) et `ping mediconvoi.fr` (pour vérifier la résolution DNS et la connectivité réseau de base).
+
+[2026-01-09T02:07:14.834Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-09T02:07:25.436Z] [NETWORK] 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
+🔥 Mediconvoi Vitrine : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
+[2026-01-09T02:09:48.837Z] [NETWORK] 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
+🔥 Mediconvoi Vitrine : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
+[2026-01-09T02:09:48.896Z] [NETWORK] 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.
+[2026-01-09T02:17:32.239Z] [DEPLOY] ⚠️ Deployment already in progress.
+[2026-01-09T02:22:39.266Z] [DEPLOY] ⚠️ Deployment already in progress.
+[2026-01-09T07:36:15.973Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-09T07:36:16.607Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-09T07:36:19.400Z] [MARKETING] Trafic: 20 visiteurs. SEO: 85/100
+[2026-01-09T07:36:19.618Z] [MARKETING] Trafic: 47 visiteurs. SEO: 85/100
+[2026-01-09T07:36:22.426Z] [DRIVE] Structure: Janvier 2026
+[2026-01-09T07:36:22.655Z] [DRIVE] Structure: Janvier 2026
+[2026-01-09T07:36:22.802Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-09T07:36:23.003Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-09T07:36:24.052Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Base.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/interactions.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/standard_flow.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Dashboard_Server.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **Alertes Critiques : OUI**
+
+Résumé : De multiples fichiers critiques du système (`Agents_Modules`, `Dashboard_Server.js`, `Sentinel_Core.js`) ont été modifiés sans autorisation. Ceci indique potentiellement une compromission du système.
+
+Actions Automatiques : Les migrations Vault sont **pertinentes** car elles permettent de protéger les secrets et les clés d'accès en cas de compromission. Elles doivent être lancées immédiatement en complément d'une investigation approfondie pour identifier la cause et l'étendue de la compromission.
+
+[2026-01-09T07:36:24.656Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Base.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/interactions.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/standard_flow.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Dashboard_Server.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **Situation:** Multiples alertes d'intégrité critiques. Plusieurs fichiers clés du système (agents, serveur dashboard, coeur du sentinel) ont été modifiés sans autorisation.
+
+**Impact:** Compromission potentielle du système. Les modifications non autorisées pourraient introduire des vulnérabilités, des portes dérobées ou des comportements malveillants.
+
+**Recommandation:** Les migrations Vault (si configurées pour gérer l'intégrité du code) sont *absolument* pertinentes ici. Elles permettraient de restaurer une version connue et de confiance des fichiers compromis. Lancer immédiatement les migrations.
+
+[2026-01-09T07:36:26.046Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-09T07:36:26.569Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-09T07:36:35.561Z] [ORCHESTRATOR] Démarrage du système (v2.0).
+[2026-01-09T07:36:37.045Z] [MARKETING] Trafic: 23 visiteurs. SEO: 85/100
+[2026-01-09T07:36:39.917Z] [DRIVE] Structure: Janvier 2026
+[2026-01-09T07:36:40.287Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-09T07:36:42.144Z] [SECURITY] 🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Base.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Agent_Fixer.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Chat_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Cloudflare_Agent.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/interactions.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper/standard_flow.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Agents_Modules/Ghost_Shopper.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Dashboard_Server.js a été MODIFIÉ sans autorisation !
+🚨 ALERTE INTEGRITÉ : Le fichier Sentinel_Core.js a été MODIFIÉ sans autorisation !
+
+🧠 Analyse IA : **ALERTE CRITIQUE :** Plusieurs fichiers clés du système (Agents et Core) ont été modifiés sans autorisation. Ceci indique potentiellement une compromission du système.
+
+**Résumé :** Une modification non autorisée généralisée de fichiers sensibles a été détectée. L'intégrité du code est compromise, ce qui pourrait permettre l'exécution de code malveillant.
+
+**Actions Automatiques :** Si les "migrations Vault" impliquent la rotation des secrets potentiellement compromis suite à cette altération de fichiers, alors elles sont **absolument pertinentes et doivent être exécutées immédiatement.** Cela inclut également une revue approfondie des fichiers modifiés et une analyse de la cause racine de cette intrusion.
+
+[2026-01-09T07:36:43.911Z] [SENTINEL] 🚨 LOCKDOWN ACTIVATED due to Integrity Alert.
+[2026-01-09T07:36:57.511Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-09T07:36:57.965Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-09T07:37:15.352Z] [KEY_GUARDIAN] ✅ GEMINI_API_KEY: Valide (Réponse: OK...)
+⚠️ GOOGLE_MAPS_API_KEY: Invalide (Status: REQUEST_DENIED)
+[2026-01-09T07:37:29.422Z] [ARCHITECT] Nouvel agent proposé : AnomalyDetector
+[2026-01-09T07:37:29.826Z] [ARCHITECT] Nouvel agent proposé : AI Threat Anticipation & Mitigation Agent (ATAMA)
+[2026-01-09T07:37:46.496Z] [ARCHITECT] Nouvel agent proposé : DataSecuritySentinel

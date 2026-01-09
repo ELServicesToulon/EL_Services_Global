@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-01-08T21:44:48.738Z",
+  "timestamp": "2026-01-09T07:36:43.925Z",
   "files": [
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/knowledge_base.json",
       "name": "knowledge_base.json",
-      "size": 1167,
+      "size": 7240,
       "relative": "Advisors_Memory/knowledge_base.json",
-      "contentSnippet": "{\n  \"error_patterns\": {\n    \"SEED_ENTRY_TEST\": {\n      \"fix\": \"This is a test entry to validate the Shared Knowledge system.\",\n      \"confidence\": 1,\n      \"count\": 1,\n      \"firstSeen\": \"2026-01-08T00:00:00.000Z\"\n    }\n  },\n  \"successful_strategies\": {"
+      "contentSnippet": "{\n  \"error_patterns\": {\n    \"SEED_ENTRY_TEST\": {\n      \"fix\": \"This is a test entry to validate the Shared Knowledge system.\",\n      \"confidence\": 1,\n      \"count\": 1,\n      \"firstSeen\": \"2026-01-08T00:00:00.000Z\"\n    },\n    \"🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analys\": {\n      \"fix\": \"Il faut investiguer l'application Livreur pour déterminer la cause du timeout. Voici quelques pistes et solutions : \\n\\n1. **Vérifier la disponibilité de l'application Livreur:**\\n   - Utilisez `curl` pour tester si l'application Livreur répond :\\n     ```bash\\n     curl -I -m 10 -w \\\"%{http_code}\\\\n\\\" http://<adresse_ip_livreur>:<port>/healthcheck  # Remplace <adresse_ip_livreur> et <port> par les valeurs correctes\\n     ```\\n     - Si vous obtenez un code d'erreur (5xx) ou un timeout, l'application Livreur a un problème.\\n\\n2. **Redémarrer l'application Livreur (solution temporaire):**\\n   - Si vous utilisez systemd :\\n     ```bash\\n     sudo systemctl restart livreur.service  # Remplace livreur.service par le nom correct du service\\n     ```\\n   - Si vous utilisez Docker :\\n     ```bash\\n     docker restart <nom_du_container_livreur> # Remplace <nom_du_container_livreur> par le nom du container\\n     ```\\n\\n3. **Augmenter le timeout (solution palliative):**\\n   - Si l'application Livreur prend du temps à répondre, augmentez le timeout dans l'application appelante (probablement celle qui demande l'analyse).\\n   - Exemple (si c'est une requête HTTP avec une librairie comme `axios` en JavaScript):\\n     ```javascript\\n     axios.get('http://<adresse_ip_livreur>:<port>/api/data', { timeout: 30000 }); // Augmente le timeout à 30 secondes\\n     ```\\n     **Attention :** Augmenter le timeout ne résout pas le problème de fond. Il faut identifier la cause de la lenteur de l'application Livreur.\\n\\n4. **Analyser les logs de l'application Livreur:**\\n   - Les logs de l'application Livreur peuvent contenir des informations sur la cause du problème (erreurs, slow queries, etc.).\\n   - Localisez les logs et analysez-les attentivement.\\n\\n5. **Vérifier la charge du serveur hébergeant l'application Livreur:**\\n   - Utilisez des outils comme `top`, `htop`, ou `vmstat` pour surveiller la CPU, la mémoire et l'I/O du serveur.\\n   - Si le serveur est surchargé, il faut identifier la cause de la surcharge et prendre des mesures pour la réduire.\\n\\nAprès avoir effectué ces vérifications, vous devriez avoir une meilleure idée de la cause du problème et pouvoir implémenter une solution plus durable.\","
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/master_plan.md",
@@ -333,16 +333,16 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_ARCHITECTURE.md",
       "name": "PROJECT_ARCHITECTURE.md",
-      "size": 16917,
+      "size": 17285,
       "relative": "PROJECT_ARCHITECTURE.md",
-      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-08T21:42:39.658Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
+      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-09T07:36:26.613Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_MAP.json",
       "name": "PROJECT_MAP.json",
-      "size": 79637,
+      "size": 88332,
       "relative": "PROJECT_MAP.json",
-      "contentSnippet": "{\n  \"timestamp\": \"2026-01-08T21:42:39.585Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/knowledge_base.json\",\n      \"name\": \"knowledge_base.json\",\n      \"size\": 1167,\n      \"relative\": \"Advisors_Memory/knowledge_base.json\",\n      \"contentSnippet\": \"{\\n  \\\"error_patterns\\\": {\\n    \\\"SEED_ENTRY_TEST\\\": {\\n      \\\"fix\\\": \\\"This is a test entry to validate the Shared Knowledge system.\\\",\\n      \\\"confidence\\\": 1,\\n      \\\"count\\\": 1,\\n      \\\"firstSeen\\\": \\\"2026-01-08T00:00:00.000Z\\\"\\n    }\\n  },\\n  \\\"successful_strategies\\\": {\"\n    },"
+      "contentSnippet": "{\n  \"timestamp\": \"2026-01-09T07:36:26.583Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/knowledge_base.json\",\n      \"name\": \"knowledge_base.json\",\n      \"size\": 7240,\n      \"relative\": \"Advisors_Memory/knowledge_base.json\",\n      \"contentSnippet\": \"{\\n  \\\"error_patterns\\\": {\\n    \\\"SEED_ENTRY_TEST\\\": {\\n      \\\"fix\\\": \\\"This is a test entry to validate the Shared Knowledge system.\\\",\\n      \\\"confidence\\\": 1,\\n      \\\"count\\\": 1,\\n      \\\"firstSeen\\\": \\\"2026-01-08T00:00:00.000Z\\\"\\n    },\\n    \\\"🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analys\\\": {\\n      \\\"fix\\\": \\\"Il faut investiguer l'application Livreur pour déterminer la cause du timeout. Voici quelques pistes et solutions : \\\\n\\\\n1. **Vérifier la disponibilité de l'application Livreur:**\\\\n   - Utilisez `curl` pour tester si l'application Livreur répond :\\\\n     ```bash\\\\n     curl -I -m 10 -w \\\\\\\"%{http_code}\\\\\\\\n\\\\\\\" http://<adresse_ip_livreur>:<port>/healthcheck  # Remplace <adresse_ip_livreur> et <port> par les valeurs correctes\\\\n     ```\\\\n     - Si vous obtenez un code d'erreur (5xx) ou un timeout, l'application Livreur a un problème.\\\\n\\\\n2. **Redémarrer l'application Livreur (solution temporaire):**\\\\n   - Si vous utilisez systemd :\\\\n     ```bash\\\\n     sudo systemctl restart livreur.service  # Remplace livreur.service par le nom correct du service\\\\n     ```\\\\n   - Si vous utilisez Docker :\\\\n     ```bash\\\\n     docker restart <nom_du_container_livreur> # Remplace <nom_du_container_livreur> par le nom du container\\\\n     ```\\\\n\\\\n3. **Augmenter le timeout (solution palliative):**\\\\n   - Si l'application Livreur prend du temps à répondre, augmentez le timeout dans l'application appelante (probablement celle qui demande l'analyse).\\\\n   - Exemple (si c'est une requête HTTP avec une librairie comme `axios` en JavaScript):\\\\n     ```javascript\\\\n     axios.get('http://<adresse_ip_livreur>:<port>/api/data', { timeout: 30000 }); // Augmente le timeout à 30 secondes\\\\n     ```\\\\n     **Attention :** Augmenter le timeout ne résout pas le problème de fond. Il faut identifier la cause de la lenteur de l'application Livreur.\\\\n\\\\n4. **Analyser les logs de l'application Livreur:**\\\\n   - Les logs de l'application Livreur peuvent contenir des informations sur la cause du problème (erreurs, slow queries, etc.).\\\\n   - Localisez les logs et analysez-les attentivement.\\\\n\\\\n5. **Vérifier la charge du serveur hébergeant l'application Livreur:**\\\\n   - Utilisez des outils comme `top`, `htop`, ou `vmstat` pour surveiller la CPU, la mémoire et l'I/O du serveur.\\\\n   - Si le serveur est surchargé, il faut identifier la cause de la surcharge et prendre des mesures pour la réduire.\\\\n\\\\nAprès avoir effectué ces vérifications, vous devriez avoir une meilleure idée de la cause du problème et pouvoir implémenter une solution plus durable.\\\",\"\n    },"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md",
@@ -350,6 +350,13 @@
       "size": 1076,
       "relative": "PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md",
       "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Predictive_Maintenance_Agent\n**But** : Prévoir les pannes potentielles des véhicules et des infrastructures de transport pour une maintenance proactive.\n**Justification** : Réduit les temps d'arrêt imprévus, optimise les coûts de maintenance en ciblant les interventions nécessaires et améliore la fiabilité globale du service, conduisant à une augmentation de la satisfaction client et à une réduction des pertes financières liées aux pannes.\n**Fonctions Clés** :\n- Collecte et analyse des données de télémétrie des véhicules (température, pression, vibrations, etc.)\n- Analyse des données historiques de maintenance pour identifier les schémas de défaillance\n- Prédiction des pannes potentielles à l'aide d'algorithmes de Machine Learning\n- Génération d'alertes pour les maintenances préventives"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md",
+      "name": "PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md",
+      "size": 887,
+      "relative": "PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Proactive_Risk_Mitigator\n**But** : Identifie et atténue proactivement les risques de sécurité et les vulnérabilités dans l'ensemble du système EL Services avant qu'ils ne soient exploités.\n**Justification** : La sécurité est un objectif principal. Un agent proactif peut réduire drastiquement les coûts associés aux incidents de sécurité (financiers, réputationnels, opérationnels) et augmenter la fiabilité du service, générant un retour sur investissement exponentiel en évitant des pertes potentielles massives.\n**Fonctions Clés** :\n- Analyse de la surface d'attaque\n- Modélisation des menaces\n- Tests de pénétration automatisés\n- Surveillance continue des vulnérabilités"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Risk_Mitigator_1767904757575.md",
@@ -537,6 +544,13 @@
       "size": 800,
       "relative": "diagnostic_2026-01-08.md",
       "contentSnippet": "# 🔧 Rapport Diagnostic - 08/01/2026\n\nGénéré le: 08/01/2026 01:03:33\n\n---\n\n## 📊 Résumé\n\n| Sévérité | Nombre |\n|----------|--------|"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/diagnostic_2026-01-09_v2.md",
+      "name": "diagnostic_2026-01-09_v2.md",
+      "size": 592,
+      "relative": "diagnostic_2026-01-09_v2.md",
+      "contentSnippet": "# 🔧 Rapport Diagnostic Intelligent - 09/01/2026\n\nTotal problèmes : 2\n- [unknown] Erreur inconnue (1x)\n  > Erreur: 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.\n- [unknown] Erreur inconnue (1x)\n  > Erreur: 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Cause probable : Le service \"App Livreur\" ne répond pas, et l'erreur de timeout suggère un problème de connectivité ou un service non opérationnel.  Il pourrait s'agir d'un problème réseau, d'une surcharge du serveur ou d'une application plantée.\n"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/email_service.js",
