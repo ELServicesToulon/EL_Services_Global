@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e8] [cursor=pointer]: LOGOMARK
+        - navigation [ref=e9]:
+          - button "Sign In" [ref=e10]
+    - main [ref=e11]:
+      - generic [ref=e12]:
+        - heading "Book Your Ride. Effortless." [level=1] [ref=e13]:
+          - text: Book Your Ride.
+          - text: Effortless.
+        - paragraph [ref=e14]: Seamless scheduling for your transportation needs.
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - img [ref=e18]
+            - heading "Standard" [level=3] [ref=e23]
+          - paragraph [ref=e24]: Quick and reliable transport.
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - img [ref=e27]
+            - heading "Saturday" [level=3] [ref=e29]
+          - paragraph [ref=e30]: Weekend transport option.
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - img [ref=e33]
+            - heading "Urgent" [level=3] [ref=e36]
+          - paragraph [ref=e37]: Fast delivery for critical needs.
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - img [ref=e40]
+            - heading "Resident Standard" [level=3] [ref=e43]
+          - paragraph [ref=e44]: Standard resident booking.
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - img [ref=e47]
+            - heading "Resident Urgent" [level=3] [ref=e50]
+          - paragraph [ref=e51]: Urgent resident booking.
+  - button [ref=e54]:
+    - img [ref=e56]
+```

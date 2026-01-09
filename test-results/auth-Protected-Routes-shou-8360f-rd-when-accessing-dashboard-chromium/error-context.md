@@ -1,0 +1,158 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - link "Logo Mediconvoi" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img "Logo" [ref=e9]
+          - generic [ref=e10]: Mediconvoi
+        - generic [ref=e11]:
+          - link "Expertises" [ref=e12] [cursor=pointer]:
+            - /url: "#expertises"
+          - link "Solutions" [ref=e13] [cursor=pointer]:
+            - /url: "#solutions"
+          - link "Tarifs" [ref=e14] [cursor=pointer]:
+            - /url: "#tarifs"
+        - button "Espace Pro" [ref=e15]
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e28]: Leader Logistique Santé PACA
+        - heading "La logistique médicale de précision." [level=1] [ref=e29]:
+          - text: La logistique
+          - text: médicale de précision.
+        - paragraph [ref=e30]:
+          - text: Transport sécurisé de produits de santé, sang et prélèvements.
+          - text: Flotte électrique, traçabilité temps réel, engagement HDS.
+        - generic [ref=e31]:
+          - button "Commander une course" [ref=e32]:
+            - generic [ref=e34]:
+              - text: Commander une course
+              - img [ref=e35]
+          - button "Découvrir nos offres" [ref=e37]
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e40]: 24/7
+            - generic [ref=e41]: Disponibilité
+          - generic [ref=e42]:
+            - generic [ref=e43]: 45min
+            - generic [ref=e44]: Intervention
+          - generic [ref=e45]:
+            - generic [ref=e46]: 100%
+            - generic [ref=e47]: Conforme HDS
+      - generic [ref=e50]:
+        - generic [ref=e52]:
+          - img [ref=e54]
+          - generic [ref=e56]:
+            - generic [ref=e57]: Suivi Live
+            - generic [ref=e58]: "ID: #TR-8829-X"
+        - generic [ref=e60]:
+          - img [ref=e62]
+          - generic [ref=e67]:
+            - img [ref=e68]
+            - generic [ref=e74]: En approche (4 min)
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - img [ref=e78]
+              - generic [ref=e80]: Température Caisson
+            - generic [ref=e81]: +4.2°C
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - img [ref=e84]
+              - generic [ref=e87]: Heure estimée
+            - generic [ref=e88]: 14:52
+    - generic [ref=e90]:
+      - generic [ref=e91]:
+        - heading "Notre Savoir-Faire" [level=2] [ref=e92]
+        - heading "L'Excellence Opérationnelle" [level=3] [ref=e93]
+        - paragraph [ref=e94]: Chaque aspect de notre service est conçu pour répondre aux normes les plus strictes du milieu hospitalier et pharmaceutique.
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - img [ref=e98]
+          - heading "Certifié & Sécurisé" [level=4] [ref=e101]
+          - paragraph [ref=e102]: Protocoles stricts conformes aux BPD (Bonnes Pratiques de Distribution). Traçabilité numérique intégrale.
+        - generic [ref=e103]:
+          - img [ref=e105]
+          - heading "Chaîne du Froid" [level=4] [ref=e107]
+          - paragraph [ref=e108]: Caissons actifs et passifs monitorés en temps réel. Alertes automatiques en cas d'excursion de température.
+        - generic [ref=e109]:
+          - img [ref=e111]
+          - heading "Urgence Vitale" [level=4] [ref=e114]
+          - paragraph [ref=e115]: Délai d'intervention < 45min pour les produits sanguins (PSL) et prélèvements urgents. Service 24H/24.
+    - generic [ref=e118]:
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - heading "Grille Tarifaire Simplifiée" [level=2] [ref=e121]
+          - paragraph [ref=e122]: Pas de frais cachés. Une facturation claire adaptée aux fréquences de nos partenaires.
+        - button "Voir la grille complète" [ref=e123]:
+          - text: Voir la grille complète
+          - img [ref=e124]
+      - generic [ref=e126]:
+        - button "Standard 15 € Course simple Retrait + Livraison (9km)" [ref=e127]:
+          - heading "Standard" [level=3] [ref=e128]
+          - generic [ref=e130]: 15 €
+          - generic [ref=e131]: Course simple
+          - paragraph [ref=e132]: Retrait + Livraison (9km)
+        - button "Populaire Express 25 € Urgence < 1h Priorité absolue & Direct" [ref=e133]:
+          - generic [ref=e134]: Populaire
+          - heading "Express" [level=3] [ref=e135]
+          - generic [ref=e137]: 25 €
+          - generic [ref=e138]: Urgence < 1h
+          - paragraph [ref=e139]: Priorité absolue & Direct
+        - button "Week-end 30 € Samedi / Dim Astreinte incluse" [ref=e140]:
+          - heading "Week-end" [level=3] [ref=e141]
+          - generic [ref=e143]: 30 €
+          - generic [ref=e144]: Samedi / Dim
+          - paragraph [ref=e145]: Astreinte incluse
+        - button "Nuit 50 € 20h - 08h Intervention nuit profonde" [ref=e146]:
+          - heading "Nuit" [level=3] [ref=e147]
+          - generic [ref=e149]: 50 €
+          - generic [ref=e150]: 20h - 08h
+          - paragraph [ref=e151]: Intervention nuit profonde
+    - generic [ref=e153]:
+      - generic [ref=e154]:
+        - img [ref=e155]
+        - img [ref=e157]
+        - img [ref=e159]
+        - img [ref=e161]
+        - img [ref=e163]
+      - heading "\"Une fiabilité sans faille.\"" [level=2] [ref=e165]
+      - paragraph [ref=e166]: "\"Mediconvoi a transformé notre gestion logistique. La traçabilité de la chaîne du froid est un atout majeur pour notre certification.\""
+      - generic [ref=e167]:
+        - img "Avatar" [ref=e169]
+        - generic [ref=e170]:
+          - generic [ref=e171]: Dr. Laurent P.
+          - generic [ref=e172]: Pharmacien Titulaire, Toulon
+    - contentinfo [ref=e173]:
+      - generic [ref=e174]:
+        - generic [ref=e175]:
+          - img "Logo" [ref=e176]
+          - generic [ref=e177]: © 2026 Mediconvoi Global Services.
+        - generic [ref=e178]:
+          - link "Mentions Légales" [ref=e179] [cursor=pointer]:
+            - /url: /legal
+          - link "Confidentialité" [ref=e180] [cursor=pointer]:
+            - /url: /legal
+          - link "Support" [ref=e181] [cursor=pointer]:
+            - /url: mailto:contact@mediconvoi.fr
+  - button [ref=e184]:
+    - img [ref=e186]
+  - generic [ref=e190]:
+    - generic [ref=e191]:
+      - img [ref=e193]
+      - generic [ref=e196]:
+        - heading "Protection de la vie privée" [level=4] [ref=e197]
+        - paragraph [ref=e198]:
+          - text: Nous utilisons uniquement des cookies techniques essentiels pour assurer le bon fonctionnement et la sécurité de notre plateforme. Consultez notre
+          - link "Politique de Confidentialité" [ref=e199] [cursor=pointer]:
+            - /url: /legal?tab=privacy
+          - text: pour en savoir plus.
+      - button [ref=e200]:
+        - img [ref=e201]
+    - generic [ref=e204]:
+      - button "Accepter" [ref=e205]
+      - button "Refuser" [ref=e206]
+```

@@ -73,95 +73,52 @@ class Chat_Agent extends Agent_Base {
         this.log(`📨 Reçu : "${msg.content}" (Session: ${msg.session_id})`);
         
         // --- AUTO-EVOLUTION CHECK ---
-        // Avant de répondre, on vérifie si la demande nécessite une évolution de l'agent
-        // (On le fait en background pour ne pas bloquer, sauf si critique)
+        // (Désactivé pour le mode "Boîte à Idées" public)
+        /*
         this.evaluateCapabilities(msg.content).then(needed => {
             if (needed) this.proposeUpgrade(msg.content);
         });
+        */
 
         if (!this.geminiKey) {
-            await this.sendReply(msg.session_id, "⚠️ Erreur Système : Clé GEMINI_API_KEY manquante dans la configuration Backend.");
+            await this.sendReply(msg.session_id, "⚠️ DÉSOLÉ : Je ne peux pas traiter votre demande pour le moment.");
             return;
         }
 
         try {
             let reply = "";
-            const lowerMsg = msg.content.toLowerCase();
-
-            // 0. MEMORY RECALL (Deepening)
-            // L'agent vérifie si le problème décrit est déjà connu dans la mémoire collective
-            const knownErrors = SharedKnowledge.getKnownErrors();
-            for (const [pattern, info] of Object.entries(knownErrors)) {
-                if (msg.content.includes(pattern) || (pattern.length > 10 && msg.content.includes(pattern.substring(0, 20)))) {
-                    const confidence = Math.round(info.confidence * 100);
-                    await this.sendReply(msg.session_id, `💡 <b>Rappel Mémoire (${confidence}%)</b>: J'ai déjà rencontré ce problème ("${pattern}"). \n\n👉 <b>Solution suggérée :</b> ${info.fix}`);
-                    return; // On a trouvé une solution en mémoire, on s'arrête là (Efficiency)
-                }
-            }
-
-            // DETECT INTENT: Ghost Shopper / Audit
+            
+            // MODE VISITEUR / BOITE A IDEES
+            // On ignore les commandes admin (audit, purge, etc.) pour la sécurité et la simplicité
+            
+            /*
             const triggers = ['audit', 'check', 'vérifie', 'verifie', 'status', 'état', 'ghost shopper', 'test'];
-            const isAuditRequest = triggers.some(t => lowerMsg.includes(t)) && 
-                                  (lowerMsg.includes('site') || lowerMsg.includes('app') || lowerMsg.includes('connexion'));
+            // ... (Code legacy désactivé)
+            */
 
-            // DETECT INTENT: Cloudflare Purge
-            const purgeTriggers = ['purge', 'cache', 'nettoie', 'clean', 'cloudflare'];
-            const isPurgeRequest = purgeTriggers.some(t => lowerMsg.includes(t));
-
-            if (isAuditRequest) {
-                await this.sendReply(msg.session_id, "🕵️‍♂️ Je lance le Ghost Shopper pour vérifier l'état du site. Patientez environ 30 secondes...");
+            const prompt = `
+                Tu es l'assistant visiteur du site MediConvoi.
+                TA MISSION : Recueillir les idées, suggestions et retours des utilisateurs ("Boîte à Idées").
                 
-                try {
-                    const report = await GhostShopper.runGhostShopperCycle();
-                    const prompt = `
-                        Tu es un assistant technique. Voici le rapport JSON d'un audit automatisé du site web effectué par le "Ghost Shopper".
-                        Résume la situation pour l'utilisateur de manière claire et concise (en quelques phrases).
-                        Si succès, sois rassurant. Si échec, explique le problème simplement.
-                        Rapport : ${JSON.stringify(report)}
-                    `;
-                    reply = await this.askGemini(prompt);
-                } catch (e) {
-                    console.error(`[${this.name}] Ghost Shopper Error:`, e);
-                    reply = "❌ Le Ghost Shopper a rencontré une erreur technique lors de l'audit. Veuillez vérifier les logs serveur.";
-                }
-
-            } else if (isPurgeRequest) {
-                await this.sendReply(msg.session_id, "🧹 Je lance la purge du cache Cloudflare. Un instant...");
+                RÈGLES :
+                1. Si l'utilisateur donne une idée ou une suggestion : Remercie chaleureusement et confirme que l'idée a été transmise à l'équipe.
+                2. Si l'utilisateur signale un problème : Remercie pour le signalement et indique que l'équipe technique va regarder.
+                3. Si l'utilisateur dit "Bonjour" ou pose une question simple sur le service : Réponds poliment et brièvement.
+                4. TU NE DOIS PAS exécuter d'actions techniques (pas d'audit, pas de purge, pas de commande).
+                5. Reste toujours courtois, positif et serviable.
                 
-                try {
-                    const result = await CloudflareAgent.purgeCache(true);
-                    if (result.success) {
-                        reply = "✅ Le cache Cloudflare a été purgé avec succès ! Les modifications devraient être visibles immédiatement (pensez à rafraîchir).";
-                    } else {
-                        reply = `⚠️ La purge a échoué. Détails: ${JSON.stringify(result.errors)}`;
-                    }
-                } catch (e) {
-                     console.error(`[${this.name}] Cloudflare Error:`, e);
-                     reply = "❌ Erreur critique lors de la tentative de purge.";
-                }
+                Message de l'utilisateur : "${msg.content}"
+            `;
 
-            } else if (lowerMsg.includes('classe') || lowerMsg.includes('range') || lowerMsg.includes('drive')) {
-                await this.sendReply(msg.session_id, "📁 Je m'occupe immédiatement du rangement de votre Drive avec l'aide de ma secrétaire experte. Un instant...");
-                reply = await SecretaryAgent.autopilotDriveClassification();
-
-            } else if (lowerMsg.includes('mail') || lowerMsg.includes('relance') || lowerMsg.includes('écris')) {
-                // Tentative d'extraction simplifiée du nom du client
-                const clientMatch = msg.content.match(/pour ([\w\s]+)/i);
-                const clientName = clientMatch ? clientMatch[1] : "notre client";
-                reply = await SecretaryAgent.prepareRelance(clientName, "n/a");
-
-            } else if (lowerMsg.includes('conseil') || lowerMsg.includes('stratég') || lowerMsg.includes('adjoint') || lowerMsg.includes('chef')) {
-                await this.sendReply(msg.session_id, "🧠 Je transmets votre demande à votre Adjoint (IA Centrale) pour une analyse approfondie...");
-                reply = await ChiefAdvisorAgent.consult(msg.content);
-
-            } else {
-                // CONVERSATION GENERALE (Fallback sur Advisor si complexe, ou Gemini simple)
-                reply = await this.askGemini(msg.content);
-            }
+            reply = await this.askGemini(prompt);
+            
+            // Log spécial pour les idées (simulation de "remontée")
+            this.log(`📝 FEEDBACK UTILISATEUR : ${msg.content}`);
 
             await this.sendReply(msg.session_id, reply);
-
+            
         } catch (error) {
+
             console.error(`[${this.name}] Erreur traitement :`, error);
             await this.sendReply(msg.session_id, "Désolé, j'ai eu un problème de connexion avec mon cerveau numérique.");
         }

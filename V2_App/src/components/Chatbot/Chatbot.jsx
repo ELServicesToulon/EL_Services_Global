@@ -11,7 +11,7 @@ export default function Chatbot() {
     return [{ 
         id: 'init', 
         sender: 'bot', 
-        content: "Bonjour ! Je suis l'Assistant Intelligent MediConvoi. Je peux lancer un audit technique, vérifier l'état du site ou répondre à vos questions. Comment puis-je vous aider ?" 
+        content: "Bonjour ! Je suis votre assistant visiteur. Je suis là pour recueillir vos idées et suggestions afin d'améliorer nos services. Comment puis-je vous aider ?" 
     }];
   });
 
@@ -162,14 +162,14 @@ export default function Chatbot() {
                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm p-0.5 flex items-center justify-center border border-white/30 shadow-inner">
                    <div className="w-full h-full bg-indigo-100 rounded-full overflow-hidden flex items-center justify-center">
                         <img src="/chatbot_logo.png" className="w-full h-full object-cover" alt="AI" 
-                             onError={(e) => { e.target.style.display='none'; e.target.parentNode.innerHTML='🤖'; }} />
+                             onError={(e) => { e.target.style.display='none'; e.target.parentNode.innerHTML='💡'; }} />
                    </div>
                </div>
                <div className="relative z-10">
-                   <h3 className="text-white font-bold text-lg tracking-wide">Assistant AI</h3>
+                   <h3 className="text-white font-bold text-lg tracking-wide">Boîte à Idées</h3>
                    <div className="flex items-center gap-2">
                        <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-                       <span className="text-indigo-100 text-xs font-medium uppercase tracking-wider">En ligne • Gemini Pro</span>
+                       <span className="text-indigo-100 text-xs font-medium uppercase tracking-wider">MédiConvoi</span>
                    </div>
                </div>
             </div>
