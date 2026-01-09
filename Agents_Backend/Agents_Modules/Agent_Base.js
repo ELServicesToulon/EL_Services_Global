@@ -101,7 +101,7 @@ class Agent_Base {
             return null;
         }
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${this.geminiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.geminiKey}`;
             const response = await axios.post(url, {
                 contents: [{ parts: [{ text: prompt }] }]
             });
@@ -112,7 +112,7 @@ class Agent_Base {
         } catch (e) {
             // Fallback
             try {
-                const url2 = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.geminiKey}`;
+                const url2 = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${this.geminiKey}`;
                 const response = await axios.post(url2, { contents: [{ parts: [{ text: prompt }] }] });
                 return response.data.candidates[0].content.parts[0].text;
             } catch (e2) {
