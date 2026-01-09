@@ -88,7 +88,7 @@ conn.on('ready', () => {
                 }
 
                 const remotePath = `${REMOTE_DIR}/${relativePath.replace(/\\/g, '/')}`;
-                const remoteDir = path.dirname(remotePath);
+                // const remoteDir = path.dirname(remotePath); // Unused
 
                 // Simple dir creation logic (can be optimized but safe effectively)
                 return new Promise((resUpload, rejUpload) => {
@@ -96,12 +96,6 @@ conn.on('ready', () => {
                     sftp.fastPut(file, remotePath, (err) => {
                         if (err) {
                             console.error(`Error uploading ${relativePath}: ${err.message}`);
-                            // If directory missing, likely fail logic here (basic implementation)
-                            // But we created main dirs in setup. 
-                            // Deep recursive dirs might fail if not pre-created.
-                            // For Sentinel, structure is shallow (Modules, Keys).
-                            // Let's assume shallow for now or add dir check.
-                            // Actually 'keys' and 'Agents_Modules' are explicitly created above.
                             rejUpload(err);
                         } else {
                             console.log(`Uploaded: ${relativePath} -> ${remotePath}`);
@@ -129,6 +123,7 @@ conn.on('ready', () => {
         `cd ${REMOTE_DIR} && pm2 save`,
         `cd ${REMOTE_DIR} && pm2 startup`
     ];
+
     runCommands.forEach(cmd => {
         chain = chain.then(() => new Promise((resolve, reject) => {
             console.log(`Executing: ${cmd}`);
