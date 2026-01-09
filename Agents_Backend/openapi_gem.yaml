@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: Antigravity VPS Control
+  description: API pour contrôler l'Assistant Adjoint (Gemini) sur le VPS Mediconvoi via un Google Gem.
+  version: 1.0.0
+servers:
+  - url: https://sacramento-phoenix-sufficiently-sent.trycloudflare.com
+paths:
+  /api/chat:
+    post:
+      operationId: sendVoicePrompt
+      summary: Envoie une commande vocale à l'Adjoint
+      description: Transmet le texte converti de la voix vers le Chief Advisor Agent pour exécution par l'essaim.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: La commande ou question (ex: "Lance un scan Deep Research")
+              required:
+                - prompt
+      responses:
+        '200':
+          description: Commande reçue et traitée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  response:
+                    type: string
+                    description: La réponse textuelle de l'Adjoint
