@@ -128,7 +128,7 @@ conn.on('ready', () => {
         `cd ${REMOTE_DIR} && (pm2 reload sentinel || pm2 start Sentinel_Core.js --name sentinel)`,
         `cd ${REMOTE_DIR} && pm2 save`,
         `cd ${REMOTE_DIR} && pm2 startup`
-
+    ];
     runCommands.forEach(cmd => {
         chain = chain.then(() => new Promise((resolve, reject) => {
             console.log(`Executing: ${cmd}`);

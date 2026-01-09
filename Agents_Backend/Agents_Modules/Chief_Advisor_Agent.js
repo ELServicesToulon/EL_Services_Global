@@ -116,12 +116,17 @@ class ChiefAdvisorAgent extends Agent_Base {
             Si la demande de l'utilisateur implique un changement de stratégie, propose de mettre à jour le fichier 'master_plan.md'.
         `;
 
-        const response = await this.askGemini(prompt, { model: 'gemini-3-pro-preview' });
+        try {
+            // Utilisation du modèle 3.0 Pro Preview pour une intelligence maximale
+            const response = await this.askGemini(prompt, { model: 'gemini-3-pro-preview' });
+            return response || "Je n'ai pas pu formuler de conseil pour le moment.";
+        } catch (error) {
+            this.log(`❌ Erreur lors de la consultation Gemini: ${error.message}`, 'error');
+            return "Désolé, une erreur est survenue lors de la consultation. Veuillez réessayer.";
+        }
         
         // Auto-apprentissage (rudimentaire) : Si la réponse contient une "Nouvelle Règle", on pourrait l'extraire.
         // Pour l'instant on reste sur du RAG simple (Retrieval Augmented Generation).
-        
-        return response;
     }
 }
 

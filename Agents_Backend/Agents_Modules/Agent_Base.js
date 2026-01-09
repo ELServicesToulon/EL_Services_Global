@@ -106,7 +106,7 @@ class Agent_Base {
             return null;
         }
 
-        const preferredModel = options.model || 'gemini-2.0-flash-exp';
+        const preferredModel = options.model || 'gemini-2.5-flash';
 
         const performRequest = async (model) => {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiKey}`;
@@ -122,9 +122,9 @@ class Agent_Base {
                 }
             } catch (e1) {
                 // If the preferred model was NOT the fallback, try the fallback
-                if (preferredModel !== 'gemini-2.0-flash-lite') {
-                    // Fallback to stable lite
-                    const response = await performRequest('gemini-2.0-flash-lite');
+                if (preferredModel !== 'gemini-2.0-flash') {
+                    // Fallback to stable
+                    const response = await performRequest('gemini-2.0-flash');
                     if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
                         return response.data.candidates[0].content.parts[0].text;
                     }

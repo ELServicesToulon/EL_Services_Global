@@ -128,9 +128,25 @@ async function runAgent(agentName) {
 
     fullPrompt += `\nBased on your instructions, analyze the code and generate a report in Markdown format. If everything is good, start with "✅ No issues found.". If there are issues, list them clearly with actionable steps.`;
 
+    // Select Model based on Agent Role
+    let modelName = 'gemini-2.5-flash'; // Default Standard
+
+    const lowerName = agentName.toLowerCase();
+    if (lowerName.includes('advisor') || lowerName.includes('adjoint') || lowerName.includes('architect')) {
+        modelName = 'gemini-3-pro-preview';
+    } else if (lowerName.includes('marketing') || lowerName.includes('scribe')) {
+        modelName = 'gemini-2.5-pro';
+    } else if (lowerName.includes('watchdog') || lowerName.includes('research')) {
+        modelName = 'deep-research-pro-preview-12-2025'; // Fallback to 2.5-pro if this fails
+    } else if (lowerName.includes('coder') || lowerName.includes('mechanic')) {
+        modelName = 'gemini-2.5-computer-use-preview-10-2025';
+    }
+
+    console.log(`🧠 Using Model: ${modelName}`);
+
     // Call Gemini
     const genAI = new GoogleGenerativeAI(API_KEY.trim());
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     const result = await model.generateContent(fullPrompt);
     const response = result.response;

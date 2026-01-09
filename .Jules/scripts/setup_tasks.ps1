@@ -39,5 +39,26 @@ if (-not ($agentMatches.Groups[1].Value -contains "Adjoint")) {
     Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName $AdjointTaskName -Description "Run Jules Assistant (Adjoint)" -Force
 }
 
+# Schedule Disposable Agents (The "Swarm" for Dell)
+Write-Host "Configuring Disposable Agents Swarm..."
+for ($i = 1; $i -le 3; $i++) {
+    $TaskName = "Jules_Disposable_Worker_$i"
+    $Argument = "Agents_Backend/Agents_Modules/Disposable_Agent.js $i"
+    
+    # Stagger them slightly: Worker 1 at :15, Worker 2 at :30, Worker 3 at :45 past every hour
+    $Minute = $i * 15
+    
+    $Action = New-ScheduledTaskAction -Execute $NodeExe -Argument $Argument -WorkingDirectory $RepoPath
+    
+    # Note: New-ScheduledTaskTrigger -At is usually for a specific time. 
+    # For repetitive hourly tasks, complex logic is needed in PS or simpler just set multiple daily triggers.
+    # Here we simplify: Run Daily at specific times for testing, user can adjust frequency.
+    $Time = "10:$Minute" 
+    
+    $Trigger = New-ScheduledTaskTrigger -Daily -At $Time
+    
+    Write-Host "Scheduling $TaskName at $Time..."
+    Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName $TaskName -Description "Disposable Worker Agent $i" -Force
+}
 
-Write-Host "All agents scheduled successfully!"
+Write-Host "All agents (including Disposable Swarm) scheduled successfully!"
