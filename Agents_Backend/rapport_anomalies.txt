@@ -2406,3 +2406,19 @@ Plusieurs fichiers critiques du système (agents, dashboard et core) ont été m
 [2026-01-09T11:11:55.507Z] [DEPLOY] 🚀 Auto-Deployment Successful! V2 & Agents updated.
 [2026-01-09T11:26:02.150Z] [DEPLOY] 🚀 Auto-Deployment Successful! V2 & Agents updated.
 [2026-01-09T11:26:03.094Z] [DEPLOY] 🚀 Auto-Deployment Successful! V2 & Agents updated.
+[2026-01-09T11:26:11.795Z] [DEPLOY] 🚀 Auto-Deployment Successful! V2 & Agents updated.
+[2026-01-09T11:30:31.731Z] [NETWORK] 🔥 Mediconvoi Vitrine : DOWN (Timeout/Error: socket hang up) -> IA: Le service "Mediconvoi Vitrine" ne répond pas avec une erreur "socket hang up", ce qui suggère une interruption de connexion inattendue. Les causes probables sont un serveur down, un problème réseau (DNS, firewall), un timeout de la requête ou une erreur dans l'application (backend).
+
+**Cause probable :** Serveur backend down ou problème réseau.
+
+**Commande de vérification :** `curl -v https://mediconvoi.fr` pour diagnostiquer la connectivité et les éventuelles erreurs HTTP.  Un `ping mediconvoi.fr` peut aussi aider à vérifier la résolution DNS et la connectivité de base.
+
+[2026-01-09T11:40:15.217Z] [MARKETING] Trafic: 48 visiteurs. SEO: 85/100
+[2026-01-09T11:40:17.519Z] [MARKETING] Trafic: 27 visiteurs. SEO: 85/100
+[2026-01-09T11:40:18.458Z] [DRIVE] Structure: Janvier 2026
+[2026-01-09T11:40:18.798Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-09T11:40:20.744Z] [DRIVE] Structure: Janvier 2026
+[2026-01-09T11:40:20.934Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-09T11:40:26.903Z] [MARKETING] Trafic: 58 visiteurs. SEO: 85/100
+[2026-01-09T11:40:30.352Z] [DRIVE] Structure: Janvier 2026
+[2026-01-09T11:40:30.555Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
