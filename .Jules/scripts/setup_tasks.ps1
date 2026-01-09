@@ -30,4 +30,14 @@ foreach ($match in $agentMatches) {
     Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName $TaskName -Description "Run Jules Agent $AgentName locally" -Force
 }
 
+# Ensure Adjoint is scheduled
+$AdjointTaskName = "Jules_Agent_Adjoint"
+if (-not ($agentMatches.Groups[1].Value -contains "Adjoint")) {
+    Write-Host "Auto-scheduling 'Adjoint' (Daily check-in at 09:00)..."
+    $Action = New-ScheduledTaskAction -Execute $NodeExe -Argument "$RunnerScript Adjoint" -WorkingDirectory $RepoPath
+    $Trigger = New-ScheduledTaskTrigger -Daily -At "09:00"
+    Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName $AdjointTaskName -Description "Run Jules Assistant (Adjoint)" -Force
+}
+
+
 Write-Host "All agents scheduled successfully!"

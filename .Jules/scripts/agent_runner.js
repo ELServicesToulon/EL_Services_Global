@@ -5,9 +5,9 @@
  * Example: node .Jules/scripts/agent_runner.js Sentinel
  */
 
-require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../Agents_Backend/.env') });
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { exec } = require('child_process');
 
@@ -130,7 +130,7 @@ async function runAgent(agentName) {
 
     // Call Gemini
     const genAI = new GoogleGenerativeAI(API_KEY.trim());
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
