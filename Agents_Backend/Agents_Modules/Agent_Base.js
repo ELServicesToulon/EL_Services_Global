@@ -106,7 +106,7 @@ class Agent_Base {
             return null;
         }
 
-        const preferredModel = options.model || 'gemini-2.5-flash';
+        const preferredModel = options.model || 'gemini-2.0-flash-exp';
 
         const performRequest = async (model) => {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiKey}`;

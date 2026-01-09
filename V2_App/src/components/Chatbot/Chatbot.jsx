@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import { Send, X, MessageCircle, Sparkles, Mic } from 'lucide-react';
+import { Send, X, MessageCircle, Sparkles, Mic, Cpu, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Chatbot() {
@@ -11,7 +11,7 @@ export default function Chatbot() {
     return [{ 
         id: 'init', 
         sender: 'bot', 
-        content: "Bonjour ! Je suis votre assistant visiteur. Je suis là pour recueillir vos idées et suggestions afin d'améliorer nos services. Comment puis-je vous aider ?" 
+        content: "System initialized. I am your Holographic Assistant. How can I facilitate your operations today?" 
     }];
   });
 
@@ -89,9 +89,9 @@ export default function Chatbot() {
     if (error) {
       console.error('Error sending message:', error);
       // More user friendly error message
-      let errorMsg = "Oups, une erreur de connexion est survenue.";
+      let errorMsg = "Connection Error. Neural link unstable.";
       if (error.message.includes('relation "public.chat_messages" does not exist')) {
-          errorMsg = "Maintenance en cours : Le système de chat est en cours de mise à jour (Table manquante).";
+          errorMsg = "Maintenance Mode: Database upgrade in progress.";
       }
       setMessages(prev => [...prev, { id: 'err', sender: 'bot', content: errorMsg }]);
       setIsTyping(false);
@@ -100,7 +100,7 @@ export default function Chatbot() {
 
   const startListening = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert("Votre navigateur ne supporte pas la reconnaissance vocale.");
+      alert("Voice module not detected.");
       return;
     }
     
@@ -126,24 +126,24 @@ export default function Chatbot() {
 
   return (
     <>
-      {/* Launcher Button with Pulse Effect */}
+      {/* Launcher Button with Neon Pulse Effect */}
       <motion.div className="fixed bottom-6 right-6 z-50">
-          <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-25"></div>
+          <div className="absolute inset-0 bg-brand-neon-blue rounded-full animate-ping opacity-25"></div>
           <motion.button
-            className="relative w-16 h-16 bg-gradient-to-br from-indigo-600 to-violet-700 text-white rounded-full shadow-2xl flex items-center justify-center border border-white/20 hover:shadow-indigo-500/50 transition-all"
+            className="relative w-16 h-16 bg-black/80 backdrop-blur-xl border border-brand-neon-blue text-brand-neon-blue rounded-full shadow-[0_0_20px_rgba(0,243,255,0.4)] flex items-center justify-center hover:bg-brand-neon-blue hover:text-black transition-all group"
             onClick={() => setIsOpen(!isOpen)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             {isOpen ? <X size={28} /> : 
                 <div className="flex flex-col items-center">
-                    <Sparkles size={24} className="animate-pulse" />
+                    <Cpu size={24} className="group-hover:animate-spin" />
                 </div>
             }
           </motion.button>
       </motion.div>
 
-      {/* Chat Window */}
+      {/* Chat Window - Holographic Interface */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -151,51 +151,53 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ type: "spring", damping: 25, stiffness: 260 }}
-            className="fixed bottom-24 right-4 md:right-6 w-[90vw] md:w-96 h-[550px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden border border-gray-100 font-sans"
+            className="fixed bottom-24 right-4 md:right-6 w-[90vw] md:w-96 h-[550px] bg-black/90 backdrop-blur-xl border border-brand-neon-blue/50 rounded-lg shadow-[0_0_30px_rgba(0,243,255,0.15)] z-50 flex flex-col overflow-hidden font-mono clip-path-polygon-[0_0,100%_0,100%_95%,95%_100%,0_100%]"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-5 flex items-center gap-4 relative overflow-hidden">
-               {/* Decorative Background Elements */}
-               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-10 blur-xl"></div>
-               <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full translate-y-12 -translate-x-10 blur-lg"></div>
-
-               <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm p-0.5 flex items-center justify-center border border-white/30 shadow-inner">
-                   <div className="w-full h-full bg-indigo-100 rounded-full overflow-hidden flex items-center justify-center">
-                        <img src="/chatbot_logo.png" className="w-full h-full object-cover" alt="AI" 
-                             onError={(e) => { e.target.style.display='none'; e.target.parentNode.innerHTML='💡'; }} />
-                   </div>
+            <div className="bg-brand-neon-blue/10 p-4 flex items-center gap-4 relative overflow-hidden border-b border-brand-neon-blue/30">
+               {/* Decorative Lines */}
+               <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand-neon-blue to-transparent"></div>
+               
+               <div className="w-10 h-10 rounded-sm border border-brand-neon-blue/50 flex items-center justify-center bg-black/50 overflow-hidden">
+                    <img src="/chatbot_logo.png" className="w-full h-full object-cover opacity-80" alt="AI" 
+                         onError={(e) => { e.target.style.display='none'; e.target.parentNode.innerHTML='<Cpu size=20 color=#00f3ff />'; }} />
                </div>
-               <div className="relative z-10">
-                   <h3 className="text-white font-bold text-lg tracking-wide">Boîte à Idées</h3>
+               
+               <div className="relative z-10 flex-1">
+                   <h3 className="text-brand-neon-blue font-bold text-sm tracking-widest uppercase">AI_ADVISOR v3.2</h3>
                    <div className="flex items-center gap-2">
-                       <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-                       <span className="text-indigo-100 text-xs font-medium uppercase tracking-wider">MédiConvoi</span>
+                       <span className="w-1.5 h-1.5 bg-brand-neon-green rounded-full animate-pulse shadow-[0_0_8px_#0aff0a]"></span>
+                       <span className="text-brand-neon-blue/60 text-[10px] font-medium uppercase tracking-wider">Neural Link Active</span>
                    </div>
                </div>
+               
+               <Zap size={16} className="text-brand-neon-purple animate-pulse" />
             </div>
 
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-5 scroll-smooth">
+            {/* Messages Area - Grid Background */}
+            <div className="flex-1 overflow-y-auto p-4 bg-black/50 space-y-5 scroll-smooth relative">
+               <div className="absolute inset-0 bg-[linear-gradient(rgba(0,243,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,243,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+
               {messages.map((m, i) => (
                 <motion.div 
                     key={m.id || i} 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    initial={{ opacity: 0, x: m.sender === 'user' ? 20 : -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'} relative z-10`}
                 >
                   {m.sender === 'bot' && (
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 border border-indigo-200 overflow-hidden mr-3 mt-1 flex-shrink-0 shadow-sm flex items-center justify-center text-xs">
+                      <div className="w-6 h-6 rounded-sm border border-brand-neon-blue/30 bg-brand-neon-blue/10 mr-2 mt-1 flex-shrink-0 flex items-center justify-center text-[10px] text-brand-neon-blue">
                           AI
                       </div>
                   )}
-                  <div className={`max-w-[80%] p-4 rounded-2xl text-[14px] leading-relaxed shadow-sm relative ${
+                  <div className={`max-w-[85%] p-3 text-xs leading-relaxed shadow-sm relative border ${
                     m.sender === 'user' 
-                      ? 'bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-br-none shadow-indigo-200' 
-                      : 'bg-white text-slate-700 border border-slate-100 rounded-bl-none shadow-slate-200'
+                      ? 'bg-brand-neon-blue/10 border-brand-neon-blue text-brand-neon-blue rounded-tl-lg rounded-bl-lg rounded-br-sm' 
+                      : 'bg-white/5 border-white/10 text-slate-300 rounded-tr-lg rounded-br-lg rounded-bl-sm'
                   }`}>
                     {m.content}
-                    {/* Timestamp (Optional) */}
-                    <div className={`text-[10px] mt-1 opacity-70 ${m.sender === 'user' ? 'text-indigo-100' : 'text-slate-400'}`}>
+                    {/* Timestamp */}
+                    <div className={`text-[9px] mt-1 opacity-50 font-mono text-right ${m.sender === 'user' ? 'text-brand-neon-blue' : 'text-slate-500'}`}>
                         {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </div>
                   </div>
@@ -203,14 +205,14 @@ export default function Chatbot() {
               ))}
               
               {isTyping && (
-                <div className="flex justify-start">
-                   <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 mr-3 mt-1 flex items-center justify-center">
-                        <Sparkles size={14} className="text-indigo-400 animate-spin-slow" />
+                <div className="flex justify-start relative z-10">
+                   <div className="w-6 h-6 rounded-sm border border-brand-neon-blue/30 bg-brand-neon-blue/10 mr-2 mt-1 flex items-center justify-center">
+                        <Cpu size={12} className="text-brand-neon-blue animate-spin" />
                    </div>
-                   <div className="bg-white border border-slate-100 p-4 rounded-2xl rounded-bl-none shadow-sm flex items-center gap-1.5 w-16 h-[46px]">
-                       <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                       <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                       <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></span>
+                   <div className="bg-black/40 border border-brand-neon-blue/30 p-2 rounded-tr-lg rounded-br-lg rounded-bl-sm flex items-center gap-1.5 w-14 h-8">
+                       <span className="w-1.5 h-1.5 bg-brand-neon-blue rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                       <span className="w-1.5 h-1.5 bg-brand-neon-purple rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                       <span className="w-1.5 h-1.5 bg-brand-neon-pink rounded-full animate-bounce"></span>
                    </div>
                 </div>
               )}
@@ -218,40 +220,41 @@ export default function Chatbot() {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 bg-white border-t border-slate-100">
+            <div className="p-4 bg-black/80 border-t border-brand-neon-blue/30 backdrop-blur-md">
                 <form onSubmit={sendMessage} className="relative flex items-center gap-2">
                     <button
                         type="button"
                         onClick={startListening}
-                        className={`p-3 rounded-xl transition-all duration-300 ${
+                        className={`p-2 rounded-sm border transition-all duration-300 ${
                             isListening 
-                            ? 'bg-rose-50 text-rose-500 shadow-inner' 
-                            : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+                            ? 'bg-red-500/20 border-red-500 text-red-500 animate-pulse' 
+                            : 'bg-transparent border-white/20 text-slate-400 hover:border-brand-neon-blue hover:text-brand-neon-blue'
                         }`}
-                        title="Dictée vocale"
+                        title="Voice Input"
                     >
-                        <Mic size={20} className={isListening ? 'animate-pulse' : ''} />
+                        <Mic size={18} />
                     </button>
                     
-                    <div className="flex-1 relative">
+                    <div className="flex-1 relative group">
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder={isListening ? "Je vous écoute..." : "Posez votre question..."}
-                            className="w-full pl-5 pr-12 py-3 bg-slate-50 border-none rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all shadow-inner"
+                            placeholder={isListening ? "Listening..." : "Input command..."}
+                            className="w-full pl-4 pr-10 py-2 bg-black/50 border border-white/10 rounded-sm text-brand-neon-blue placeholder:text-slate-600 focus:outline-none focus:border-brand-neon-blue focus:bg-black/80 transition-all font-mono text-sm"
                         />
                         <button 
                             type="submit" 
                             disabled={!input.trim()}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-lg shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:scale-105 disabled:opacity-50 disabled:scale-100 disabled:shadow-none transition-all duration-200"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 bg-brand-neon-blue/20 text-brand-neon-blue rounded-sm hover:bg-brand-neon-blue hover:text-black hover:scale-105 disabled:opacity-30 disabled:scale-100 transition-all duration-200"
                         >
-                            <Send size={18} />
+                            <Send size={14} />
                         </button>
                     </div>
                 </form>
-                <div className="text-center mt-2">
-                    <p className="text-[10px] text-slate-300 font-medium">Powered by Gemini & Supabase</p>
+                <div className="flex justify-between items-center mt-2 px-1">
+                    <p className="text-[9px] text-slate-500 font-mono tracking-wider">SECURE CONNECTION // TLS 1.3</p>
+                    <p className="text-[9px] text-brand-neon-purple font-mono uppercase">Gemini 2.0 Core</p>
                 </div>
             </div>
           </motion.div>
