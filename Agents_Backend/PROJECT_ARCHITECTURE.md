@@ -1,6 +1,6 @@
 # 🏗️ PROJECT ARCHITECTURE (Live Map)
 
-Updated: 2026-01-09T08:40:33.544Z
+Updated: 2026-01-09T15:08:16.731Z
 
 ## 🤖 Agents Detected
 - **Agency_Architect**
@@ -15,6 +15,8 @@ Updated: 2026-01-09T08:40:33.544Z
   - @description Agent Marketing & SEO (Backend) Analyse le trafic (Google Analytics v4), suit le positionnement SEO et optimise la présence en ligne.
 - **Archive_Keeper**
   - @description Agent responsable de l'archivage et des sauvegardes locales.
+- **Backend_Agent**
+  - @description Agent Spécialiste Backend. Rôle : Expert Node.js, Supabase, SQL, API Design. Responsabilité : Gérer la logique serveur, les migrations DB et les API Endpoints.
 - **Browser_Server**
   - @description Manages a persistent Chromium browser server for agents. Agents can connect via WebSocket endpoint for ~27% faster page loads.
 - **Chat_Agent**
@@ -27,6 +29,8 @@ Updated: 2026-01-09T08:40:33.544Z
   - @description Agent responsible for Continuous Deployment (CD). Monitors 'git status' and triggers 'deploy_launch_v2.js' if changes are detected.
 - **Drive_Manager**
   - @description Agent de gestion du dossier Google Drive "Gestion ELS" Organise les fichiers, synchronise avec Supabase et archive les emails.
+- **Frontend_Agent**
+  - @description Agent Spécialiste Frontend. Rôle : Expert React, Vite, TailwindCSS. Responsabilité : Analyser, créer et modifier des composants UI avec une esthétique "Premium".
 - **config**
   - @description Configuration et constantes pour Ghost Shopper
 - **index**
@@ -55,6 +59,8 @@ Updated: 2026-01-09T08:40:33.544Z
   - @description Agent responsable de la surveillance réseau et santé des applications. Version 2.0 : Hérite de Agent_Base pour analyse intelligente des pannes.
 - **Orchestrator_Agent**
   - @description "L'Aiguilleur" - Agent central qui cartographie le projet et redirige les requêtes. Il maintient une carte live du projet (Agents, Core, Relations) et utilise Gemini pour le dispatch.
+- **QA_Agent**
+  - @description Agent Spécialiste QA (Qualité). Rôle : Expert Testing Automatisé (Playwright), Validation. Responsabilité : Orchestrer Ghost Shopper, écrire des tests E2E, valider les déploiements.
 - **Risk_Mitigator**
   - @description Agent de Gestion des Risques (Proactif). Analyse les données contextuelles (Météo, Trafic, Cyber-menaces) pour anticiper les problèmes. Proposé par Agency_Architect (Evolution Autonome).
 - **Secretary_Agent**
@@ -67,6 +73,8 @@ Updated: 2026-01-09T08:40:33.544Z
   - @description Surveille la flotte Tesla en utilisant la configuration existante du projet.
 - **Vault**
   - @description Module de gestion centralisée des secrets et de la configuration. Charge les variables d'environnement depuis le fichier .env et valide leur présence.
+- **Watchdog_Agent**
+  - @description "Agent de Veille" (Deep Research). Responsable de la surveillance légale et technologique. Capacité de naviguer sur le web (via Playwright), d'extraire le contenu et de l'analyser via Gemini pour proposer des actions.
 
 ## 🔗 Relationships
 - `Agency_Architect.js` imports `Agent_Base.js`
@@ -77,6 +85,8 @@ Updated: 2026-01-09T08:40:33.544Z
 - `Agent_Fixer.js` imports `Agent_Base.js`
 - `Agent_Fixer.js` imports `Shared_Knowledge.js`
 - Class **AgentFixer** extends **Agent_Base** (in Agent_Fixer.js)
+- `Backend_Agent.js` imports `Agent_Base.js`
+- Class **Backend_Agent** extends **Agent_Base** (in Backend_Agent.js)
 - `Chat_Agent.js` imports `Agent_Base.js`
 - `Chat_Agent.js` imports `Ghost_Shopper.js`
 - `Chat_Agent.js` imports `Cloudflare_Agent.js`
@@ -86,6 +96,8 @@ Updated: 2026-01-09T08:40:33.544Z
 - Class **Chat_Agent** extends **Agent_Base** (in Chat_Agent.js)
 - `Chief_Advisor_Agent.js` imports `Agent_Base.js`
 - Class **ChiefAdvisorAgent** extends **Agent_Base** (in Chief_Advisor_Agent.js)
+- `Frontend_Agent.js` imports `Agent_Base.js`
+- Class **Frontend_Agent** extends **Agent_Base** (in Frontend_Agent.js)
 - `index.js` imports `Browser_Server.js`
 - `index.js` imports `config.js`
 - `index.js` imports `probes.js`
@@ -109,6 +121,9 @@ Updated: 2026-01-09T08:40:33.544Z
 - `Network_Overseer.js` imports `Vault.js`
 - `Network_Overseer.js` imports `Agent_Base.js`
 - Class **NetworkOverseer** extends **Agent_Base** (in Network_Overseer.js)
+- `QA_Agent.js` imports `Agent_Base.js`
+- `QA_Agent.js` imports `Ghost_Shopper.js`
+- Class **QA_Agent** extends **Agent_Base** (in QA_Agent.js)
 - `Risk_Mitigator.js` imports `Agent_Base.js`
 - `Risk_Mitigator.js` imports `Shared_Knowledge.js`
 - Class **Risk_Mitigator** extends **Agent_Base** (in Risk_Mitigator.js)
@@ -120,6 +135,8 @@ Updated: 2026-01-09T08:40:33.544Z
 - `Security_Agent.js` imports `Vault.js`
 - `Security_Agent.js` imports `Vault.js`
 - Class **SecurityAgent** extends **Agent_Base** (in Security_Agent.js)
+- `Watchdog_Agent.js` imports `Agent_Base.js`
+- Class **Watchdog_Agent** extends **Agent_Base** (in Watchdog_Agent.js)
 - `index.js` imports `Ghost_Shopper.js`
 - `Dashboard_Server.js` imports `Chief_Advisor_Agent.js`
 - `Sentinel_Core.js` imports `Archive_Keeper.js`
@@ -153,6 +170,7 @@ Updated: 2026-01-09T08:40:33.544Z
 - `run_redesign.js` imports `Marketing_Agent.js`
 - `test_network.js` imports `Network_Overseer.js`
 - `test_risk.js` imports `Risk_Mitigator.js`
+- `test_watchdog.js` imports `Watchdog_Agent.js`
 - `trigger_architect.js` imports `Agency_Architect.js`
 - `trigger_evolution.js` imports `Agency_Architect.js`
 - `trigger_evolution.js` imports `Agent_Fixer.js`
@@ -161,7 +179,7 @@ Updated: 2026-01-09T08:40:33.544Z
 - `whitelist_myself.js` imports `Cloudflare_Agent.js`
 
 ## 📂 File Index
-- [knowledge_base.json](Advisors_Memory/knowledge_base.json) (7.6 KB)
+- [knowledge_base.json](Advisors_Memory/knowledge_base.json) (8.2 KB)
 - [master_plan.md](Advisors_Memory/master_plan.md) (0.2 KB)
 - [Agency_Architect.js](Agents_Modules/Agency_Architect.js) (3.2 KB)
 - [Agent_Base.js](Agents_Modules/Agent_Base.js) (4.6 KB)
@@ -169,12 +187,14 @@ Updated: 2026-01-09T08:40:33.544Z
 - [Agent_Fixer.js](Agents_Modules/Agent_Fixer.js) (10.6 KB)
 - [Agent_Marketing.js](Agents_Modules/Agent_Marketing.js) (1.4 KB)
 - [Archive_Keeper.js](Agents_Modules/Archive_Keeper.js) (2.8 KB)
+- [Backend_Agent.js](Agents_Modules/Backend_Agent.js) (1.6 KB)
 - [Browser_Server.js](Agents_Modules/Browser_Server.js) (2.2 KB)
-- [Chat_Agent.js](Agents_Modules/Chat_Agent.js) (8.2 KB)
+- [Chat_Agent.js](Agents_Modules/Chat_Agent.js) (4.9 KB)
 - [Chief_Advisor_Agent.js](Agents_Modules/Chief_Advisor_Agent.js) (4.3 KB)
 - [Cloudflare_Agent.js](Agents_Modules/Cloudflare_Agent.js) (6.9 KB)
 - [Deployment_Agent.js](Agents_Modules/Deployment_Agent.js) (4.0 KB)
 - [Drive_Manager.js](Agents_Modules/Drive_Manager.js) (11.9 KB)
+- [Frontend_Agent.js](Agents_Modules/Frontend_Agent.js) (2.4 KB)
 - [config.js](Agents_Modules/Ghost_Shopper/config.js) (1.3 KB)
 - [index.js](Agents_Modules/Ghost_Shopper/index.js) (2.4 KB)
 - [interactions.js](Agents_Modules/Ghost_Shopper/interactions.js) (4.0 KB)
@@ -189,32 +209,37 @@ Updated: 2026-01-09T08:40:33.544Z
 - [Marketing_Agent.js](Agents_Modules/Marketing_Agent.js) (2.3 KB)
 - [Network_Overseer.js](Agents_Modules/Network_Overseer.js) (3.4 KB)
 - [Orchestrator_Agent.js](Agents_Modules/Orchestrator_Agent.js) (8.9 KB)
+- [QA_Agent.js](Agents_Modules/QA_Agent.js) (1.6 KB)
 - [Risk_Mitigator.js](Agents_Modules/Risk_Mitigator.js) (3.0 KB)
 - [Secretary_Agent.js](Agents_Modules/Secretary_Agent.js) (3.6 KB)
 - [Security_Agent.js](Agents_Modules/Security_Agent.js) (8.8 KB)
 - [Shared_Knowledge.js](Agents_Modules/Shared_Knowledge.js) (2.9 KB)
 - [Tesla_Monitor.js](Agents_Modules/Tesla_Monitor.js) (3.4 KB)
 - [Vault.js](Agents_Modules/Vault.js) (5.0 KB)
-- [fim_baseline.json](Agents_Modules/fim_baseline.json) (6.5 KB)
+- [Watchdog_Agent.js](Agents_Modules/Watchdog_Agent.js) (4.1 KB)
+- [fim_baseline.json](Agents_Modules/fim_baseline.json) (7.0 KB)
 - [Ghost_Shopper.js](Agents_Standalone/Ghost_Shopper_Worker/Ghost_Shopper.js) (5.8 KB)
 - [README.md](Agents_Standalone/Ghost_Shopper_Worker/README.md) (1.6 KB)
 - [index.js](Agents_Standalone/Ghost_Shopper_Worker/index.js) (1.7 KB)
 - [package.json](Agents_Standalone/Ghost_Shopper_Worker/package.json) (0.4 KB)
-- [Dashboard_Server.js](Dashboard_Server.js) (4.1 KB)
+- [Dashboard_Server.js](Dashboard_Server.js) (4.6 KB)
 - [INFRASTRUCTURE.md](INFRASTRUCTURE.md) (3.2 KB)
 - [Maintenance_Agent.js](Maintenance_Agent.js) (1.8 KB)
-- [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (17.7 KB)
-- [PROJECT_MAP.json](PROJECT_MAP.json) (97.6 KB)
+- [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (19.9 KB)
+- [PROJECT_MAP.json](PROJECT_MAP.json) (107.7 KB)
 - [PROPOSAL_AI Threat Anticipation & Mitigation Agent (ATAMA)_1767944249826.md](PROPOSAL_AI Threat Anticipation & Mitigation Agent (ATAMA)_1767944249826.md) (2.3 KB)
+- [PROPOSAL_Agent de Prédiction et d'Optimisation Dynamique des Risques (APODR)_1767948086547.md](PROPOSAL_Agent de Prédiction et d'Optimisation Dynamique des Risques (APODR)_1767948086547.md) (1.8 KB)
 - [PROPOSAL_AnomalyDetector_1767944249421.md](PROPOSAL_AnomalyDetector_1767944249421.md) (1.5 KB)
 - [PROPOSAL_CybersecuritySentinel_1767946378196.md](PROPOSAL_CybersecuritySentinel_1767946378196.md) (1.8 KB)
 - [PROPOSAL_DataSecuritySentinel_1767944266496.md](PROPOSAL_DataSecuritySentinel_1767944266496.md) (1.2 KB)
 - [PROPOSAL_PredictiveMaintenanceAgent_1767946382091.md](PROPOSAL_PredictiveMaintenanceAgent_1767946382091.md) (1.4 KB)
+- [PROPOSAL_PredictiveSecurityAgent_1767948086167.md](PROPOSAL_PredictiveSecurityAgent_1767948086167.md) (1.1 KB)
 - [PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md](PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md) (1.1 KB)
 - [PROPOSAL_Predictive_Maintenance_Agent_1767946377484.md](PROPOSAL_Predictive_Maintenance_Agent_1767946377484.md) (1.5 KB)
 - [PROPOSAL_ProactiveSecurityAnalyzer_1767946039971.md](PROPOSAL_ProactiveSecurityAnalyzer_1767946039971.md) (1.2 KB)
 - [PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md](PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md) (0.9 KB)
 - [PROPOSAL_Risk_Mitigator_1767904757575.md](PROPOSAL_Risk_Mitigator_1767904757575.md) (0.8 KB)
+- [PROPOSAL_ThreatIntelligenceAgent_1767948096214.md](PROPOSAL_ThreatIntelligenceAgent_1767948096214.md) (1.3 KB)
 - [SECURITY_PROTOCOLS.md](SECURITY_PROTOCOLS.md) (2.4 KB)
 - [SETUP_KEYS.md](SETUP_KEYS.md) (1.6 KB)
 - [Sentinel_Core.js](Sentinel_Core.js) (17.7 KB)
@@ -252,6 +277,7 @@ Updated: 2026-01-09T08:40:33.544Z
 - [package.json](package.json) (0.7 KB)
 - [purge_cloudflare.js](purge_cloudflare.js) (3.0 KB)
 - [rapport_agents_2026-01-06.md](rapport_agents_2026-01-06.md) (7.3 KB)
+- [read_drive_doc.js](read_drive_doc.js) (1.9 KB)
 - [read_vps_logs.js](read_vps_logs.js) (0.6 KB)
 - [run_redesign.js](run_redesign.js) (1.2 KB)
 - [setup_chatbot_db.js](setup_chatbot_db.js) (1.5 KB)
@@ -259,6 +285,7 @@ Updated: 2026-01-09T08:40:33.544Z
 - [telecommande.js](telecommande.js) (1.4 KB)
 - [test_network.js](test_network.js) (0.4 KB)
 - [test_risk.js](test_risk.js) (0.2 KB)
+- [test_watchdog.js](test_watchdog.js) (0.8 KB)
 - [trigger_architect.js](trigger_architect.js) (0.3 KB)
 - [trigger_evolution.js](trigger_evolution.js) (1.2 KB)
 - [verify_android_api.js](verify_android_api.js) (0.9 KB)

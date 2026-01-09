@@ -64,5 +64,11 @@
   "run_redesign.js": "8992c7123ded6d2647aec5848374892554726c8f03ffdb75fe4808870c9610f4",
   "test_risk.js": "b1e36ce33607a2539735b1f10199f29d74246104e50c2ab526d84d44e4d5a81f",
   "trigger_evolution.js": "02b61596d22edaffc447346eeb4fbe9e495311d4a708e611d56bda9725b2faee",
-  "verify_android_api.js": "f377e7d02c4bb6fd223b93615cfd412e67c0ec0c686bdc49cabf4df9d335e739"
+  "verify_android_api.js": "f377e7d02c4bb6fd223b93615cfd412e67c0ec0c686bdc49cabf4df9d335e739",
+  "Agents_Modules/Backend_Agent.js": "79278766b6251228f10a3b3746653294bd42a76e9df8c55edb4fd20ddcce8c5f",
+  "Agents_Modules/Frontend_Agent.js": "4e38a39e6e85ea9670ee818174ba5d38bb4c4bafba94fec3077a866d39133e5e",
+  "Agents_Modules/QA_Agent.js": "e3af32350ed07f8d4245816b3c753eea7bd2faf3d34af1276e95287645e7e27b",
+  "Agents_Modules/Watchdog_Agent.js": "fe5be8a624fdec5cb77f099ad13842a4a2e513f5cc848978c10a202da0a42275",
+  "read_drive_doc.js": "028c03e1ce24e557979babdf6126939075efde00a919885c918a406baeb5fd08",
+  "test_watchdog.js": "a8a340f1fe597d4087aafeccd67d4500d73b646e92e55187164edb52df5efe1e"
 }
