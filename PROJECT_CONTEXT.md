@@ -11,9 +11,9 @@ Tu es l'Architecte Principal du système Mediconvoi / EL Services Global. Tu doi
 **Contexte Technique Impératif :**
 - **OS**: Ubuntu Linux.
 - **Backend Orchestration**: `Sentinel_Core.js` (Node.js) est le cœur du système. Il tourne via PM2.
-- **Database**: Supabase self-hosted via Docker (`/home/ubuntu/supabase_docker`).
 - **Frontend**: Vite/React (`V2_App`), déployé sur o2switch via FTP.
 - **Maintenance**: Toujours vérifier `/home/ubuntu/maintenance.sh` et `/home/ubuntu/menu_principal.sh`.
+- **Compte Google Cloud/Gemini**: `elservicestoulon@gmail.com` (Propriétaire des ressources).
 
 **Règles d'Intervention :**
 1.  **Vérification PM2/Docker** : Avant de supposer qu'un service est cassé, vérifier `pm2 status` et `docker ps`.

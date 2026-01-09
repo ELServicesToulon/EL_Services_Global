@@ -14,6 +14,10 @@ export default function BookingForm({ onBookingCreated }) {
     const [packages, setPackages] = useState(1)
     const [isUrgent, setIsUrgent] = useState(false)
     const [notes, setNotes] = useState('')
+    
+    // Antigravity V2 State
+    const [isAntigravity, setIsAntigravity] = useState(false)
+    const [gravityOffset, setGravityOffset] = useState(20) // Default 20% comfort
 
     // Set default date to tomorrow
     useEffect(() => {
@@ -47,7 +51,10 @@ export default function BookingForm({ onBookingCreated }) {
                         packages_count: packages,
                         is_urgent: isUrgent,
                         notes: notes,
-                        status: 'pending'
+                        status: 'pending',
+                        // Champs V2 Antigravity (Rétro-compatible: null si non utilisé)
+                        treadmill_model: isAntigravity ? 'AG-5000' : null,
+                        gravity_offset: isAntigravity ? gravityOffset : 0
                     }
                 ])
 
@@ -146,8 +153,8 @@ export default function BookingForm({ onBookingCreated }) {
                 </div>
 
                 {/* Options */}
-                <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center space-x-4">
+                <div className="space-y-4 pt-2 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <label className="text-sm text-gray-700 mr-2">Colis:</label>
                             <input
@@ -172,6 +179,44 @@ export default function BookingForm({ onBookingCreated }) {
                                 {isUrgent && <AlertCircle className="w-3 h-3 text-red-500 ml-1" />}
                             </span>
                         </label>
+                    </div>
+
+                    {/* Section Antigravité (New Feature V2) */}
+                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                        <label className="flex items-center cursor-pointer mb-2">
+                            <input
+                                type="checkbox"
+                                checked={isAntigravity}
+                                onChange={(e) => setIsAntigravity(e.target.checked)}
+                                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                            />
+                            <span className="ml-2 text-sm font-medium text-blue-800 flex items-center">
+                                🚀 Séance Antigravité (Tapis V2)
+                            </span>
+                        </label>
+
+                        {isAntigravity && (
+                            <div className="ml-6 space-y-2 animate-fadeIn">
+                                <div>
+                                    <label className="block text-xs font-semibold text-blue-700 mb-1">
+                                        Allègement Gravité: {gravityOffset}%
+                                    </label>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        step="5"
+                                        value={gravityOffset}
+                                        onChange={(e) => setGravityOffset(parseInt(e.target.value))}
+                                        className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                                    />
+                                    <div className="flex justify-between text-xs text-blue-400">
+                                        <span>0% (Normal)</span>
+                                        <span>100% (Apesanteur)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
