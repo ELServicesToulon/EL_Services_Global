@@ -5,14 +5,16 @@
  * and executes them locally using Gemini 3 Pro Preview intelligence.
  */
 
-const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const axiosModule = require('./node_modules/axios');
-const axios = axiosModule.default || axiosModule;
-require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// Fix paths for running from Agents_Modules subdirectory
+const parentDir = path.join(__dirname, '..');
+require('dotenv').config({ path: path.join(parentDir, '.env') });
+
+const axios = require(path.join(parentDir, 'node_modules', 'axios')).default || require(path.join(parentDir, 'node_modules', 'axios'));
+
+const { GoogleGenerativeAI } = require(path.join(parentDir, 'node_modules', '@google', 'generative-ai'));
 
 const VPS_API = process.env.VPS_API_URL || 'http://37.59.124.82:3333';
 const POLL_INTERVAL = 60000; // 1 minute
