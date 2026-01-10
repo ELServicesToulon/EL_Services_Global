@@ -117,6 +117,30 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+// 6. Dell Heartbeat (Remote Monitoring)
+let dellStatus = {};
+app.post('/api/heartbeat', (req, res) => {
+    const { hostname, user, uptime, disk_free_gb, memory_gb, last_sync, timestamp } = req.body;
+    
+    console.log(`💓 [HEARTBEAT] Dell (${hostname}) checked in at ${timestamp}`);
+    
+    dellStatus = {
+        hostname,
+        user,
+        uptime,
+        disk_free_gb,
+        memory_gb,
+        last_sync,
+        last_seen: timestamp
+    };
+    
+    res.json({ success: true, message: 'Heartbeat received' });
+});
+
+app.get('/api/heartbeat', (req, res) => {
+    res.json(dellStatus);
+});
+
 // Lancement du serveur
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🛡️ Dashboard API Server running on port ${PORT}`);

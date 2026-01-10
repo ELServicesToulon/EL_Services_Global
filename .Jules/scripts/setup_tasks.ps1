@@ -70,4 +70,13 @@ $SyncTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval
 Register-ScheduledTask -Action $SyncAction -Trigger $SyncTrigger -TaskName $SyncTaskName -Description "Auto-sync code from GitHub" -Force
 Write-Host "✅ Auto-Sync scheduled every 30 minutes."
 
+# Schedule Heartbeat (Every hour)
+Write-Host "Configuring Dell Heartbeat..."
+$HeartbeatTaskName = "Jules_Heartbeat"
+$HeartbeatScript = "$RepoPath\.Jules\scripts\heartbeat.ps1"
+$HeartbeatAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$HeartbeatScript`"" -WorkingDirectory $RepoPath
+$HeartbeatTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Hours 1)
+Register-ScheduledTask -Action $HeartbeatAction -Trigger $HeartbeatTrigger -TaskName $HeartbeatTaskName -Description "Send Dell status to VPS" -Force
+Write-Host "✅ Heartbeat scheduled every hour."
+
 Write-Host "All agents (including Disposable Swarm) scheduled successfully!"
