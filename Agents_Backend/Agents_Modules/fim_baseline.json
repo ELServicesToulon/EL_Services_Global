@@ -70,5 +70,7 @@
   "Agents_Modules/QA_Agent.js": "e3af32350ed07f8d4245816b3c753eea7bd2faf3d34af1276e95287645e7e27b",
   "Agents_Modules/Watchdog_Agent.js": "fe5be8a624fdec5cb77f099ad13842a4a2e513f5cc848978c10a202da0a42275",
   "read_drive_doc.js": "028c03e1ce24e557979babdf6126939075efde00a919885c918a406baeb5fd08",
-  "test_watchdog.js": "a8a340f1fe597d4087aafeccd67d4500d73b646e92e55187164edb52df5efe1e"
+  "test_watchdog.js": "a8a340f1fe597d4087aafeccd67d4500d73b646e92e55187164edb52df5efe1e",
+  "Agents_Modules/Caporal_Agent.js": "de3987b4ac378af6fa705161809a5c6d7a1e578a1d88f6c1b8ccf203834fc0c1",
+  "Agents_Modules/Disposable_Agent.js": "3435a8f303ce92282e32e7f883e23c251d7aaeb393a1aa5e0f668be81099c632"
 }
