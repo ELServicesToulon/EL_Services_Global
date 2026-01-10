@@ -16,6 +16,19 @@ function log(message) {
 }
 
 async function main() {
+    // Prevent double execution
+    const LOCK_FILE = path.join(__dirname, 'boot.lock');
+    const LOCK_TIMEOUT = 60000; // 1 minute
+    
+    if (fs.existsSync(LOCK_FILE)) {
+        const lockAge = Date.now() - fs.statSync(LOCK_FILE).mtimeMs;
+        if (lockAge < LOCK_TIMEOUT) {
+            console.log('[BOOT] Already running (lock file exists). Exiting.');
+            process.exit(0);
+        }
+    }
+    fs.writeFileSync(LOCK_FILE, Date.now().toString());
+    
     log("🚀 === MEDICONVOI BOOT ORCHESTRATOR START ===");
     let recap = "MEDICONVOI V2 - BOOT REPORT\n============================\n";
 
