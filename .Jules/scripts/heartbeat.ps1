@@ -14,6 +14,21 @@ $Memory = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemo
 # Check if agents ran recently
 $LastSync = (Get-Item "$RepoPath\.git\FETCH_HEAD" -ErrorAction SilentlyContinue).LastWriteTime
 
+# Check for ESET blocking events
+$EsetBlocked = @()
+try {
+    $esetLogs = Get-WinEvent -LogName "Application" -MaxEvents 50 -ErrorAction SilentlyContinue | 
+        Where-Object { $_.ProviderName -like "*ESET*" -and $_.Message -like "*block*" }
+    if ($esetLogs) {
+        $EsetBlocked = $esetLogs | Select-Object -First 3 | ForEach-Object { $_.Message.Substring(0, [Math]::Min(100, $_.Message.Length)) }
+    }
+} catch {
+    # No ESET logs or access denied - that's OK
+}
+
+# Check if node.exe is accessible
+$NodeOK = $null -ne (Get-Command node.exe -ErrorAction SilentlyContinue)
+
 $Payload = @{
     hostname = $Hostname
     user = $Username
@@ -21,6 +36,8 @@ $Payload = @{
     disk_free_gb = $DiskFree
     memory_gb = $Memory
     last_sync = $LastSync
+    node_accessible = $NodeOK
+    eset_blocked = $EsetBlocked
     timestamp = (Get-Date -Format "o")
 } | ConvertTo-Json
 
