@@ -2,7 +2,7 @@
 # This script reads .Jules/schedule.yml and creates Windows Scheduled Tasks.
 # It assumes 'node' is in the PATH and 'npm install' has been run.
 
-$RepoPath = "c:\Users\ELServices\EL_Services_Global"
+$RepoPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $RunnerScript = "$RepoPath\.Jules\scripts\agent_runner.js"
 $NodeExe = "node.exe" 
 
@@ -60,5 +60,14 @@ for ($i = 1; $i -le 3; $i++) {
     Write-Host "Scheduling $TaskName at $Time..."
     Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName $TaskName -Description "Disposable Worker Agent $i" -Force
 }
+
+# Schedule Auto-Sync (Every 30 minutes)
+Write-Host "Configuring Auto-Sync from GitHub..."
+$SyncTaskName = "Jules_AutoSync"
+$SyncScript = "$RepoPath\.Jules\scripts\auto_sync.ps1"
+$SyncAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$SyncScript`"" -WorkingDirectory $RepoPath
+$SyncTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 30)
+Register-ScheduledTask -Action $SyncAction -Trigger $SyncTrigger -TaskName $SyncTaskName -Description "Auto-sync code from GitHub" -Force
+Write-Host "✅ Auto-Sync scheduled every 30 minutes."
 
 Write-Host "All agents (including Disposable Swarm) scheduled successfully!"
