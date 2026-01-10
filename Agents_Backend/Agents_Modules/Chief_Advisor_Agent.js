@@ -128,6 +128,65 @@ class ChiefAdvisorAgent extends Agent_Base {
         // Auto-apprentissage (rudimentaire) : Si la réponse contient une "Nouvelle Règle", on pourrait l'extraire.
         // Pour l'instant on reste sur du RAG simple (Retrieval Augmented Generation).
     }
+
+    /**
+     * Dispatch a command to the Caporal Agent on the Dell
+     */
+    async dispatchToCaporal(orderType, payload) {
+        const axios = require('axios');
+        const VPS_API = 'http://localhost:3333'; // Dashboard is local to Sentinel
+        
+        this.log(`📤 Dispatching to Caporal: ${orderType} - ${payload}`);
+        
+        try {
+            const response = await axios.post(`${VPS_API}/api/orders/dell`, {
+                type: orderType,
+                payload: payload
+            });
+            
+            if (response.data.success) {
+                this.log(`✅ Order queued for Caporal (ID: ${response.data.orderId})`);
+                return response.data.orderId;
+            }
+        } catch (e) {
+            this.log(`❌ Failed to dispatch to Caporal: ${e.message}`);
+            return null;
+        }
+    }
+
+    /**
+     * Two-way communication: Consult and optionally dispatch to Dell
+     */
+    async consultWithDell(userQuery) {
+        const response = await this.consult(userQuery);
+        
+        // Check if the response suggests an action for the Dell
+        if (response.toLowerCase().includes('dell') || response.toLowerCase().includes('local')) {
+            // Use AI to extract a potential command
+            const extractPrompt = `
+                Basé sur cette réponse: "${response}"
+                
+                Y a-t-il une action à envoyer à la machine Dell locale ?
+                Si oui, retourne en JSON: {"dispatch": true, "type": "...", "payload": "..."}
+                Si non, retourne: {"dispatch": false}
+            `;
+            
+            try {
+                const extractResult = await this.askGemini(extractPrompt, { model: 'gemini-2.5-flash' });
+                const jsonMatch = extractResult.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    const action = JSON.parse(jsonMatch[0]);
+                    if (action.dispatch) {
+                        await this.dispatchToCaporal(action.type, action.payload);
+                    }
+                }
+            } catch (e) {
+                this.log(`⚠️ Could not extract Dell action: ${e.message}`);
+            }
+        }
+        
+        return response;
+    }
 }
 
 module.exports = new ChiefAdvisorAgent();

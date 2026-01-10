@@ -79,4 +79,13 @@ $HeartbeatTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInt
 Register-ScheduledTask -Action $HeartbeatAction -Trigger $HeartbeatTrigger -TaskName $HeartbeatTaskName -Description "Send Dell status to VPS" -Force
 Write-Host "✅ Heartbeat scheduled every hour."
 
+# Schedule Caporal Agent (Continuous background service)
+Write-Host "Configuring Caporal Agent..."
+$CaporalTaskName = "Jules_Caporal"
+$CaporalScript = "$RepoPath\Agents_Backend\Agents_Modules\Caporal_Agent.js"
+$CaporalAction = New-ScheduledTaskAction -Execute "node.exe" -Argument "`"$CaporalScript`"" -WorkingDirectory $RepoPath
+$CaporalTrigger = New-ScheduledTaskTrigger -AtStartup
+Register-ScheduledTask -Action $CaporalAction -Trigger $CaporalTrigger -TaskName $CaporalTaskName -Description "Caporal Agent - Command Relay (Gemini 3 Pro)" -Force
+Write-Host "✅ Caporal Agent scheduled to run at startup."
+
 Write-Host "All agents (including Disposable Swarm) scheduled successfully!"
