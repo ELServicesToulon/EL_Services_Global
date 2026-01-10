@@ -141,6 +141,35 @@ app.get('/api/heartbeat', (req, res) => {
     res.json(dellStatus);
 });
 
+// 7. Dell Command Queue (for Caporal Agent)
+let dellOrders = [];
+app.get('/api/orders/dell', (req, res) => {
+    // Return pending orders and clear the queue
+    const orders = [...dellOrders];
+    dellOrders = [];
+    res.json({ orders });
+});
+
+app.post('/api/orders/dell', (req, res) => {
+    const { type, payload } = req.body;
+    const order = {
+        id: Date.now(),
+        type,
+        payload,
+        created: new Date().toISOString()
+    };
+    dellOrders.push(order);
+    console.log(`📤 [ORDERS] New order queued for Dell: ${type}`);
+    res.json({ success: true, orderId: order.id });
+});
+
+app.post('/api/orders/report', (req, res) => {
+    const { orderId, machine, status, details, timestamp } = req.body;
+    console.log(`📊 [REPORT] ${machine} - Order ${orderId}: ${status}`);
+    // Could store in a log file or database here
+    res.json({ success: true });
+});
+
 // Lancement du serveur
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🛡️ Dashboard API Server running on port ${PORT}`);
