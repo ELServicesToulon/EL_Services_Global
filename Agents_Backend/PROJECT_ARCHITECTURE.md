@@ -1,6 +1,6 @@
 # 🏗️ PROJECT ARCHITECTURE (Live Map)
 
-Updated: 2026-01-09T15:08:16.731Z
+Updated: 2026-01-10T08:06:55.531Z
 
 ## 🤖 Agents Detected
 - **Agency_Architect**
@@ -19,6 +19,8 @@ Updated: 2026-01-09T15:08:16.731Z
   - @description Agent Spécialiste Backend. Rôle : Expert Node.js, Supabase, SQL, API Design. Responsabilité : Gérer la logique serveur, les migrations DB et les API Endpoints.
 - **Browser_Server**
   - @description Manages a persistent Chromium browser server for agents. Agents can connect via WebSocket endpoint for ~27% faster page loads.
+- **Caporal_Agent**
+  - Caporal Agent - Dell Command Relay This agent runs on the Dell, polls the VPS for commands, and executes them locally using Gemini 3 Pro Preview intelligence.
 - **Chat_Agent**
   - @description Agent conversationnel (Chatbot) intégré à Sentinel. Interagit avec les utilisateurs via Supabase et utilise Gemini pour l'intelligence. Peut piloter Ghost Shopper pour des audits à la demande. Version 2.0 : Hérite de Agent_Base (Auto-Evolution Ready)
 - **Chief_Advisor_Agent**
@@ -27,6 +29,8 @@ Updated: 2026-01-09T15:08:16.731Z
   - @description Agent dédié à la gestion de Cloudflare (Cache, DNS, Firewall). Version 3.1 : Correction fonctions manquantes.
 - **Deployment_Agent**
   - @description Agent responsible for Continuous Deployment (CD). Monitors 'git status' and triggers 'deploy_launch_v2.js' if changes are detected.
+- **Disposable_Agent**
+  - No description detected.
 - **Drive_Manager**
   - @description Agent de gestion du dossier Google Drive "Gestion ELS" Organise les fichiers, synchronise avec Supabase et archive les emails.
 - **Frontend_Agent**
@@ -96,6 +100,8 @@ Updated: 2026-01-09T15:08:16.731Z
 - Class **Chat_Agent** extends **Agent_Base** (in Chat_Agent.js)
 - `Chief_Advisor_Agent.js` imports `Agent_Base.js`
 - Class **ChiefAdvisorAgent** extends **Agent_Base** (in Chief_Advisor_Agent.js)
+- `Disposable_Agent.js` imports `Agent_Base.js`
+- Class **Disposable_Agent** extends **AgentBase** (in Disposable_Agent.js)
 - `Frontend_Agent.js` imports `Agent_Base.js`
 - Class **Frontend_Agent** extends **Agent_Base** (in Frontend_Agent.js)
 - `index.js` imports `Browser_Server.js`
@@ -179,20 +185,22 @@ Updated: 2026-01-09T15:08:16.731Z
 - `whitelist_myself.js` imports `Cloudflare_Agent.js`
 
 ## 📂 File Index
-- [knowledge_base.json](Advisors_Memory/knowledge_base.json) (8.2 KB)
+- [knowledge_base.json](Advisors_Memory/knowledge_base.json) (9.0 KB)
 - [master_plan.md](Advisors_Memory/master_plan.md) (0.2 KB)
 - [Agency_Architect.js](Agents_Modules/Agency_Architect.js) (3.2 KB)
-- [Agent_Base.js](Agents_Modules/Agent_Base.js) (4.6 KB)
+- [Agent_Base.js](Agents_Modules/Agent_Base.js) (6.2 KB)
 - [Agent_Connector.js](Agents_Modules/Agent_Connector.js) (2.3 KB)
 - [Agent_Fixer.js](Agents_Modules/Agent_Fixer.js) (10.6 KB)
 - [Agent_Marketing.js](Agents_Modules/Agent_Marketing.js) (1.4 KB)
 - [Archive_Keeper.js](Agents_Modules/Archive_Keeper.js) (2.8 KB)
 - [Backend_Agent.js](Agents_Modules/Backend_Agent.js) (1.6 KB)
 - [Browser_Server.js](Agents_Modules/Browser_Server.js) (2.2 KB)
+- [Caporal_Agent.js](Agents_Modules/Caporal_Agent.js) (4.8 KB)
 - [Chat_Agent.js](Agents_Modules/Chat_Agent.js) (4.9 KB)
-- [Chief_Advisor_Agent.js](Agents_Modules/Chief_Advisor_Agent.js) (4.3 KB)
+- [Chief_Advisor_Agent.js](Agents_Modules/Chief_Advisor_Agent.js) (6.9 KB)
 - [Cloudflare_Agent.js](Agents_Modules/Cloudflare_Agent.js) (6.9 KB)
 - [Deployment_Agent.js](Agents_Modules/Deployment_Agent.js) (4.0 KB)
+- [Disposable_Agent.js](Agents_Modules/Disposable_Agent.js) (1.5 KB)
 - [Drive_Manager.js](Agents_Modules/Drive_Manager.js) (11.9 KB)
 - [Frontend_Agent.js](Agents_Modules/Frontend_Agent.js) (2.4 KB)
 - [config.js](Agents_Modules/Ghost_Shopper/config.js) (1.3 KB)
@@ -217,21 +225,22 @@ Updated: 2026-01-09T15:08:16.731Z
 - [Tesla_Monitor.js](Agents_Modules/Tesla_Monitor.js) (3.4 KB)
 - [Vault.js](Agents_Modules/Vault.js) (5.0 KB)
 - [Watchdog_Agent.js](Agents_Modules/Watchdog_Agent.js) (4.1 KB)
-- [fim_baseline.json](Agents_Modules/fim_baseline.json) (7.0 KB)
+- [fim_baseline.json](Agents_Modules/fim_baseline.json) (7.3 KB)
 - [Ghost_Shopper.js](Agents_Standalone/Ghost_Shopper_Worker/Ghost_Shopper.js) (5.8 KB)
 - [README.md](Agents_Standalone/Ghost_Shopper_Worker/README.md) (1.6 KB)
 - [index.js](Agents_Standalone/Ghost_Shopper_Worker/index.js) (1.7 KB)
 - [package.json](Agents_Standalone/Ghost_Shopper_Worker/package.json) (0.4 KB)
-- [Dashboard_Server.js](Dashboard_Server.js) (4.6 KB)
+- [Dashboard_Server.js](Dashboard_Server.js) (6.1 KB)
 - [INFRASTRUCTURE.md](INFRASTRUCTURE.md) (3.2 KB)
 - [Maintenance_Agent.js](Maintenance_Agent.js) (1.8 KB)
-- [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (19.9 KB)
-- [PROJECT_MAP.json](PROJECT_MAP.json) (107.7 KB)
+- [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) (20.7 KB)
+- [PROJECT_MAP.json](PROJECT_MAP.json) (113.4 KB)
 - [PROPOSAL_AI Threat Anticipation & Mitigation Agent (ATAMA)_1767944249826.md](PROPOSAL_AI Threat Anticipation & Mitigation Agent (ATAMA)_1767944249826.md) (2.3 KB)
 - [PROPOSAL_Agent de Prédiction et d'Optimisation Dynamique des Risques (APODR)_1767948086547.md](PROPOSAL_Agent de Prédiction et d'Optimisation Dynamique des Risques (APODR)_1767948086547.md) (1.8 KB)
 - [PROPOSAL_AnomalyDetector_1767944249421.md](PROPOSAL_AnomalyDetector_1767944249421.md) (1.5 KB)
 - [PROPOSAL_CybersecuritySentinel_1767946378196.md](PROPOSAL_CybersecuritySentinel_1767946378196.md) (1.8 KB)
 - [PROPOSAL_DataSecuritySentinel_1767944266496.md](PROPOSAL_DataSecuritySentinel_1767944266496.md) (1.2 KB)
+- [PROPOSAL_PredictiveFailureAnalyst_1767971319622.md](PROPOSAL_PredictiveFailureAnalyst_1767971319622.md) (1.0 KB)
 - [PROPOSAL_PredictiveMaintenanceAgent_1767946382091.md](PROPOSAL_PredictiveMaintenanceAgent_1767946382091.md) (1.4 KB)
 - [PROPOSAL_PredictiveSecurityAgent_1767948086167.md](PROPOSAL_PredictiveSecurityAgent_1767948086167.md) (1.1 KB)
 - [PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md](PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md) (1.1 KB)
@@ -239,6 +248,8 @@ Updated: 2026-01-09T15:08:16.731Z
 - [PROPOSAL_ProactiveSecurityAnalyzer_1767946039971.md](PROPOSAL_ProactiveSecurityAnalyzer_1767946039971.md) (1.2 KB)
 - [PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md](PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md) (0.9 KB)
 - [PROPOSAL_Risk_Mitigator_1767904757575.md](PROPOSAL_Risk_Mitigator_1767904757575.md) (0.8 KB)
+- [PROPOSAL_SecurityPatchingAgent_1767971320461.md](PROPOSAL_SecurityPatchingAgent_1767971320461.md) (1.4 KB)
+- [PROPOSAL_Security_Auditor_AI_1767971360034.md](PROPOSAL_Security_Auditor_AI_1767971360034.md) (1.4 KB)
 - [PROPOSAL_ThreatIntelligenceAgent_1767948096214.md](PROPOSAL_ThreatIntelligenceAgent_1767948096214.md) (1.3 KB)
 - [SECURITY_PROTOCOLS.md](SECURITY_PROTOCOLS.md) (2.4 KB)
 - [SETUP_KEYS.md](SETUP_KEYS.md) (1.6 KB)
@@ -255,12 +266,12 @@ Updated: 2026-01-09T15:08:16.731Z
 - [PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md) (0.9 KB)
 - [PROPOSAL_Threat_Anticipator_1767888167483.md](_ARCHIVE/proposals_reviewed/PROPOSAL_Threat_Anticipator_1767888167483.md) (1.1 KB)
 - [benchmark_browser.js](benchmark_browser.js) (4.3 KB)
-- [boot_orchestrator.js](boot_orchestrator.js) (3.8 KB)
+- [boot_orchestrator.js](boot_orchestrator.js) (4.3 KB)
 - [check_env_keys.js](check_env_keys.js) (0.5 KB)
 - [check_keys.js](check_keys.js) (0.3 KB)
 - [check_vps.js](check_vps.js) (0.7 KB)
 - [deploy_local.js](deploy_local.js) (2.9 KB)
-- [deploy_vps.js](deploy_vps.js) (6.0 KB)
+- [deploy_vps.js](deploy_vps.js) (5.5 KB)
 - [diagnose_ftp.js](diagnose_ftp.js) (2.1 KB)
 - [diagnostic_2026-01-06.md](diagnostic_2026-01-06.md) (0.9 KB)
 - [diagnostic_2026-01-07.md](diagnostic_2026-01-07.md) (0.8 KB)

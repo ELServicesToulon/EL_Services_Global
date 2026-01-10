@@ -192,3 +192,14 @@ Ce fichier sert de mémoire persistante pour le projet. Il permet à l'agent (et
 - ...
 
 ---
+
+### 2026-01-10 - Nouvelle Session
+**Objectif**: Démarrage automatique du système (Boot)
+**Actions**:
+- [ ] (À remplir par l'agent/dev)
+**Décisions**:
+- ...
+**Prochaines Étapes**:
+- ...
+
+---

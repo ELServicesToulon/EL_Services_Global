@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-01-09T15:08:16.696Z",
+  "timestamp": "2026-01-10T08:06:55.489Z",
   "files": [
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/knowledge_base.json",
       "name": "knowledge_base.json",
-      "size": 8387,
+      "size": 9252,
       "relative": "Advisors_Memory/knowledge_base.json",
       "contentSnippet": "{\n  \"error_patterns\": {\n    \"SEED_ENTRY_TEST\": {\n      \"fix\": \"This is a test entry to validate the Shared Knowledge system.\",\n      \"confidence\": 1,\n      \"count\": 1,\n      \"firstSeen\": \"2026-01-08T00:00:00.000Z\"\n    },\n    \"🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analys\": {\n      \"fix\": \"Il faut investiguer l'application Livreur pour déterminer la cause du timeout. Voici quelques pistes et solutions : \\n\\n1. **Vérifier la disponibilité de l'application Livreur:**\\n   - Utilisez `curl` pour tester si l'application Livreur répond :\\n     ```bash\\n     curl -I -m 10 -w \\\"%{http_code}\\\\n\\\" http://<adresse_ip_livreur>:<port>/healthcheck  # Remplace <adresse_ip_livreur> et <port> par les valeurs correctes\\n     ```\\n     - Si vous obtenez un code d'erreur (5xx) ou un timeout, l'application Livreur a un problème.\\n\\n2. **Redémarrer l'application Livreur (solution temporaire):**\\n   - Si vous utilisez systemd :\\n     ```bash\\n     sudo systemctl restart livreur.service  # Remplace livreur.service par le nom correct du service\\n     ```\\n   - Si vous utilisez Docker :\\n     ```bash\\n     docker restart <nom_du_container_livreur> # Remplace <nom_du_container_livreur> par le nom du container\\n     ```\\n\\n3. **Augmenter le timeout (solution palliative):**\\n   - Si l'application Livreur prend du temps à répondre, augmentez le timeout dans l'application appelante (probablement celle qui demande l'analyse).\\n   - Exemple (si c'est une requête HTTP avec une librairie comme `axios` en JavaScript):\\n     ```javascript\\n     axios.get('http://<adresse_ip_livreur>:<port>/api/data', { timeout: 30000 }); // Augmente le timeout à 30 secondes\\n     ```\\n     **Attention :** Augmenter le timeout ne résout pas le problème de fond. Il faut identifier la cause de la lenteur de l'application Livreur.\\n\\n4. **Analyser les logs de l'application Livreur:**\\n   - Les logs de l'application Livreur peuvent contenir des informations sur la cause du problème (erreurs, slow queries, etc.).\\n   - Localisez les logs et analysez-les attentivement.\\n\\n5. **Vérifier la charge du serveur hébergeant l'application Livreur:**\\n   - Utilisez des outils comme `top`, `htop`, ou `vmstat` pour surveiller la CPU, la mémoire et l'I/O du serveur.\\n   - Si le serveur est surchargé, il faut identifier la cause de la surcharge et prendre des mesures pour la réduire.\\n\\nAprès avoir effectué ces vérifications, vous devriez avoir une meilleure idée de la cause du problème et pouvoir implémenter une solution plus durable.\","
     },
@@ -18,7 +18,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agency_Architect.js",
       "name": "Agency_Architect.js",
-      "size": 3227,
+      "size": 3262,
       "relative": "Agents_Modules/Agency_Architect.js",
       "contentSnippet": "/**\n * @file Agency_Architect.js\n * @description \"L'Aiguilleur Orchestrateur\".\n * Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst fs = require('fs');\nconst path = require('path');\n",
       "description": "@description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow."
@@ -26,7 +26,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agent_Base.js",
       "name": "Agent_Base.js",
-      "size": 4691,
+      "size": 6392,
       "relative": "Agents_Modules/Agent_Base.js",
       "contentSnippet": "/**\n * @file Agent_Base.js\n * @description Classe de base pour tous les agents.\n * Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n */\n\nconst axios = require('axios');\nconst fs = require('fs');\nconst Vault = require('./Vault');\nconst SharedKnowledge = require('./Shared_Knowledge'); // COGNITIVE UPGRADE",
       "description": "@description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade."
@@ -80,6 +80,14 @@
       "description": "@description Manages a persistent Chromium browser server for agents. Agents can connect via WebSocket endpoint for ~27% faster page loads."
     },
     {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Caporal_Agent.js",
+      "name": "Caporal_Agent.js",
+      "size": 4870,
+      "relative": "Agents_Modules/Caporal_Agent.js",
+      "contentSnippet": "/**\n * Caporal Agent - Dell Command Relay\n * \n * This agent runs on the Dell, polls the VPS for commands,\n * and executes them locally using Gemini 3 Pro Preview intelligence.\n */\n\nconst path = require('path');\nconst { exec } = require('child_process');\n",
+      "description": "Caporal Agent - Dell Command Relay This agent runs on the Dell, polls the VPS for commands, and executes them locally using Gemini 3 Pro Preview intelligence."
+    },
+    {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Chat_Agent.js",
       "name": "Chat_Agent.js",
       "size": 5003,
@@ -90,7 +98,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Chief_Advisor_Agent.js",
       "name": "Chief_Advisor_Agent.js",
-      "size": 4384,
+      "size": 7088,
       "relative": "Agents_Modules/Chief_Advisor_Agent.js",
       "contentSnippet": "/**\n * @file Chief_Advisor_Agent.js\n * @description \"Le Chef de Projet / Adjoint\" - Agent central IA (Gemini).\n * Version 3.0 : Mémoire Dynamique d'Expérience.\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst fs = require('fs');\nconst path = require('path');\n",
       "description": "@description \"Le Chef de Projet / Adjoint\" - Agent central IA (Gemini). Version 3.0 : Mémoire Dynamique d'Expérience."
@@ -110,6 +118,13 @@
       "relative": "Agents_Modules/Deployment_Agent.js",
       "contentSnippet": "/**\n * @file Deployment_Agent.js\n * @description Agent responsible for Continuous Deployment (CD).\n * Monitors 'git status' and triggers 'deploy_launch_v2.js' if changes are detected.\n */\n\nconst { exec } = require('child_process');\nconst path = require('path');\n// fs removed (unused)\n",
       "description": "@description Agent responsible for Continuous Deployment (CD). Monitors 'git status' and triggers 'deploy_launch_v2.js' if changes are detected."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Disposable_Agent.js",
+      "name": "Disposable_Agent.js",
+      "size": 1513,
+      "relative": "Agents_Modules/Disposable_Agent.js",
+      "contentSnippet": "const AgentBase = require('./Agent_Base');\n\nclass Disposable_Agent extends AgentBase {\n    constructor(workerId = 1) {\n        super(`Disposable_Worker_${workerId}`);\n        this.workerId = workerId;\n    }\n\n    async run() {\n        this.log(`🚀 Disposable Worker ${this.workerId} activated on ${require('os').hostname()}.`);"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Drive_Manager.js",
@@ -266,7 +281,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Security_Agent.js",
       "name": "Security_Agent.js",
-      "size": 9016,
+      "size": 9051,
       "relative": "Agents_Modules/Security_Agent.js",
       "contentSnippet": "/**\n * @file Security_Agent.js\n * @description Agent de sécurité proactif.\n * Scanne le code pour détecter les secrets exposés, les déplace vers le Vault (.env)\n * et refactorise le code automatiquement.\n * \n * Version 2.0.0 : Hérite de Agent_Base + Intégration Gemini.\n */\n\nconst fs = require('fs');",
       "description": "@description Agent de sécurité proactif. Scanne le code pour détecter les secrets exposés, les déplace vers le Vault (.env) et refactorise le code automatiquement. Version 2.0.0 : Hérite de Agent_Base + Intégration Gemini."
@@ -306,7 +321,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/fim_baseline.json",
       "name": "fim_baseline.json",
-      "size": 7219,
+      "size": 7432,
       "relative": "Agents_Modules/fim_baseline.json",
       "contentSnippet": "{\n  \"Agents_Modules/Agency_Architect.js\": \"acf1f744946cd6d392048c6c6e4439223533fca2bd0a2e0e3bf4e457b7475ffb\",\n  \"Agents_Modules/Agent_Base.js\": \"b3d8fc5efebbefd64b5f41eb798a71bdd843d83c40f2c0b87a972c6be71df219\",\n  \"Agents_Modules/Agent_Connector.js\": \"d34febb4349ecf92872a85706caf9be9db4ce233bd945b07edc9a47fa6e62fee\",\n  \"Agents_Modules/Agent_Fixer.js\": \"7d3773e15948afa7aa3e1eff27e74bd2279f3ef249a28defee2245791d0ea091\",\n  \"Agents_Modules/Agent_Marketing.js\": \"5e09386ccfb1b9c77f02fd1ad839ea8ad3203f3c0d0a8c1d5a747bbae2f8c77f\",\n  \"Agents_Modules/Archive_Keeper.js\": \"5c654d52c65b42f4b0ce02ffca6b729dcd90362cfa732b1b262efcda61b722c3\",\n  \"Agents_Modules/Browser_Server.js\": \"17b18d773a628d78c3ec7de3c5ed35c5215e6d4be32370252c78909010b1992d\",\n  \"Agents_Modules/Chat_Agent.js\": \"33a47042934af06ba71f1b0bf13c29e3c6c12e4baa1a56cd4ce92e2252cb0747\",\n  \"Agents_Modules/Chief_Advisor_Agent.js\": \"782080b858dacb5a7807624ad6c12ed5cc8c948f500f46b6a71a9d54c618718c\","
     },
@@ -343,7 +358,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Dashboard_Server.js",
       "name": "Dashboard_Server.js",
-      "size": 4745,
+      "size": 6240,
       "relative": "Dashboard_Server.js",
       "contentSnippet": "/**\n * @file Dashboard_Server.js\n * @description Serveur API léger pour le Dashboard SuperAdmin.\n * Il expose l'état des agents, les logs et les conseils de l'Adjoint.\n * Documentation API disponible sur /api-docs\n */\n\nconst express = require('express');\nconst cors = require('cors');\nconst fs = require('fs');",
       "description": "@description Serveur API léger pour le Dashboard SuperAdmin. Il expose l'état des agents, les logs et les conseils de l'Adjoint. Documentation API disponible sur /api-docs"
@@ -365,16 +380,16 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_ARCHITECTURE.md",
       "name": "PROJECT_ARCHITECTURE.md",
-      "size": 20337,
+      "size": 21161,
       "relative": "PROJECT_ARCHITECTURE.md",
-      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-09T15:07:37.020Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
+      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-10T08:06:22.820Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_MAP.json",
       "name": "PROJECT_MAP.json",
-      "size": 110266,
+      "size": 116106,
       "relative": "PROJECT_MAP.json",
-      "contentSnippet": "{\n  \"timestamp\": \"2026-01-09T15:07:36.984Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/knowledge_base.json\",\n      \"name\": \"knowledge_base.json\",\n      \"size\": 8387,\n      \"relative\": \"Advisors_Memory/knowledge_base.json\",\n      \"contentSnippet\": \"{\\n  \\\"error_patterns\\\": {\\n    \\\"SEED_ENTRY_TEST\\\": {\\n      \\\"fix\\\": \\\"This is a test entry to validate the Shared Knowledge system.\\\",\\n      \\\"confidence\\\": 1,\\n      \\\"count\\\": 1,\\n      \\\"firstSeen\\\": \\\"2026-01-08T00:00:00.000Z\\\"\\n    },\\n    \\\"🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analys\\\": {\\n      \\\"fix\\\": \\\"Il faut investiguer l'application Livreur pour déterminer la cause du timeout. Voici quelques pistes et solutions : \\\\n\\\\n1. **Vérifier la disponibilité de l'application Livreur:**\\\\n   - Utilisez `curl` pour tester si l'application Livreur répond :\\\\n     ```bash\\\\n     curl -I -m 10 -w \\\\\\\"%{http_code}\\\\\\\\n\\\\\\\" http://<adresse_ip_livreur>:<port>/healthcheck  # Remplace <adresse_ip_livreur> et <port> par les valeurs correctes\\\\n     ```\\\\n     - Si vous obtenez un code d'erreur (5xx) ou un timeout, l'application Livreur a un problème.\\\\n\\\\n2. **Redémarrer l'application Livreur (solution temporaire):**\\\\n   - Si vous utilisez systemd :\\\\n     ```bash\\\\n     sudo systemctl restart livreur.service  # Remplace livreur.service par le nom correct du service\\\\n     ```\\\\n   - Si vous utilisez Docker :\\\\n     ```bash\\\\n     docker restart <nom_du_container_livreur> # Remplace <nom_du_container_livreur> par le nom du container\\\\n     ```\\\\n\\\\n3. **Augmenter le timeout (solution palliative):**\\\\n   - Si l'application Livreur prend du temps à répondre, augmentez le timeout dans l'application appelante (probablement celle qui demande l'analyse).\\\\n   - Exemple (si c'est une requête HTTP avec une librairie comme `axios` en JavaScript):\\\\n     ```javascript\\\\n     axios.get('http://<adresse_ip_livreur>:<port>/api/data', { timeout: 30000 }); // Augmente le timeout à 30 secondes\\\\n     ```\\\\n     **Attention :** Augmenter le timeout ne résout pas le problème de fond. Il faut identifier la cause de la lenteur de l'application Livreur.\\\\n\\\\n4. **Analyser les logs de l'application Livreur:**\\\\n   - Les logs de l'application Livreur peuvent contenir des informations sur la cause du problème (erreurs, slow queries, etc.).\\\\n   - Localisez les logs et analysez-les attentivement.\\\\n\\\\n5. **Vérifier la charge du serveur hébergeant l'application Livreur:**\\\\n   - Utilisez des outils comme `top`, `htop`, ou `vmstat` pour surveiller la CPU, la mémoire et l'I/O du serveur.\\\\n   - Si le serveur est surchargé, il faut identifier la cause de la surcharge et prendre des mesures pour la réduire.\\\\n\\\\nAprès avoir effectué ces vérifications, vous devriez avoir une meilleure idée de la cause du problème et pouvoir implémenter une solution plus durable.\\\",\"\n    },"
+      "contentSnippet": "{\n  \"timestamp\": \"2026-01-10T08:06:22.744Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/knowledge_base.json\",\n      \"name\": \"knowledge_base.json\",\n      \"size\": 9252,\n      \"relative\": \"Advisors_Memory/knowledge_base.json\",\n      \"contentSnippet\": \"{\\n  \\\"error_patterns\\\": {\\n    \\\"SEED_ENTRY_TEST\\\": {\\n      \\\"fix\\\": \\\"This is a test entry to validate the Shared Knowledge system.\\\",\\n      \\\"confidence\\\": 1,\\n      \\\"count\\\": 1,\\n      \\\"firstSeen\\\": \\\"2026-01-08T00:00:00.000Z\\\"\\n    },\\n    \\\"🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analys\\\": {\\n      \\\"fix\\\": \\\"Il faut investiguer l'application Livreur pour déterminer la cause du timeout. Voici quelques pistes et solutions : \\\\n\\\\n1. **Vérifier la disponibilité de l'application Livreur:**\\\\n   - Utilisez `curl` pour tester si l'application Livreur répond :\\\\n     ```bash\\\\n     curl -I -m 10 -w \\\\\\\"%{http_code}\\\\\\\\n\\\\\\\" http://<adresse_ip_livreur>:<port>/healthcheck  # Remplace <adresse_ip_livreur> et <port> par les valeurs correctes\\\\n     ```\\\\n     - Si vous obtenez un code d'erreur (5xx) ou un timeout, l'application Livreur a un problème.\\\\n\\\\n2. **Redémarrer l'application Livreur (solution temporaire):**\\\\n   - Si vous utilisez systemd :\\\\n     ```bash\\\\n     sudo systemctl restart livreur.service  # Remplace livreur.service par le nom correct du service\\\\n     ```\\\\n   - Si vous utilisez Docker :\\\\n     ```bash\\\\n     docker restart <nom_du_container_livreur> # Remplace <nom_du_container_livreur> par le nom du container\\\\n     ```\\\\n\\\\n3. **Augmenter le timeout (solution palliative):**\\\\n   - Si l'application Livreur prend du temps à répondre, augmentez le timeout dans l'application appelante (probablement celle qui demande l'analyse).\\\\n   - Exemple (si c'est une requête HTTP avec une librairie comme `axios` en JavaScript):\\\\n     ```javascript\\\\n     axios.get('http://<adresse_ip_livreur>:<port>/api/data', { timeout: 30000 }); // Augmente le timeout à 30 secondes\\\\n     ```\\\\n     **Attention :** Augmenter le timeout ne résout pas le problème de fond. Il faut identifier la cause de la lenteur de l'application Livreur.\\\\n\\\\n4. **Analyser les logs de l'application Livreur:**\\\\n   - Les logs de l'application Livreur peuvent contenir des informations sur la cause du problème (erreurs, slow queries, etc.).\\\\n   - Localisez les logs et analysez-les attentivement.\\\\n\\\\n5. **Vérifier la charge du serveur hébergeant l'application Livreur:**\\\\n   - Utilisez des outils comme `top`, `htop`, ou `vmstat` pour surveiller la CPU, la mémoire et l'I/O du serveur.\\\\n   - Si le serveur est surchargé, il faut identifier la cause de la surcharge et prendre des mesures pour la réduire.\\\\n\\\\nAprès avoir effectué ces vérifications, vous devriez avoir une meilleure idée de la cause du problème et pouvoir implémenter une solution plus durable.\\\",\"\n    },"
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_AI Threat Anticipation & Mitigation Agent (ATAMA)_1767944249826.md",
@@ -410,6 +425,13 @@
       "size": 1244,
       "relative": "PROPOSAL_DataSecuritySentinel_1767944266496.md",
       "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : DataSecuritySentinel\n**But** : Agent de sécurité proactif pour la détection et la réponse automatisée aux menaces sur les données sensibles des agents et des flux logistiques.\n**Justification** : Une brèche de sécurité majeure pourrait paralyser l'ensemble de la flotte et entraîner des pertes financières massives et une atteinte à la réputation. Cet agent détecte et corrige les vulnérabilités en temps réel, limitant ainsi considérablement le risque d'attaques et assurant la continuité des opérations. La détection précoce et la réponse automatisée réduisent drastiquement le temps d'arrêt et les coûts associés à une violation de données, ayant un impact exponentiel sur la confiance des clients et les revenus.\n**Fonctions Clés** :\n- Analyse comportementale des flux de données (détection d'anomalies)\n- Détection de vulnérabilités dans les configurations des agents et du backend\n- Réponse automatisée aux incidents (isolation des agents compromis, application de correctifs)\n- Audit de sécurité continu et génération de rapports"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_PredictiveFailureAnalyst_1767971319622.md",
+      "name": "PROPOSAL_PredictiveFailureAnalyst_1767971319622.md",
+      "size": 1020,
+      "relative": "PROPOSAL_PredictiveFailureAnalyst_1767971319622.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : PredictiveFailureAnalyst\n**But** : Prédire les pannes des applications logistiques (Livreur, Tracking, etc.) et déclencher des actions correctives AVANT qu'elles ne se produisent.\n**Justification** : Réduit drastiquement les interruptions de service et les pertes financières associées, optimise la maintenance préventive et augmente la fiabilité globale du système de manière exponentielle en évitant les effets domino des pannes.\n**Fonctions Clés** :\n- Collecter et analyser les logs, métriques de performance et données d'utilisation de toutes les applications logistiques.\n- Identifier des patterns et anomalies prédictives de pannes potentielles en utilisant le Machine Learning.\n- Générer des alertes prédictives et suggérer des actions correctives (redémarrage, scaling, etc.).\n- Automatiser l'exécution des actions correctives pour minimiser les interruptions de service."
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_PredictiveMaintenanceAgent_1767946382091.md",
@@ -459,6 +481,20 @@
       "size": 844,
       "relative": "PROPOSAL_Risk_Mitigator_1767904757575.md",
       "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Risk_Mitigator\n**But** : Analyse proactive des risques potentiels dans la chaîne logistique et propose des stratégies d'atténuation.\n**Justification** : Réduit les pertes financières et améliore la fiabilité en anticipant les problèmes (retards, accidents, vols, conditions météorologiques) avant qu'ils ne surviennent, permettant une réaction rapide et des ajustements proactifs, conduisant à une réduction significative des coûts et une amélioration de la satisfaction client. L'impact est exponentiel car une interruption mineure peut rapidement se propager à toute la chaîne.\n**Fonctions Clés** :\n- Data Analysis\n- Predictive Modeling\n- Risk Assessment\n- Strategy Recommendation"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_SecurityPatchingAgent_1767971320461.md",
+      "name": "PROPOSAL_SecurityPatchingAgent_1767971320461.md",
+      "size": 1400,
+      "relative": "PROPOSAL_SecurityPatchingAgent_1767971320461.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : SecurityPatchingAgent\n**But** : Automatiser la découverte et l'application de correctifs de sécurité en temps réel pour l'ensemble de la flotte d'agents et des applications sous-jacentes.\n**Justification** : En réduisant considérablement le temps de réponse aux vulnérabilités nouvellement découvertes, cet agent minimise le risque d'exploitation et de compromission des données. L'automatisation de ce processus, qui est normalement manuel et chronophage, libère des ressources précieuses et garantit une posture de sécurité proactive, augmentant la fiabilité de l'ensemble du système et évitant potentiellement des pertes financières massives dues à des violations de données.\n**Fonctions Clés** :\n- Analyser les flux d'informations sur les vulnérabilités (CVE, etc.) en temps réel.\n- Identifier les composants logiciels vulnérables au sein de l'infrastructure EL Services.\n- Prioriser les correctifs en fonction de la criticité de la vulnérabilité et de l'impact potentiel.\n- Tester et appliquer automatiquement les correctifs dans un environnement de staging."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Security_Auditor_AI_1767971360034.md",
+      "name": "PROPOSAL_Security_Auditor_AI_1767971360034.md",
+      "size": 1453,
+      "relative": "PROPOSAL_Security_Auditor_AI_1767971360034.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Security_Auditor_AI\n**But** : Effectuer des audits de sécurité proactifs sur l'ensemble de l'infrastructure EL Services (applications, réseaux, données) pour identifier et corriger les vulnérabilités avant qu'elles ne soient exploitées.\n**Justification** : Une brèche de sécurité majeure pourrait entraîner des pertes financières considérables, une interruption de service et une atteinte à la réputation. Un audit automatisé et continu permet de réduire drastiquement les risques en identifiant et en corrigeant proactivement les vulnérabilités, diminuant ainsi la probabilité et l'impact potentiel d'une attaque. Cela assure la continuité des opérations et protège les revenus.\n**Fonctions Clés** :\n- Analyse statique du code source des applications (Livreur, etc.) à la recherche de vulnérabilités courantes (OWASP Top 10).\n- Tests de pénétration automatisés des API et des services web.\n- Analyse dynamique du comportement des applications en environnement de test (fuzzing, etc.).\n- Surveillance en temps réel des logs et des métriques de sécurité pour détecter les anomalies et les tentatives d'intrusion."
     },
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_ThreatIntelligenceAgent_1767948096214.md",
@@ -579,7 +615,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/boot_orchestrator.js",
       "name": "boot_orchestrator.js",
-      "size": 3886,
+      "size": 4353,
       "relative": "boot_orchestrator.js",
       "contentSnippet": "const { spawn, execSync, exec } = require('child_process');\nconst path = require('path');\nconst fs = require('fs');\nconst { main: runMaintenance } = require('./Maintenance_Agent');\nconst { main: runServiceCheck } = require('./Service_Agent');\nconst { sendRecapEmail } = require('./email_service');\n\nconst LOG_FILE = path.join(__dirname, 'boot_log.txt');\n\nfunction log(message) {"
     },
@@ -615,7 +651,7 @@
     {
       "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/deploy_vps.js",
       "name": "deploy_vps.js",
-      "size": 6110,
+      "size": 5623,
       "relative": "deploy_vps.js",
       "contentSnippet": "const { Client } = require('ssh2');\nconst fs = require('fs');\nconst path = require('path');\nconst Vault = require('./Agents_Modules/Vault'); // Ensure Vault is accessible\n\nconst config = {\n    host: Vault.get('VPS_HOST'),\n    port: 22,\n    username: Vault.get('VPS_USER'),\n    password: Vault.get('VPS_PASS')"
     },
@@ -839,10 +875,12 @@
     "Archive_Keeper",
     "Backend_Agent",
     "Browser_Server",
+    "Caporal_Agent",
     "Chat_Agent",
     "Chief_Advisor_Agent",
     "Cloudflare_Agent",
     "Deployment_Agent",
+    "Disposable_Agent",
     "Drive_Manager",
     "Frontend_Agent",
     "config",
@@ -968,6 +1006,17 @@
       "from": "ChiefAdvisorAgent",
       "to": "Agent_Base",
       "file": "Chief_Advisor_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Disposable_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Disposable_Agent",
+      "to": "AgentBase",
+      "file": "Disposable_Agent.js"
     },
     {
       "type": "dependency",
