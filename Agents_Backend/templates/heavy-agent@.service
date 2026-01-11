@@ -1,0 +1,47 @@
+[Unit]
+Description=Antigravity Heavy Agent Service: %i
+Documentation=file:///root/INFRASTRUCTURE.md
+After=network.target
+
+[Service]
+# --- CONFIGURATION UTILISATEUR ---
+# Adapter l'utilisateur si besoin (ex: antigravity, node, debian)
+User=root
+Group=root
+
+# --- ENVIRONNEMENT ---
+# Répertoire de travail standardisé : /opt/agents/<nom-agent>
+WorkingDirectory=/opt/agents/%i
+Environment=NODE_ENV=production
+
+# --- EXECUTION ---
+# Commande de lancement (doit être présente dans le dossier)
+# npm start, node index.js, ou script custom start.sh
+ExecStart=/usr/bin/npm start
+
+# --- ROBUSTESSE ---
+# Redémarrer si plantage
+Restart=on-failure
+# Attendre 30s avant redémarrage pour éviter boucle CPU
+RestartSec=30s
+# Limite de redémarrage (5 fois en 5 min)
+StartLimitInterval=300
+StartLimitBurst=5
+
+# --- LIMITES DE RESSOURCES (CRITIQUE) ---
+# Empêcher l'agent de tuer le VPS (OOM global)
+# Tue le processus si RAM > 80% de la RAM systeme
+MemoryMax=80%
+# Si possible, utilise le swap avant de tuer (si swap existe)
+MemorySwapMax=1G
+
+# Empêcher le gel du système (Garder 10% CPU pour SSH/System)
+CPUQuota=90%
+
+# --- LOGS ---
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agent-%i
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+# Configuration environment for Jules
+# See https://jules.google/docs/environment/
+
+setup:
+  - npm install
+  - npx playwright install --with-deps chromium
+  # Create mock .clasp.json files to prevent 'clasp status/push' errors in the sandbox
+  # The scriptId is a placeholder as credentials are not available in this environment.
+  - |
+    echo '{"scriptId":"mock-id-livreur","rootDir":"App_Livreur"}' > App_Livreur/.clasp.json
+
+    echo '{"scriptId":"mock-id-projet-els","rootDir":"Projet_ELS"}' > Projet_ELS/.clasp.json
+    # Reset the working tree to discard changes to package-lock.json caused by npm install
+    git reset --hard
+
+# Linting command to ensure code quality
+lint:
+  - npm run lint
+
+# Testing command using Playwright for frontend verification
+test:
+  - npm test

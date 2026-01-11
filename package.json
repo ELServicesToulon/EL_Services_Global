@@ -1,0 +1,49 @@
+{
+  "name": "el-services-global",
+  "version": "1.0.0",
+  "description": "Solution complète de gestion logistique pour EL Services (Livraison, Pharmacie, EHPAD).",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:landing": "playwright test landing.spec.js",
+    "test:booking": "playwright test booking.spec.js",
+    "test:auth": "playwright test auth.spec.js",
+    "test:legal": "playwright test legal.spec.js",
+    "test:api": "playwright test api-health.spec.js",
+    "test:report": "playwright show-report",
+    "lint": "eslint .",
+    "memory": "node agent_memory.js"
+  },
+  "keywords": [
+    "google-apps-script",
+    "logistics",
+    "delivery",
+    "healthcare"
+  ],
+  "author": "EL Services",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@google/clasp": "^2.5.0",
+    "@playwright/test": "^1.40.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/typography": "^0.5.19",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^8.56.0",
+    "eslint-plugin-googleappsscript": "^1.0.5",
+    "google-apps-script": "^1.0.0",
+    "playwright": "^1.57.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.10"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "basic-ftp": "^5.1.0",
+    "dotenv": "^17.2.3",
+    "ssh2": "^1.17.0"
+  }
+}

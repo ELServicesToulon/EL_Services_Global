@@ -1,0 +1,94 @@
+<style>
+    /* * Admin_CSS.html - Styles spécifiques pour l'interface d'administration
+ * Inclut les correctifs pour la compatibilité avec les navigateurs tactiles (Tesla).
+ */
+
+    /* ========================================================================= */
+    /* --- CORRECTION POUR COMPATIBILITÉ TACTILE / TESLA --- */
+    /* Forçage de la taille minimale des cibles tactiles pour plus de fiabilité */
+    button,
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select,
+    .admin-button,
+    /* Assumer une classe commune pour les boutons Admin */
+    .btn-admin {
+        min-height: 44px !important;
+        padding: 10px 15px !important;
+        box-sizing: border-box;
+    }
+
+    /* S'assurer que les menus déroulants natifs n'utilisent pas l'interface native qui bugue */
+    select {
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+    /* ========================================================================= */
+    /* --- Styles spécifiques à l'Admin (Exemples) --- */
+    #admin-dashboard {
+        padding: 20px;
+    }
+
+    .admin-card {
+        background: #e0f2f1;
+        /* Teinte claire de vert */
+        border: 1px solid #004d40;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .admin-section-title {
+        color: #004d40;
+        border-bottom: 2px solid #004d40;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+    }
+
+    .log-entry {
+        font-size: 0.85em;
+        padding: 5px 0;
+        border-bottom: 1px dotted #ccc;
+    }
+
+    /* --- RESPONSIVE ADMIN --- */
+    @media (max-width: 768px) {
+        #admin-dashboard {
+            padding: 10px;
+        }
+
+        .admin-card {
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Tables en défilement horizontal si débordement */
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Ajustements typographiques */
+        .admin-section-title {
+            font-size: 1.2em;
+        }
+
+        .log-entry {
+            font-size: 0.8em;
+        }
+
+        /* Boutons plus larges */
+        .admin-button,
+        .btn-admin {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+    }
+</style>

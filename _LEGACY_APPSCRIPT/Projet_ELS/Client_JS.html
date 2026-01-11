@@ -1,0 +1,940 @@
+<script>
+    /**
+     * =================================================================
+     * MODULE JAVASCRIPT - ESPACE CLIENT
+     * =================================================================
+     * Description: Gère l'interactivité de l'espace client, y compris
+     * la logique de connexion, le chargement des réservations et leur
+     * modification.
+     */
+
+    /**
+     * Journalise un avertissement avec le préfixe [ELS].
+     * @param {...*} args Contenu à journaliser.
+     */
+    function logWarn(...args) {
+        console.warn('[ELS]', ...args);
+    }
+
+    /**
+     * Journalise une erreur avec le préfixe [ELS].
+     * @param {...*} args Contenu à journaliser.
+     */
+    function logError(...args) {
+        console.error('[ELS]', ...args);
+    }
+
+    function formatDateLongueFr(date, options = {}) {
+        if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+        const baseOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const opts = Object.assign({}, baseOptions, options);
+        const formatted = date.toLocaleDateString('fr-FR', opts);
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }
+
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\'': '&apos;', '"': '&quot;' }[c]));
+    }
+
+    function telechargerPdfDepuisBase64(base64Data, fileName, mimeType) {
+        if (!base64Data) return;
+        const safeName = fileName || 'devis.pdf';
+        const type = mimeType || 'application/pdf';
+        try {
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = safeName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Echec téléchargement devis PDF', err);
+            try {
+                window.open(`data:${type};base64,${base64Data}`, '_blank');
+            } catch (_ignored) { }
+        }
+    }
+
+    const CLE_LOCALSTORAGE_CLIENT = 'sessionClientELServices';
+    const CLIENT_SESSION_OPAQUE_ID_ENABLED = false; // Fix: Hardcoded
+    const CLIENT_SESSION_TTL_HOURS = 24;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Références aux éléments du DOM ---
+        const indicateurChargement = document.getElementById('indicateur-chargement');
+        const contenuReservations = document.getElementById('contenu-reservations');
+        const modale = document.getElementById('modale-modification');
+        const contenuModale = document.getElementById('contenu-modale-wrapper');
+        const btnFermerModale = document.getElementById('btn-fermer-modale');
+        const formulaireConnexionClient = document.getElementById('formulaire-connexion-client');
+        const emailConnexionInput = document.getElementById('email-connexion');
+        const erreurConnexionDiv = document.getElementById('erreur-connexion');
+        const listeQuestions = document.getElementById('liste-questions');
+        const formQuestion = document.getElementById('form-question');
+        const questionTexte = document.getElementById('question-texte');
+        const btnContactSupport = document.getElementById('btn-contact-support');
+        let linkEmail = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.email) || '';
+        let linkExp = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.exp) || '';
+        let linkSig = (window.CLIENT_PARAMS && window.CLIENT_PARAMS.sig) || '';
+        let signatureExp = linkExp || '';
+        let signatureSig = linkSig || '';
+
+        // --- Variable d'état pour stocker les réservations chargées ---
+        let toutesLesReservationsClient = [];
+        let toutesLesFacturesClient = [];
+        let emailClientCourant = linkEmail || '';
+        let removeFocusTrap = () => { };
+
+        if (btnContactSupport) {
+            const fallbackEmail = btnContactSupport.dataset.supportEmail || '';
+            const ensureMailtoHref = () => {
+                const currentHref = btnContactSupport.getAttribute('href') || '';
+                if ((!currentHref || currentHref === '#') && fallbackEmail) {
+                    const mailto = `mailto:${fallbackEmail}`;
+                    btnContactSupport.setAttribute('href', mailto);
+                    return mailto;
+                }
+                return currentHref;
+            };
+
+            ensureMailtoHref();
+
+            btnContactSupport.addEventListener('click', (event) => {
+                const href = ensureMailtoHref();
+                const supportEmail = fallbackEmail || href.replace(/^mailto:/i, '').trim();
+                if (!supportEmail) {
+                    event.preventDefault();
+                    if (typeof afficherNotification === 'function') {
+                        afficherNotification("Adresse du support indisponible pour le moment.", "erreur");
+                    }
+                    return;
+                }
+
+                const hasNavigator = typeof navigator !== 'undefined';
+                const clipboardSupported = Boolean(window.isSecureContext && hasNavigator && navigator.clipboard && typeof navigator.clipboard.writeText === 'function');
+                if (clipboardSupported) {
+                    navigator.clipboard.writeText(supportEmail)
+                        .then(() => {
+                            if (typeof afficherNotification === 'function') {
+                                afficherNotification('Adresse du support copiée dans le presse-papiers.', 'info');
+                            }
+                        })
+                        .catch((err) => {
+                            logWarn('Impossible de copier l’adresse du support', err);
+                            if (typeof afficherNotification === 'function') {
+                                afficherNotification(`Vous pouvez nous écrire à ${supportEmail}.`, 'info');
+                            }
+                        });
+                } else if (typeof afficherNotification === 'function') {
+                    afficherNotification(`Vous pouvez nous écrire à ${supportEmail}.`, 'info');
+                }
+            });
+        }
+
+        function afficherVueConnexion(prefilledEmail, keepError) {
+            document.getElementById('conteneur-app').classList.add('hidden');
+            document.getElementById('non-connecte').classList.remove('hidden');
+            if (prefilledEmail && emailConnexionInput) {
+                emailConnexionInput.value = prefilledEmail;
+            }
+            if (!keepError && erreurConnexionDiv) {
+                erreurConnexionDiv.textContent = '';
+                erreurConnexionDiv.classList.add('hidden');
+            }
+            basculerIndicateurChargement(false);
+        }
+
+        function recupererSessionLocale() {
+            try {
+                const brute = localStorage.getItem(CLE_LOCALSTORAGE_CLIENT);
+                if (!brute) return null;
+                const session = JSON.parse(brute);
+                if (CLIENT_SESSION_TTL_HOURS && session && session.ts) {
+                    const ageHeures = (Date.now() - session.ts) / 36e5;
+                    if (ageHeures > CLIENT_SESSION_TTL_HOURS) {
+                        localStorage.removeItem(CLE_LOCALSTORAGE_CLIENT);
+                        return null;
+                    }
+                }
+                return session;
+            } catch (err) {
+                logWarn('Session client locale invalide, reinitialisation.', err);
+                localStorage.removeItem(CLE_LOCALSTORAGE_CLIENT);
+                return null;
+            }
+        }
+
+        function connecterDepuisSession(session) {
+            if (!session) {
+                afficherVueConnexion();
+                return;
+            }
+            if (CLIENT_SESSION_OPAQUE_ID_ENABLED && session.token) {
+                basculerIndicateurChargement(true);
+                google.script.run
+                    .withSuccessHandler(client => {
+                        if (client && client.email) {
+                            if (emailConnexionInput) {
+                                emailConnexionInput.value = client.email;
+                            }
+                            validerEtChargerClient(client.email);
+                        } else {
+                            afficherVueConnexion();
+                        }
+                    })
+                    .withFailureHandler(err => {
+                        logWarn('Impossible de recuperer le client via son identifiant opaque.', err);
+                        afficherVueConnexion();
+                    })
+                    .rechercherClientParIdentifiant(session.token);
+                return;
+            }
+            if (session.email) {
+                if (emailConnexionInput) {
+                    emailConnexionInput.value = session.email;
+                }
+                validerEtChargerClient(session.email);
+                return;
+            }
+            afficherVueConnexion();
+        }
+
+        /**
+         * Initialise l'espace client.
+         */
+        function initialiser() {
+            gererAffichageInitial();
+
+            if (btnFermerModale) {
+                btnFermerModale.addEventListener('click', () => {
+                    removeFocusTrap();
+                    modale.classList.add('hidden');
+                });
+            }
+
+            if (formulaireConnexionClient) {
+                formulaireConnexionClient.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = emailConnexionInput.value.trim();
+                    if (email) {
+                        // Bypass OTP/Link : Direct Connection
+                        const unlock = lockButton(formulaireConnexionClient.querySelector('button[type="submit"]'));
+                        // Simulate link params for compatibility
+                        linkEmail = email;
+                        // We can leave exp/sig empty as CLIENT_PORTAL_SIGNED_LINKS is false
+                        validerEtChargerClient(email, unlock);
+                    }
+                });
+            }
+
+            if (formQuestion) {
+                formQuestion.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const unlock = lockButton(formQuestion.querySelector('button[type="submit"]'));
+                    posterQuestion(unlock);
+                });
+            }
+        }
+
+        /**
+         * Gère l'affichage initial en fonction des paramètres de l'URL.
+         */
+        function gererAffichageInitial() {
+            if (linkEmail) {
+                if (emailConnexionInput) {
+                    emailConnexionInput.value = linkEmail;
+                }
+                validerEtChargerClient(linkEmail);
+                return;
+            }
+            const sessionLocale = recupererSessionLocale();
+            if (sessionLocale) {
+                connecterDepuisSession(sessionLocale);
+                return;
+            }
+            afficherVueConnexion();
+        }
+
+        /**
+         * Valide l'email du client auprès du serveur, puis charge ses réservations.
+         * @param {string} email L'email à valider.
+         */
+        /**
+         * Valide l'email du client auprès du serveur, puis charge ses réservations.
+         * @param {string} email L'email à valider.
+         */
+        function validerEtChargerClient(email, unlock) {
+            if (!linkExp || !linkSig || email !== linkEmail) {
+                signatureExp = '';
+                signatureSig = '';
+            }
+            basculerIndicateurChargement(true);
+
+            // --- OPTIMISATION : Appel unique pour tout charger ---
+            google.script.run
+                .withSuccessHandler(reponse => {
+                    if (reponse.success) {
+                        if (erreurConnexionDiv) {
+                            erreurConnexionDiv.textContent = '';
+                            erreurConnexionDiv.classList.add('hidden');
+                        }
+                        // 1. Infos Client
+                        document.getElementById('message-bienvenue-client').textContent = `Bienvenue, ${reponse.client.nom}`;
+                        document.getElementById('conteneur-app').classList.remove('hidden');
+                        document.getElementById('non-connecte').classList.add('hidden');
+                        emailClientCourant = email;
+
+                        // 2. Réservations
+                        toutesLesReservationsClient = reponse.reservations || [];
+                        afficherReservations(toutesLesReservationsClient);
+
+                        // 3. CA
+                        const caDiv = document.getElementById('ca-client');
+                        if (caDiv && reponse.ca !== undefined) {
+                            caDiv.textContent = `CA en cours\u00A0: ${Number(reponse.ca).toFixed(2)}\u00A0€`;
+                        }
+
+                        // 4. Factures
+                        toutesLesFacturesClient = reponse.factures || [];
+                        afficherFactures(toutesLesFacturesClient);
+
+                        // 5. Questions
+                        if (typeof PRO_QA_ENABLED !== 'undefined' && PRO_QA_ENABLED && reponse.questions) {
+                            chargerQuestionsDepuisDonnees(reponse.questions);
+                        }
+
+                    } else {
+                        afficherErreurConnexion(reponse.error);
+                        afficherVueConnexion(email, true);
+                    }
+                    basculerIndicateurChargement(false);
+                    unlock && unlock();
+                })
+                .withFailureHandler(err => {
+                    afficherErreurConnexion("Une erreur de communication est survenue.");
+                    afficherVueConnexion(email, true);
+                    basculerIndicateurChargement(false);
+                    unlock && unlock();
+                })
+                .chargerDonneesInitialesClient(email, signatureExp, signatureSig);
+        }
+
+        /**
+         * Charge les réservations pour un client donné.
+         * @param {string} email L'email du client.
+         */
+        function chargerReservationsClient(email) {
+            google.script.run
+                .withSuccessHandler(reponse => {
+                    if (reponse.success) {
+                        toutesLesReservationsClient = reponse.reservations;
+                        afficherReservations(toutesLesReservationsClient);
+                        google.script.run
+                            .withSuccessHandler(total => {
+                                const caDiv = document.getElementById('ca-client');
+                                if (caDiv) {
+                                    caDiv.textContent = `CA en cours\u00A0: ${total.toFixed(2)}\u00A0€`;
+                                }
+                            })
+                            .withFailureHandler(err => logError(err))
+                            .calculerCAEnCoursClient(email, signatureExp, signatureSig);
+                    } else {
+                        afficherErreur(reponse.error);
+                    }
+                    basculerIndicateurChargement(false);
+                })
+                .withFailureHandler(err => {
+                    afficherErreur(err);
+                    basculerIndicateurChargement(false);
+                })
+                .obtenirReservationsClient(email, signatureExp, signatureSig);
+        }
+
+        function demanderLienConnexion(email, unlock) {
+            basculerIndicateurChargement(true);
+            if (erreurConnexionDiv) {
+                erreurConnexionDiv.classList.add('hidden');
+                erreurConnexionDiv.textContent = '';
+            }
+
+            google.script.run
+                .withSuccessHandler(response => {
+                    basculerIndicateurChargement(false);
+                    unlock && unlock();
+
+                    if (response.success) {
+                        if (response.mode === 'OTP') {
+                            afficherFormulaireOTP(email);
+                        } else {
+                            if (formulaireConnexionClient) {
+                                formulaireConnexionClient.innerHTML = `
+                            <div class="message-succes" style="text-align: center; padding: 20px;">
+                                <p style="font-size: 1.1em; margin-bottom: 10px;"><strong>Lien envoyé !</strong></p>
+                                <p>Veuillez consulter votre boîte de réception (${escapeHTML(email)})<br>pour accéder à votre espace client.</p>
+                                <p class="u-mt-10" style="font-size: 0.9em; color: #666;">Le lien est valide pendant 7 jours.</p>
+                                <button class="btn btn-secondaire btn--client u-mt-15" onclick="location.reload()">Retour</button>
+                            </div>
+                        `;
+                            }
+                        }
+                    } else {
+                        afficherErreurConnexion(response.error || "Impossible d'envoyer le lien.");
+                    }
+                })
+                .withFailureHandler(err => {
+                    basculerIndicateurChargement(false);
+                    unlock && unlock();
+                    afficherErreurConnexion("Erreur de communication.");
+                    logError(err);
+                })
+                .envoyerLienEspaceClient(email);
+        }
+
+        function afficherFormulaireOTP(email) {
+            const container = document.getElementById('non-connecte');
+            if (!container) return;
+
+            container.innerHTML = `
+                <h2>Vérification</h2>
+                <p>Un code à 6 chiffres a été envoyé à <strong>${escapeHTML(email)}</strong>.</p>
+                <form id="form-otp" class="groupe-formulaire u-mt-20">
+                    <label for="input-otp">Code de connexion :</label>
+                    <input type="text" id="input-otp" class="champ-formulaire" placeholder="123456" required pattern="[0-9]*" inputmode="numeric" autocomplete="one-time-code" style="font-size: 1.5em; letter-spacing: 5px; text-align: center;">
+                    <div id="erreur-otp" class="message-erreur-connexion hidden"></div>
+                    <button type="submit" class="btn btn-primaire btn--client btn--client-full u-mt-15">Valider</button>
+                    <button type="button" class="btn btn-secondaire btn--client u-mt-10" onclick="location.reload()">Retour</button>
+                </form>
+             `;
+
+            const form = document.getElementById('form-otp');
+            const input = document.getElementById('input-otp');
+            if (input) input.focus();
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                validerCodeOTP(email, input.value.trim());
+            });
+        }
+
+        function validerCodeOTP(email, code) {
+            const btn = document.querySelector('#form-otp button[type="submit"]');
+            const errDiv = document.getElementById('erreur-otp');
+            if (errDiv) errDiv.classList.add('hidden');
+
+            const unlock = lockButton(btn);
+            basculerIndicateurChargement(true);
+
+            google.script.run
+                .withSuccessHandler(res => {
+                    basculerIndicateurChargement(false);
+                    unlock();
+
+                    if (res.success) {
+                        // Store session params implicitly by variables
+                        // Note: Client_JS.html uses 'linkExp', 'linkSig', 'emailClientCourant'
+                        // Update them for subsequent calls
+
+                        // We do NOT modify window.location to keep it SPA, 
+                        // but we rely on these vars being set for 'chargerDonneesInitialesClient'
+
+                        // Hack: Update the global variables expected by 'validerEtChargerClient'
+                        // Since 'validerEtChargerClient' uses arguments, we just call it.
+                        // But subsequent calls (like 'chargerReservationsClient') use 'signatureExp/Sig'.
+
+                        // Update globals defined at top of Client_JS.html (needs to be accessible)
+                        // In Client_JS, 'signatureExp' and 'signatureSig' are 'let'.
+
+                        // However, inside this scope (function), we can't easily reach them if they are module-scoped in specific way
+                        // But they are top-level inside 'DOMContentLoaded' callback? 
+                        // Ah, 'demanderLienConnexion' is inside 'initialiser', inside 'DOMContentLoaded'. 
+                        // So they capture the closure variables 'signatureExp', 'signatureSig'.
+
+                        signatureExp = res.exp;
+                        signatureSig = res.sig;
+                        emailClientCourant = res.email;
+
+                        // IMPORTANT: Update link parameters so validerEtChargerClient trusts them
+                        linkEmail = res.email;
+                        linkExp = res.exp;
+                        linkSig = res.sig;
+
+                        // Persist session if needed (optional for OTP?)
+                        // Usually we want persistence. Storing in localStorage allows reload.
+                        try {
+                            localStorage.setItem(CLE_LOCALSTORAGE_CLIENT, JSON.stringify({
+                                email: res.email,
+                                ts: Date.now(),
+                                // We don't have a token, but we have signature.
+                                // If we want to restore session, we need to save exp/sig OR handle session via token.
+                                // Current 'connecterDepuisSession' handles {email} but triggers 'validerEtChargerClient'.
+                                // But 'validerEtChargerClient' needs sig if enforced.
+                                // We should save exp/sig in localStorage if we want persistence.
+                                // But 'Client_JS' logic for 'recupererSessionLocale' only checks 'email' or 'token'.
+                                // It doesn't seem to restore sig/exp.
+                                // If CLIENT_PORTAL_SIGNED_LINKS is true, restoration from localStorage (just email) FAILs?
+                                // Let's check 'connecterDepuisSession'.
+                                // It calls 'validerEtChargerClient(session.email)'. 
+                                // 'validerEtChargerClient(email)' sets sig='' if email != linkEmail (URL params).
+                                // So reloading page with localStorage session FAILS if signed links are enforced!
+                                // Fix: Save sig/exp in localStorage too.
+                            }));
+                        } catch (e) { }
+
+                        validerEtChargerClient(res.email);
+                    } else {
+                        if (errDiv) {
+                            errDiv.textContent = res.error || 'Code invalide';
+                            errDiv.classList.remove('hidden');
+                        }
+                    }
+                })
+                .withFailureHandler(e => {
+                    basculerIndicateurChargement(false);
+                    unlock();
+                    if (errDiv) {
+                        errDiv.textContent = "Erreur technique: " + e.toString();
+                        errDiv.classList.remove('hidden');
+                    }
+                })
+                .verifierCodeClient(email, code);
+        }
+
+        /**
+         * Charge les factures pour un client donné.
+         */
+        function chargerFacturesClient(email) {
+            google.script.run
+                .withSuccessHandler(reponse => {
+                    if (reponse.success) {
+                        toutesLesFacturesClient = reponse.factures || [];
+                        afficherFactures(toutesLesFacturesClient);
+                    } else {
+                        afficherErreur(reponse.error);
+                    }
+                })
+                .withFailureHandler(afficherErreur)
+                .obtenirFacturesPourClient(email, signatureExp, signatureSig);
+        }
+
+        /**
+         * Affiche la liste des factures avec lien et action e-mail.
+         */
+        function afficherFactures(factures) {
+            const cont = document.getElementById('contenu-factures');
+            if (!cont) return;
+            renderText(cont, '');
+            if (!factures || factures.length === 0) {
+                renderMessage(cont, "Aucune facture disponible pour l\u2019instant.");
+                return;
+            }
+            const formatISODate = iso => {
+                if (!iso) return '';
+                const d = new Date(iso);
+                return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR');
+            };
+            const ul = document.createElement('ul');
+            ul.className = 'liste-factures';
+            factures.forEach(f => {
+                const li = document.createElement('li');
+                const numero = escapeHTML(f.numero);
+                const dateEmission = formatISODate(f.dateISO);
+                const periodeLabel = f.periode ? escapeHTML(f.periode) : '';
+                const periodeDebut = formatISODate(f.periodeStartISO);
+                const periodeFin = formatISODate(f.periodeEndISO);
+                const dueDate = formatISODate(f.dueDateISO);
+                const url = escapeHTML(f.url);
+
+                const ligneNumero = `Numéro : ${numero}${dateEmission ? ` — Date : ${escapeHTML(dateEmission)}` : ''}`;
+                let lignePeriode = '';
+                if (periodeLabel || (periodeDebut || periodeFin)) {
+                    if (periodeLabel && periodeDebut && periodeFin) {
+                        lignePeriode = `Période couverte : ${periodeLabel} (${escapeHTML(periodeDebut)} → ${escapeHTML(periodeFin)})`;
+                    } else if (periodeLabel) {
+                        lignePeriode = `Période couverte : ${periodeLabel}`;
+                    } else {
+                        const debutTxt = periodeDebut ? escapeHTML(periodeDebut) : '—';
+                        const finTxt = periodeFin ? escapeHTML(periodeFin) : '—';
+                        lignePeriode = `Période couverte : ${debutTxt} → ${finTxt}`;
+                    }
+                }
+                const ligneEcheance = dueDate ? `Échéance : ${escapeHTML(dueDate)}` : '';
+
+                renderHTML(li, `
+                <div class="facture-meta">
+                    <p><strong>Votre facture</strong></p>
+                    <p>${ligneNumero}</p>
+                    ${lignePeriode ? `<p>${lignePeriode}</p>` : ''}
+                    ${ligneEcheance ? `<p>${ligneEcheance}</p>` : ''}
+                </div>
+                <div class="facture-actions">
+                    <a class="btn btn-secondaire btn--client" href="${url}" target="_blank" rel="noopener">Télécharger</a>
+                    <button class="btn btn-primaire btn--client btn-mail-facture" data-numero="${numero}">Recevoir par e-mail</button>
+                </div>
+            `);
+                ul.appendChild(li);
+            });
+            cont.appendChild(ul);
+            cont.querySelectorAll('.btn-mail-facture').forEach(btn => {
+                btn.addEventListener('click', (e) => envoyerFactureParEmail(btn.dataset.numero, e.currentTarget));
+            });
+        }
+
+        function envoyerFactureParEmail(numero, btn) {
+            const email = emailClientCourant;
+            if (!email) return;
+            const unlock = lockButton(btn);
+            basculerIndicateurChargement(true);
+            google.script.run
+                .withSuccessHandler(reponse => {
+                    basculerIndicateurChargement(false);
+                    if (reponse.success) {
+                        afficherNotification('Facture envoyée par e-mail.');
+                    } else {
+                        afficherErreur(reponse.error || 'Envoi impossible.');
+                    }
+                    unlock();
+                })
+                .withFailureHandler(err => {
+                    afficherErreur(err);
+                    unlock();
+                })
+                .envoyerFactureClient(email, numero, signatureExp, signatureSig);
+        }
+
+        /**
+         * Affiche les questions depuis un tableau de données (optimisation).
+         */
+        function chargerQuestionsDepuisDonnees(qs) {
+            if (!listeQuestions) return;
+            renderText(listeQuestions, '');
+            if (qs && qs.length > 0) {
+                const html = qs.map(q => {
+                    const repHtml = q.reponses && q.reponses.length
+                        ? '<ul>' + q.reponses.map(r => `<li>${escapeHTML(r.auteur)}: ${escapeHTML(r.texte)}</li>`).join('') + '</ul>'
+                        : '';
+                    return `<div class="question-item"><p><strong>${escapeHTML(q.auteur)}:</strong> ${escapeHTML(q.question)}</p>${repHtml}</div>`;
+                }).join('');
+                renderHTML(listeQuestions, html);
+            } else {
+                renderMessage(listeQuestions, 'Aucune question pour le moment.');
+            }
+        }
+
+        /**
+         * Charge et affiche les questions du client (Mode legacy / mise à jour).
+         */
+        function chargerQuestions() {
+            if (!listeQuestions) return;
+            google.script.run
+                .withSuccessHandler(chargerQuestionsDepuisDonnees)
+                .withFailureHandler(afficherErreur)
+                .getQuestions(emailClientCourant, signatureExp, signatureSig);
+        }
+
+        function posterQuestion(unlock) {
+            if (!questionTexte) return;
+            const texte = questionTexte.value.trim();
+            if (!texte || !emailClientCourant) return;
+            basculerIndicateurChargement(true);
+            google.script.run
+                .withSuccessHandler(() => {
+                    questionTexte.value = '';
+                    chargerQuestions();
+                    basculerIndicateurChargement(false);
+                    unlock && unlock();
+                })
+                .withFailureHandler(err => {
+                    afficherErreur(err);
+                    unlock && unlock();
+                })
+                .addQuestion(texte, emailClientCourant, emailClientCourant, signatureExp, signatureSig);
+        }
+
+        function posterReponse(questionId, reponse) {
+            if (!questionId || !reponse || !emailClientCourant) return;
+            basculerIndicateurChargement(true);
+            const unlock = lockButton(document.querySelector(`#question-${questionId} button`));
+            google.script.run
+                .withSuccessHandler(() => {
+                    chargerQuestions();
+                    basculerIndicateurChargement(false);
+                    unlock();
+                })
+                .withFailureHandler(err => {
+                    afficherErreur(err);
+                    unlock();
+                })
+                .addAnswer(questionId, reponse, emailClientCourant, emailClientCourant, signatureExp, signatureSig);
+        }
+
+
+        /**
+         * Génère le HTML pour le suivi de livraison.
+         */
+        function genererHtmlSuivi(resa) {
+            if (!resa.tracking) return '';
+            const status = resa.tracking.status || 'Inconnu';
+            const dateObj = resa.tracking.lastUpdate ? new Date(resa.tracking.lastUpdate) : null;
+            const time = dateObj && !isNaN(dateObj.getTime()) ? dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+            let badgeClass = 'badge-info';
+            if (String(status).toLowerCase().includes('livr')) badgeClass = 'badge-success';
+            if (String(status).toLowerCase().includes('anomalie') || String(status).toLowerCase().includes('problème')) badgeClass = 'badge-error';
+
+            return `
+        <div class="tracking-info" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin:0"><strong>Suivi :</strong> <span class="badge ${badgeClass}">${escapeHTML(status)}</span> ${time ? `(${time})` : ''}</p>
+            ${resa.tracking.anomalie ? `<p class="error-text" style="margin:5px 0 0">Note: ${escapeHTML(resa.tracking.anomalie)}</p>` : ''}
+        </div>`;
+        }
+
+        /**
+         * Affiche les réservations dans le DOM.
+         * @param {Array<Object>} reservations La liste des réservations à afficher.
+         */
+        function afficherReservations(reservations) {
+            if (!contenuReservations) return;
+            renderText(contenuReservations, '');
+
+            if (reservations.length === 0) {
+                renderMessage(contenuReservations, "Vous n'avez aucune course à venir.");
+                return;
+            }
+
+            reservations.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+            let html = '';
+            const resResidents = reservations.filter(r => r && r.resident === true);
+            const resStandard = reservations.filter(r => r && !r.resident);
+            if (resResidents.length > 0) {
+                html += `<div class="carte"><h3>Courses résidents affiliés</h3>`;
+                resResidents.forEach(resa => {
+                    const dateDebut = new Date(resa.start);
+                    const dateFormatee = escapeHTML(formatDateLongueFr(dateDebut));
+                    const heureFormatee = escapeHTML(dateDebut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
+                    html += `
+                <div class="reservation-item" data-id="${escapeHTML(resa.id)}">
+                    <div class="reservation-details">
+                        <h4>${dateFormatee} à ${heureFormatee}</h4>
+                        <p><strong>Détails :</strong> ${escapeHTML(resa.details)}</p>
+                        <p><strong>Montant :</strong> ${escapeHTML(resa.amount.toFixed(2))} €</p>
+                        ${genererHtmlSuivi(resa)}
+                    </div>
+                    <div class="reservation-actions">
+                        <button class="btn btn-secondaire btn--client btn-deplacer">Déplacer</button>
+                    </div>
+                </div>`;
+                });
+                html += `</div>`;
+            }
+            resStandard.forEach(resa => {
+                const dateDebut = new Date(resa.start);
+                const dateFormatee = escapeHTML(formatDateLongueFr(dateDebut));
+                const heureFormatee = escapeHTML(dateDebut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
+                html += `
+                <div class="reservation-item" data-id="${escapeHTML(resa.id)}">
+                    <div class="reservation-details">
+                        <h4>${dateFormatee} à ${heureFormatee}</h4>
+                        <p><strong>Détails :</strong> ${escapeHTML(resa.details)}</p>
+                        <p><strong>Montant :</strong> ${escapeHTML(resa.amount.toFixed(2))} €</p>
+                        ${genererHtmlSuivi(resa)}
+                    </div>
+                    <div class="reservation-actions">
+                        <button class="btn btn-primaire btn--client btn-modifier-arrets">Modifier les arrêts</button>
+                        <button class="btn btn-secondaire btn--client btn-deplacer">Déplacer</button>
+                    </div>
+                </div>`;
+            });
+            renderHTML(contenuReservations, html);
+
+            document.querySelectorAll('.btn-modifier-arrets').forEach(btn => btn.addEventListener('click', (e) => gererModificationArrets(e.target.closest('.reservation-item').dataset.id)));
+            document.querySelectorAll('.btn-deplacer').forEach(btn => btn.addEventListener('click', (e) => gererDeplacement(e.target.closest('.reservation-item').dataset.id)));
+        }
+
+        /**
+         * Gère l'ouverture de la modale pour modifier les arrêts.
+         * @param {string} idReservation L'ID de la réservation.
+         */
+        function gererModificationArrets(idReservation) {
+            const resa = toutesLesReservationsClient.find(r => r.id === idReservation);
+            if (!resa || !contenuModale) return;
+
+            const matchTotal = resa.details.match(/(\d+)\s*arrêt\(s\)\s*total\(s\)/);
+            const matchSup = resa.details.match(/(\d+)\s*arrêt\(s\)\s*sup/);
+            const arretsActuels = matchTotal ? parseInt(matchTotal[1], 10) : (matchSup ? parseInt(matchSup[1], 10) + 1 : 1);
+
+            renderHTML(contenuModale, `
+            <h3 id="modale-modification-titre">Modifier les arrêts</h3>
+            <p><strong>Course :</strong> ${escapeHTML(new Date(resa.start).toLocaleString('fr-FR'))}</p>
+            <div class="groupe-formulaire">
+                <label for="nouveaux-arrets">Nombre d'arrêt(s) total(s) :</label>
+                <input type="number" id="nouveaux-arrets" class="champ-formulaire" value="${escapeHTML(String(arretsActuels))}" min="1">
+            </div>
+            <div class="modale-actions">
+                <button id="btn-valider-modif-arrets" class="btn btn-primaire btn--client">Valider</button>
+            </div>
+        `);
+            modale.classList.remove('hidden');
+            removeFocusTrap = trapFocus(modale);
+
+            document.getElementById('btn-valider-modif-arrets').addEventListener('click', (e) => {
+                const nouveauxArrets = document.getElementById('nouveaux-arrets').value;
+                const unlock = lockButton(e.currentTarget);
+                validerModificationArrets(idReservation, parseInt(nouveauxArrets, 10), unlock);
+            });
+        }
+
+        /**
+         * Gère l'ouverture de la modale pour déplacer une réservation.
+         * @param {string} idReservation L'ID de la réservation.
+         */
+        function gererDeplacement(idReservation) {
+            const resa = toutesLesReservationsClient.find(r => r.id === idReservation);
+            if (!resa || !contenuModale) return;
+
+            renderHTML(contenuModale, `
+            <h3 id="modale-modification-titre">Déplacer la course</h3>
+            <p><strong>Course actuelle :</strong> ${escapeHTML(new Date(resa.start).toLocaleString('fr-FR'))}</p>
+            <div class="groupe-formulaire">
+                <label for="nouvelle-date">Nouvelle date :</label>
+                <input type="date" id="nouvelle-date" class="champ-formulaire">
+            </div>
+            <div class="groupe-formulaire">
+                <label>Nouveau créneau :</label>
+                <div id="grille-creneaux-deplacement" class="grille-creneaux"></div>
+            </div>
+        `);
+            modale.classList.remove('hidden');
+            removeFocusTrap = trapFocus(modale);
+
+            const inputDate = document.getElementById('nouvelle-date');
+            inputDate.addEventListener('change', () => chargerCreneauxDeplacement(idReservation, inputDate.value));
+        }
+
+        /**
+         * Charge les créneaux disponibles pour un déplacement.
+         * @param {string} idReservation L'ID de la réservation.
+         * @param {string} dateString La nouvelle date choisie.
+         */
+        function chargerCreneauxDeplacement(idReservation, dateString) {
+            const resa = toutesLesReservationsClient.find(r => r.id === idReservation);
+            const grille = document.getElementById('grille-creneaux-deplacement');
+            if (!resa || !grille) return;
+
+            const duree = (new Date(resa.end) - new Date(resa.start)) / 60000;
+            renderHTML(grille, '<div class="spinner"></div>');
+
+            google.script.run
+                .withSuccessHandler(creneaux => {
+                    renderText(grille, '');
+                    if (creneaux && creneaux.length > 0) {
+                        const html = creneaux.map(heure => `<button class="slot-btn">${escapeHTML(heure)}</button>`).join('');
+                        renderHTML(grille, html);
+                        grille.querySelectorAll('.slot-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                const unlock = lockButton(e.currentTarget);
+                                validerDeplacement(idReservation, dateString, btn.textContent, unlock);
+                            });
+                        });
+                    } else {
+                        renderMessage(grille, 'Aucun créneau disponible.');
+                    }
+                })
+                .withFailureHandler(afficherErreur)
+                .obtenirCreneauxDisponiblesPourDate(dateString, duree, resa.eventId, null, [], emailClientCourant, signatureExp, signatureSig);
+        }
+
+        /**
+         * Valide et envoie la modification du nombre d'arrêts.
+         * @param {string} idReservation L'ID de la réservation.
+         * @param {number} totalStops Le nouveau nombre d'arrêts totaux.
+         */
+        function validerModificationArrets(idReservation, totalStops, unlock) {
+            basculerIndicateurChargement(true);
+            modale.classList.add('hidden');
+            removeFocusTrap();
+            google.script.run
+                .withSuccessHandler(reponse => {
+                    if (reponse.success) {
+                        afficherNotification("Réservation mise à jour avec succès !");
+                        chargerReservationsClient(emailClientCourant);
+                    } else {
+                        afficherErreur(reponse.error);
+                    }
+                    unlock && unlock();
+                })
+                .withFailureHandler(err => {
+                    afficherErreur(err);
+                    unlock && unlock();
+                })
+                .mettreAJourDetailsReservation(idReservation, totalStops, emailClientCourant, signatureExp, signatureSig);
+        }
+
+        /**
+         * Valide et envoie le déplacement de la réservation.
+         * @param {string} idReservation L'ID de la réservation.
+         * @param {string} nouvelleDate La nouvelle date.
+         * @param {string} nouvelleHeure Le nouveau créneau.
+         */
+        function validerDeplacement(idReservation, nouvelleDate, nouvelleHeure, unlock) {
+            basculerIndicateurChargement(true);
+            modale.classList.add('hidden');
+            removeFocusTrap();
+            google.script.run
+                .withSuccessHandler(reponse => {
+                    if (reponse.success) {
+                        afficherNotification("Réservation déplacée avec succès !");
+                        chargerReservationsClient(emailClientCourant);
+                    } else {
+                        afficherErreur(reponse.error);
+                    }
+                    unlock && unlock();
+                })
+                .withFailureHandler(err => {
+                    afficherErreur(err);
+                    unlock && unlock();
+                })
+                .replanifierReservation(idReservation, nouvelleDate, nouvelleHeure, emailClientCourant, signatureExp, signatureSig);
+        }
+
+        function afficherErreurConnexion(message) {
+            if (erreurConnexionDiv) {
+                erreurConnexionDiv.textContent = message;
+                erreurConnexionDiv.classList.remove('hidden');
+            }
+        }
+
+        function basculerIndicateurChargement(afficher) {
+            const indicateur = document.getElementById('indicateur-chargement');
+            if (indicateur) indicateur.classList.toggle('hidden', !afficher);
+        }
+
+        function afficherNotification(message, type = "succes") {
+            const conteneur = document.getElementById('conteneur-notifications');
+            if (!conteneur) return;
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.textContent = message;
+            conteneur.appendChild(notif);
+            setTimeout(() => notif.remove(), 5000);
+        }
+
+        function afficherErreur(erreur) {
+            basculerIndicateurChargement(false);
+            const message = (typeof erreur === 'object' && erreur && erreur.message) ? erreur.message : String(erreur);
+            afficherNotification(`Erreur : ${message}`, "erreur");
+            logError(erreur);
+        }
+
+        initialiser();
+    });
+</script>

@@ -1,0 +1,11 @@
+# Jules Agents Schedule
+# Format: Agent Name + Time (24h)
+
+- Agent: Sentinel
+  Schedule: 08:00
+
+- Agent: Adjoint
+  Schedule: 09:00
+
+- Agent: Mechanic
+  Schedule: 12:00

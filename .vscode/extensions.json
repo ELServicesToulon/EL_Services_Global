@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "google.cros-ide",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "rangav.vscode-thunder-client",
+        "mikestead.dotenv"
+    ]
+}

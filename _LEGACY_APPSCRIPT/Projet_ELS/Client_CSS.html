@@ -1,0 +1,650 @@
+<?!= include('Styles'); ?>
+<style>
+  /* =================================================================
+                      FEUILLE DE STYLE - ESPACE CLIENT
+   ================================================================= */
+
+  body {
+    font-family: var(--police-principale);
+    background-color: var(--gris-clair);
+    margin: 0;
+    color: var(--gris-fonce);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body[data-client-embed="1"] {
+    background-color: transparent;
+  }
+
+  body[data-client-embed="1"] #app-conteneur-principal {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    gap: 20px;
+  }
+
+  body[data-client-embed="1"] .app-en-tete {
+    display: none;
+  }
+
+  body[data-client-embed="1"] .carte {
+    box-shadow: none;
+    border-radius: 0;
+    border: none;
+    padding: 20px;
+  }
+
+  body[data-client-embed="1"] .carte+.carte {
+    border-top: 1px solid var(--couleur-bordure);
+  }
+
+  body[data-client-embed="1"] .btn-contact-support {
+    margin-left: 0;
+  }
+
+  /* --- ACCESSIBILITÉ : Style pour le focus clavier --- */
+  .champ-formulaire:focus,
+  .btn-fermer:focus {
+    outline: 3px solid var(--couleur-secondaire);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.3);
+  }
+
+  /* --- MISE EN PAGE PRINCIPALE --- */
+  #app-conteneur-principal {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .app-en-tete {
+    text-align: center;
+  }
+
+  /* --- COMPOSANT CARTE --- */
+  .carte {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: var(--ombre-portee);
+  }
+
+  /* --- CA EN COURS --- */
+  #ca-client {
+    font-weight: 600;
+    color: var(--couleur-primaire);
+  }
+
+  #ca-client:focus {
+    outline: 3px solid var(--couleur-secondaire);
+    outline-offset: 2px;
+  }
+
+  /* --- LISTE DES RÉSERVATIONS --- */
+  .reservation-item {
+    padding: 20px;
+    border: 1px solid var(--couleur-bordure);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .reservation-details h4 {
+    margin: 0 0 10px 0;
+    color: var(--couleur-primaire);
+  }
+
+  .reservation-details p {
+    margin: 5px 0;
+  }
+
+  .reservation-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .message-aucune-reservation {
+    text-align: center;
+    padding: 30px;
+    color: var(--gris-moyen);
+  }
+
+  /* --- FORMULAIRES & BOUTONS --- */
+  .groupe-formulaire {
+    margin-bottom: 15px;
+  }
+
+  .groupe-formulaire label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .champ-formulaire {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--couleur-bordure);
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  .btn--client {
+    border: none;
+    border-radius: 999px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .btn--client.btn-primaire {
+    background-color: var(--couleur-primaire, #3498db);
+    color: white;
+  }
+
+  .btn--client.btn-primaire:not(:disabled):hover {
+    background-color: #2980b9;
+    filter: brightness(110%);
+  }
+
+  .btn--client.btn-secondaire {
+    background-color: var(--couleur-bordure);
+    color: var(--gris-fonce);
+  }
+
+  .btn--client.btn-secondaire:not(:disabled):hover {
+    background-color: #dcdfe2;
+  }
+
+  .btn--client-full {
+    width: 100%;
+  }
+
+  .u-mt-10 {
+    margin-top: 10px !important;
+  }
+
+  .u-mt-15 {
+    margin-top: 15px !important;
+  }
+
+  .u-mt-20 {
+    margin-top: 20px !important;
+  }
+
+  .btn-contact-support {
+    margin-left: 10px;
+  }
+
+  .message-erreur-connexion {
+    color: var(--couleur-erreur);
+    margin-top: 10px;
+    font-size: 0.9em;
+  }
+
+  /* --- MODALE --- */
+  .modale-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+
+  .modale-contenu {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+  }
+
+  .modale-contenu .app-logo-container {
+    margin: 10px auto 20px;
+  }
+
+  .modale-contenu .app-logo-container svg,
+  .modale-contenu .app-logo-container img {
+    max-width: 150px;
+    height: auto;
+  }
+
+  .btn-fermer {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    cursor: pointer;
+    color: var(--gris-moyen);
+  }
+
+  .modale-actions {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--couleur-bordure);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .grille-creneaux {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .slot-btn {
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid var(--couleur-bordure);
+    background-color: transparent;
+  }
+
+  .slot-btn:hover {
+    border-color: var(--couleur-primaire);
+  }
+
+  .slot-btn.selected {
+    background-color: var(--couleur-primaire);
+    color: white;
+    border-color: var(--couleur-primaire);
+  }
+
+  /* --- CHARGEMENT & NOTIFICATIONS --- */
+  .indicateur-chargement-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--couleur-bordure);
+    border-top-color: var(--couleur-primaire);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .spinner-inline {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--couleur-bordure);
+    border-top-color: var(--couleur-primaire);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  #conteneur-notifications {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+
+  .notification {
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.5s ease-out forwards, slideOut 0.5s ease-in 4.5s forwards;
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  .notification.succes {
+    background-color: var(--couleur-succes);
+  }
+
+  .notification.erreur {
+    background-color: var(--couleur-erreur);
+  }
+
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .btn-fermer {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    cursor: pointer;
+    color: var(--gris-moyen);
+  }
+
+  .modale-actions {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--couleur-bordure);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .grille-creneaux {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .slot-btn {
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid var(--couleur-bordure);
+    background-color: transparent;
+  }
+
+  .slot-btn:hover {
+    border-color: var(--couleur-primaire);
+  }
+
+  .slot-btn.selected {
+    background-color: var(--couleur-primaire);
+    color: white;
+    border-color: var(--couleur-primaire);
+  }
+
+  /* --- CHARGEMENT & NOTIFICATIONS --- */
+  .indicateur-chargement-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--couleur-bordure);
+    border-top-color: var(--couleur-primaire);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .spinner-inline {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--couleur-bordure);
+    border-top-color: var(--couleur-primaire);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  #conteneur-notifications {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+
+  .notification {
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.5s ease-out forwards, slideOut 0.5s ease-in 4.5s forwards;
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  .notification.succes {
+    background-color: var(--couleur-succes);
+  }
+
+  .notification.erreur {
+    background-color: var(--couleur-erreur);
+  }
+
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .notification {
+      animation: none;
+    }
+  }
+
+  /* --- RESPONSIVE DESIGN --- */
+  /* --- RESPONSIVE DESIGN (Mobile/Android) --- */
+  @media (max-width: 768px) {
+
+    /* Layout global : utilisation optimale de la largeur */
+    #app-conteneur-principal {
+      padding: 0 12px;
+      margin: 10px auto;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Cartes : moins de padding pour laisser place au contenu */
+    .carte {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    /* Typographie : tailles adaptées pour la lecture sur petit écran */
+    body {
+      font-size: 16px;
+      /* Taille de base confortable */
+    }
+
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 0.5em;
+    }
+
+    h2 {
+      font-size: 1.25em;
+      margin-bottom: 15px;
+    }
+
+    /* Liste des réservations : passage en colonne unique */
+    .reservation-item {
+      grid-template-columns: 1fr;
+      /* Une seule colonne qui défile */
+      gap: 12px;
+      padding: 15px;
+    }
+
+    /* Actions (Boutons) : empilés verticalement pour être faciles à toucher */
+    .reservation-actions {
+      display: flex;
+      flex-direction: column;
+      /* Colonne verticale */
+      width: 100%;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .reservation-actions .btn {
+      width: 100%;
+      /* Boutons pleine largeur */
+      padding: 12px 15px;
+      /* Zone de touche confortable */
+      text-align: center;
+      justify-content: center;
+    }
+
+    /* Champs de formulaire : adaptés au tactile (taille, focus, zoom) */
+    .champ-formulaire {
+      font-size: 16px;
+      /* Empêche le zoom auto sur iOS */
+      padding: 12px;
+      height: auto;
+      /* Laisser le contenu définir la hauteur si multiline */
+      min-height: 48px;
+      /* Standard tactile */
+    }
+
+    /* Modale : adaptation largeur et défilement */
+    .modale-contenu {
+      width: 90%;
+      /* Largeur adaptée */
+      max-width: none;
+      max-height: 85vh;
+      /* Hauteur max pour éviter le débordement */
+      overflow-y: auto;
+      /* Défilement interne si nécessaire */
+      padding: 20px;
+      margin: auto;
+      border-radius: 12px;
+    }
+
+    .btn-fermer {
+      top: 10px;
+      right: 10px;
+      font-size: 2em;
+      padding: 10px;
+      /* Plus facile à cliquer */
+    }
+
+    /* Notifications : positionnement mobile */
+    #conteneur-notifications {
+      left: 10px;
+      right: 10px;
+      bottom: 20px;
+      width: auto;
+    }
+
+    .notification {
+      width: auto;
+      margin: 0;
+      font-size: 14px;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    /* Ajustements divers */
+    .app-logo-container svg,
+    .app-logo-container img {
+      max-width: 120px;
+      /* Logo un peu plus petit */
+    }
+
+    /* Grille créneaux dans la modale */
+    .grille-creneaux {
+      grid-template-columns: repeat(3, 1fr);
+      /* 3 colonnes fixes suffisent souvent sur mobile */
+    }
+  }
+
+  /* --- BADGES SUIVI --- */
+  .badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+
+  .badge-info {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+  }
+
+  .badge-success {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+  }
+
+  .badge-error {
+    background-color: #ffebee;
+    color: #b71c1c;
+  }
+
+  .error-text {
+    color: var(--couleur-erreur);
+    font-size: 0.9em;
+    margin-top: 5px;
+  }
+</style>

@@ -1,0 +1,12 @@
+# Ignorer le module Livraison (géré dans le sous-projet Apps Script /livraison)
+livraison/**
+# Exclure la copie .gs du connecteur pour éviter le doublon lors du push
+Resideur_Connector.gs
+OneShotCleaner.gs
+**/Sentinel_Node.js
+
+# Exclure le build PWA/Vite qui cause des erreurs de déploiement
+pwa/**
+temp_check/**
+tests/**
+examples/**

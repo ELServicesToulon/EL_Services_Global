@@ -1,0 +1,318 @@
+openapi: 3.0.3
+info:
+  title: EL Services Antigravity Dashboard API
+  description: |
+    API Backend pour le Dashboard SuperAdmin du système Antigravity.
+    
+    Cette API expose les fonctionnalités de monitoring et contrôle des agents automatisés
+    du système EL Services Global.
+    
+    ## Authentification
+    Actuellement, l'API est destinée à un usage interne uniquement et ne requiert pas
+    d'authentification explicite. Les requêtes sont filtrées par IP au niveau Cloudflare.
+    
+    ## Rate Limiting
+    - Endpoints `/api/agents` et `/api/events` : illimité
+    - Endpoint `/api/advisor/tip` : cache 1h (évite surcharge Gemini)
+    - Endpoint `/api/control/*` : rate limiting recommandé côté client
+    
+  version: 1.0.0
+  contact:
+    name: EL Services Support
+    email: contact@mediconvoi.fr
+  license:
+    name: Proprietary
+    url: https://mediconvoi.fr
+
+servers:
+  - url: http://37.59.124.82:3333
+    description: VPS Production (Dashboard Server)
+  - url: http://localhost:3333
+    description: Développement local
+
+tags:
+  - name: Agents
+    description: Gestion et monitoring des agents Antigravity
+  - name: Advisor
+    description: Conseils stratégiques générés par IA (Chief Advisor)
+  - name: Events
+    description: Événements et logs système
+  - name: Control
+    description: Actions de contrôle sur les agents
+
+paths:
+  /api/agents:
+    get:
+      tags:
+        - Agents
+      summary: Liste des agents
+      description: |
+        Retourne la liste complète des agents avec leur statut actuel.
+        Les agents sont des modules autonomes orchestrés par Sentinel Core.
+      operationId: getAgents
+      responses:
+        '200':
+          description: Liste des agents récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Agent'
+              example:
+                - id: sentinel
+                  name: Sentinel Core
+                  role: Orchestrateur
+                  status: running
+                - id: network
+                  name: Network Overseer
+                  role: Surveillance
+                  status: running
+                - id: security
+                  name: Security Agent
+                  role: Cybersécurité
+                  status: running
+                - id: advisor
+                  name: Chief Advisor
+                  role: Stratégie
+                  status: idle
+                - id: secretary
+                  name: Secretary Agent
+                  role: Administratif
+                  status: idle
+                - id: ghost
+                  name: Ghost Shopper
+                  role: Tests User
+                  status: stopped
+        '500':
+          description: Erreur serveur interne
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/advisor/tip:
+    get:
+      tags:
+        - Advisor
+      summary: Conseil stratégique
+      description: |
+        Récupère un conseil stratégique généré par le Chief Advisor (Gemini AI).
+        
+        **Cache**: Le conseil est mis en cache pendant 1 heure pour éviter
+        les appels excessifs à l'API Gemini.
+        
+        En cas d'erreur de connexion à Gemini, un message de fallback est retourné.
+      operationId: getAdvisorTip
+      responses:
+        '200':
+          description: Conseil récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvisorTip'
+              examples:
+                success:
+                  summary: Conseil généré
+                  value:
+                    tip: "Optimisez vos créneaux du samedi matin, ils sont les plus demandés."
+                fallback:
+                  summary: Mode dégradé
+                  value:
+                    tip: "Impossible de contacter l'Advisor pour le moment."
+        '500':
+          description: Erreur serveur interne
+
+  /api/events:
+    get:
+      tags:
+        - Events
+      summary: Événements récents
+      description: |
+        Retourne les 5 derniers événements majeurs du système,
+        extraits du fichier `rapport_anomalies.txt`.
+        
+        Les événements sont retournés dans l'ordre chronologique inverse
+        (le plus récent en premier).
+      operationId: getEvents
+      responses:
+        '200':
+          description: Liste des événements récupérée
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 5
+                items:
+                  $ref: '#/components/schemas/Event'
+              example:
+                - id: 0
+                  text: "[2026-01-08T20:15:00Z] [SECURITY] Scan intégrité terminé - OK"
+                - id: 1
+                  text: "[2026-01-08T20:10:00Z] [NETWORK] Tous les services opérationnels"
+                - id: 2
+                  text: "[2026-01-08T20:05:00Z] [ARCHIVE] Backup incrémental terminé"
+
+  /api/control/{agentId}:
+    post:
+      tags:
+        - Control
+      summary: Contrôler un agent
+      description: |
+        Envoie une commande de contrôle à un agent spécifique.
+        
+        **Actions supportées**:
+        - `restart`: Redémarre l'agent
+        - `stop`: Arrête l'agent
+        - `start`: Démarre l'agent
+        - `status`: Demande le statut actuel
+        
+        > **Note**: Les actions sont actuellement simulées côté serveur.
+        > L'implémentation réelle du contrôle des processus est prévue.
+      operationId: controlAgent
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: Identifiant unique de l'agent
+          schema:
+            type: string
+            enum:
+              - sentinel
+              - network
+              - security
+              - advisor
+              - secretary
+              - ghost
+              - deployment
+              - cloudflare
+              - honeypot
+              - chat
+          example: sentinel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ControlRequest'
+            example:
+              action: restart
+      responses:
+        '200':
+          description: Commande envoyée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlResponse'
+              example:
+                success: true
+                message: "Commande restart envoyée à sentinel"
+        '400':
+          description: Requête invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent non trouvé
+        '500':
+          description: Erreur serveur interne
+
+components:
+  schemas:
+    Agent:
+      type: object
+      required:
+        - id
+        - name
+        - role
+        - status
+      properties:
+        id:
+          type: string
+          description: Identifiant unique de l'agent
+          example: sentinel
+        name:
+          type: string
+          description: Nom d'affichage de l'agent
+          example: Sentinel Core
+        role:
+          type: string
+          description: Rôle/fonction de l'agent
+          example: Orchestrateur
+        status:
+          type: string
+          description: Statut actuel de l'agent
+          enum:
+            - running
+            - idle
+            - stopped
+            - error
+          example: running
+
+    AdvisorTip:
+      type: object
+      required:
+        - tip
+      properties:
+        tip:
+          type: string
+          description: Conseil stratégique généré par l'IA
+          example: "Pensez à vérifier les logs de sécurité chaque matin."
+
+    Event:
+      type: object
+      required:
+        - id
+        - text
+      properties:
+        id:
+          type: integer
+          description: Index de l'événement (0 = plus récent)
+          example: 0
+        text:
+          type: string
+          description: Contenu brut de l'événement (ligne du log)
+          example: "[2026-01-08T20:00:00Z] [SECURITY] Scan terminé"
+
+    ControlRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          description: Action à exécuter sur l'agent
+          enum:
+            - restart
+            - stop
+            - start
+            - status
+          example: restart
+
+    ControlResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          description: Indique si la commande a été acceptée
+          example: true
+        message:
+          type: string
+          description: Message de confirmation
+          example: "Commande restart envoyée à sentinel"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Message d'erreur
+          example: "Internal server error"
+        code:
+          type: string
+          description: Code d'erreur (optionnel)
+          example: "ERR_INTERNAL"

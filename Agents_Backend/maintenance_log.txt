@@ -1,0 +1,481 @@
+[2026-01-07T14:36:30.128Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-07T14:36:30.128Z] Checking for code updates...
+[2026-01-07T14:36:30.128Z] Executing: git pull
+[2026-01-07T14:36:30.516Z] Output: Already up to date.
+
+[2026-01-07T14:36:30.516Z] Attempting system updates...
+[2026-01-07T14:36:30.517Z] Executing: sudo -n true
+[2026-01-07T14:36:30.542Z] Output: 
+[2026-01-07T14:36:30.543Z] Executing: sudo apt-get update
+[2026-01-07T14:36:35.754Z] Output: Get:1 http://security.ubuntu.com/ubuntu questing-security InRelease [136 kB]
+Hit:2 https://download.docker.com/linux/ubuntu questing InRelease
+Get:3 http://security.ubuntu.com/ubuntu questing-security/main amd64 Packages [113 kB]
+Hit:4 https://deb.nodesource.com/node_20.x nodistro InRelease
+Get:5 http://security.ubuntu.com/ubuntu questing-security/main Translation-en [32.8 kB]
+Get:6 http://security.ubuntu.com/ubuntu questing-security/main amd64 Components [448 B]
+Hit:7 http://nova.clouds.archive.ubuntu.com/ubuntu questing InRelease
+Get:8 http://security.ubuntu.com/ubuntu questing-security/restricted amd64 Components [212 B]
+Get:9 http://security.ubuntu.com/ubuntu questing-security/universe amd64 Packages [75.2 kB]
+Get:10 http://security.ubuntu.com/ubuntu questing-security/universe Translation-en [23.5 kB]
+Get:11 http://security.ubuntu.com/ubuntu questing-security/universe amd64 Components [6760 B]
+Get:12 http://security.ubuntu.com/ubuntu questing-security/multiverse amd64 Components [212 B]
+Ign:13 http://dl.google.com/linux/chrome-remote-desktop/deb stable InRelease
+Hit:14 https://dl.google.com/linux/chrome/deb stable InRelease
+Hit:15 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates InRelease
+Hit:16 http://dl.google.com/linux/chrome-remote-desktop/deb stable Release
+Hit:18 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports InRelease
+Hit:19 https://packages.microsoft.com/ubuntu/25.04/prod plucky InRelease
+Hit:20 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Fetched 388 kB in 1s (356 kB/s)
+Reading package lists...
+
+[2026-01-07T14:36:35.755Z] System packages list updated.
+[2026-01-07T14:36:35.755Z] === MAINTENANCE COMPLETE ===
+[2026-01-07T14:38:51.402Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-07T14:38:51.402Z] Checking for code updates...
+[2026-01-07T14:38:51.403Z] Executing: git pull
+[2026-01-07T14:38:52.093Z] Output: Already up to date.
+
+[2026-01-07T14:38:52.094Z] Attempting system updates...
+[2026-01-07T14:38:52.094Z] Executing: sudo -n true
+[2026-01-07T14:38:52.118Z] Output: 
+[2026-01-07T14:38:52.119Z] Executing: sudo apt-get update
+[2026-01-07T14:38:53.693Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1336 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T14:38:53.694Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1336 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T14:38:53.695Z] System packages list updated.
+[2026-01-07T14:38:53.695Z] === MAINTENANCE COMPLETE ===
+[2026-01-07T14:52:32.150Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-07T14:52:32.150Z] Checking for code updates...
+[2026-01-07T14:52:32.150Z] Executing: git pull
+[2026-01-07T14:52:32.961Z] Output: Already up to date.
+
+[2026-01-07T14:52:32.961Z] Attempting system updates...
+[2026-01-07T14:52:32.961Z] Executing: sudo -n true
+[2026-01-07T14:52:32.996Z] Output: 
+[2026-01-07T14:52:32.996Z] Executing: sudo apt-get update
+[2026-01-07T14:52:33.223Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-07T14:52:33.223Z] Checking for code updates...
+[2026-01-07T14:52:33.224Z] Executing: git pull
+[2026-01-07T14:52:34.173Z] Output: Already up to date.
+
+[2026-01-07T14:52:34.173Z] Attempting system updates...
+[2026-01-07T14:52:34.173Z] Executing: sudo -n true
+[2026-01-07T14:52:34.240Z] Output: 
+[2026-01-07T14:52:34.240Z] Executing: sudo apt-get update
+[2026-01-07T14:52:35.956Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 4590 (apt-get)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T14:52:35.956Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 4590 (apt-get)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T14:52:35.956Z] System packages list updated.
+[2026-01-07T14:52:35.956Z] === MAINTENANCE COMPLETE ===
+[2026-01-07T14:52:36.734Z] Output: Hit:1 http://security.ubuntu.com/ubuntu questing-security InRelease
+Hit:2 https://download.docker.com/linux/ubuntu questing InRelease
+Ign:3 http://dl.google.com/linux/chrome-remote-desktop/deb stable InRelease
+Hit:4 https://dl.google.com/linux/chrome/deb stable InRelease
+Hit:5 https://packages.microsoft.com/ubuntu/25.04/prod plucky InRelease
+Hit:6 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Hit:7 http://nova.clouds.archive.ubuntu.com/ubuntu questing InRelease
+Get:8 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates InRelease [136 kB]
+Hit:9 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:10 http://dl.google.com/linux/chrome-remote-desktop/deb stable Release
+Get:11 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports InRelease [133 kB]
+Fetched 268 kB in 2s (169 kB/s)
+Reading package lists...
+
+[2026-01-07T14:52:36.735Z] System packages list updated.
+[2026-01-07T14:52:36.735Z] === MAINTENANCE COMPLETE ===
+[2026-01-07T20:01:40.650Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-07T20:01:40.651Z] Checking for code updates...
+[2026-01-07T20:01:40.651Z] Executing: git pull
+[2026-01-07T20:01:41.529Z] Output: Already up to date.
+
+[2026-01-07T20:01:41.530Z] Attempting system updates...
+[2026-01-07T20:01:41.530Z] Executing: sudo -n true
+[2026-01-07T20:01:41.547Z] Output: 
+[2026-01-07T20:01:41.547Z] Executing: sudo apt-get update
+[2026-01-07T20:01:42.042Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-07T20:01:42.042Z] Checking for code updates...
+[2026-01-07T20:01:42.043Z] Executing: git pull
+[2026-01-07T20:01:42.654Z] Output: Already up to date.
+
+[2026-01-07T20:01:42.654Z] Attempting system updates...
+[2026-01-07T20:01:42.655Z] Executing: sudo -n true
+[2026-01-07T20:01:42.709Z] Output: 
+[2026-01-07T20:01:42.709Z] Executing: sudo apt-get update
+[2026-01-07T20:01:44.985Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1319 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T20:01:44.987Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1319 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T20:01:44.987Z] System packages list updated.
+[2026-01-07T20:01:44.988Z] === MAINTENANCE COMPLETE ===
+[2026-01-07T20:01:46.195Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1319 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T20:01:46.195Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1319 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T20:01:46.195Z] System packages list updated.
+[2026-01-07T20:01:46.195Z] === MAINTENANCE COMPLETE ===
+[2026-01-07T21:58:15.729Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-07T21:58:15.730Z] Checking for code updates...
+[2026-01-07T21:58:15.730Z] Executing: git pull
+[2026-01-07T21:58:16.581Z] Output: Already up to date.
+
+[2026-01-07T21:58:16.581Z] Attempting system updates...
+[2026-01-07T21:58:16.581Z] Executing: sudo -n true
+[2026-01-07T21:58:16.633Z] Output: 
+[2026-01-07T21:58:16.633Z] Executing: sudo apt-get update
+[2026-01-07T21:58:17.510Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-07T21:58:17.511Z] Checking for code updates...
+[2026-01-07T21:58:17.512Z] Executing: git pull
+[2026-01-07T21:58:18.062Z] Output: Already up to date.
+
+[2026-01-07T21:58:18.063Z] Attempting system updates...
+[2026-01-07T21:58:18.064Z] Executing: sudo -n true
+[2026-01-07T21:58:18.135Z] Output: 
+[2026-01-07T21:58:18.135Z] Executing: sudo apt-get update
+[2026-01-07T21:58:19.434Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 5188 (apt-get)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T21:58:19.434Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 5188 (apt-get)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-07T21:58:19.434Z] System packages list updated.
+[2026-01-07T21:58:19.434Z] === MAINTENANCE COMPLETE ===
+[2026-01-07T21:58:19.564Z] Output: Ign:1 http://dl.google.com/linux/chrome-remote-desktop/deb stable InRelease
+Hit:2 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:3 http://nova.clouds.archive.ubuntu.com/ubuntu questing InRelease
+Hit:4 http://dl.google.com/linux/chrome-remote-desktop/deb stable Release
+Hit:5 https://download.docker.com/linux/ubuntu questing InRelease
+Hit:6 https://dl.google.com/linux/chrome/deb stable InRelease
+Hit:8 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates InRelease
+Hit:9 http://security.ubuntu.com/ubuntu questing-security InRelease
+Hit:10 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports InRelease
+Hit:11 https://packages.microsoft.com/ubuntu/25.04/prod plucky InRelease
+Hit:12 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Reading package lists...
+
+[2026-01-07T21:58:19.565Z] System packages list updated.
+[2026-01-07T21:58:19.565Z] === MAINTENANCE COMPLETE ===
+[2026-01-08T09:16:43.357Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-08T09:16:43.357Z] Checking for code updates...
+[2026-01-08T09:16:43.357Z] Executing: git pull
+[2026-01-08T09:16:44.204Z] Output: Already up to date.
+
+[2026-01-08T09:16:44.204Z] Attempting system updates...
+[2026-01-08T09:16:44.204Z] Executing: sudo -n true
+[2026-01-08T09:16:44.249Z] Output: 
+[2026-01-08T09:16:44.250Z] Executing: sudo apt-get update
+[2026-01-08T09:16:45.141Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-08T09:16:45.141Z] Checking for code updates...
+[2026-01-08T09:16:45.141Z] Executing: git pull
+[2026-01-08T09:16:46.417Z] Output: Already up to date.
+
+[2026-01-08T09:16:46.418Z] Attempting system updates...
+[2026-01-08T09:16:46.422Z] Executing: sudo -n true
+[2026-01-08T09:16:46.455Z] Output: 
+[2026-01-08T09:16:46.464Z] Executing: sudo apt-get update
+[2026-01-08T09:16:47.248Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1415 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-08T09:16:47.249Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1415 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-08T09:16:47.250Z] System packages list updated.
+[2026-01-08T09:16:47.250Z] === MAINTENANCE COMPLETE ===
+[2026-01-08T09:16:47.728Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1415 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-08T09:16:47.729Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1415 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-08T09:16:47.729Z] System packages list updated.
+[2026-01-08T09:16:47.729Z] === MAINTENANCE COMPLETE ===
+[2026-01-08T14:45:27.384Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-08T14:45:27.384Z] Checking for code updates...
+[2026-01-08T14:45:27.384Z] Executing: git pull
+[2026-01-08T14:45:28.092Z] Output: Already up to date.
+
+[2026-01-08T14:45:28.093Z] Attempting system updates...
+[2026-01-08T14:45:28.093Z] Executing: sudo -n true
+[2026-01-08T14:45:28.105Z] Output: 
+[2026-01-08T14:45:28.107Z] Executing: sudo apt-get update
+[2026-01-08T14:45:29.591Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1397 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-08T14:45:29.592Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1397 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-08T14:45:29.593Z] System packages list updated.
+[2026-01-08T14:45:29.593Z] === MAINTENANCE COMPLETE ===
+[2026-01-08T14:45:31.825Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-08T14:45:31.825Z] Checking for code updates...
+[2026-01-08T14:45:31.825Z] Executing: git pull
+[2026-01-08T14:45:32.179Z] Output: Already up to date.
+
+[2026-01-08T14:45:32.181Z] Attempting system updates...
+[2026-01-08T14:45:32.181Z] Executing: sudo -n true
+[2026-01-08T14:45:32.211Z] Output: 
+[2026-01-08T14:45:32.212Z] Executing: sudo apt-get update
+[2026-01-08T14:45:34.117Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1397 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-08T14:45:34.117Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1397 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-08T14:45:34.117Z] System packages list updated.
+[2026-01-08T14:45:34.118Z] === MAINTENANCE COMPLETE ===
+[2026-01-08T16:01:20.654Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-08T16:01:20.655Z] Checking for code updates...
+[2026-01-08T16:01:20.655Z] Executing: git pull
+[2026-01-08T16:01:21.876Z] Output: Already up to date.
+
+[2026-01-08T16:01:21.876Z] Attempting system updates...
+[2026-01-08T16:01:21.876Z] Executing: sudo -n true
+[2026-01-08T16:01:21.891Z] Output: 
+[2026-01-08T16:01:21.891Z] Executing: sudo apt-get update
+[2026-01-08T16:01:24.468Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-08T16:01:24.468Z] Checking for code updates...
+[2026-01-08T16:01:24.469Z] Executing: git pull
+[2026-01-08T16:01:25.087Z] Output: Already up to date.
+
+[2026-01-08T16:01:25.087Z] Attempting system updates...
+[2026-01-08T16:01:25.087Z] Executing: sudo -n true
+[2026-01-08T16:01:25.192Z] Output: 
+[2026-01-08T16:01:25.192Z] Executing: sudo apt-get update
+[2026-01-08T16:01:26.484Z] Output: Hit:1 https://dl.google.com/linux/chrome/deb stable InRelease
+Hit:2 http://security.ubuntu.com/ubuntu questing-security InRelease
+Ign:3 http://dl.google.com/linux/chrome-remote-desktop/deb stable InRelease
+Hit:4 https://download.docker.com/linux/ubuntu questing InRelease
+Hit:5 https://packages.microsoft.com/ubuntu/25.04/prod plucky InRelease
+Hit:6 http://nova.clouds.archive.ubuntu.com/ubuntu questing InRelease
+Hit:7 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:8 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates InRelease
+Hit:9 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports InRelease
+Hit:10 http://dl.google.com/linux/chrome-remote-desktop/deb stable Release
+Hit:12 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Reading package lists...
+
+[2026-01-08T16:01:26.485Z] System packages list updated.
+[2026-01-08T16:01:26.485Z] === MAINTENANCE COMPLETE ===
+[2026-01-08T16:01:28.384Z] Output: Hit:1 http://nova.clouds.archive.ubuntu.com/ubuntu questing InRelease
+Hit:2 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates InRelease
+Hit:3 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports InRelease
+Ign:4 http://dl.google.com/linux/chrome-remote-desktop/deb stable InRelease
+Hit:5 http://dl.google.com/linux/chrome-remote-desktop/deb stable Release
+Hit:6 https://download.docker.com/linux/ubuntu questing InRelease
+Hit:7 https://dl.google.com/linux/chrome/deb stable InRelease
+Hit:8 https://packages.microsoft.com/ubuntu/25.04/prod plucky InRelease
+Hit:9 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:10 http://security.ubuntu.com/ubuntu questing-security InRelease
+Hit:12 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Reading package lists...
+
+[2026-01-08T16:01:28.385Z] System packages list updated.
+[2026-01-08T16:01:28.385Z] === MAINTENANCE COMPLETE ===
+[2026-01-09T07:36:07.418Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-09T07:36:07.419Z] Checking for code updates...
+[2026-01-09T07:36:07.420Z] Executing: git pull
+[2026-01-09T07:36:07.925Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-09T07:36:07.925Z] Checking for code updates...
+[2026-01-09T07:36:07.926Z] Executing: git pull
+[2026-01-09T07:36:08.345Z] Output: Already up to date.
+
+[2026-01-09T07:36:08.346Z] Attempting system updates...
+[2026-01-09T07:36:08.346Z] Executing: sudo -n true
+[2026-01-09T07:36:08.382Z] Output: 
+[2026-01-09T07:36:08.382Z] Output: Already up to date.
+
+[2026-01-09T07:36:08.382Z] Executing: sudo apt-get update
+[2026-01-09T07:36:08.382Z] Attempting system updates...
+[2026-01-09T07:36:08.383Z] Executing: sudo -n true
+[2026-01-09T07:36:08.410Z] Output: 
+[2026-01-09T07:36:08.416Z] Executing: sudo apt-get update
+[2026-01-09T07:36:09.723Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1390 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T07:36:09.723Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1390 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T07:36:09.724Z] System packages list updated.
+[2026-01-09T07:36:09.724Z] === MAINTENANCE COMPLETE ===
+[2026-01-09T07:36:09.938Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1390 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T07:36:09.939Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1390 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T07:36:09.940Z] System packages list updated.
+[2026-01-09T07:36:09.940Z] === MAINTENANCE COMPLETE ===
+[2026-01-09T08:11:36.185Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-09T08:11:36.186Z] Checking for code updates...
+[2026-01-09T08:11:36.186Z] Executing: git pull
+[2026-01-09T08:11:37.075Z] Output: Already up to date.
+
+[2026-01-09T08:11:37.076Z] Attempting system updates...
+[2026-01-09T08:11:37.076Z] Executing: sudo -n true
+[2026-01-09T08:11:37.118Z] Output: 
+[2026-01-09T08:11:37.119Z] Executing: sudo apt-get update
+[2026-01-09T08:11:37.517Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-09T08:11:37.517Z] Checking for code updates...
+[2026-01-09T08:11:37.517Z] Executing: git pull
+[2026-01-09T08:11:38.470Z] Output: Already up to date.
+
+[2026-01-09T08:11:38.471Z] Attempting system updates...
+[2026-01-09T08:11:38.471Z] Executing: sudo -n true
+[2026-01-09T08:11:39.005Z] Output: 
+[2026-01-09T08:11:39.005Z] Executing: sudo apt-get update
+[2026-01-09T08:11:40.256Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 5248 (apt-get)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T08:11:40.257Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 5248 (apt-get)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T08:11:40.257Z] System packages list updated.
+[2026-01-09T08:11:40.257Z] === MAINTENANCE COMPLETE ===
+[2026-01-09T08:11:40.933Z] Output: Hit:1 http://security.ubuntu.com/ubuntu questing-security InRelease
+Hit:2 https://download.docker.com/linux/ubuntu questing InRelease
+Hit:3 http://nova.clouds.archive.ubuntu.com/ubuntu questing InRelease
+Hit:4 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates InRelease
+Hit:5 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports InRelease
+Hit:6 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:7 https://packages.microsoft.com/ubuntu/25.04/prod plucky InRelease
+Ign:8 http://dl.google.com/linux/chrome-remote-desktop/deb stable InRelease
+Hit:9 https://dl.google.com/linux/chrome/deb stable InRelease
+Hit:10 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Hit:11 http://dl.google.com/linux/chrome-remote-desktop/deb stable Release
+Reading package lists...
+
+[2026-01-09T08:11:40.933Z] System packages list updated.
+[2026-01-09T08:11:40.933Z] === MAINTENANCE COMPLETE ===
+[2026-01-09T08:40:00.828Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-09T08:40:00.828Z] Checking for code updates...
+[2026-01-09T08:40:00.828Z] Executing: git pull
+[2026-01-09T08:40:01.482Z] Output: Already up to date.
+
+[2026-01-09T08:40:01.482Z] Attempting system updates...
+[2026-01-09T08:40:01.482Z] Executing: sudo -n true
+[2026-01-09T08:40:01.550Z] Output: 
+[2026-01-09T08:40:01.550Z] Executing: sudo apt-get update
+[2026-01-09T08:40:01.982Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-09T08:40:01.982Z] Checking for code updates...
+[2026-01-09T08:40:01.982Z] Executing: git pull
+[2026-01-09T08:40:04.516Z] Output: Already up to date.
+
+[2026-01-09T08:40:04.517Z] Attempting system updates...
+[2026-01-09T08:40:04.518Z] Executing: sudo -n true
+[2026-01-09T08:40:04.613Z] Output: 
+[2026-01-09T08:40:04.613Z] Executing: sudo apt-get update
+[2026-01-09T08:40:05.548Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1381 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T08:40:05.548Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1381 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T08:40:05.549Z] System packages list updated.
+[2026-01-09T08:40:05.549Z] === MAINTENANCE COMPLETE ===
+[2026-01-09T08:40:10.965Z] Output: Hit:1 http://nova.clouds.archive.ubuntu.com/ubuntu questing InRelease
+Get:2 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates InRelease [136 kB]
+Get:3 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports InRelease [133 kB]
+Hit:4 https://download.docker.com/linux/ubuntu questing InRelease
+Hit:5 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:6 https://packages.microsoft.com/ubuntu/25.04/prod plucky InRelease
+Hit:7 http://security.ubuntu.com/ubuntu questing-security InRelease
+Get:8 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates/main amd64 Components [36.7 kB]
+Ign:9 http://dl.google.com/linux/chrome-remote-desktop/deb stable InRelease
+Get:10 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates/restricted amd64 Components [212 B]
+Get:11 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates/universe amd64 Components [38.5 kB]
+Get:12 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates/multiverse amd64 Components [212 B]
+Get:13 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports/main amd64 Components [212 B]
+Get:14 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports/restricted amd64 Components [216 B]
+Hit:15 https://dl.google.com/linux/chrome/deb stable InRelease
+Get:16 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports/universe amd64 Components [216 B]
+Get:17 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports/multiverse amd64 Components [216 B]
+Hit:18 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Hit:19 http://dl.google.com/linux/chrome-remote-desktop/deb stable Release
+Fetched 345 kB in 2s (193 kB/s)
+Reading package lists...
+
+[2026-01-09T08:40:10.966Z] System packages list updated.
+[2026-01-09T08:40:10.967Z] === MAINTENANCE COMPLETE ===
+[2026-01-09T15:07:14.640Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-09T15:07:14.640Z] Checking for code updates...
+[2026-01-09T15:07:14.641Z] Executing: git pull
+[2026-01-09T15:07:15.771Z] Output: Already up to date.
+
+[2026-01-09T15:07:15.772Z] Attempting system updates...
+[2026-01-09T15:07:15.772Z] Executing: sudo -n true
+[2026-01-09T15:07:15.889Z] Output: 
+[2026-01-09T15:07:15.889Z] Executing: sudo apt-get update
+[2026-01-09T15:07:16.570Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-09T15:07:16.570Z] Checking for code updates...
+[2026-01-09T15:07:16.572Z] Executing: git pull
+[2026-01-09T15:07:18.700Z] Output: Already up to date.
+
+[2026-01-09T15:07:18.701Z] Attempting system updates...
+[2026-01-09T15:07:18.701Z] Executing: sudo -n true
+[2026-01-09T15:07:18.728Z] Output: 
+[2026-01-09T15:07:18.729Z] Executing: sudo apt-get update
+[2026-01-09T15:07:19.081Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1386 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T15:07:19.082Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1386 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-09T15:07:19.082Z] System packages list updated.
+[2026-01-09T15:07:19.082Z] === MAINTENANCE COMPLETE ===
+[2026-01-09T15:07:21.248Z] Output: Ign:1 http://dl.google.com/linux/chrome-remote-desktop/deb stable InRelease
+Hit:2 http://dl.google.com/linux/chrome-remote-desktop/deb stable Release
+Hit:3 https://download.docker.com/linux/ubuntu questing InRelease
+Hit:4 https://dl.google.com/linux/chrome/deb stable InRelease
+Hit:6 https://deb.nodesource.com/node_20.x nodistro InRelease
+Hit:7 http://security.ubuntu.com/ubuntu questing-security InRelease
+Hit:8 http://nova.clouds.archive.ubuntu.com/ubuntu questing InRelease
+Hit:9 http://nova.clouds.archive.ubuntu.com/ubuntu questing-updates InRelease
+Hit:10 http://nova.clouds.archive.ubuntu.com/ubuntu questing-backports InRelease
+Hit:11 https://packages.microsoft.com/ubuntu/25.04/prod plucky InRelease
+Hit:12 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Reading package lists...
+
+[2026-01-09T15:07:21.249Z] System packages list updated.
+[2026-01-09T15:07:21.249Z] === MAINTENANCE COMPLETE ===
+[2026-01-10T08:05:17.270Z] === STARTING MAINTENANCE AGENT ===
+[2026-01-10T08:05:17.270Z] Checking for code updates...
+[2026-01-10T08:05:17.271Z] Executing: git pull
+[2026-01-10T08:05:17.946Z] Output: Already up to date.
+
+[2026-01-10T08:05:17.946Z] Attempting system updates...
+[2026-01-10T08:05:17.946Z] Executing: sudo -n true
+[2026-01-10T08:05:17.981Z] Output: 
+[2026-01-10T08:05:17.981Z] Executing: sudo apt-get update
+[2026-01-10T08:05:20.166Z] Error executing sudo apt-get update: Command failed: sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1399 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-10T08:05:20.166Z] Stderr: E: Could not get lock /var/lib/apt/lists/lock. It is held by process 1399 (apt)
+E: Unable to lock directory /var/lib/apt/lists/
+
+[2026-01-10T08:05:20.166Z] System packages list updated.
+[2026-01-10T08:05:20.166Z] === MAINTENANCE COMPLETE ===

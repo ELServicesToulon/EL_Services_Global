@@ -1,0 +1,16 @@
+{
+    "name": "ghost-shopper-worker",
+    "version": "1.0.0",
+    "description": "Standalone Ghost Shopper Agent for Dedicated VPS",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "playwright": "^1.40.0",
+        "dotenv": "^16.0.0"
+    },
+    "author": "Antigravity",
+    "license": "ISC"
+}

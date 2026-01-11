@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Modele de facture ELS</title>
+  <style>
+    :root {
+      --primary: #8e44ad;
+      --secondary: #5dade2;
+      --dark: #2c3e50;
+      --text: #34495e;
+      --bg: #fdfdfd;
+      --highlight: #f4f6f7;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      /* Web safe fonts */
+      font-size: 11pt;
+      line-height: 1.4;
+      color: #34495e;
+      background: white;
+    }
+
+    .page {
+      width: 100%;
+      background: white;
+      padding: 20px;
+    }
+
+    /* TABLE LAYOUTS FOR PDF COMPATIBILITY */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    td {
+      vertical-align: top;
+      padding: 0;
+    }
+
+    .text-primary {
+      color: #8e44ad;
+    }
+
+    .text-secondary {
+      color: #5dade2;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .font-bold {
+      font-weight: bold;
+    }
+
+    .text-uppercase {
+      text-transform: uppercase;
+    }
+
+    /* HEADER */
+    .header-table td.brand-col {
+      width: 60%;
+      vertical-align: middle;
+    }
+
+    .header-table td.company-col {
+      width: 40%;
+      text-align: right;
+      font-size: 9pt;
+      color: #7f8c8d;
+    }
+
+    .brand-logo svg,
+    .brand-logo img {
+      height: 60px;
+      vertical-align: middle;
+    }
+
+    .brand-text {
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 18pt;
+      color: #8e44ad;
+    }
+
+    .brand-text p {
+      margin: 0;
+      font-size: 8pt;
+      color: #5dade2;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    /* TRUST BANNER */
+    .trust-banner {
+      background-color: #f4f6f7;
+      color: #8e44ad;
+      text-align: center;
+      padding: 8px;
+      margin: 20px 0;
+      font-size: 10pt;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+
+    /* HERO SECTION */
+    .hero-table {
+      margin-bottom: 30px;
+    }
+
+    .client-box h3 {
+      font-size: 10pt;
+      color: #5dade2;
+      text-transform: uppercase;
+      margin: 0 0 5px 0;
+      border-bottom: 1px solid #eee;
+      display: inline-block;
+    }
+
+    .client-name {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .meta-table td {
+      padding-bottom: 5px;
+    }
+
+    .meta-label {
+      color: #95a5a6;
+      width: 80px;
+      font-size: 9pt;
+    }
+
+    .meta-value {
+      color: #2c3e50;
+      font-weight: bold;
+      font-size: 10pt;
+    }
+
+    /* PAYMENT CARD */
+    .payment-card {
+      background-color: #f4f6f7;
+      border: 1px solid #eef2f3;
+      padding: 15px;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    .payment-amount {
+      font-size: 24pt;
+      font-weight: bold;
+      color: #8e44ad;
+      margin: 5px 0;
+    }
+
+    .discount-badge {
+      background-color: #fff;
+      color: #5dade2;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 8pt;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 10px;
+      border: 1px solid #eee;
+    }
+
+    /* DETAILS TABLE */
+    table.data {
+      margin-top: 20px;
+    }
+
+    table.data th {
+      text-align: left;
+      color: #8e44ad;
+      font-size: 9pt;
+      border-bottom: 2px solid #f4f6f7;
+      padding: 8px 4px;
+    }
+
+    table.data td {
+      padding: 8px 4px;
+      border-bottom: 1px solid #f9f9f9;
+      font-size: 10pt;
+    }
+
+    .notes {
+      color: #95a5a6;
+      font-style: italic;
+      font-size: 9pt;
+    }
+
+    /* FOOTER */
+    .footer-table {
+      margin-top: 40px;
+      border-top: 2px solid #f4f6f7;
+      padding-top: 20px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- PAGE 1: FACTURE -->
+  <div class="page">
+
+    <!-- HEADER TABLE -->
+    <table class="header-table">
+      <tr>
+        <td class="brand-col">
+          <div class="brand-logo" style="display:inline-block; vertical-align:middle;">
+            <?!= logo ?>
+          </div>
+          <div class="brand-text">
+            <h1>
+              <?= nom_entreprise ?>
+            </h1>
+            <p>Bien-&ecirc;tre patient &bull; Excellence officinale</p>
+          </div>
+        </td>
+        <td class="company-col">
+          <div>
+            <?= adresse_entreprise ?>
+          </div>
+          <div>SIRET :
+            <?= siret ?>
+          </div>
+          <div>
+            <?= email_entreprise ?>
+          </div>
+          <div style="font-size: 8pt; margin-top: 4px; color: #95a5a6;">Assurance RC Auto-Entrepreneur SIMPLIS n&deg;
+            15251070</div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="trust-banner">
+      Une ann&eacute;e de confiance s'ach&egrave;ve, merci de la v&ocirc;tre !
+    </div>
+
+    <!-- HERO TABLE -->
+    <table class="hero-table">
+      <tr>
+        <td style="width: 55%; padding-right: 20px;">
+          <div class="client-box">
+            <h3>Destinataire</h3>
+            <div class="client-name">
+              <?= client_nom ?>
+            </div>
+            <div style="color: #7f8c8d;">
+              <?= client_adresse ?>
+            </div>
+          </div>
+          <br>
+          <table class="meta-table">
+            <tr>
+              <td class="meta-label">Num&eacute;ro :</td>
+              <td class="meta-value text-primary">
+                <?= numero_facture ?>
+              </td>
+            </tr>
+            <tr>
+              <td class="meta-label">Date :</td>
+              <td class="meta-value">
+                <?= date_facture ?>
+              </td>
+            </tr>
+            <tr>
+              <td class="meta-label">P&eacute;riode :</td>
+              <td class="meta-value">
+                <?= periode_facturee ?>
+              </td>
+            </tr>
+            <tr>
+              <td class="meta-label">&Eacute;ch&eacute;ance :</td>
+              <td class="meta-value">
+                <?= date_echeance ?>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td style="width: 45%;">
+          <div class="payment-card">
+            <div style="font-size: 11pt; color: #34495e;">Net &agrave; payer</div>
+            <div class="payment-amount">
+              <?= total_du ?> &euro;
+            </div>
+            <div style="font-size: 10pt; color: #7f8c8d;">pour
+              <?= nombre_courses ?> tourn&eacute;es
+            </div>
+            <div class="discount-badge">
+              2025
+              <?= total_remises_offertes ?> 2026
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- PAYMENT INFO TABLE -->
+    <div style="margin-top:20px;">
+      <h3 style="font-size:12pt; color:#2c3e50; border-bottom:1px solid #eee; padding-bottom:5px;">Informations de
+        r&egrave;glement</h3>
+      <table class="footer-table" style="margin-top:10px; border:none;">
+        <tr>
+          <td style="width: 60%; font-size: 9.5pt; color: #7f8c8d;">
+            R&egrave;glement attendu sous <strong>
+              <?= delai_paiement ?> jours
+            </strong><br>
+            Banque : <strong>
+              <?= societe_banque ?>
+            </strong><br>
+            IBAN :
+            <?= rib_entreprise ?><br>
+            BIC :
+            <?= bic_entreprise ?>
+          </td>
+          <td style="width: 40%; text-align: right; font-size: 9pt;">
+            <p>Tarifs &amp; CGV :</p>
+            <p><a href="#" style="color:#5dade2; text-decoration:none;">
+                <?= lien_tarifs ?>
+              </a></p>
+            <p><a href="#" style="color:#5dade2; text-decoration:none;">
+                <?= lien_cgv ?>
+              </a></p>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- PAGE 2: ANNEXE -->
+  <div class="page">
+    <table style="width:100%; margin-bottom:10px;">
+      <tr>
+        <td class="text-primary font-bold text-uppercase" style="font-size:12pt;">
+          D&eacute;tail des services
+        </td>
+        <td class="text-right" style="color:#7f8c8d; font-size:10pt;">
+          Ref:
+          <?= numero_facture ?>
+        </td>
+      </tr>
+    </table>
+
+    <p style="font-size: 9pt; color: #95a5a6; margin-bottom: 20px;">
+      Ce document annexe est destin&eacute; &agrave; votre suivi interne.
+    </p>
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th style="width:15%">Date</th>
+          <th style="width:10%">Horaire</th>
+          <th style="width:40%">D&eacute;tails</th>
+          <th style="width:20%">Notes</th>
+          <th class="text-right" style="width:15%">Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        <? for (var i = 0; i < lignesBordereau.length; i++) { 
+             var ligne = lignesBordereau[i];
+        ?>
+        <tr>
+          <td>
+            <?= ligne.date ?>
+          </td>
+          <td>
+            <?= ligne.heure ?>
+          </td>
+          <td>
+            <?= ligne.details ?>
+            <? if (ligne.remiseMontantTexte) { ?>
+            <br><small class="text-secondary">Remise:
+              <?= ligne.remiseMontantTexte ?>
+            </small>
+            <? } ?>
+          </td>
+          <td class="notes">
+            <? if (ligne.lienNote && ligne.lienNote.startsWith('http')) { ?>
+            <a href="<?= ligne.lienNote ?>" target="_blank" class="text-secondary">Voir la note</a>
+            <? } else { ?>
+            <?= ligne.note ?>
+            <? } ?>
+          </td>
+          <td class="text-right">
+            <?= ligne.montantTexte ?>
+            <? if (ligne.estOfferte) { ?>
+            <span class="text-secondary">(Offert)</span>
+            <? } else if (ligne.remiseMontantTexte) { ?>
+            <span class="text-secondary"> (-
+              <?= ligne.remiseTexte ?>)
+            </span>
+            <? } ?>
+          </td>
+        </tr>
+        <? } ?>
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>

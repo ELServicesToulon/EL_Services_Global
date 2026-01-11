@@ -1,0 +1,1436 @@
+{
+  "timestamp": "2026-01-10T08:06:55.489Z",
+  "files": [
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/knowledge_base.json",
+      "name": "knowledge_base.json",
+      "size": 9252,
+      "relative": "Advisors_Memory/knowledge_base.json",
+      "contentSnippet": "{\n  \"error_patterns\": {\n    \"SEED_ENTRY_TEST\": {\n      \"fix\": \"This is a test entry to validate the Shared Knowledge system.\",\n      \"confidence\": 1,\n      \"count\": 1,\n      \"firstSeen\": \"2026-01-08T00:00:00.000Z\"\n    },\n    \"🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analys\": {\n      \"fix\": \"Il faut investiguer l'application Livreur pour déterminer la cause du timeout. Voici quelques pistes et solutions : \\n\\n1. **Vérifier la disponibilité de l'application Livreur:**\\n   - Utilisez `curl` pour tester si l'application Livreur répond :\\n     ```bash\\n     curl -I -m 10 -w \\\"%{http_code}\\\\n\\\" http://<adresse_ip_livreur>:<port>/healthcheck  # Remplace <adresse_ip_livreur> et <port> par les valeurs correctes\\n     ```\\n     - Si vous obtenez un code d'erreur (5xx) ou un timeout, l'application Livreur a un problème.\\n\\n2. **Redémarrer l'application Livreur (solution temporaire):**\\n   - Si vous utilisez systemd :\\n     ```bash\\n     sudo systemctl restart livreur.service  # Remplace livreur.service par le nom correct du service\\n     ```\\n   - Si vous utilisez Docker :\\n     ```bash\\n     docker restart <nom_du_container_livreur> # Remplace <nom_du_container_livreur> par le nom du container\\n     ```\\n\\n3. **Augmenter le timeout (solution palliative):**\\n   - Si l'application Livreur prend du temps à répondre, augmentez le timeout dans l'application appelante (probablement celle qui demande l'analyse).\\n   - Exemple (si c'est une requête HTTP avec une librairie comme `axios` en JavaScript):\\n     ```javascript\\n     axios.get('http://<adresse_ip_livreur>:<port>/api/data', { timeout: 30000 }); // Augmente le timeout à 30 secondes\\n     ```\\n     **Attention :** Augmenter le timeout ne résout pas le problème de fond. Il faut identifier la cause de la lenteur de l'application Livreur.\\n\\n4. **Analyser les logs de l'application Livreur:**\\n   - Les logs de l'application Livreur peuvent contenir des informations sur la cause du problème (erreurs, slow queries, etc.).\\n   - Localisez les logs et analysez-les attentivement.\\n\\n5. **Vérifier la charge du serveur hébergeant l'application Livreur:**\\n   - Utilisez des outils comme `top`, `htop`, ou `vmstat` pour surveiller la CPU, la mémoire et l'I/O du serveur.\\n   - Si le serveur est surchargé, il faut identifier la cause de la surcharge et prendre des mesures pour la réduire.\\n\\nAprès avoir effectué ces vérifications, vous devriez avoir une meilleure idée de la cause du problème et pouvoir implémenter une solution plus durable.\","
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/master_plan.md",
+      "name": "master_plan.md",
+      "size": 169,
+      "relative": "Advisors_Memory/master_plan.md",
+      "contentSnippet": "# Plan Maître & Directives Stratégiques\n\n- Objectif 1: Sécurité Maximale (Sentinel)\n- Objectif 2: Autonomie (Agents Indépendants)\n- Objectif 3: Performance (V2 App)"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agency_Architect.js",
+      "name": "Agency_Architect.js",
+      "size": 3262,
+      "relative": "Agents_Modules/Agency_Architect.js",
+      "contentSnippet": "/**\n * @file Agency_Architect.js\n * @description \"L'Aiguilleur Orchestrateur\".\n * Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst fs = require('fs');\nconst path = require('path');\n",
+      "description": "@description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agent_Base.js",
+      "name": "Agent_Base.js",
+      "size": 6392,
+      "relative": "Agents_Modules/Agent_Base.js",
+      "contentSnippet": "/**\n * @file Agent_Base.js\n * @description Classe de base pour tous les agents.\n * Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n */\n\nconst axios = require('axios');\nconst fs = require('fs');\nconst Vault = require('./Vault');\nconst SharedKnowledge = require('./Shared_Knowledge'); // COGNITIVE UPGRADE",
+      "description": "@description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agent_Connector.js",
+      "name": "Agent_Connector.js",
+      "size": 2383,
+      "relative": "Agents_Modules/Agent_Connector.js",
+      "contentSnippet": "/**\n * @file Agent_Connector.js\n * @description Gère la connexion SSH reutilisable vers les Workers Distants via ssh2.\n */\n\nconst { Client } = require('ssh2');\n\nclass AgentConnector {\n    constructor() {\n        this.config = null;",
+      "description": "@description Gère la connexion SSH reutilisable vers les Workers Distants via ssh2."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agent_Fixer.js",
+      "name": "Agent_Fixer.js",
+      "size": 10839,
+      "relative": "Agents_Modules/Agent_Fixer.js",
+      "contentSnippet": "/**\n * @file Agent_Fixer.js\n * @description Agent intelligent qui analyse les logs des autres agents\n * et génère/exécute des corrections automatiques pour les problèmes détectés.\n * \n * Version 2.0.0 : Hérite de Agent_Base pour utiliser Gemini IA.\n */\n\nconst fs = require('fs');\nconst path = require('path');",
+      "description": "@description Agent intelligent qui analyse les logs des autres agents et génère/exécute des corrections automatiques pour les problèmes détectés. Version 2.0.0 : Hérite de Agent_Base pour utiliser Gemini IA."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Agent_Marketing.js",
+      "name": "Agent_Marketing.js",
+      "size": 1431,
+      "relative": "Agents_Modules/Agent_Marketing.js",
+      "contentSnippet": "/**\n * @file Agent_Marketing.js\n * @description Agent Marketing & SEO (Backend)\n * Analyse le trafic (Google Analytics v4), suit le positionnement SEO et optimise la présence en ligne.\n */\n\nconst fs = require('fs');\nconst path = require('path');\n// const { BetaAnalyticsDataClient } = require('@google-analytics/data'); // TODO: Installer via npm\n",
+      "description": "@description Agent Marketing & SEO (Backend) Analyse le trafic (Google Analytics v4), suit le positionnement SEO et optimise la présence en ligne."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Archive_Keeper.js",
+      "name": "Archive_Keeper.js",
+      "size": 2822,
+      "relative": "Agents_Modules/Archive_Keeper.js",
+      "contentSnippet": "/**\n * @file Archive_Keeper.js\n * @description Agent responsable de l'archivage et des sauvegardes locales.\n */\n\nconst fs = require('fs');\nconst path = require('path');\nconst crypto = require('crypto');\n\nconst SOURCE_DIR = path.resolve(__dirname, '../../Projet_ELS');",
+      "description": "@description Agent responsable de l'archivage et des sauvegardes locales."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Backend_Agent.js",
+      "name": "Backend_Agent.js",
+      "size": 1687,
+      "relative": "Agents_Modules/Backend_Agent.js",
+      "contentSnippet": "/**\n * @file Backend_Agent.js\n * @description Agent Spécialiste Backend.\n * Rôle : Expert Node.js, Supabase, SQL, API Design.\n * Responsabilité : Gérer la logique serveur, les migrations DB et les API Endpoints.\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst fs = require('fs');\nconst path = require('path');",
+      "description": "@description Agent Spécialiste Backend. Rôle : Expert Node.js, Supabase, SQL, API Design. Responsabilité : Gérer la logique serveur, les migrations DB et les API Endpoints."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Browser_Server.js",
+      "name": "Browser_Server.js",
+      "size": 2240,
+      "relative": "Agents_Modules/Browser_Server.js",
+      "contentSnippet": "/**\n * @file Browser_Server.js\n * @description Manages a persistent Chromium browser server for agents.\n * Agents can connect via WebSocket endpoint for ~27% faster page loads.\n */\n\nconst { chromium } = require('playwright');\n\nlet browserServer = null;\nlet wsEndpoint = null;",
+      "description": "@description Manages a persistent Chromium browser server for agents. Agents can connect via WebSocket endpoint for ~27% faster page loads."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Caporal_Agent.js",
+      "name": "Caporal_Agent.js",
+      "size": 4870,
+      "relative": "Agents_Modules/Caporal_Agent.js",
+      "contentSnippet": "/**\n * Caporal Agent - Dell Command Relay\n * \n * This agent runs on the Dell, polls the VPS for commands,\n * and executes them locally using Gemini 3 Pro Preview intelligence.\n */\n\nconst path = require('path');\nconst { exec } = require('child_process');\n",
+      "description": "Caporal Agent - Dell Command Relay This agent runs on the Dell, polls the VPS for commands, and executes them locally using Gemini 3 Pro Preview intelligence."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Chat_Agent.js",
+      "name": "Chat_Agent.js",
+      "size": 5003,
+      "relative": "Agents_Modules/Chat_Agent.js",
+      "contentSnippet": "/**\n * @file Chat_Agent.js\n * @description Agent conversationnel (Chatbot) intégré à Sentinel.\n * Interagit avec les utilisateurs via Supabase et utilise Gemini pour l'intelligence.\n * Peut piloter Ghost Shopper pour des audits à la demande.\n * \n * Version 2.0 : Hérite de Agent_Base (Auto-Evolution Ready)\n */\n\nconst Agent_Base = require('./Agent_Base');",
+      "description": "@description Agent conversationnel (Chatbot) intégré à Sentinel. Interagit avec les utilisateurs via Supabase et utilise Gemini pour l'intelligence. Peut piloter Ghost Shopper pour des audits à la demande. Version 2.0 : Hérite de Agent_Base (Auto-Evolution Ready)"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Chief_Advisor_Agent.js",
+      "name": "Chief_Advisor_Agent.js",
+      "size": 7088,
+      "relative": "Agents_Modules/Chief_Advisor_Agent.js",
+      "contentSnippet": "/**\n * @file Chief_Advisor_Agent.js\n * @description \"Le Chef de Projet / Adjoint\" - Agent central IA (Gemini).\n * Version 3.0 : Mémoire Dynamique d'Expérience.\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst fs = require('fs');\nconst path = require('path');\n",
+      "description": "@description \"Le Chef de Projet / Adjoint\" - Agent central IA (Gemini). Version 3.0 : Mémoire Dynamique d'Expérience."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Cloudflare_Agent.js",
+      "name": "Cloudflare_Agent.js",
+      "size": 7088,
+      "relative": "Agents_Modules/Cloudflare_Agent.js",
+      "contentSnippet": "/**\n * @file Cloudflare_Agent.js\n * @description Agent dédié à la gestion de Cloudflare (Cache, DNS, Firewall).\n * Version 3.1 : Correction fonctions manquantes.\n */\n\nconst axios = require('axios');\nconst fs = require('fs');\nconst path = require('path');\nrequire('dotenv').config({ path: path.join(__dirname, '..', '.env') });",
+      "description": "@description Agent dédié à la gestion de Cloudflare (Cache, DNS, Firewall). Version 3.1 : Correction fonctions manquantes."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Deployment_Agent.js",
+      "name": "Deployment_Agent.js",
+      "size": 4081,
+      "relative": "Agents_Modules/Deployment_Agent.js",
+      "contentSnippet": "/**\n * @file Deployment_Agent.js\n * @description Agent responsible for Continuous Deployment (CD).\n * Monitors 'git status' and triggers 'deploy_launch_v2.js' if changes are detected.\n */\n\nconst { exec } = require('child_process');\nconst path = require('path');\n// fs removed (unused)\n",
+      "description": "@description Agent responsible for Continuous Deployment (CD). Monitors 'git status' and triggers 'deploy_launch_v2.js' if changes are detected."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Disposable_Agent.js",
+      "name": "Disposable_Agent.js",
+      "size": 1513,
+      "relative": "Agents_Modules/Disposable_Agent.js",
+      "contentSnippet": "const AgentBase = require('./Agent_Base');\n\nclass Disposable_Agent extends AgentBase {\n    constructor(workerId = 1) {\n        super(`Disposable_Worker_${workerId}`);\n        this.workerId = workerId;\n    }\n\n    async run() {\n        this.log(`🚀 Disposable Worker ${this.workerId} activated on ${require('os').hostname()}.`);"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Drive_Manager.js",
+      "name": "Drive_Manager.js",
+      "size": 12177,
+      "relative": "Agents_Modules/Drive_Manager.js",
+      "contentSnippet": "/**\n * @file Drive_Manager.js\n * @description Agent de gestion du dossier Google Drive \"Gestion ELS\"\n * Organise les fichiers, synchronise avec Supabase et archive les emails.\n */\n\nconst fs = require('fs');\nconst path = require('path');\nconst { google } = require('googleapis');\n",
+      "description": "@description Agent de gestion du dossier Google Drive \"Gestion ELS\" Organise les fichiers, synchronise avec Supabase et archive les emails."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Frontend_Agent.js",
+      "name": "Frontend_Agent.js",
+      "size": 2457,
+      "relative": "Agents_Modules/Frontend_Agent.js",
+      "contentSnippet": "/**\n * @file Frontend_Agent.js\n * @description Agent Spécialiste Frontend.\n * Rôle : Expert React, Vite, TailwindCSS.\n * Responsabilité : Analyser, créer et modifier des composants UI avec une esthétique \"Premium\".\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst fs = require('fs');\nconst path = require('path');",
+      "description": "@description Agent Spécialiste Frontend. Rôle : Expert React, Vite, TailwindCSS. Responsabilité : Analyser, créer et modifier des composants UI avec une esthétique \"Premium\"."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Ghost_Shopper/config.js",
+      "name": "config.js",
+      "size": 1349,
+      "relative": "Agents_Modules/Ghost_Shopper/config.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper/config.js\n * @description Configuration et constantes pour Ghost Shopper\n */\n\n// Seuils de performance (QA)\nconst PERF_THRESHOLDS = {\n    PAGE_LOAD: 8000,    // Max 8sec pour charger la page\n    API_RESPONSE: 2000  // Max 2sec pour une réponse serveur\n};",
+      "description": "@description Configuration et constantes pour Ghost Shopper"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Ghost_Shopper/index.js",
+      "name": "index.js",
+      "size": 2484,
+      "relative": "Agents_Modules/Ghost_Shopper/index.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper/index.js\n * @description AGENT HYBRIDE: GHOST SHOPPER + CLIENT EXPERT (Backend QA)\n * Point d'entrée principal - Orchestre les différents modules.\n * \n * CAPACITÉS :\n * 1. 🕵️‍♂️ Console Spy : Détecte les erreurs JavaScript invisibles\n * 2. 🕸️ Network Sniffer : Repère les 404/500\n * 3. ⚡ Performance Audit : Mesure les temps de chargement\n * 4. 🐒 Chaos Monkey : Clique aléatoirement pour trouver des bugs",
+      "description": "@description AGENT HYBRIDE: GHOST SHOPPER + CLIENT EXPERT (Backend QA) Point d'entrée principal - Orchestre les différents modules. CAPACITÉS : 1. 🕵️‍♂️ Console Spy : Détecte les erreurs JavaScript invisibles 2. 🕸️ Network Sniffer : Repère les 404/500 3. ⚡ Performance Audit : Mesure les temps de chargement 4. 🐒 Chaos Monkey : Clique aléatoirement pour trouver des bugs 5. 🔍 Omni-Scan : Scan intégral de toutes les pages"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Ghost_Shopper/interactions.js",
+      "name": "interactions.js",
+      "size": 4129,
+      "relative": "Agents_Modules/Ghost_Shopper/interactions.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper/interactions.js\n * @description Module d'interactions (Chaos Monkey + interactions méthodiques)\n */\n\nconst { SCAN_CONFIG } = require('./config');\n\n/**\n * Chaos Monkey : Clique sur des éléments interactifs aléatoires\n * @param {Page} page - Instance Playwright Page",
+      "description": "@description Module d'interactions (Chaos Monkey + interactions méthodiques)"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Ghost_Shopper/omni_scan.js",
+      "name": "omni_scan.js",
+      "size": 3702,
+      "relative": "Agents_Modules/Ghost_Shopper/omni_scan.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper/omni_scan.js\n * @description Mode Omni-Scan : Scan intégral du site\n */\n\nconst { TARGETS, SCAN_CONFIG, QA_CREDENTIALS } = require('./config');\nconst { waitForOverlay } = require('./session_utils');\nconst { methodicalInteract } = require('./interactions');\n\n/**",
+      "description": "@description Mode Omni-Scan : Scan intégral du site"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Ghost_Shopper/probes.js",
+      "name": "probes.js",
+      "size": 2177,
+      "relative": "Agents_Modules/Ghost_Shopper/probes.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper/probes.js\n * @description Sondes de monitoring (console JS, network, crashes)\n */\n\n/**\n * Configure les sondes de monitoring sur une page\n * @param {Page} page - Instance Playwright Page\n * @param {Object} report - Objet rapport à alimenter\n */",
+      "description": "@description Sondes de monitoring (console JS, network, crashes)"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Ghost_Shopper/session_utils.js",
+      "name": "session_utils.js",
+      "size": 2478,
+      "relative": "Agents_Modules/Ghost_Shopper/session_utils.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper/session_utils.js\n * @description Utilitaires de session (loader wait, screenshots, finish)\n */\n\nconst path = require('path');\nconst fs = require('fs');\n\n/**\n * Attente intelligente de la disparition du loader",
+      "description": "@description Utilitaires de session (loader wait, screenshots, finish)"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Ghost_Shopper/standard_flow.js",
+      "name": "standard_flow.js",
+      "size": 5688,
+      "relative": "Agents_Modules/Ghost_Shopper/standard_flow.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper/standard_flow.js\n * @description Parcours standard de réservation (booking flow)\n */\n\nconst { TARGETS, PERF_THRESHOLDS, QA_CREDENTIALS } = require('./config');\nconst { waitForOverlay } = require('./session_utils');\nconst { exploreAndClick, selectAvailableSlot } = require('./interactions');\n\n/**",
+      "description": "@description Parcours standard de réservation (booking flow)"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Ghost_Shopper.js",
+      "name": "Ghost_Shopper.js",
+      "size": 849,
+      "relative": "Agents_Modules/Ghost_Shopper.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper.js\n * @description DEPRECATED - Ce fichier redirige vers le module refactoré.\n * Le code a été découpé en modules plus petits dans le dossier Ghost_Shopper/\n * \n * Structure du nouveau module :\n * - Ghost_Shopper/index.js        : Orchestrateur principal\n * - Ghost_Shopper/config.js       : Configuration et constantes\n * - Ghost_Shopper/probes.js       : Sondes de monitoring\n * - Ghost_Shopper/session_utils.js: Utilitaires de session",
+      "description": "@description DEPRECATED - Ce fichier redirige vers le module refactoré. Le code a été découpé en modules plus petits dans le dossier Ghost_Shopper/ Structure du nouveau module : - Ghost_Shopper/index.js        : Orchestrateur principal - Ghost_Shopper/config.js       : Configuration et constantes - Ghost_Shopper/probes.js       : Sondes de monitoring - Ghost_Shopper/session_utils.js: Utilitaires de session - Ghost_Shopper/standard_flow.js: Parcours de réservation - Ghost_Shopper/omni_scan.js    : Scan intégral du site - Ghost_Shopper/interactions.js : Chaos Monkey et interactions @see ./Ghost_Shopper/index.js"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Honeypot_Agent.js",
+      "name": "Honeypot_Agent.js",
+      "size": 2035,
+      "relative": "Agents_Modules/Honeypot_Agent.js",
+      "contentSnippet": "/**\n * @file Honeypot_Agent.js\n * @description Agent \"Honeyport\" qui écoute sur un port spécifique (3333).\n * TOUTE connexion à ce port est considérée comme hostile (Scanner/Bot) \n * et déclenche un bannissement immédiat via Cloudflare + Alerte.\n */\n\nconst http = require('http');\nconst CloudflareAgent = require('./Cloudflare_Agent');\n",
+      "description": "@description Agent \"Honeyport\" qui écoute sur un port spécifique (3333). TOUTE connexion à ce port est considérée comme hostile (Scanner/Bot) et déclenche un bannissement immédiat via Cloudflare + Alerte."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Key_Guardian.js",
+      "name": "Key_Guardian.js",
+      "size": 2923,
+      "relative": "Agents_Modules/Key_Guardian.js",
+      "contentSnippet": "/**\n * @file Key_Guardian.js\n * @description Agent chargé de la validation des clés API critiques.\n * S'assure que le Vault contient des clés actives et alerte en cas de problème.\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst Vault = require('./Vault');\nconst axios = require('axios');\n",
+      "description": "@description Agent chargé de la validation des clés API critiques. S'assure que le Vault contient des clés actives et alerte en cas de problème."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Log_Aggregator.js",
+      "name": "Log_Aggregator.js",
+      "size": 10068,
+      "relative": "Agents_Modules/Log_Aggregator.js",
+      "contentSnippet": "/**\n * @file Log_Aggregator.js\n * @description Agent qui collecte et affiche les logs de tous les autres agents en temps réel.\n * Exécution à la volée (immédiate) avec affichage formaté.\n */\n\nconst fs = require('fs');\nconst path = require('path');\nconst readline = require('readline');\n",
+      "description": "@description Agent qui collecte et affiche les logs de tous les autres agents en temps réel. Exécution à la volée (immédiate) avec affichage formaté."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Marketing_Agent.js",
+      "name": "Marketing_Agent.js",
+      "size": 2350,
+      "relative": "Agents_Modules/Marketing_Agent.js",
+      "contentSnippet": "/**\n * @file Marketing_Agent.js\n * @description Agent Expert en Marketing Visuel & UI/UX.\n * Responsable de l'esthétique \"Premium\", du Copywriting et de l'expérience utilisateur.\n * Utilise Gemini pour générer du code React/Tailwind de haute qualité.\n */\n\nconst Agent_Base = require('./Agent_Base');\n\nclass Marketing_Agent extends Agent_Base {",
+      "description": "@description Agent Expert en Marketing Visuel & UI/UX. Responsable de l'esthétique \"Premium\", du Copywriting et de l'expérience utilisateur. Utilise Gemini pour générer du code React/Tailwind de haute qualité."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Network_Overseer.js",
+      "name": "Network_Overseer.js",
+      "size": 3432,
+      "relative": "Agents_Modules/Network_Overseer.js",
+      "contentSnippet": "/**\n * @file Network_Overseer.js\n * @description Agent responsable de la surveillance réseau et santé des applications.\n * Version 2.0 : Hérite de Agent_Base pour analyse intelligente des pannes.\n */\n\nconst axios = require('axios');\nconst Vault = require('./Vault');\nconst Agent_Base = require('./Agent_Base');\n",
+      "description": "@description Agent responsable de la surveillance réseau et santé des applications. Version 2.0 : Hérite de Agent_Base pour analyse intelligente des pannes."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Orchestrator_Agent.js",
+      "name": "Orchestrator_Agent.js",
+      "size": 9074,
+      "relative": "Agents_Modules/Orchestrator_Agent.js",
+      "contentSnippet": "/**\n * @file Orchestrator_Agent.js\n * @description \"L'Aiguilleur\" - Agent central qui cartographie le projet et redirige les requêtes.\n * Il maintient une carte live du projet (Agents, Core, Relations) et utilise Gemini pour le dispatch.\n */\n\nconst fs = require('fs');\nconst path = require('path');\nconst axios = require('axios');\nrequire('dotenv').config();",
+      "description": "@description \"L'Aiguilleur\" - Agent central qui cartographie le projet et redirige les requêtes. Il maintient une carte live du projet (Agents, Core, Relations) et utilise Gemini pour le dispatch."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/QA_Agent.js",
+      "name": "QA_Agent.js",
+      "size": 1676,
+      "relative": "Agents_Modules/QA_Agent.js",
+      "contentSnippet": "/**\n * @file QA_Agent.js\n * @description Agent Spécialiste QA (Qualité).\n * Rôle : Expert Testing Automatisé (Playwright), Validation.\n * Responsabilité : Orchestrer Ghost Shopper, écrire des tests E2E, valider les déploiements.\n */\n\nconst Agent_Base = require('./Agent_Base');\n// On pourrait importer Ghost_Shopper ici pour le piloter\n// const GhostShopper = require('./Ghost_Shopper'); ",
+      "description": "@description Agent Spécialiste QA (Qualité). Rôle : Expert Testing Automatisé (Playwright), Validation. Responsabilité : Orchestrer Ghost Shopper, écrire des tests E2E, valider les déploiements."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Risk_Mitigator.js",
+      "name": "Risk_Mitigator.js",
+      "size": 3102,
+      "relative": "Agents_Modules/Risk_Mitigator.js",
+      "contentSnippet": "/**\n * @file Risk_Mitigator.js\n * @description Agent de Gestion des Risques (Proactif).\n * Analyse les données contextuelles (Météo, Trafic, Cyber-menaces) pour anticiper les problèmes.\n * Proposé par Agency_Architect (Evolution Autonome).\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst SharedKnowledge = require('./Shared_Knowledge');\nconst axios = require('axios'); // Upgraded for Live Data",
+      "description": "@description Agent de Gestion des Risques (Proactif). Analyse les données contextuelles (Météo, Trafic, Cyber-menaces) pour anticiper les problèmes. Proposé par Agency_Architect (Evolution Autonome)."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Secretary_Agent.js",
+      "name": "Secretary_Agent.js",
+      "size": 3678,
+      "relative": "Agents_Modules/Secretary_Agent.js",
+      "contentSnippet": "/**\n * @file Secretary_Agent.js\n * @description \"La Secrétaire Experte\" - Agent IA spécialisé dans l'organisation, \n * le classement du Drive, la rédaction de mails et le suivi administratif.\n * Ton : Professionnel, chaleureux et efficace (Experte & Charmante).\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst DriveManager = require('./Drive_Manager');\nconst fs = require('fs');",
+      "description": "@description \"La Secrétaire Experte\" - Agent IA spécialisé dans l'organisation, le classement du Drive, la rédaction de mails et le suivi administratif. Ton : Professionnel, chaleureux et efficace (Experte & Charmante)."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Security_Agent.js",
+      "name": "Security_Agent.js",
+      "size": 9051,
+      "relative": "Agents_Modules/Security_Agent.js",
+      "contentSnippet": "/**\n * @file Security_Agent.js\n * @description Agent de sécurité proactif.\n * Scanne le code pour détecter les secrets exposés, les déplace vers le Vault (.env)\n * et refactorise le code automatiquement.\n * \n * Version 2.0.0 : Hérite de Agent_Base + Intégration Gemini.\n */\n\nconst fs = require('fs');",
+      "description": "@description Agent de sécurité proactif. Scanne le code pour détecter les secrets exposés, les déplace vers le Vault (.env) et refactorise le code automatiquement. Version 2.0.0 : Hérite de Agent_Base + Intégration Gemini."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Shared_Knowledge.js",
+      "name": "Shared_Knowledge.js",
+      "size": 2993,
+      "relative": "Agents_Modules/Shared_Knowledge.js",
+      "contentSnippet": "/**\n * @file Shared_Knowledge.js\n * @description Module de Gestion de la Connaissance Partagée (Shared Brain).\n * Permet aux agents de sauvegarder des \"leçons\", des \"patterns\" d'erreur, et des \"succès\".\n * Stockage persistant JSON dans Advisors_Memory.\n */\n\nconst fs = require('fs');\nconst path = require('path');\n",
+      "description": "@description Module de Gestion de la Connaissance Partagée (Shared Brain). Permet aux agents de sauvegarder des \"leçons\", des \"patterns\" d'erreur, et des \"succès\". Stockage persistant JSON dans Advisors_Memory."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Tesla_Monitor.js",
+      "name": "Tesla_Monitor.js",
+      "size": 3483,
+      "relative": "Agents_Modules/Tesla_Monitor.js",
+      "contentSnippet": "/**\n * @file Tesla_Monitor.js\n * @description Surveille la flotte Tesla en utilisant la configuration existante du projet.\n */\n\nconst axios = require('axios');\nconst fs = require('fs');\nconst path = require('path');\n\n// Chemin vers la config Apps Script (Source de vérité)",
+      "description": "@description Surveille la flotte Tesla en utilisant la configuration existante du projet."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Vault.js",
+      "name": "Vault.js",
+      "size": 5128,
+      "relative": "Agents_Modules/Vault.js",
+      "contentSnippet": "/**\n * @file Vault.js\n * @description Module de gestion centralisée des secrets et de la configuration.\n * Charge les variables d'environnement depuis le fichier .env et valide leur présence.\n */\n\nrequire('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });\nconst path = require('path');\n\nconst SECRETS = {",
+      "description": "@description Module de gestion centralisée des secrets et de la configuration. Charge les variables d'environnement depuis le fichier .env et valide leur présence."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/Watchdog_Agent.js",
+      "name": "Watchdog_Agent.js",
+      "size": 4187,
+      "relative": "Agents_Modules/Watchdog_Agent.js",
+      "contentSnippet": "/**\n * @file Watchdog_Agent.js\n * @description \"Agent de Veille\" (Deep Research).\n * Responsable de la surveillance légale et technologique.\n * Capacité de naviguer sur le web (via Playwright), d'extraire le contenu\n * et de l'analyser via Gemini pour proposer des actions.\n */\n\nconst Agent_Base = require('./Agent_Base');\nconst { chromium } = require('playwright');",
+      "description": "@description \"Agent de Veille\" (Deep Research). Responsable de la surveillance légale et technologique. Capacité de naviguer sur le web (via Playwright), d'extraire le contenu et de l'analyser via Gemini pour proposer des actions."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Modules/fim_baseline.json",
+      "name": "fim_baseline.json",
+      "size": 7432,
+      "relative": "Agents_Modules/fim_baseline.json",
+      "contentSnippet": "{\n  \"Agents_Modules/Agency_Architect.js\": \"acf1f744946cd6d392048c6c6e4439223533fca2bd0a2e0e3bf4e457b7475ffb\",\n  \"Agents_Modules/Agent_Base.js\": \"b3d8fc5efebbefd64b5f41eb798a71bdd843d83c40f2c0b87a972c6be71df219\",\n  \"Agents_Modules/Agent_Connector.js\": \"d34febb4349ecf92872a85706caf9be9db4ce233bd945b07edc9a47fa6e62fee\",\n  \"Agents_Modules/Agent_Fixer.js\": \"7d3773e15948afa7aa3e1eff27e74bd2279f3ef249a28defee2245791d0ea091\",\n  \"Agents_Modules/Agent_Marketing.js\": \"5e09386ccfb1b9c77f02fd1ad839ea8ad3203f3c0d0a8c1d5a747bbae2f8c77f\",\n  \"Agents_Modules/Archive_Keeper.js\": \"5c654d52c65b42f4b0ce02ffca6b729dcd90362cfa732b1b262efcda61b722c3\",\n  \"Agents_Modules/Browser_Server.js\": \"17b18d773a628d78c3ec7de3c5ed35c5215e6d4be32370252c78909010b1992d\",\n  \"Agents_Modules/Chat_Agent.js\": \"33a47042934af06ba71f1b0bf13c29e3c6c12e4baa1a56cd4ce92e2252cb0747\",\n  \"Agents_Modules/Chief_Advisor_Agent.js\": \"782080b858dacb5a7807624ad6c12ed5cc8c948f500f46b6a71a9d54c618718c\","
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Standalone/Ghost_Shopper_Worker/Ghost_Shopper.js",
+      "name": "Ghost_Shopper.js",
+      "size": 5909,
+      "relative": "Agents_Standalone/Ghost_Shopper_Worker/Ghost_Shopper.js",
+      "contentSnippet": "/**\n * @file Ghost_Shopper.js\n * @description AGENT HYBRIDE: GHOST SHOPPER + CLIENT EXPERT (Worker Version)\n * Version Standalone pour VPS dédié.\n */\n\nconst { chromium } = require('playwright');\nconst path = require('path');\nconst fs = require('fs');\n",
+      "description": "@description AGENT HYBRIDE: GHOST SHOPPER + CLIENT EXPERT (Worker Version) Version Standalone pour VPS dédié."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Standalone/Ghost_Shopper_Worker/README.md",
+      "name": "README.md",
+      "size": 1647,
+      "relative": "Agents_Standalone/Ghost_Shopper_Worker/README.md",
+      "contentSnippet": "# Ghost Shopper Agent (Worker Standalone)\n\nCe dossier contient tout le nécessaire pour déployer l'agent \"Ghost Shopper\" sur son propre VPS (M ou S).\n\n## 🚀 Installation sur VPS (Debian/Ubuntu)\n\n### 1. Pré-requis VPS\n*   Node.js 18+ installé\n*   Dépendances Playwright (navigateurs) installées\n"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Standalone/Ghost_Shopper_Worker/index.js",
+      "name": "index.js",
+      "size": 1703,
+      "relative": "Agents_Standalone/Ghost_Shopper_Worker/index.js",
+      "contentSnippet": "/**\n * @file index.js\n * @description Point d'entrée du Worker Ghost Shopper\n */\n\nconst { runGhostShopperCycle } = require('./Ghost_Shopper');\n\n// Configuration\nconst INTERVAL_MS = 4 * 60 * 60 * 1000; // 4 Heures\nconst RUN_ON_START = true;",
+      "description": "@description Point d'entrée du Worker Ghost Shopper"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Agents_Standalone/Ghost_Shopper_Worker/package.json",
+      "name": "package.json",
+      "size": 418,
+      "relative": "Agents_Standalone/Ghost_Shopper_Worker/package.json",
+      "contentSnippet": "{\n    \"name\": \"ghost-shopper-worker\",\n    \"version\": \"1.0.0\",\n    \"description\": \"Standalone Ghost Shopper Agent for Dedicated VPS\",\n    \"main\": \"index.js\",\n    \"scripts\": {\n        \"start\": \"node index.js\",\n        \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n    },\n    \"dependencies\": {"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Dashboard_Server.js",
+      "name": "Dashboard_Server.js",
+      "size": 6240,
+      "relative": "Dashboard_Server.js",
+      "contentSnippet": "/**\n * @file Dashboard_Server.js\n * @description Serveur API léger pour le Dashboard SuperAdmin.\n * Il expose l'état des agents, les logs et les conseils de l'Adjoint.\n * Documentation API disponible sur /api-docs\n */\n\nconst express = require('express');\nconst cors = require('cors');\nconst fs = require('fs');",
+      "description": "@description Serveur API léger pour le Dashboard SuperAdmin. Il expose l'état des agents, les logs et les conseils de l'Adjoint. Documentation API disponible sur /api-docs"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/INFRASTRUCTURE.md",
+      "name": "INFRASTRUCTURE.md",
+      "size": 3313,
+      "relative": "INFRASTRUCTURE.md",
+      "contentSnippet": "# STRATÉGIE INFRASTRUCTURE - ANTIGRAVITY\n\n## 🚨 Règle d'Or\n> **Service Résident = Serveur Dédié | Agent Lourd = Serveur Jetable**\n\n---\n\n## 1. Architecture Cible\n\n### 🛡️ Le Sentinel (Intouchable)"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Maintenance_Agent.js",
+      "name": "Maintenance_Agent.js",
+      "size": 1817,
+      "relative": "Maintenance_Agent.js",
+      "contentSnippet": "const { execSync } = require('child_process');\nconst fs = require('fs');\nconst path = require('path');\n\nconst LOG_FILE = path.join(__dirname, 'maintenance_log.txt');\n\nfunction log(message) {\n    const timestamp = new Date().toISOString();\n    const logMessage = `[${timestamp}] ${message}\\n`;\n    fs.appendFileSync(LOG_FILE, logMessage);"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_ARCHITECTURE.md",
+      "name": "PROJECT_ARCHITECTURE.md",
+      "size": 21161,
+      "relative": "PROJECT_ARCHITECTURE.md",
+      "contentSnippet": "# 🏗️ PROJECT ARCHITECTURE (Live Map)\n\nUpdated: 2026-01-10T08:06:22.820Z\n\n## 🤖 Agents Detected\n- **Agency_Architect**\n  - @description \"L'Aiguilleur Orchestrateur\". Analyse l'état global du projet et propose de nouveaux agents pour optimiser le workflow.\n- **Agent_Base**\n  - @description Classe de base pour tous les agents. Apporte des capacités d'auto-évaluation et de demande d'upgrade.\n- **Agent_Connector**"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROJECT_MAP.json",
+      "name": "PROJECT_MAP.json",
+      "size": 116106,
+      "relative": "PROJECT_MAP.json",
+      "contentSnippet": "{\n  \"timestamp\": \"2026-01-10T08:06:22.744Z\",\n  \"files\": [\n    {\n      \"path\": \"/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Advisors_Memory/knowledge_base.json\",\n      \"name\": \"knowledge_base.json\",\n      \"size\": 9252,\n      \"relative\": \"Advisors_Memory/knowledge_base.json\",\n      \"contentSnippet\": \"{\\n  \\\"error_patterns\\\": {\\n    \\\"SEED_ENTRY_TEST\\\": {\\n      \\\"fix\\\": \\\"This is a test entry to validate the Shared Knowledge system.\\\",\\n      \\\"confidence\\\": 1,\\n      \\\"count\\\": 1,\\n      \\\"firstSeen\\\": \\\"2026-01-08T00:00:00.000Z\\\"\\n    },\\n    \\\"🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analys\\\": {\\n      \\\"fix\\\": \\\"Il faut investiguer l'application Livreur pour déterminer la cause du timeout. Voici quelques pistes et solutions : \\\\n\\\\n1. **Vérifier la disponibilité de l'application Livreur:**\\\\n   - Utilisez `curl` pour tester si l'application Livreur répond :\\\\n     ```bash\\\\n     curl -I -m 10 -w \\\\\\\"%{http_code}\\\\\\\\n\\\\\\\" http://<adresse_ip_livreur>:<port>/healthcheck  # Remplace <adresse_ip_livreur> et <port> par les valeurs correctes\\\\n     ```\\\\n     - Si vous obtenez un code d'erreur (5xx) ou un timeout, l'application Livreur a un problème.\\\\n\\\\n2. **Redémarrer l'application Livreur (solution temporaire):**\\\\n   - Si vous utilisez systemd :\\\\n     ```bash\\\\n     sudo systemctl restart livreur.service  # Remplace livreur.service par le nom correct du service\\\\n     ```\\\\n   - Si vous utilisez Docker :\\\\n     ```bash\\\\n     docker restart <nom_du_container_livreur> # Remplace <nom_du_container_livreur> par le nom du container\\\\n     ```\\\\n\\\\n3. **Augmenter le timeout (solution palliative):**\\\\n   - Si l'application Livreur prend du temps à répondre, augmentez le timeout dans l'application appelante (probablement celle qui demande l'analyse).\\\\n   - Exemple (si c'est une requête HTTP avec une librairie comme `axios` en JavaScript):\\\\n     ```javascript\\\\n     axios.get('http://<adresse_ip_livreur>:<port>/api/data', { timeout: 30000 }); // Augmente le timeout à 30 secondes\\\\n     ```\\\\n     **Attention :** Augmenter le timeout ne résout pas le problème de fond. Il faut identifier la cause de la lenteur de l'application Livreur.\\\\n\\\\n4. **Analyser les logs de l'application Livreur:**\\\\n   - Les logs de l'application Livreur peuvent contenir des informations sur la cause du problème (erreurs, slow queries, etc.).\\\\n   - Localisez les logs et analysez-les attentivement.\\\\n\\\\n5. **Vérifier la charge du serveur hébergeant l'application Livreur:**\\\\n   - Utilisez des outils comme `top`, `htop`, ou `vmstat` pour surveiller la CPU, la mémoire et l'I/O du serveur.\\\\n   - Si le serveur est surchargé, il faut identifier la cause de la surcharge et prendre des mesures pour la réduire.\\\\n\\\\nAprès avoir effectué ces vérifications, vous devriez avoir une meilleure idée de la cause du problème et pouvoir implémenter une solution plus durable.\\\",\"\n    },"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_AI Threat Anticipation & Mitigation Agent (ATAMA)_1767944249826.md",
+      "name": "PROPOSAL_AI Threat Anticipation & Mitigation Agent (ATAMA)_1767944249826.md",
+      "size": 2304,
+      "relative": "PROPOSAL_AI Threat Anticipation & Mitigation Agent (ATAMA)_1767944249826.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : AI Threat Anticipation & Mitigation Agent (ATAMA)\n**But** : Proactive security agent identifying and mitigating potential threats to EL Services' logistics/transport operations before they impact service delivery and revenue.\n**Justification** : ATAMA provides exponential value by preventing revenue loss and service disruptions *before* they occur. By proactively identifying vulnerabilities and automating responses, it minimizes the impact of cyberattacks, system failures, and even physical threats (e.g., supply chain disruptions). Preventing even a single major incident can save significant costs and maintain customer trust, leading to exponential improvements in overall reliability and security posture. Furthermore, the predictive capabilities can inform strategic planning and resource allocation, optimizing resilience and minimizing potential future risks.\n**Fonctions Clés** :\n- Vulnerability Scanning & Prioritization: Continuously scan all systems (applications, infrastructure, vehicles) for known vulnerabilities and misconfigurations, prioritizing remediation based on risk level and potential impact.\n- Threat Intelligence Integration: Aggregate and analyze real-time threat intelligence feeds to identify emerging threats targeting similar logistics/transport systems.\n- Anomaly Detection: Monitor network traffic, system logs, and application behavior to identify anomalous patterns indicative of malicious activity or system failures.\n- Automated Incident Response: Trigger automated responses to identified threats, such as isolating compromised systems, deploying security patches, and alerting human security personnel."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Agent de Prédiction et d'Optimisation Dynamique des Risques (APODR)_1767948086547.md",
+      "name": "PROPOSAL_Agent de Prédiction et d'Optimisation Dynamique des Risques (APODR)_1767948086547.md",
+      "size": 1834,
+      "relative": "PROPOSAL_Agent de Prédiction et d'Optimisation Dynamique des Risques (APODR)_1767948086547.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Agent de Prédiction et d'Optimisation Dynamique des Risques (APODR)\n**But** : Anticiper et atténuer les risques en temps réel pour optimiser la sécurité, la fiabilité et les revenus de la flotte EL Services.\n**Justification** : En prédisant les défaillances potentielles (techniques, humaines, environnementales, cyberattaques) et en proposant des mesures correctives proactives, APODR minimise les temps d'arrêt, réduit les pertes financières liées aux incidents, et optimise l'allocation des ressources de sécurité et de maintenance de manière dynamique. Cette proactivité conduit à une réduction exponentielle des risques et à une amélioration continue des performances.\n**Fonctions Clés** :\n- Analyse prédictive des risques (techniques, cyber, opérationnels) à partir des logs, des données de performance des agents, des données météorologiques, des informations de sécurité externes, et des tendances du marché.\n- Modélisation des scénarios de risques et simulation d'impact sur la flotte (temps d'arrêt, coûts, atteinte à la réputation).\n- Recommandation de mesures correctives et préventives automatisées (patchs de sécurité, maintenance prédictive, réacheminement des livraisons, renforcement des protocoles de sécurité).\n- Allocation dynamique des ressources de sécurité et de maintenance en fonction du profil de risque de chaque segment de la flotte et des prévisions de risques."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_AnomalyDetector_1767944249421.md",
+      "name": "PROPOSAL_AnomalyDetector_1767944249421.md",
+      "size": 1508,
+      "relative": "PROPOSAL_AnomalyDetector_1767944249421.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : AnomalyDetector\n**But** : Détecter proactivement les anomalies de sécurité et de performance dans l'ensemble du système EL Services.\n**Justification** : En identifiant et en corrigeant les anomalies de manière précoce, cet agent réduit considérablement les risques de pannes majeures, d'incidents de sécurité coûteux et d'interruptions de service. Une détection proactive des anomalies peut prévenir des pertes financières importantes, améliorer la fiabilité du système et renforcer la confiance des clients, impactant positivement la croissance à long terme.\n**Fonctions Clés** :\n- Analyser en continu les logs, les métriques et les données opérationnelles provenant de tous les agents et services EL Services.\n- Appliquer des algorithmes de détection d'anomalies (par exemple, séries temporelles, machine learning) pour identifier les comportements inhabituels.\n- Corréler les anomalies détectées avec les données de la base de connaissances (knowledge_base.json) pour identifier les causes potentielles et les solutions.\n- Générer des alertes en temps réel en cas de détection d'anomalies critiques, en fournissant des informations contextuelles et des suggestions de remédiation."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_CybersecuritySentinel_1767946378196.md",
+      "name": "PROPOSAL_CybersecuritySentinel_1767946378196.md",
+      "size": 1854,
+      "relative": "PROPOSAL_CybersecuritySentinel_1767946378196.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : CybersecuritySentinel\n**But** : Automatisation proactive de la réponse aux incidents de cybersécurité ciblant les agents IA et l'infrastructure, minimisant les risques et garantissant la continuité des opérations.\n**Justification** : Une faille de sécurité réussie sur un seul agent pourrait compromettre l'ensemble de la flotte, entraînant des pertes financières massives, des atteintes à la réputation et un arrêt complet des opérations. CybersecuritySentinel automatisera la détection, l'investigation et la réponse aux menaces en temps réel, réduisant considérablement le temps de réponse et minimisant l'impact des attaques. Il protège également les données sensibles transitant par les agents. En automatisant cette fonction critique, nous réduisons la dépendance aux interventions humaines, améliorant ainsi la résilience et la sécurité de la flotte de manière exponentielle. Cela permet également de prévenir les ransomwares ou attaques DDOS qui pourraient paralyser l'infrastructure. Plus le nombre d'agents augmente, plus la surface d'attaque potentielle augmente, rendant cet agent exponentiellement plus précieux.\n**Fonctions Clés** :\n- Analyse comportementale des agents IA pour détecter les anomalies et activités suspectes.\n- Détection et prévention des intrusions au niveau du réseau et des applications.\n- Réponse automatisée aux incidents de sécurité, incluant l'isolement des agents compromis, la correction des vulnérabilités et la restauration des systèmes.\n- Gestion centralisée des politiques de sécurité et de la conformité réglementaire."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_DataSecuritySentinel_1767944266496.md",
+      "name": "PROPOSAL_DataSecuritySentinel_1767944266496.md",
+      "size": 1244,
+      "relative": "PROPOSAL_DataSecuritySentinel_1767944266496.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : DataSecuritySentinel\n**But** : Agent de sécurité proactif pour la détection et la réponse automatisée aux menaces sur les données sensibles des agents et des flux logistiques.\n**Justification** : Une brèche de sécurité majeure pourrait paralyser l'ensemble de la flotte et entraîner des pertes financières massives et une atteinte à la réputation. Cet agent détecte et corrige les vulnérabilités en temps réel, limitant ainsi considérablement le risque d'attaques et assurant la continuité des opérations. La détection précoce et la réponse automatisée réduisent drastiquement le temps d'arrêt et les coûts associés à une violation de données, ayant un impact exponentiel sur la confiance des clients et les revenus.\n**Fonctions Clés** :\n- Analyse comportementale des flux de données (détection d'anomalies)\n- Détection de vulnérabilités dans les configurations des agents et du backend\n- Réponse automatisée aux incidents (isolation des agents compromis, application de correctifs)\n- Audit de sécurité continu et génération de rapports"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_PredictiveFailureAnalyst_1767971319622.md",
+      "name": "PROPOSAL_PredictiveFailureAnalyst_1767971319622.md",
+      "size": 1020,
+      "relative": "PROPOSAL_PredictiveFailureAnalyst_1767971319622.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : PredictiveFailureAnalyst\n**But** : Prédire les pannes des applications logistiques (Livreur, Tracking, etc.) et déclencher des actions correctives AVANT qu'elles ne se produisent.\n**Justification** : Réduit drastiquement les interruptions de service et les pertes financières associées, optimise la maintenance préventive et augmente la fiabilité globale du système de manière exponentielle en évitant les effets domino des pannes.\n**Fonctions Clés** :\n- Collecter et analyser les logs, métriques de performance et données d'utilisation de toutes les applications logistiques.\n- Identifier des patterns et anomalies prédictives de pannes potentielles en utilisant le Machine Learning.\n- Générer des alertes prédictives et suggérer des actions correctives (redémarrage, scaling, etc.).\n- Automatiser l'exécution des actions correctives pour minimiser les interruptions de service."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_PredictiveMaintenanceAgent_1767946382091.md",
+      "name": "PROPOSAL_PredictiveMaintenanceAgent_1767946382091.md",
+      "size": 1416,
+      "relative": "PROPOSAL_PredictiveMaintenanceAgent_1767946382091.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : PredictiveMaintenanceAgent\n**But** : Prédire les pannes potentielles des véhicules et des équipements logistiques pour minimiser les temps d'arrêt et optimiser la maintenance.\n**Justification** : En anticipant les pannes, cet agent permet de réduire drastiquement les coûts de maintenance corrective, d'éviter les retards de livraison coûteux et d'augmenter la durée de vie des équipements. Une réduction de 10% des temps d'arrêt des véhicules peut se traduire par des économies significatives et une augmentation substantielle de la capacité de transport. De plus, en optimisant la maintenance préventive, on améliore la sécurité globale des opérations.\n**Fonctions Clés** :\n- Collecter et analyser les données de télémétrie des véhicules (température du moteur, pression des pneus, consommation de carburant, etc.).\n- Exploiter les données historiques de maintenance pour identifier les schémas de défaillance.\n- Utiliser des algorithmes de machine learning pour prédire les pannes potentielles avec une probabilité associée.\n- Générer des alertes et des recommandations de maintenance proactive pour les équipes concernées."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_PredictiveSecurityAgent_1767948086167.md",
+      "name": "PROPOSAL_PredictiveSecurityAgent_1767948086167.md",
+      "size": 1080,
+      "relative": "PROPOSAL_PredictiveSecurityAgent_1767948086167.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : PredictiveSecurityAgent\n**But** : Anticiper et neutraliser les menaces de sécurité en analysant les logs et les patterns d'activité de l'ensemble des agents et systèmes EL Services.\n**Justification** : Une faille de sécurité exploitée peut entraîner des pertes financières massives, une interruption de service majeure et une atteinte à la réputation. Cet agent réduit exponentiellement ce risque en identifiant proactivement les vulnérabilités avant qu'elles ne soient exploitées, automatisant la réponse aux incidents et adaptant dynamiquement les mesures de sécurité. Un tel agent minimiserait les arrêts et les coûts associés aux attaques et permettrait une croissance plus sereine de l'entreprise.\n**Fonctions Clés** :\n- Log Aggregation & Analysis\n- Anomaly Detection (Machine Learning)\n- Automated Threat Response (Incident Response Orchestration)\n- Vulnerability Scanning & Prioritization"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md",
+      "name": "PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md",
+      "size": 1076,
+      "relative": "PROPOSAL_Predictive_Maintenance_Agent_1767908621735.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Predictive_Maintenance_Agent\n**But** : Prévoir les pannes potentielles des véhicules et des infrastructures de transport pour une maintenance proactive.\n**Justification** : Réduit les temps d'arrêt imprévus, optimise les coûts de maintenance en ciblant les interventions nécessaires et améliore la fiabilité globale du service, conduisant à une augmentation de la satisfaction client et à une réduction des pertes financières liées aux pannes.\n**Fonctions Clés** :\n- Collecte et analyse des données de télémétrie des véhicules (température, pression, vibrations, etc.)\n- Analyse des données historiques de maintenance pour identifier les schémas de défaillance\n- Prédiction des pannes potentielles à l'aide d'algorithmes de Machine Learning\n- Génération d'alertes pour les maintenances préventives"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Predictive_Maintenance_Agent_1767946377484.md",
+      "name": "PROPOSAL_Predictive_Maintenance_Agent_1767946377484.md",
+      "size": 1572,
+      "relative": "PROPOSAL_Predictive_Maintenance_Agent_1767946377484.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Predictive_Maintenance_Agent\n**But** : Anticiper les défaillances des véhicules et des infrastructures logistiques pour minimiser les temps d'arrêt et optimiser la maintenance.\n**Justification** : La maintenance prédictive permet une réduction significative des coûts de maintenance, une augmentation de la durée de vie des équipements, et une diminution drastique des interruptions de service dues à des pannes inattendues. En optimisant la maintenance, on améliore la fiabilité de l'ensemble de la chaîne logistique, ce qui conduit à une augmentation des revenus et à une réduction des coûts opérationnels. L'impact est exponentiel car une petite amélioration de la disponibilité des ressources se traduit par une grande amélioration de l'efficacité globale.\n**Fonctions Clés** :\n- Collecter et analyser les données des capteurs IoT des véhicules et des infrastructures (température, vibrations, consommation d'énergie, etc.).\n- Utiliser l'apprentissage automatique pour détecter les anomalies et prédire les défaillances potentielles.\n- Générer des alertes et des recommandations de maintenance proactive pour les équipes techniques.\n- Optimiser les plannings de maintenance en fonction des prédictions de défaillance et de la disponibilité des ressources."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_ProactiveSecurityAnalyzer_1767946039971.md",
+      "name": "PROPOSAL_ProactiveSecurityAnalyzer_1767946039971.md",
+      "size": 1204,
+      "relative": "PROPOSAL_ProactiveSecurityAnalyzer_1767946039971.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : ProactiveSecurityAnalyzer\n**But** : Détecter et corriger proactivement les vulnérabilités de sécurité dans les applications et infrastructures en temps réel, avant qu'elles ne soient exploitées.\n**Justification** : Réduit exponentiellement le risque de brèches de sécurité coûteuses et de perturbations de service en automatisant l'analyse de vulnérabilités et les corrections, diminuant ainsi la charge de travail de l'équipe de sécurité et améliorant la posture de sécurité globale.\n**Fonctions Clés** :\n- Analyse de vulnérabilités statique et dynamique des applications et infrastructures\n- Corrélation des menaces provenant de diverses sources de renseignements sur les menaces\n- Génération automatique de correctifs et de configurations de sécurité basés sur l'analyse de vulnérabilités\n- Déploiement automatisé des correctifs et configurations"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md",
+      "name": "PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md",
+      "size": 887,
+      "relative": "PROPOSAL_Proactive_Risk_Mitigator_1767908750797.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Proactive_Risk_Mitigator\n**But** : Identifie et atténue proactivement les risques de sécurité et les vulnérabilités dans l'ensemble du système EL Services avant qu'ils ne soient exploités.\n**Justification** : La sécurité est un objectif principal. Un agent proactif peut réduire drastiquement les coûts associés aux incidents de sécurité (financiers, réputationnels, opérationnels) et augmenter la fiabilité du service, générant un retour sur investissement exponentiel en évitant des pertes potentielles massives.\n**Fonctions Clés** :\n- Analyse de la surface d'attaque\n- Modélisation des menaces\n- Tests de pénétration automatisés\n- Surveillance continue des vulnérabilités"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Risk_Mitigator_1767904757575.md",
+      "name": "PROPOSAL_Risk_Mitigator_1767904757575.md",
+      "size": 844,
+      "relative": "PROPOSAL_Risk_Mitigator_1767904757575.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Risk_Mitigator\n**But** : Analyse proactive des risques potentiels dans la chaîne logistique et propose des stratégies d'atténuation.\n**Justification** : Réduit les pertes financières et améliore la fiabilité en anticipant les problèmes (retards, accidents, vols, conditions météorologiques) avant qu'ils ne surviennent, permettant une réaction rapide et des ajustements proactifs, conduisant à une réduction significative des coûts et une amélioration de la satisfaction client. L'impact est exponentiel car une interruption mineure peut rapidement se propager à toute la chaîne.\n**Fonctions Clés** :\n- Data Analysis\n- Predictive Modeling\n- Risk Assessment\n- Strategy Recommendation"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_SecurityPatchingAgent_1767971320461.md",
+      "name": "PROPOSAL_SecurityPatchingAgent_1767971320461.md",
+      "size": 1400,
+      "relative": "PROPOSAL_SecurityPatchingAgent_1767971320461.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : SecurityPatchingAgent\n**But** : Automatiser la découverte et l'application de correctifs de sécurité en temps réel pour l'ensemble de la flotte d'agents et des applications sous-jacentes.\n**Justification** : En réduisant considérablement le temps de réponse aux vulnérabilités nouvellement découvertes, cet agent minimise le risque d'exploitation et de compromission des données. L'automatisation de ce processus, qui est normalement manuel et chronophage, libère des ressources précieuses et garantit une posture de sécurité proactive, augmentant la fiabilité de l'ensemble du système et évitant potentiellement des pertes financières massives dues à des violations de données.\n**Fonctions Clés** :\n- Analyser les flux d'informations sur les vulnérabilités (CVE, etc.) en temps réel.\n- Identifier les composants logiciels vulnérables au sein de l'infrastructure EL Services.\n- Prioriser les correctifs en fonction de la criticité de la vulnérabilité et de l'impact potentiel.\n- Tester et appliquer automatiquement les correctifs dans un environnement de staging."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_Security_Auditor_AI_1767971360034.md",
+      "name": "PROPOSAL_Security_Auditor_AI_1767971360034.md",
+      "size": 1453,
+      "relative": "PROPOSAL_Security_Auditor_AI_1767971360034.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Security_Auditor_AI\n**But** : Effectuer des audits de sécurité proactifs sur l'ensemble de l'infrastructure EL Services (applications, réseaux, données) pour identifier et corriger les vulnérabilités avant qu'elles ne soient exploitées.\n**Justification** : Une brèche de sécurité majeure pourrait entraîner des pertes financières considérables, une interruption de service et une atteinte à la réputation. Un audit automatisé et continu permet de réduire drastiquement les risques en identifiant et en corrigeant proactivement les vulnérabilités, diminuant ainsi la probabilité et l'impact potentiel d'une attaque. Cela assure la continuité des opérations et protège les revenus.\n**Fonctions Clés** :\n- Analyse statique du code source des applications (Livreur, etc.) à la recherche de vulnérabilités courantes (OWASP Top 10).\n- Tests de pénétration automatisés des API et des services web.\n- Analyse dynamique du comportement des applications en environnement de test (fuzzing, etc.).\n- Surveillance en temps réel des logs et des métriques de sécurité pour détecter les anomalies et les tentatives d'intrusion."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/PROPOSAL_ThreatIntelligenceAgent_1767948096214.md",
+      "name": "PROPOSAL_ThreatIntelligenceAgent_1767948096214.md",
+      "size": 1295,
+      "relative": "PROPOSAL_ThreatIntelligenceAgent_1767948096214.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : ThreatIntelligenceAgent\n**But** : Analyser en continu les logs et les données du réseau pour identifier et prédire les menaces de sécurité potentielles affectant la chaîne logistique, le transport et les données des clients.\n**Justification** : L'automatisation de la détection des menaces et la réponse proactive peuvent prévenir des pertes financières massives, des interruptions de service coûteuses, et des atteintes à la réputation qui pourraient survenir en cas de cyberattaque réussie. En prédisant et en bloquant les attaques avant qu'elles ne se produisent, cet agent minimise de manière exponentielle les risques et les coûts associés à la sécurité.\n**Fonctions Clés** :\n- Analyse comportementale du réseau et des applications\n- Corrélation des événements de sécurité provenant de différentes sources (logs, pare-feu, IDS)\n- Détection d'anomalies et d'indicateurs de compromission (IOC)\n- Génération automatique d'alertes et de rapports de sécurité"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/SECURITY_PROTOCOLS.md",
+      "name": "SECURITY_PROTOCOLS.md",
+      "size": 2467,
+      "relative": "SECURITY_PROTOCOLS.md",
+      "contentSnippet": "# 🛡️ Protocoles de Sécurité & Configuration Hébergement\n\nCe document référence les politiques de sécurité actives sur l'hébergement (o2switch / Tiger Protect) et les règles à suivre par les agents (Network Overseer).\n\n## 1. Configuration Tiger Protect (WAF)\n\n| Fonctionnalité | État | Justification |\n| :--- | :--- | :--- |\n| **Sécurité par défaut** | ✅ **ACTIVÉ** | Protection de base indispensable (SQLi, XSS). |\n| **Contrôle Navigateur** | ⚠️ **DÉSACTIVÉ** | **Risque de blocage** pour les agents API (`Network_Overseer`). Activer uniquement si IPs whitelisted. |"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/SETUP_KEYS.md",
+      "name": "SETUP_KEYS.md",
+      "size": 1664,
+      "relative": "SETUP_KEYS.md",
+      "contentSnippet": "# Configuration du Compte de Service Antigravity\n\nPour activer l'autonomie totale des agents, suivez ces étapes :\n\n## 1. Création sur Google Cloud\n1. Rendez-vous sur la [Console Google Cloud](https://console.cloud.google.com/).\n2. Créez un **Nouveau Projet** (ex: `antigravity-backend`).\n   - Ou sélectionnez le projet lié à votre Apps Script si vous le connaissez (`1hRea4x...`).\n3. Allez dans **IAM et administration** > **Comptes de service**.\n4. Cliquez sur **Créer un compte de service**."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Sentinel_Core.js",
+      "name": "Sentinel_Core.js",
+      "size": 18083,
+      "relative": "Sentinel_Core.js",
+      "contentSnippet": "/**\n * @file Sentinel_Core.js\n * @description ORCHESTRATEUR PRINCIPAL ANTIGRAVITY (Backend Node.js)\n * Coordonne les agents spécialisés (Modules) et assure la liaison avec le Dashboard Google.\n * Version : 2.0 (Intégration Marketing + Client Expert Local + Logs Fichiers)\n */\n\nrequire('dotenv').config();\nconst { google } = require('googleapis');\nconst fs = require('fs');",
+      "description": "@description ORCHESTRATEUR PRINCIPAL ANTIGRAVITY (Backend Node.js) Coordonne les agents spécialisés (Modules) et assure la liaison avec le Dashboard Google. Version : 2.0 (Intégration Marketing + Client Expert Local + Logs Fichiers)"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Sentinel_Node.js",
+      "name": "Sentinel_Node.js",
+      "size": 5544,
+      "relative": "Sentinel_Node.js",
+      "contentSnippet": "/**\n * Sentinel Node Agent for VPS (Linux/Ubuntu)\n * ==========================================\n * This script gathers security and system status from the VPS and sends it to the central GAS Web App.\n *\n * Usage:\n *   1. Install Node.js: sudo apt install nodejs\n *   2. Run: node Sentinel_Node.js\n *   3. (Optional) Run via cron or systemd for periodic reporting.\n */",
+      "description": "Sentinel Node Agent for VPS (Linux/Ubuntu) ========================================== This script gathers security and system status from the VPS and sends it to the central GAS Web App. Usage: 1. Install Node.js: sudo apt install nodejs 2. Run: node Sentinel_Node.js 3. (Optional) Run via cron or systemd for periodic reporting."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Service_Agent.js",
+      "name": "Service_Agent.js",
+      "size": 1090,
+      "relative": "Service_Agent.js",
+      "contentSnippet": "const { execSync } = require('child_process');\nconst fs = require('fs');\nconst path = require('path');\n\nconst LOG_FILE = path.join(__dirname, 'service_check_log.txt');\n\nfunction log(message) {\n    const timestamp = new Date().toISOString();\n    const logMessage = `[${timestamp}] ${message}\\n`;\n    fs.appendFileSync(LOG_FILE, logMessage);"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/Worker_Launcher.js",
+      "name": "Worker_Launcher.js",
+      "size": 2016,
+      "relative": "Worker_Launcher.js",
+      "contentSnippet": "/**\n * @file Worker_Launcher.js\n * @description Script d'entrée pour les Workers distants.\n * Reçoit le nom de l'agent en argument et déclenche son cycle.\n * Usage: node Worker_Launcher.js Ghost_Shopper\n */\n\nconst path = require('path');\n\n// Mappage des Agents disponibles sur le Worker",
+      "description": "@description Script d'entrée pour les Workers distants. Reçoit le nom de l'agent en argument et déclenche son cycle. Usage: node Worker_Launcher.js Ghost_Shopper"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/_ARCHIVE/proposals_reviewed/PROPOSAL_Anomaly_Detector_1767888166573.md",
+      "name": "PROPOSAL_Anomaly_Detector_1767888166573.md",
+      "size": 819,
+      "relative": "_ARCHIVE/proposals_reviewed/PROPOSAL_Anomaly_Detector_1767888166573.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Anomaly_Detector\n**But** : Détecte les anomalies en temps réel dans les données opérationnelles (routes, performances des véhicules, délais) et alerte les agents concernés.\n**Justification** : Peut prévenir des incidents majeurs (accidents, retards massifs, pannes) en identifiant des schémas inhabituels avant qu'ils ne causent des problèmes, réduisant ainsi les coûts, augmentant la fiabilité et améliorant la sécurité. L'impact est exponentiel car une petite anomalie non détectée peut engendrer des pertes considérables.\n**Fonctions Clés** :\n- Real-time data analysis\n- Anomaly detection using statistical models\n- Automated alert system\n- Predictive maintenance suggestions"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/_ARCHIVE/proposals_reviewed/PROPOSAL_Anomaly_Predictor_1767883625045.md",
+      "name": "PROPOSAL_Anomaly_Predictor_1767883625045.md",
+      "size": 893,
+      "relative": "_ARCHIVE/proposals_reviewed/PROPOSAL_Anomaly_Predictor_1767883625045.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Anomaly_Predictor\n**But** : Prédire les anomalies (sécurité, performance, erreurs) dans les logs et métriques en temps réel pour une intervention proactive.\n**Justification** : La détection précoce des anomalies peut éviter des incidents majeurs (sécurité, performance) et des pertes financières importantes. L'intervention proactive automatisée permet de minimiser l'impact et d'optimiser la fiabilité du système. Cette capacité pourrait aussi permettre de prévoir des problèmes de maintenance des véhicules ou des retards de livraison, améliorant ainsi la satisfaction client et réduisant les coûts opérationnels.\n**Fonctions Clés** :\n- Log_Analysis\n- Metrics_Monitoring\n- Anomaly_Detection\n- Predictive_Alerting"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/_ARCHIVE/proposals_reviewed/PROPOSAL_Dynamic_Risk_Assessor_1767888172787.md",
+      "name": "PROPOSAL_Dynamic_Risk_Assessor_1767888172787.md",
+      "size": 891,
+      "relative": "_ARCHIVE/proposals_reviewed/PROPOSAL_Dynamic_Risk_Assessor_1767888172787.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Dynamic_Risk_Assessor\n**But** : Évalue en temps réel les risques de sécurité et de délais sur l'ensemble des opérations logistiques en cours, en utilisant des données de capteurs, des flux d'informations externes et des modèles prédictifs.\n**Justification** : En anticipant les problèmes (accidents, météo, blocages), on peut réagir proactivement, minimiser les pertes, optimiser les itinéraires et améliorer la fiabilité, réduisant les coûts et augmentant la satisfaction client de manière exponentielle. Cela contribue directement à l'objectif de sécurité maximale (Sentinel) et à la performance (V2 App).\n**Fonctions Clés** :\n- Real-time Risk Prediction\n- Automated Contingency Planning\n- Dynamic Route Optimization\n- Security Threat Detection"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/_ARCHIVE/proposals_reviewed/PROPOSAL_Predictive_Maintenance_Agent_1767877053024.md",
+      "name": "PROPOSAL_Predictive_Maintenance_Agent_1767877053024.md",
+      "size": 1385,
+      "relative": "_ARCHIVE/proposals_reviewed/PROPOSAL_Predictive_Maintenance_Agent_1767877053024.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Predictive_Maintenance_Agent\n**But** : Prédire les pannes des véhicules de transport avant qu'elles ne surviennent, minimisant les temps d'arrêt et optimisant la planification de la maintenance.\n**Justification** : La maintenance prédictive peut réduire considérablement les coûts de réparation, améliorer la disponibilité des véhicules et éviter les retards de livraison. En analysant les données des capteurs des véhicules (température du moteur, pression des pneus, etc.), cet agent peut anticiper les problèmes et recommander une maintenance proactive. Cela conduit à une réduction significative des temps d'arrêt imprévus et à une meilleure utilisation de la flotte, augmentant potentiellement les revenus et la fiabilité de manière exponentielle.\n**Fonctions Clés** :\n- Collecter et analyser les données des capteurs des véhicules en temps réel.\n- Utiliser des algorithmes de Machine Learning pour prédire les pannes potentielles.\n- Générer des alertes de maintenance prédictive et des recommandations.\n- S'intégrer avec le système de gestion de la maintenance existant pour automatiser la planification de la maintenance."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/_ARCHIVE/proposals_reviewed/PROPOSAL_Revenue_Optimizer_1767889024364.md",
+      "name": "PROPOSAL_Revenue_Optimizer_1767889024364.md",
+      "size": 1256,
+      "relative": "_ARCHIVE/proposals_reviewed/PROPOSAL_Revenue_Optimizer_1767889024364.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Revenue_Optimizer\n**But** : Analyse les données de transport (coûts, itinéraires, délais) pour identifier des opportunités d'optimisation des revenus, en proposant des ajustements de prix dynamiques, des regroupements de commandes intelligents ou des itinéraires alternatifs plus rentables.\n**Justification** : L'optimisation des revenus est cruciale pour la croissance exponentielle du projet. Un agent dédié à l'identification et à l'implémentation d'opportunités d'augmentation des revenus peut avoir un impact financier significatif et direct, bien au-delà d'optimisations de coûts ou de sécurité. Il automatise la recherche de nouvelles sources de revenus et l'ajustement des prix en fonction de la demande et de la concurrence.\n**Fonctions Clés** :\n- Analyse des données de transport (coûts, délais, itinéraires)\n- Identification des opportunités d'optimisation des revenus (prix dynamiques, regroupement de commandes)\n- Proposition d'ajustements de prix et d'itinéraires\n- Simulation de l'impact financier des changements proposés"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/_ARCHIVE/proposals_reviewed/PROPOSAL_Sentinel_Threat_Predictor_1767883611121.md",
+      "name": "PROPOSAL_Sentinel_Threat_Predictor_1767883611121.md",
+      "size": 1041,
+      "relative": "_ARCHIVE/proposals_reviewed/PROPOSAL_Sentinel_Threat_Predictor_1767883611121.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Sentinel_Threat_Predictor\n**But** : Analyse prédictive des menaces de sécurité et des anomalies dans les opérations logistiques.\n**Justification** : La prédiction proactive des menaces permet d'éviter des pertes financières importantes dues à des vols, des fraudes, des cyberattaques ou des interruptions de service. Une détection précoce offre un avantage exponentiel en réduisant les risques et en optimisant la résilience de la chaîne logistique.\n**Fonctions Clés** :\n- Analyse des données de flux logistiques pour détecter les schémas anormaux.\n- Corrélation des données de sécurité (cyberattaques, incidents de vol) avec les opérations logistiques.\n- Prédiction des zones à risque élevé et des vulnérabilités potentielles.\n- Génération d'alertes et de recommandations de sécurité proactives."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/_ARCHIVE/proposals_reviewed/PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md",
+      "name": "PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md",
+      "size": 914,
+      "relative": "_ARCHIVE/proposals_reviewed/PROPOSAL_Sentinel_Threat_Predictor_1767883612207.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Sentinel_Threat_Predictor\n**But** : Analyse proactive des menaces de sécurité potentielles et automatisation des réponses préventives.\n**Justification** : Sécurité Maximale (Objectif 1 du plan maître). La prédiction et la prévention automatisées réduisent exponentiellement le risque d'attaques et de vulnérabilités exploitées, minimisant les pertes potentielles (financières, opérationnelles, de réputation) et assurant la continuité des opérations critiques. L'analyse en temps réel des données et des tendances émergentes permet une adaptation dynamique des mesures de sécurité, surpassant les approches réactives traditionnelles.\n**Fonctions Clés** :\n- Threat Prediction\n- Automated Security Response\n- Vulnerability Scanning & Reporting\n- Real-time Data Analysis"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/_ARCHIVE/proposals_reviewed/PROPOSAL_Threat_Anticipator_1767888167483.md",
+      "name": "PROPOSAL_Threat_Anticipator_1767888167483.md",
+      "size": 1164,
+      "relative": "_ARCHIVE/proposals_reviewed/PROPOSAL_Threat_Anticipator_1767888167483.md",
+      "contentSnippet": "\n# 💡 Proposition de Nouvel Agent\n**Nom** : Threat_Anticipator\n**But** : Analyse prédictive des menaces de sécurité et des perturbations opérationnelles pour le réseau logistique.\n**Justification** : Réduit exponentiellement les risques de sécurité (cyberattaques, vols, erreurs humaines) et les perturbations opérationnelles (conditions météorologiques extrêmes, embouteillages imprévus, pénuries de carburant). En anticipant et en atténuant ces menaces de manière proactive, il optimise la sécurité, la fiabilité et la performance du réseau, ce qui se traduit par des économies importantes et une amélioration de la satisfaction client. Une détection et une réponse précoces peuvent prévenir des pertes massives.\n**Fonctions Clés** :\n- Analyse des données de sécurité (journaux, vulnérabilités)\n- Modélisation prédictive des perturbations opérationnelles\n- Génération de plans d'atténuation proactifs\n- Coordination avec les autres agents pour l'exécution des plans d'atténuation"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/benchmark_browser.js",
+      "name": "benchmark_browser.js",
+      "size": 4375,
+      "relative": "benchmark_browser.js",
+      "contentSnippet": "/**\n * @file benchmark_browser.js\n * @description Compare two browser launch methods:\n *   1. Launch new browser instance each time (current Ghost_Shopper behavior)\n *   2. Connect to a persistent Chrome instance via CDP\n */\n\nconst { chromium } = require('playwright');\n\nconst TARGET_URL = 'https://mediconvoi.fr/';",
+      "description": "@description Compare two browser launch methods: 1. Launch new browser instance each time (current Ghost_Shopper behavior) 2. Connect to a persistent Chrome instance via CDP"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/boot_orchestrator.js",
+      "name": "boot_orchestrator.js",
+      "size": 4353,
+      "relative": "boot_orchestrator.js",
+      "contentSnippet": "const { spawn, execSync, exec } = require('child_process');\nconst path = require('path');\nconst fs = require('fs');\nconst { main: runMaintenance } = require('./Maintenance_Agent');\nconst { main: runServiceCheck } = require('./Service_Agent');\nconst { sendRecapEmail } = require('./email_service');\n\nconst LOG_FILE = path.join(__dirname, 'boot_log.txt');\n\nfunction log(message) {"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/check_env_keys.js",
+      "name": "check_env_keys.js",
+      "size": 507,
+      "relative": "check_env_keys.js",
+      "contentSnippet": "const dotenv = require('dotenv');\nconst fs = require('fs');\nconst path = require('path');\n\nconst envPath = path.join(__dirname, '.env');\nif (fs.existsSync(envPath)) {\n    const envConfig = dotenv.parse(fs.readFileSync(envPath));\n    console.log(\"Keys in .env:\", Object.keys(envConfig));\n    if (envConfig.GEMINI_API_KEY) {\n        console.log(\"GEMINI_API_KEY is present.\");"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/check_keys.js",
+      "name": "check_keys.js",
+      "size": 267,
+      "relative": "check_keys.js",
+      "contentSnippet": "require('dotenv').config();\nconsole.log('GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'FOUND' : 'NOT_FOUND');\nif (process.env.GEMINI_API_KEY) console.log('Length:', process.env.GEMINI_API_KEY.length);\nconsole.log('MY_DANGEROUS_KEY:', process.env.MY_DANGEROUS_KEY);\n"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/check_vps.js",
+      "name": "check_vps.js",
+      "size": 692,
+      "relative": "check_vps.js",
+      "contentSnippet": "const { Client } = require('ssh2');\n\nconst config = {\n    host: '37.59.124.82',\n    port: 22,\n    username: 'ubuntu',\n    password: 'CHANGE_ME'\n};\n\nconst conn = new Client();"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/deploy_local.js",
+      "name": "deploy_local.js",
+      "size": 2949,
+      "relative": "deploy_local.js",
+      "contentSnippet": "/**\n * @file deploy_local.js\n * @description Script de déploiement LOCAL (car nous sommes déjà sur le VPS).\n * Copie les fichiers vers /home/ubuntu/sentinel et redémarre les services.\n */\n\nconst fs = require('fs');\nconst path = require('path');\nconst { exec } = require('child_process');\n",
+      "description": "@description Script de déploiement LOCAL (car nous sommes déjà sur le VPS). Copie les fichiers vers /home/ubuntu/sentinel et redémarre les services."
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/deploy_vps.js",
+      "name": "deploy_vps.js",
+      "size": 5623,
+      "relative": "deploy_vps.js",
+      "contentSnippet": "const { Client } = require('ssh2');\nconst fs = require('fs');\nconst path = require('path');\nconst Vault = require('./Agents_Modules/Vault'); // Ensure Vault is accessible\n\nconst config = {\n    host: Vault.get('VPS_HOST'),\n    port: 22,\n    username: Vault.get('VPS_USER'),\n    password: Vault.get('VPS_PASS')"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/diagnose_ftp.js",
+      "name": "diagnose_ftp.js",
+      "size": 2180,
+      "relative": "diagnose_ftp.js",
+      "contentSnippet": "const ftp = require('basic-ftp');\nconst fs = require('fs');\nconst path = require('path');\nrequire('dotenv').config({ path: path.join(__dirname, '.env') });\n\nasync function diagnose() {\n    const client = new ftp.Client();\n    client.ftp.verbose = true;\n    \n    // Configuration"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/diagnostic_2026-01-06.md",
+      "name": "diagnostic_2026-01-06.md",
+      "size": 962,
+      "relative": "diagnostic_2026-01-06.md",
+      "contentSnippet": "# 🔧 Rapport Diagnostic - 07/01/2026\n\nGénéré le: 07/01/2026 00:45:44\n\n---\n\n## 📊 Résumé\n\n| Sévérité | Nombre |\n|----------|--------|"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/diagnostic_2026-01-07.md",
+      "name": "diagnostic_2026-01-07.md",
+      "size": 800,
+      "relative": "diagnostic_2026-01-07.md",
+      "contentSnippet": "# 🔧 Rapport Diagnostic - 07/01/2026\n\nGénéré le: 07/01/2026 21:50:42\n\n---\n\n## 📊 Résumé\n\n| Sévérité | Nombre |\n|----------|--------|"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/diagnostic_2026-01-08.md",
+      "name": "diagnostic_2026-01-08.md",
+      "size": 800,
+      "relative": "diagnostic_2026-01-08.md",
+      "contentSnippet": "# 🔧 Rapport Diagnostic - 08/01/2026\n\nGénéré le: 08/01/2026 01:03:33\n\n---\n\n## 📊 Résumé\n\n| Sévérité | Nombre |\n|----------|--------|"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/diagnostic_2026-01-09_v2.md",
+      "name": "diagnostic_2026-01-09_v2.md",
+      "size": 592,
+      "relative": "diagnostic_2026-01-09_v2.md",
+      "contentSnippet": "# 🔧 Rapport Diagnostic Intelligent - 09/01/2026\n\nTotal problèmes : 2\n- [unknown] Erreur inconnue (1x)\n  > Erreur: 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Analyse indisponible.\n- [unknown] Erreur inconnue (1x)\n  > Erreur: 🔥 App Livreur : DOWN (Timeout/Error: timeout of 20000ms exceeded) -> IA: Cause probable : Le service \"App Livreur\" ne répond pas, et l'erreur de timeout suggère un problème de connectivité ou un service non opérationnel.  Il pourrait s'agir d'un problème réseau, d'une surcharge du serveur ou d'une application plantée.\n"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/email_service.js",
+      "name": "email_service.js",
+      "size": 1890,
+      "relative": "email_service.js",
+      "contentSnippet": "const nodemailer = require('nodemailer');\nconst fs = require('fs');\nconst path = require('path');\nconst dotenv = require('dotenv');\n\n// Path to Supabase env where SMTP creds are stored\nconst SUPABASE_ENV_PATH = '/home/ubuntu/supabase_docker/supabase/docker/.env';\n\nfunction getSmtpConfig() {\n    if (!fs.existsSync(SUPABASE_ENV_PATH)) {"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/finish_vps_setup.js",
+      "name": "finish_vps_setup.js",
+      "size": 1821,
+      "relative": "finish_vps_setup.js",
+      "contentSnippet": "const { Client } = require('ssh2');\n\nconst config = {\n    host: '37.59.124.82',\n    port: 22,\n    username: 'ubuntu',\n    password: 'CHANGE_ME'\n};\n\nconst conn = new Client();"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/fix_admin_access.js",
+      "name": "fix_admin_access.js",
+      "size": 2143,
+      "relative": "fix_admin_access.js",
+      "contentSnippet": "const Vault = require('./Agents_Modules/Vault');\n\nconst { createClient } = require('@supabase/supabase-js');\n\n// Configuration Check\n// API URL from .env (API_EXTERNAL_URL)\nconst SUPABASE_URL = 'https://37.59.124.82.sslip.io';\n// SERVICE_ROLE_KEY from .env (Line 9)\nconst SERVICE_KEY = Vault.get('SERVICE_KEY');\n"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/fix_integrity_and_reset.js",
+      "name": "fix_integrity_and_reset.js",
+      "size": 1365,
+      "relative": "fix_integrity_and_reset.js",
+      "contentSnippet": "\nconst fs = require('fs');\nconst path = require('path');\nconst { exec } = require('child_process');\nconst CloudflareAgent = require('./Agents_Modules/Cloudflare_Agent');\n\nasync function fixIntegrityAndReset() {\n    console.log(\"🛠️ Starting System Recovery...\");\n\n    // 1. Reset Integrity Baseline"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/fix_qa_user.js",
+      "name": "fix_qa_user.js",
+      "size": 1544,
+      "relative": "fix_qa_user.js",
+      "contentSnippet": "const { createClient } = require('@supabase/supabase-js');\nrequire('dotenv').config();\n\nconst SUPABASE_URL = process.env.SUPABASE_URL;\nconst SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;\n\nif (!SUPABASE_URL || !SUPABASE_KEY) {\n    console.error(\"Missing credentials in .env\");\n    process.exit(1);\n}"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/keys/service-account.json",
+      "name": "service-account.json",
+      "size": 2398,
+      "relative": "keys/service-account.json",
+      "contentSnippet": "{\n    \"type\": \"service_account\",\n    \"project_id\": \"gestion-els\",\n    \"private_key_id\": \"1479aa1956041bc155ef114e5764dc735f12fa1b\",\n    \"private_key\": \"-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDMZVwI/WXcoGyM\\nG4LE+gobUoDBkdSKsN90yTJFxB7WYX1RlM0lsWm2fNvbzat7oYEN7iwyhS9c82rJ\\nuXsRNuRh2JiAZ13APDAJJlGInpyk2L3a7fb8LUajVY7i+c5YeSb2lH69hT7TxgTr\\nJooBZPkDiMgZ5pt4PmWP9hB/AkuFQTLf7dVavAyHh+NK5jeM9uCf22FXovmvj3pl\\nLl/gj8nrXZCB8FRdyhjr3/G2GfksFv5MWeW7DoeEUQgDNE3hIWzoX6Sg6CnNTqHr\\nNxvhyaYoUG7axHVwKUVwBgEbGlxyh3+VUTyuX9h07wPepbsaI7LpPAi7SevK9mY6\\nziDjzFjbAgMBAAECggEAALL6DnJ7cOFAQyHBn+sxB1M6wIQUrjLDrj0VRcV8INnt\\ng/lr0uID+A1TnTFbZvgFnnwUPPSqqvk5gh4hzHcbxIqT9EsmOBxHQnNrRPnclE3E\\n0c+4OrhBl8PDp4VuOMGVVLOWVA9KyI5SrFE8mJuf+cHz2UQqKk5K/6Pk/jeOSug4\\nHl28vrKLP10Jgb0iB1HECavlPckvmHU/uzJiqvKRolaYHMWEHTwNdcdrR3ud2CVZ\\nsF8h4g611QO/dhBp4eJyMQyoqTWHbUdL8V6Y8/IzVOZvo+AKfd2e6Pew79C2JcsV\\nzRNPTQ+TKZ6xdAXdcdCOThVyDsO1gOGCsKp49MynZQKBgQDr6l7vsT15GiDhj530\\nTSH7fSo9xWrpl/odu4nU8+n/aWtfc8JjRRkTx3VlApJhbWaLlwQRzKkT7jiIQXyT\\nKeH23ljC8NKmUsfkc24Wqjt7YI8FHOULZ4uN4sOAGHRTR54H4uDXizm/Mm25uFJt\\nbFcifPUQT55CjgopQRQtfWvyDwKBgQDdzAobaTZPxidklKzVq8u7VWWs+dgUTjJc\\nuX9kSXNzD0tTFpkKUKZUUs437I8F1tRraZiI6bjA/GeD9+prYu9vAH2Zs6x75Qx7\\nnNq743FMvDhTf20s2jyFlVQfvfVym4O4m6mi9BZtKk6TwLQ4iXHUBcgLyQK3+z3P\\nhaB/LPXIdQKBgQCPgqwrzTri/2T/MblZks5YSSS4HO7TmNLa4WmQNKyk5cEeeLHI\\nZ5FAufYM80qOn9lgkwYzubck26ZiJMweTb0aytleBNdvvC3DKADRIs86V1vJNXGT\\nxXJcZpScyMOCoa9dhsNV+2iuiYO8FYd27w/2d+Mv/+7696Lww5j9ry1KOwKBgEFQ\\nS42k3vSA8qrAyWCmlXkV/boBXOsl19jMW0JKCvBQCatvFSQfecuNEuMPC1L531W+\\nI8f1o41ZBparE+IJoV57s4Dmkx1s5s8j8pmvsXaaWq/j719s6LOhtMMgKj5Uo2Zi\\nmIK/BDejZL5H2gpoFxgLl8w4pk9NcfdBb3Dj6YDdAoGBAI/aKoFdOD2R9Pqx152/\\nf9OUZzAshtJDmEgSezcu4s+/hypV/eYrgzEIS/5K2wfRys2bZw/Sa1E5VQ6qfO/5\\na4TPMxsn1O8hhulgOyEFJURp129yP/IALqC5n2KySzoXklL/AwOdNcb+qZEYRUOK\\nKzKXTJBVEay6f4ZrthoneB6v\\n-----END PRIVATE KEY-----\\n\",\n    \"client_email\": \"antigravity-core-to-drive@gestion-els.iam.gserviceaccount.com\",\n    \"client_id\": \"105473237633230862865\",\n    \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n    \"token_uri\": \"https://oauth2.googleapis.com/token\",\n    \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\","
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/manual_check_ghost_shopper.js",
+      "name": "manual_check_ghost_shopper.js",
+      "size": 675,
+      "relative": "manual_check_ghost_shopper.js",
+      "contentSnippet": "\nconst GhostShopper = require('./Agents_Modules/Ghost_Shopper');\n\nasync function runTest() {\n    console.log('--- STARTING MANUAL GHOST SHOPPER TEST ---');\n    try {\n        const report = await GhostShopper.runGhostShopperCycle();\n        console.log('--- REPORT ---');\n        console.log(JSON.stringify(report, null, 2));\n"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/manual_purge.js",
+      "name": "manual_purge.js",
+      "size": 371,
+      "relative": "manual_purge.js",
+      "contentSnippet": "const CloudflareAgent = require('./Agents_Modules/Cloudflare_Agent');\n\n(async () => {\n    console.log(\"🧹 Démarrage de la Purge Cloudflare Manuelle...\");\n    try {\n        const result = await CloudflareAgent.purgeCache(true);\n        console.log(\"Résultat:\", JSON.stringify(result, null, 2));\n    } catch (e) {\n        console.error(\"Erreur Purge:\", e);\n    }"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/package.json",
+      "name": "package.json",
+      "size": 713,
+      "relative": "package.json",
+      "contentSnippet": "{\n    \"name\": \"antigravity-agents-backend\",\n    \"version\": \"1.0.0\",\n    \"description\": \"Backend local pour les agents Antigravity\",\n    \"main\": \"Sentinel_Core.js\",\n    \"scripts\": {\n        \"start\": \"node Sentinel_Core.js\",\n        \"dev\": \"nodemon Sentinel_Core.js\"\n    },\n    \"dependencies\": {"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/purge_cloudflare.js",
+      "name": "purge_cloudflare.js",
+      "size": 3081,
+      "relative": "purge_cloudflare.js",
+      "contentSnippet": "require('dotenv').config();\nconst axios = require('axios');\n\nconst ZONE_ID = process.env.CLOUDFLARE_ZONE_ID;\nconst API_TOKEN = process.env.CLOUDFLARE_API_TOKEN;\n// Global API Key support (alternative)\nconst EMAIL = process.env.CLOUDFLARE_EMAIL;\nconst API_KEY = process.env.CLOUDFLARE_API_KEY;\n\nasync function purgeCache() {"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/rapport_agents_2026-01-06.md",
+      "name": "rapport_agents_2026-01-06.md",
+      "size": 7501,
+      "relative": "rapport_agents_2026-01-06.md",
+      "contentSnippet": "# Rapport des Agents - 07/01/2026\n\nGénéré le: 07/01/2026 00:32:15\n\n---\n\n## 📊 Résumé Global\n\n| Agent | Total Logs | Dernières 24h |\n|-------|------------|---------------|"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/read_drive_doc.js",
+      "name": "read_drive_doc.js",
+      "size": 1897,
+      "relative": "read_drive_doc.js",
+      "contentSnippet": "const { google } = require('googleapis');\nconst fs = require('fs');\nconst path = require('path');\n\n// Configuration\nconst CREDENTIALS_PATH = path.join(__dirname, '../credentials.json'); // Adjusted path based on file location\nconst DOC_ID = '1dtN-RG34Mw2l7U3rM56FHUPcNDoj3BIDmYbdU_VfDh8';\n\nasync function readDoc() {\n    try {"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/read_vps_logs.js",
+      "name": "read_vps_logs.js",
+      "size": 645,
+      "relative": "read_vps_logs.js",
+      "contentSnippet": "const { Client } = require('ssh2');\n\nconst config = {\n    host: '37.59.124.82',\n    port: 22,\n    username: 'ubuntu',\n    password: 'CHANGE_ME'\n};\n\nconst conn = new Client();"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/run_redesign.js",
+      "name": "run_redesign.js",
+      "size": 1187,
+      "relative": "run_redesign.js",
+      "contentSnippet": "const fs = require('fs');\nconst path = require('path');\nconst MarketingAgent = require('./Agents_Modules/Marketing_Agent');\n\nconst TARGET_FILE = path.join(__dirname, '../V2_App/src/pages/PublicBooking.jsx');\n\nasync function run() {\n    console.log(\"🎨 Marketing Agent : Redesigning PublicBooking.jsx...\");\n    \n    if (!fs.existsSync(TARGET_FILE)) {"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/setup_chatbot_db.js",
+      "name": "setup_chatbot_db.js",
+      "size": 1532,
+      "relative": "setup_chatbot_db.js",
+      "contentSnippet": "const { Client } = require('ssh2');\nrequire('dotenv').config();\n\nconst conn = new Client();\n\n// SQL command to create table and policy\n// We use \"CREATE TABLE IF NOT EXISTS\" to correspond to the task\nconst sql = `\nCREATE TABLE IF NOT EXISTS chat_messages (\n    id uuid primary key default gen_random_uuid(),"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/setup_chatbot_db_http.js",
+      "name": "setup_chatbot_db_http.js",
+      "size": 1611,
+      "relative": "setup_chatbot_db_http.js",
+      "contentSnippet": "const { createClient } = require('@supabase/supabase-js');\n\n// Config from V2_App/run_migrations.js\nconst SUPABASE_URL = 'https://37.59.124.82.sslip.io';\nconst SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q';\n\nconst supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {\n  auth: {\n    autoRefreshToken: false,\n    persistSession: false"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/telecommande.js",
+      "name": "telecommande.js",
+      "size": 1395,
+      "relative": "telecommande.js",
+      "contentSnippet": "const { Client } = require('ssh2');\n\nconst config = {\n    host: '37.59.124.82',\n    port: 22,\n    username: 'ubuntu',\n    password: 'CHANGE_ME'\n};\n\nconst action = process.argv[2] || 'status'; // Default to status"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/test_network.js",
+      "name": "test_network.js",
+      "size": 375,
+      "relative": "test_network.js",
+      "contentSnippet": "const { runHealthCheck } = require('./Agents_Modules/Network_Overseer');\n\nasync function test() {\n    console.log(\"Testing Network Overseer...\");\n    const report = await runHealthCheck();\n    if (report) {\n        console.log(\"Report generated:\");\n        console.log(report);\n    } else {\n        console.log(\"No issues reported (Report is null/empty).\");"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/test_risk.js",
+      "name": "test_risk.js",
+      "size": 246,
+      "relative": "test_risk.js",
+      "contentSnippet": "const RiskMitigator = require('./Agents_Modules/Risk_Mitigator');\n\nasync function test() {\n    console.log(\"Testing RiskMitigator...\");\n    const report = await RiskMitigator.runRiskAnalysisCycle();\n    console.log(\"Report:\", report);\n}\n\ntest();\n"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/test_watchdog.js",
+      "name": "test_watchdog.js",
+      "size": 854,
+      "relative": "test_watchdog.js",
+      "contentSnippet": "const Watchdog = require('./Agents_Modules/Watchdog_Agent');\n\nasync function test() {\n    console.log(\"🚀 Testing Watchdog Agent...\");\n    \n    // Test simple navigation\n    try {\n        console.log(\"1. Testing Deep Research on Example.com...\");\n        const result = await Watchdog.deepResearch('https://example.com', 'What is this domain for?');\n        "
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/trigger_architect.js",
+      "name": "trigger_architect.js",
+      "size": 299,
+      "relative": "trigger_architect.js",
+      "contentSnippet": "const Architect = require('./Agents_Modules/Agency_Architect');\n(async () => {\n    try {\n        console.log(\"Triggering Architect Cycle...\");\n        const result = await Architect.runArchitectCycle();\n        console.log(\"Result:\", result);\n    } catch (e) {\n        console.error(e);\n    }\n})();"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/trigger_evolution.js",
+      "name": "trigger_evolution.js",
+      "size": 1255,
+      "relative": "trigger_evolution.js",
+      "contentSnippet": "const AgencyArchitect = require('./Agents_Modules/Agency_Architect');\nconst AgentFixer = require('./Agents_Modules/Agent_Fixer');\nconst SharedKnowledge = require('./Agents_Modules/Shared_Knowledge');\n\nasync function triggerEvolution() {\n    console.log(\"🧬 [EVOLUTION] Starting Autonomous Self-Development Cycle...\");\n\n    // 1. Architect: Look for structural improvements\n    console.log(\"🏗️ [ARCHITECT] Scanning for optimization opportunities...\");\n    const architectProposal = await AgencyArchitect.runArchitectCycle();"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/verify_android_api.js",
+      "name": "verify_android_api.js",
+      "size": 872,
+      "relative": "verify_android_api.js",
+      "contentSnippet": "const axios = require('axios');\n\nasync function testApi() {\n    try {\n        console.log(\"Testing POST /api/chat...\");\n        const response = await axios.post('http://localhost:3333/api/chat', {\n            prompt: 'Test de connexion Android'\n        });\n        \n        console.log(\"Status:\", response.status);"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/verify_omni_scan.js",
+      "name": "verify_omni_scan.js",
+      "size": 715,
+      "relative": "verify_omni_scan.js",
+      "contentSnippet": "const GhostShopper = require('./Agents_Modules/Ghost_Shopper');\n\nasync function runTest() {\n    console.log('--- STARTING OMNI SCAN MODE TEST ---');\n    process.env.GHOST_MODE = 'OMNI_SCAN';\n    \n    try {\n        const report = await GhostShopper.runGhostShopperCycle();\n        console.log('--- REPORT ---');\n        console.log(JSON.stringify(report, null, 2));"
+    },
+    {
+      "path": "/home/ubuntu/Documents/EL_Services_Global/Agents_Backend/whitelist_myself.js",
+      "name": "whitelist_myself.js",
+      "size": 744,
+      "relative": "whitelist_myself.js",
+      "contentSnippet": "\nconst CloudflareAgent = require('./Agents_Modules/Cloudflare_Agent');\nconst { exec } = require('child_process');\n\nasync function whitelistSelf() {\n    // 1. Get Public IP\n    const publicIP = await new Promise((resolve) => {\n        exec('curl -s ifconfig.me', (err, stdout) => {\n            if (err) resolve(null);\n            else resolve(stdout.trim());"
+    }
+  ],
+  "agents": [
+    "Agency_Architect",
+    "Agent_Base",
+    "Agent_Connector",
+    "Agent_Fixer",
+    "Agent_Marketing",
+    "Archive_Keeper",
+    "Backend_Agent",
+    "Browser_Server",
+    "Caporal_Agent",
+    "Chat_Agent",
+    "Chief_Advisor_Agent",
+    "Cloudflare_Agent",
+    "Deployment_Agent",
+    "Disposable_Agent",
+    "Drive_Manager",
+    "Frontend_Agent",
+    "config",
+    "index",
+    "interactions",
+    "omni_scan",
+    "probes",
+    "session_utils",
+    "standard_flow",
+    "Ghost_Shopper",
+    "Honeypot_Agent",
+    "Key_Guardian",
+    "Log_Aggregator",
+    "Marketing_Agent",
+    "Network_Overseer",
+    "Orchestrator_Agent",
+    "QA_Agent",
+    "Risk_Mitigator",
+    "Secretary_Agent",
+    "Security_Agent",
+    "Shared_Knowledge",
+    "Tesla_Monitor",
+    "Vault",
+    "Watchdog_Agent"
+  ],
+  "relationships": [
+    {
+      "type": "dependency",
+      "from": "Agency_Architect.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Agency_Architect",
+      "to": "Agent_Base",
+      "file": "Agency_Architect.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Agent_Base.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Agent_Base.js",
+      "to": "Shared_Knowledge.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Agent_Fixer.js",
+      "to": "Log_Aggregator.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Agent_Fixer.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Agent_Fixer.js",
+      "to": "Shared_Knowledge.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "AgentFixer",
+      "to": "Agent_Base",
+      "file": "Agent_Fixer.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Backend_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Backend_Agent",
+      "to": "Agent_Base",
+      "file": "Backend_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Chat_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Chat_Agent.js",
+      "to": "Ghost_Shopper.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Chat_Agent.js",
+      "to": "Cloudflare_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Chat_Agent.js",
+      "to": "Secretary_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Chat_Agent.js",
+      "to": "Chief_Advisor_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Chat_Agent.js",
+      "to": "Shared_Knowledge.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Chat_Agent",
+      "to": "Agent_Base",
+      "file": "Chat_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Chief_Advisor_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "ChiefAdvisorAgent",
+      "to": "Agent_Base",
+      "file": "Chief_Advisor_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Disposable_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Disposable_Agent",
+      "to": "AgentBase",
+      "file": "Disposable_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Frontend_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Frontend_Agent",
+      "to": "Agent_Base",
+      "file": "Frontend_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "index.js",
+      "to": "Browser_Server.js"
+    },
+    {
+      "type": "dependency",
+      "from": "index.js",
+      "to": "config.js"
+    },
+    {
+      "type": "dependency",
+      "from": "index.js",
+      "to": "probes.js"
+    },
+    {
+      "type": "dependency",
+      "from": "index.js",
+      "to": "session_utils.js"
+    },
+    {
+      "type": "dependency",
+      "from": "index.js",
+      "to": "standard_flow.js"
+    },
+    {
+      "type": "dependency",
+      "from": "index.js",
+      "to": "omni_scan.js"
+    },
+    {
+      "type": "dependency",
+      "from": "interactions.js",
+      "to": "config.js"
+    },
+    {
+      "type": "dependency",
+      "from": "omni_scan.js",
+      "to": "config.js"
+    },
+    {
+      "type": "dependency",
+      "from": "omni_scan.js",
+      "to": "session_utils.js"
+    },
+    {
+      "type": "dependency",
+      "from": "omni_scan.js",
+      "to": "interactions.js"
+    },
+    {
+      "type": "dependency",
+      "from": "standard_flow.js",
+      "to": "config.js"
+    },
+    {
+      "type": "dependency",
+      "from": "standard_flow.js",
+      "to": "session_utils.js"
+    },
+    {
+      "type": "dependency",
+      "from": "standard_flow.js",
+      "to": "interactions.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Ghost_Shopper.js",
+      "to": "index.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Honeypot_Agent.js",
+      "to": "Cloudflare_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Key_Guardian.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Key_Guardian.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Key_Guardian",
+      "to": "Agent_Base",
+      "file": "Key_Guardian.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Marketing_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Marketing_Agent",
+      "to": "Agent_Base",
+      "file": "Marketing_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Network_Overseer.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Network_Overseer.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "NetworkOverseer",
+      "to": "Agent_Base",
+      "file": "Network_Overseer.js"
+    },
+    {
+      "type": "dependency",
+      "from": "QA_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "dependency",
+      "from": "QA_Agent.js",
+      "to": "Ghost_Shopper.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "QA_Agent",
+      "to": "Agent_Base",
+      "file": "QA_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Risk_Mitigator.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Risk_Mitigator.js",
+      "to": "Shared_Knowledge.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Risk_Mitigator",
+      "to": "Agent_Base",
+      "file": "Risk_Mitigator.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Secretary_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Secretary_Agent.js",
+      "to": "Drive_Manager.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "SecretaryAgent",
+      "to": "Agent_Base",
+      "file": "Secretary_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Security_Agent.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Security_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Security_Agent.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Security_Agent.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "SecurityAgent",
+      "to": "Agent_Base",
+      "file": "Security_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Watchdog_Agent.js",
+      "to": "Agent_Base.js"
+    },
+    {
+      "type": "inheritance",
+      "from": "Watchdog_Agent",
+      "to": "Agent_Base",
+      "file": "Watchdog_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "index.js",
+      "to": "Ghost_Shopper.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Dashboard_Server.js",
+      "to": "Chief_Advisor_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Archive_Keeper.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Network_Overseer.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Agent_Connector.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Drive_Manager.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Agent_Fixer.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Security_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Chat_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Cloudflare_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Orchestrator_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Agency_Architect.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Key_Guardian.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Honeypot_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Secretary_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Deployment_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Browser_Server.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Risk_Mitigator.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Tesla_Monitor.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Agent_Marketing.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Sentinel_Core.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "dependency",
+      "from": "Worker_Launcher.js",
+      "to": "Ghost_Shopper.js"
+    },
+    {
+      "type": "dependency",
+      "from": "boot_orchestrator.js",
+      "to": "Maintenance_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "boot_orchestrator.js",
+      "to": "Service_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "boot_orchestrator.js",
+      "to": "email_service.js"
+    },
+    {
+      "type": "dependency",
+      "from": "deploy_vps.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "dependency",
+      "from": "fix_admin_access.js",
+      "to": "Vault.js"
+    },
+    {
+      "type": "dependency",
+      "from": "fix_integrity_and_reset.js",
+      "to": "Cloudflare_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "manual_check_ghost_shopper.js",
+      "to": "Ghost_Shopper.js"
+    },
+    {
+      "type": "dependency",
+      "from": "manual_purge.js",
+      "to": "Cloudflare_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "run_redesign.js",
+      "to": "Marketing_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "test_network.js",
+      "to": "Network_Overseer.js"
+    },
+    {
+      "type": "dependency",
+      "from": "test_risk.js",
+      "to": "Risk_Mitigator.js"
+    },
+    {
+      "type": "dependency",
+      "from": "test_watchdog.js",
+      "to": "Watchdog_Agent.js"
+    },
+    {
+      "type": "dependency",
+      "from": "trigger_architect.js",
+      "to": "Agency_Architect.js"
+    },
+    {
+      "type": "dependency",
+      "from": "trigger_evolution.js",
+      "to": "Agency_Architect.js"
+    },
+    {
+      "type": "dependency",
+      "from": "trigger_evolution.js",
+      "to": "Agent_Fixer.js"
+    },
+    {
+      "type": "dependency",
+      "from": "trigger_evolution.js",
+      "to": "Shared_Knowledge.js"
+    },
+    {
+      "type": "dependency",
+      "from": "verify_omni_scan.js",
+      "to": "Ghost_Shopper.js"
+    },
+    {
+      "type": "dependency",
+      "from": "whitelist_myself.js",
+      "to": "Cloudflare_Agent.js"
+    }
+  ]
+}
