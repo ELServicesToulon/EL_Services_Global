@@ -1,0 +1,169 @@
+[2026-01-10T00:49:04.302Z] [ARCHIVE] Backup : 112 fichiers sécurisés.
+[2026-01-10T00:49:37.755Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (98ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Application down / Service non démarré ou n'écoute pas sur le port 8000.
+**Commande de vérification :** `systemctl status mediconvoi-core` (si le service est géré par systemd) ou `ss -tulnp | grep 8000` pour voir si un processus écoute sur ce port.
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Application Mediconvoi Core non démarrée ou crashée (aucun processus n'écoute sur 127.0.0.1:3000).
+
+**Vérification :** `sudo ss -tulnp | grep 3000` (ou `systemctl status <nom_du_service_mediconvoi>` si géré par systemd).
+[2026-01-10T00:55:03.016Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T00:59:39.527Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (734ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Application non démarrée ou plantée. Le service "Mediconvoi Core (API)" n'écoute pas sur le port 8000.
+
+**Commande de vérification :** `systemctl status mediconvoi-core` (ou le nom réel du service) OU `ss -tulpn | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable:** Le service "Mediconvoi Core (Studio)" n'est pas démarré ou a planté. `ECONNREFUSED` sur `127.0.0.1` indique qu'aucune application n'écoute sur ce port.
+
+**Commande de vérification:**
+`systemctl status mediconvoicore.service` (si c'est un service systemd)
+OU
+`ss -tuln | grep 3000` (pour vérifier si quelque chose écoute sur le port 3000)
+[2026-01-10T01:09:39.364Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (89ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Le service "Mediconvoi Core (API)" est arrêté ou n'a pas pu démarrer correctement. `ECONNREFUSED` sur `127.0.0.1` indique qu'aucun processus n'écoute sur le port 8000 localement.
+
+**Commande de vérification :** `systemctl status mediconvoicore.service` (ou le nom exact du service)
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Serveur applicatif down (L'application "Mediconvoi Core" n'est pas démarrée ou a crashé, aucun processus n'écoute sur le port 3000).
+
+**Commande de vérification :** `systemctl status mediconvoi-core` (ou le nom exact du service) OU `lsof -i :3000`
+[2026-01-10T01:10:02.333Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T01:19:38.695Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (103ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable:** Application "Mediconvoi Core (API)" non démarrée ou arrêtée. Le port 8000 n'est pas écouté.
+
+**Vérification:** `systemctl status mediconvoi-core-api.service` (adapter le nom si différent) ou `netstat -tulnp | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable:** Application (Mediconvoi Core) non démarrée, crashée ou n'écoutant pas sur le port 3000. L'OS est joignable mais aucun processus n'accepte la connexion sur ce port.
+
+**Commande de vérification:** `systemctl status mediconvoi-core` (si c'est un service systemd) ou `ss -tulnp | grep 3000`
+[2026-01-10T01:25:02.615Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T01:29:37.285Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (87ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Le service "Mediconvoi Core (API)" n'est pas démarré, a planté ou n'écoute pas sur le port 8000. `ECONNREFUSED` indique que le système d'exploitation a rejeté la connexion car aucun processus n'écoutait sur ce port.
+
+**Vérification :**
+*   `systemctl status mediconvoi-core` (ou le nom exact du service)
+*   `ss -tunlp | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: Cause probable : Le serveur d'application "Mediconvoi Core (Studio)" n'est pas démarré ou a crashé sur `127.0.0.1`. `ECONNREFUSED` indique qu'aucun processus n'écoute sur le port 3000.
+
+Commande de vérification : `systemctl status mediconvoi-core` (ou `ss -tuln | grep 3000`)
+[2026-01-10T01:39:22.872Z] [MARKETING] Trafic: 36 visiteurs. SEO: 85/100
+[2026-01-10T01:39:22.879Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-10T01:39:39.543Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (102ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Le service "Mediconvoi Core (API)" n'est pas démarré ou a crashé et n'écoute pas sur le port 8000.
+
+**Vérification :** `lsof -i :8000` ou `netstat -tulnp | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable:** L'application "Mediconvoi Core (Studio)" est arrêtée/plantée ou n'écoute pas sur le port 3000. `ECONNREFUSED` indique qu'aucun service n'a répondu sur cette adresse:port.
+
+**Commande de vérification:** `systemctl status mediconvoi-core` (si c'est un service systemd) ou `ss -tulnp | grep 3000` pour vérifier si quelque chose écoute sur le port 3000.
+[2026-01-10T01:40:01.851Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T01:49:41.194Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (98ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Le service "Mediconvoi Core (API)" n'est pas démarré ou a crashé sur le serveur local, et n'écoute donc pas sur le port 8000.
+
+**Vérification :** `systemctl status mediconvoi-core.service` (adapter le nom du service si nécessaire) ou `ss -tulnp | grep 8000`.
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Le service "Mediconvoi Core (Studio)" n'est pas démarré ou a planté ; rien n'écoute sur le port 3000.
+
+**Commande de vérification :**
+`systemctl status mediconvoi-core-studio.service` (adapter le nom exact du service si nécessaire) ou `ss -tulnp | grep 3000`
+[2026-01-10T01:55:01.961Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T01:59:37.139Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (108ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: Cause probable : L'application "Mediconvoi Core (API)" n'est pas démarrée ou n'écoute pas sur le port 8000.
+
+Commande de vérification : `ss -tuln | grep 8000` (pour voir si un processus écoute sur ce port) ou `systemctl status <nom_du_service>` (si géré par systemd, ex: `systemctl status mediconvoi-core.service`).
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Le service "Mediconvoi Core (Studio)" n'est pas démarré ou a planté. (ECONNREFUSED signifie qu'aucun processus n'écoute sur ce port).
+
+**Vérification :** `ss -tulpn | grep 3000`
+[2026-01-10T02:09:39.963Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (97ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Serveur down / L'application "Mediconvoi Core (API)" n'est pas démarrée ou n'écoute pas sur le port 8000. `ECONNREFUSED` signifie que la connexion a été activement refusée car rien ne répondait sur cette adresse/port.
+
+**Vérification :**
+`systemctl status mediconvoi-core` (en supposant "mediconvoi-core" est le nom du service)
+ou
+`ss -tuln | grep 8000` (pour vérifier si un processus écoute sur le port 8000)
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable:** Application "Mediconvoi Core (Studio)" non démarrée ou crashée sur le port 3000.
+**Vérification:** `systemctl status mediconvoi-core` (si c'est un service systemd) ou `netstat -tulnp | grep 3000`
+[2026-01-10T02:10:01.772Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T02:19:40.151Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (102ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: Cause probable : Le service "Mediconvoi Core (API)" est **arrêté ou n'écoute pas** sur le port 8000 (application down).
+
+Commande de vérification : `systemctl status mediconvoi-core` (si service systemd) ou `ss -tulnp | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Serveur down (l'application Mediconvoi Core ne tourne pas ou n'écoute pas sur le port 3000). `ECONNREFUSED` signifie que la connexion a atteint l'hôte, mais qu'aucun processus n'a répondu sur le port spécifié.
+
+**Vérification :**
+`systemctl status mediconvoi-core` (si c'est un service systemd)
+ou
+`sudo ss -tulnp | grep 3000` (pour voir si un processus écoute sur le port)
+[2026-01-10T02:25:01.789Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T02:29:38.724Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (108ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Le service Mediconvoi Core (API) est arrêté ou ne tourne pas sur le port 8000. (Application down)
+
+**Vérification :**
+*   `systemctl status mediconvoi-core` (si géré par systemd)
+*   `ss -tulpn | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: Cause probable: **Application non démarrée** (le service "Mediconvoi Core (Studio)" n'écoute pas sur le port 3000).
+
+Vérification: `systemctl status mediconvoi-core` (si c'est un service systemd) ou `lsof -i :3000`.
+[2026-01-10T02:39:22.874Z] [MARKETING] Trafic: 55 visiteurs. SEO: 85/100
+[2026-01-10T02:39:22.879Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-10T02:39:36.731Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (119ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable:** L'application Mediconvoi Core API n'est pas démarrée ou n'écoute pas sur le port 8000. L'OS refuse la connexion car rien n'est en écoute.
+
+**Vérification:**
+`systemctl status mediconvoi-core-api` (ou le nom exact du service)
+`ss -tuln | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable:** Serveur down (le service "Mediconvoi Core" n'est pas démarré ou a crashé).
+
+**Commande de vérification:**
+`systemctl status mediconvoi-core` (ou le nom exact du service)
+[2026-01-10T02:39:44.319Z] [FIXER] Diagnostic V2: 1 problèmes identifiés. Voir C:\Users\ELS\EL_Services_Global\Agents_Backend\diagnostic_2026-01-10_v2.md
+[2026-01-10T02:40:01.810Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T02:49:40.093Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (98ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Le service Mediconvoi Core (API) n'est pas démarré ou a crashé et n'écoute pas sur le port 8000.
+
+**Vérification :** `systemctl status mediconvoi-core` (ou nom exact du service)
+(Alternative : `ss -tulnp | grep 8000` pour vérifier qui écoute sur le port)
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Erreur App (Le service n'est pas démarré ou n'écoute pas sur le port 3000).
+**Commande de vérification :** `systemctl status "Mediconvoi Core (Studio)"`
+[2026-01-10T02:55:02.014Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T02:59:38.540Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (93ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Application "Mediconvoi Core (API)" non démarrée ou en panne sur le port 8000.
+
+**Vérification :** `systemctl status mediconvoi-core-api.service` (ou `systemctl status <nom_exact_du_service>`). Si non systemd : `ss -tlnp | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable:** Le service "Mediconvoi Core (Studio)" n'est pas démarré ou a crashé (ECONNREFUSED sur 127.0.0.1 indique que rien n'écoute sur le port 3000).
+
+**Commande de vérification:**
+*   `systemctl status <nom_du_service_mediconvoi>` (si géré par systemd)
+*   OU `ss -tuln | grep 3000`
+[2026-01-10T03:09:39.825Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (96ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** L'application API (Mediconvoi Core) n'est pas démarrée ou a crashé, ou un pare-feu bloque le port 8000 localement.
+
+**Vérification :**
+1.  `systemctl status mediconvoi-core` (si c'est un service systemd)
+2.  `netstat -tulnp | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Le service "Mediconvoi Core (Studio)" n'est pas démarré ou a crashé et n'écoute plus sur le port 3000. `ECONNREFUSED` indique qu'aucun processus n'accepte de connexions sur cette adresse et ce port.
+
+**Commande de vérification :**
+`systemctl status mediconvoi-core.service` (ou le nom exact du service)
+*OU*
+`sudo ss -tuln | grep 3000` (pour vérifier si quelque chose écoute sur le port 3000)
+[2026-01-10T03:10:02.198Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T03:19:38.538Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (99ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** Le service "Mediconvoi Core (API)" n'est pas démarré ou n'écoute pas sur le port 8000.
+
+**Vérification :** `systemctl status mediconvoi-core-api` (ou le nom exact du service)
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Serveur down (le service n'écoute pas sur le port 3000).
+
+**Commande de vérification :** `ss -ltn | grep 3000`
+[2026-01-10T03:25:02.146Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.
+[2026-01-10T03:29:38.142Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (117ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable:** Le service "Mediconvoi Core (API)" n'est pas démarré ou n'écoute pas sur le port 8000.
+**Vérification:**
+*   `systemctl status mediconvoi-core-api` (ou le nom exact du service)
+*   `ss -tlnp | grep 8000`
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** Le service Mediconvoi Core (Studio) n'est pas démarré ou a planté. (ECONNREFUSED sur 127.0.0.1 indique que le serveur refuse activement la connexion car rien n'écoute sur ce port).
+
+**Vérification :** `systemctl status mediconvoi-core-studio` (ou `ss -tulnp | grep 3000` si le nom du service est incertain ou s'il n'est pas géré par systemd).
+[2026-01-10T03:39:22.889Z] [MARKETING] Trafic: 58 visiteurs. SEO: 85/100
+[2026-01-10T03:39:22.893Z] [SECRETARY] Tout est impeccable à la racine, aucun fichier ne traîne !
+[2026-01-10T03:39:38.246Z] [NETWORK] ⚠️ Mediconvoi Vitrine : ERREUR 403 (336ms)
+🔥 Mediconvoi Core (API) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:8000) -> IA: **Cause probable :** L'application Mediconvoi Core (API) n'est pas démarrée ou a planté, donc rien n'écoute sur le port 8000.
+
+**Commande de vérification :** `systemctl status mediconvoi-core` (adapter le nom du service si différent) ou `ss -tuln | grep 8000`.
+🔥 Mediconvoi Core (Studio) : DOWN (Timeout/Error: connect ECONNREFUSED 127.0.0.1:3000) -> IA: **Cause probable :** L'application "Mediconvoi Core (Studio)" n'est pas démarrée ou a planté, et ne tourne pas sur le port 3000.
+
+**Vérification :** `systemctl status mediconvoi-core-studio` (ajuster le nom du service si différent) ou `ss -tuln | grep 3000`
+[2026-01-10T03:40:01.919Z] [DEPLOY] ❌ Auto-Deployment Failed. Check logs.

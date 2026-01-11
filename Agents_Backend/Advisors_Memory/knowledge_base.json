@@ -1,0 +1,23 @@
+{
+  "error_patterns": {
+    "❌ Auto-Deployment Failed. Check logs.": {
+      "fix": "# 1. Vérifiez l'utilisation du disque sur le serveur de déploiement ou la machine cible :\ndf -h\n\n# 2. Si l'espace est critique (par exemple, < 10% disponible), identifiez et supprimez les fichiers volumineux ou inutiles. Voici des exemples de commandes pour libérer de l'espace :\n\n# Nettoyer les caches des gestionnaires de paquets (pour systèmes basés sur Debian/Ubuntu)\nsudo apt-get clean\n\n# Nettoyer les caches des gestionnaires de paquets (pour systèmes basés sur RHEL/CentOS)\nsudo yum clean all\n\n# Supprimer les fichiers temporaires anciens (ex: plus de 7 jours dans /tmp)\nfind /tmp -type f -atime +7 -delete\n\n# Réduire la taille des journaux systemd (si utilisé)\nsudo journalctl --vacuum-size=500M\n\n# Lister les répertoires les plus lourds dans des zones communes de logs/cache\nsudo du -sh /var/log/* /var/cache/* /opt/* | sort -rh",
+      "confidence": 0.5,
+      "count": 1,
+      "firstSeen": "2026-01-10T00:39:44.191Z"
+    }
+  },
+  "successful_strategies": {
+    "Risk_Mitigation": [
+      {
+        "strategy": "MOYEN: Alerter immédiatement les conducteurs des conditions de vents forts à Toulon, leur conseiller une vigilance accrue, une réduction de vitesse et d'éviter les manœuvres brusques. Rappeler les procédures en cas de perturbation cyber et assurer une surveillance accrue des systèmes.",
+        "timestamp": "2026-01-10T00:25:56.530Z"
+      },
+      {
+        "strategy": "MOYEN: Informer immédiatement tous les chauffeurs opérant à Toulon et ses environs de la présence de vents forts. Leur recommander de réduire leur vitesse, d'augmenter les distances de sécurité, et d'être particulièrement vigilants aux rafales, surtout lors du franchissement de zones découvertes ou d'ouvrages d'art. Suivre l'évolution des conditions météorologiques.",
+        "timestamp": "2026-01-10T00:45:13.544Z"
+      }
+    ]
+  },
+  "bypassed_obstacles": {}
+}

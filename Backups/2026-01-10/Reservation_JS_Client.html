@@ -1,0 +1,859 @@
+<script>
+/**
+ * =================================================================
+ * MODULE JAVASCRIPT - GESTION DU CLIENT
+ * =================================================================
+ * Description: Gère la session client (localStorage) pour pré-remplir
+ * les informations et personnaliser l'accueil.
+ */
+
+const CLE_LOCALSTORAGE_CLIENT = 'sessionClientELServices';
+const CLE_NOTICE_PREMIERE_CONNEXION = 'noticePremiereConnexionELServices';
+const CLIENT_SESSION_OPAQUE_ID_ENABLED = <?!= CLIENT_SESSION_OPAQUE_ID_ENABLED ?>;
+const CLIENT_SESSION_TTL_HOURS = <?!= CLIENT_SESSION_TTL_HOURS ?>;
+const CLIENT_ID_CARTOON_NAMES = <?!= JSON.stringify(CLIENT_ID_CARTOON_NAMES) ?>;
+const EMAIL_CLIENT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+let portailClientLienEnCours = null;
+let releaseConnexionFocus = () => {};
+
+/**
+ * Vérifie si une session client existe dans le localStorage.
+ */
+function verifierSessionClient() {
+  const sessionSauvegardee = localStorage.getItem(CLE_LOCALSTORAGE_CLIENT);
+  if (!sessionSauvegardee) return;
+  try {
+    const session = JSON.parse(sessionSauvegardee);
+    if (CLIENT_SESSION_TTL_HOURS && session.ts) {
+      const ageHeures = (Date.now() - session.ts) / 36e5;
+      if (ageHeures > CLIENT_SESSION_TTL_HOURS) {
+        localStorage.removeItem(CLE_LOCALSTORAGE_CLIENT);
+        return;
+      }
+    }
+    const identifiant = CLIENT_SESSION_OPAQUE_ID_ENABLED ? session.token : session.email;
+    preRemplirInfosClient(identifiant);
+  } catch (e) {
+    localStorage.removeItem(CLE_LOCALSTORAGE_CLIENT);
+  }
+}
+
+/**
+ * Pré-remplit les informations du client s'il est reconnu.
+ * @param {string} identifiant Email ou jeton opaque du client.
+ */
+function preRemplirInfosClient(identifiant, options = {}) {
+  if (!identifiant) return;
+  const prefillEmail = typeof options.prefillEmail === 'string' ? options.prefillEmail.trim() : '';
+
+  const banniere = document.getElementById('banniere-client-reconnu');
+  const nomClientEl = document.getElementById('nom-client-reconnu');
+
+  basculerIndicateurChargement(true);
+  const runner = google.script.run
+    .withSuccessHandler(client => {
+      basculerIndicateurChargement(false);
+      if (client && window.ui) {
+        if (!client.codePostal && window.etat?.codePostalOfficine) {
+          client.codePostal = window.etat.codePostalOfficine;
+        }
+        window.etat.clientReconnu = client;
+        try {
+          document.dispatchEvent(new CustomEvent('els-client-recognized', { detail: client }));
+        } catch (_evtErr) {
+          // ignore dispatch errors (CustomEvent unsupported)
+        }
+        memoriserClientReconnu(client);
+        if (window.ui.champEmailClient) window.ui.champEmailClient.value = client.email || '';
+        if (window.ui.champNomClient) window.ui.champNomClient.value = client.nom || '';
+        if (window.ui.champAdresseClient) window.ui.champAdresseClient.value = client.adresse || '';
+        if (window.ui.champTelephoneClient) window.ui.champTelephoneClient.value = client.telephone || '';
+        if (window.ui.champSiretClient) window.ui.champSiretClient.value = client.siret || '';
+        if (client.codePostal && typeof window.definirCodePostalCourant === 'function') {
+          window.definirCodePostalCourant(client.codePostal);
+        } else if (window.ui.champCodePostalClient) {
+          window.ui.champCodePostalClient.value = window.etat?.codePostalOfficine || '';
+        }
+        if (window.ui.champCodePostalClient) {
+          window.ui.champCodePostalClient.readOnly = true;
+        }
+        if (window.ui.champResidentClient) window.ui.champResidentClient.checked = !!client.resident;
+        if (nomClientEl) nomClientEl.textContent = client.nom;
+        if (banniere) banniere.classList.remove('hidden');
+      } else {
+        // Aucun client trouvé : inviter l'utilisateur à créer une réservation
+        if (typeof afficherNotification === 'function') {
+          afficherNotification(
+            "Aucun compte client trouvé. Veuillez valider une réservation pour créer votre compte.",
+            'info'
+          );
+        }
+        // Afficher le conteneur de finalisation afin de saisir ses informations
+        if (typeof afficherConteneurFinalisation === 'function') {
+          afficherConteneurFinalisation();
+        }
+        if (prefillEmail && window.ui?.champEmailClient) {
+          window.ui.champEmailClient.value = prefillEmail;
+          window.ui.champEmailClient.readOnly = false;
+        }
+      }
+    })
+    .withFailureHandler(afficherErreur);
+
+  if (CLIENT_SESSION_OPAQUE_ID_ENABLED && !identifiant.includes('@')) {
+    runner.rechercherClientParIdentifiant(identifiant);
+  } else {
+    runner.rechercherClientParEmail(identifiant);
+  }
+}
+
+function construireIdentifiantCartoonDepuisDigest(hashArray) {
+  const pool = Array.isArray(CLIENT_ID_CARTOON_NAMES) ? CLIENT_ID_CARTOON_NAMES : [];
+  if (!pool.length) {
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  const poolSize = pool.length;
+  if (!hashArray.length) {
+    return pool[0] + '000';
+  }
+  let seed = 0;
+  for (let i = 0; i < hashArray.length; i++) {
+    seed = (seed * 257 + hashArray[i]) >>> 0;
+  }
+  const baseName = pool[seed % poolSize];
+  let suffixSeed = 0;
+  for (let j = hashArray.length - 1; j >= Math.max(0, hashArray.length - 6); j--) {
+    suffixSeed = (suffixSeed * 131 + hashArray[j]) >>> 0;
+  }
+  const suffixValue = suffixSeed % 46656;
+  const suffix = suffixValue.toString(36).toUpperCase().padStart(3, '0');
+  return baseName + suffix;
+}
+
+async function genererIdentifiantClient(email) {
+  const data = new TextEncoder().encode(String(email).trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return construireIdentifiantCartoonDepuisDigest(hashArray);
+}
+
+async function sauvegarderSessionClient(email) {
+  if (!email) return;
+  const token = await genererIdentifiantClient(email);
+  const session = { token: token, ts: Date.now() };
+  localStorage.setItem(CLE_LOCALSTORAGE_CLIENT, JSON.stringify(session));
+}
+
+/**
+ * M�morise un client reconnu dans le stockage local pour faciliter les futurs acc�s.
+ * @param {{email:string,nom?:string,adresse?:string,telephone?:string,siret?:string,resident?:boolean}} client
+ */
+function memoriserClientReconnu(client) {
+  if (!client || !client.email) return;
+  if (CLIENT_SESSION_OPAQUE_ID_ENABLED) {
+    sauvegarderSessionClient(client.email);
+    return;
+  }
+  const snapshot = {
+    email: client.email || '',
+    nom: client.nom || '',
+    adresse: client.adresse || '',
+    telephone: client.telephone || '',
+    siret: client.siret || '',
+    codePostal: client.codePostal || '',
+    resident: !!client.resident,
+    ts: Date.now()
+  };
+  try {
+    localStorage.setItem(CLE_LOCALSTORAGE_CLIENT, JSON.stringify(snapshot));
+  } catch (err) {
+    console.warn('[ELS] Impossible de m�moriser le client reconnu:', err);
+  }
+}
+
+/**
+ * Réinitialise la session client et vide les champs.
+ */
+function reinitialiserClient() {
+  localStorage.removeItem(CLE_LOCALSTORAGE_CLIENT);
+  window.etat.clientReconnu = null;
+  try {
+    document.dispatchEvent(new Event('els-client-cleared'));
+  } catch (_evtErr) {
+    // ignore dispatch errors
+  }
+  if (window.ui && window.ui.formulaireReservation) {
+    window.ui.formulaireReservation.reset();
+    if (window.ui.champResidentClient) {
+      window.ui.champResidentClient.checked = false;
+    }
+    if (window.ui.champCodePostalClient) {
+      window.ui.champCodePostalClient.value = window.etat?.codePostalOfficine || '';
+      window.ui.champCodePostalClient.readOnly = true;
+    }
+  }
+  const banniere = document.getElementById('banniere-client-reconnu');
+  if (banniere) {
+    banniere.classList.add('hidden');
+  }
+}
+
+function toggleConnexionClientModal(show, options = {}) {
+  const modal = document.getElementById('modale-connexion-client');
+  const form = document.getElementById('formulaire-connexion-reservation');
+  const input = document.getElementById('email-connexion-reservation');
+  if (!modal || !form || !input) return false;
+
+  if (show) {
+    const prefill = typeof options.prefill === 'string' ? options.prefill.trim() : '';
+    if (prefill) {
+      input.value = prefill;
+    }
+    modal.classList.remove('hidden');
+    releaseConnexionFocus = typeof trapFocus === 'function' ? trapFocus(modal) : () => {};
+    const focusInput = () => input.focus();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(focusInput);
+    } else {
+      setTimeout(focusInput, 0);
+    }
+  } else {
+    modal.classList.add('hidden');
+    releaseConnexionFocus();
+    releaseConnexionFocus = () => {};
+    if (options.reset !== false) {
+      form.reset();
+    }
+    input.blur();
+  }
+  return true;
+}
+
+function initialiserModaleConnexionClient() {
+  const modal = document.getElementById('modale-connexion-client');
+  const form = document.getElementById('formulaire-connexion-reservation');
+  const input = document.getElementById('email-connexion-reservation');
+  const btnAnnuler = document.getElementById('btn-annuler-connexion-client');
+  const btnFermer = document.getElementById('btn-fermer-connexion-client');
+  if (!modal || !form || !input) return;
+
+  const fermer = () => toggleConnexionClientModal(false);
+
+  btnAnnuler?.addEventListener('click', fermer);
+  btnFermer?.addEventListener('click', fermer);
+  modal.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      fermer();
+    }
+  });
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      fermer();
+    }
+  });
+  input.addEventListener('input', () => input.setCustomValidity(''));
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    const emailTrim = input.value.trim();
+    if (!EMAIL_CLIENT_REGEX.test(emailTrim)) {
+      input.setCustomValidity('Merci de renseigner une adresse email valide.');
+      input.reportValidity();
+      input.setCustomValidity('');
+      return;
+    }
+    fermer();
+    preRemplirInfosClient(emailTrim, { prefillEmail: emailTrim });
+  });
+}
+
+function initialiserAdresseAutocompleteClient() {
+  if (!window || !window.etat || !window.etat.flags || window.etat.flags.adresseAutocompleteEnabled !== true) {
+    return;
+  }
+  if (!window.ui) return;
+  const input = window.ui.champAdresseClient;
+  const list = window.ui.adresseSuggestionsClient;
+  if (!input || !list) return;
+  if (input.dataset.autocompleteInitialized === 'true') return;
+
+  const parent = list.parentElement;
+  if (!parent) return;
+
+  input.dataset.autocompleteInitialized = 'true';
+
+  const MIN_CHARS = 3;
+  let debounceId = null;
+  let activeIndex = -1;
+  let suggestions = [];
+  let lastQuery = '';
+  let abortController = null;
+
+  const setExpanded = (expanded) => {
+    input.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  };
+
+  const clearActiveDescendant = () => {
+    input.removeAttribute('aria-activedescendant');
+  };
+
+  const hideSuggestions = () => {
+    suggestions = [];
+    activeIndex = -1;
+    list.innerHTML = '';
+    list.classList.add('hidden');
+    setExpanded(false);
+    clearActiveDescendant();
+  };
+
+  const renderMessage = (message) => {
+    suggestions = [];
+    activeIndex = -1;
+    list.innerHTML = '';
+    clearActiveDescendant();
+    if (!message) {
+      hideSuggestions();
+      return;
+    }
+    const info = document.createElement('div');
+    info.className = 'adresse-suggestion adresse-suggestion--info';
+    info.textContent = message;
+    list.appendChild(info);
+    list.classList.remove('hidden');
+    setExpanded(true);
+  };
+
+  const buildSuggestionId = (index) => 'client-adresse-suggestion-' + index;
+
+  const updateHighlight = (index) => {
+    const nodes = Array.prototype.slice.call(list.querySelectorAll('[data-adresse-index]'));
+    nodes.forEach(node => node.classList.remove('is-active'));
+    activeIndex = index;
+    if (index >= 0 && nodes[index]) {
+      const node = nodes[index];
+      const nodeId = node.id || buildSuggestionId(index);
+      node.id = nodeId;
+      node.classList.add('is-active');
+      input.setAttribute('aria-activedescendant', nodeId);
+      if (typeof node.scrollIntoView === 'function') {
+        node.scrollIntoView({ block: 'nearest' });
+      }
+    } else {
+      clearActiveDescendant();
+    }
+  };
+
+  const selectSuggestion = (index) => {
+    const feature = suggestions[index];
+    if (!feature) return;
+    const props = feature.properties || {};
+    const label = (props.label || '').trim();
+    const fallback = (props.name || '').trim();
+    let value = label || fallback;
+    if (!value) {
+      const cityParts = [];
+      if (props.postcode) cityParts.push(props.postcode);
+      if (props.city) cityParts.push(props.city);
+      value = cityParts.join(' ');
+    }
+    if (value) {
+      input.value = value;
+      lastQuery = value.trim();
+    }
+    let coords = null;
+    if (feature.geometry && Array.isArray(feature.geometry.coordinates)) {
+      coords = {
+        lon: Number(feature.geometry.coordinates[0]),
+        lat: Number(feature.geometry.coordinates[1])
+      };
+    }
+    window.etat.adresseSuggestion = {
+      label: value,
+      postcode: props.postcode || '',
+      city: props.city || '',
+      context: props.context || '',
+      coordinates: coords
+    };
+    hideSuggestions();
+  };
+
+  const renderSuggestions = (features) => {
+    suggestions = features;
+    activeIndex = -1;
+    list.innerHTML = '';
+    clearActiveDescendant();
+    if (!features.length) {
+      hideSuggestions();
+      return;
+    }
+    features.forEach((feature, index) => {
+      const props = feature.properties || {};
+      const option = document.createElement('div');
+      option.className = 'adresse-suggestion';
+      option.dataset.adresseIndex = String(index);
+      option.setAttribute('role', 'option');
+      option.id = buildSuggestionId(index);
+
+      const primary = document.createElement('div');
+      primary.className = 'adresse-suggestion__primary';
+      const primaryValue = (props.name || props.label || '') + '';
+      primary.textContent = primaryValue.trim();
+      option.appendChild(primary);
+
+      const cityParts = [];
+      if (props.postcode) cityParts.push(props.postcode);
+      if (props.city) cityParts.push(props.city);
+      let context = '';
+      if (props.context) {
+        const ctxParts = props.context.split(',');
+        if (ctxParts.length) {
+          context = ctxParts[0].trim();
+        }
+      }
+      let secondaryText = '';
+      if (cityParts.length && context) {
+        secondaryText = cityParts.join(' ') + ' · ' + context;
+      } else if (cityParts.length) {
+        secondaryText = cityParts.join(' ');
+      } else {
+        secondaryText = context;
+      }
+      if (secondaryText) {
+        const secondary = document.createElement('div');
+        secondary.className = 'adresse-suggestion__secondary';
+        secondary.textContent = secondaryText;
+        option.appendChild(secondary);
+      }
+
+      list.appendChild(option);
+    });
+    list.classList.remove('hidden');
+    setExpanded(true);
+  };
+
+  const fetchSuggestions = (query) => {
+    let codePostal = '';
+    if (typeof window.obtenirCodePostalCourant === 'function') {
+      codePostal = window.obtenirCodePostalCourant() || '';
+    } else if (window.etat && window.etat.codePostalOfficine) {
+      codePostal = window.etat.codePostalOfficine;
+    }
+    if (!codePostal) {
+      renderMessage("Validez votre code postal pour afficher des suggestions.");
+      return;
+    }
+    const url =
+      'https://api-adresse.data.gouv.fr/search/?limit=5&autocomplete=1&postcode=' +
+      encodeURIComponent(codePostal) +
+      '&q=' +
+      encodeURIComponent(query);
+    if (abortController && typeof abortController.abort === 'function') {
+      abortController.abort();
+    }
+    abortController = typeof AbortController === 'function' ? new AbortController() : null;
+    const options = abortController ? { signal: abortController.signal } : {};
+    fetch(url, options)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data || !Array.isArray(data.features) || !data.features.length) {
+          renderMessage("Aucune adresse trouvée pour ce code postal.");
+          return;
+        }
+        renderSuggestions(data.features.slice(0, 5));
+      })
+      .catch(err => {
+        if (err && err.name === 'AbortError') return;
+        console.warn('[ELS] Autocomplete adresse erreur', err);
+        renderMessage("Suggestions d'adresse indisponibles.");
+      });
+  };
+
+  const debouncedFetch = (query) => {
+    if (debounceId) clearTimeout(debounceId);
+    debounceId = setTimeout(() => fetchSuggestions(query), 250);
+  };
+
+  input.addEventListener('input', (event) => {
+    if (debounceId) clearTimeout(debounceId);
+    const value = (event.target.value || '').trim();
+    window.etat.adresseSuggestion = null;
+    if (!value || value.length < MIN_CHARS) {
+      hideSuggestions();
+      lastQuery = value;
+      return;
+    }
+    if (value === lastQuery) {
+      return;
+    }
+    lastQuery = value;
+    debouncedFetch(value);
+  });
+
+  input.addEventListener('keydown', (event) => {
+    if (list.classList.contains('hidden') || !suggestions.length) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const next = activeIndex + 1 >= suggestions.length ? 0 : activeIndex + 1;
+      updateHighlight(next);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const prev = activeIndex <= 0 ? suggestions.length - 1 : activeIndex - 1;
+      updateHighlight(prev);
+    } else if (event.key === 'Enter') {
+      if (activeIndex >= 0) {
+        event.preventDefault();
+        selectSuggestion(activeIndex);
+      }
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      hideSuggestions();
+    }
+  });
+
+  list.addEventListener('mousemove', (event) => {
+    const option = event.target.closest('[data-adresse-index]');
+    if (!option) return;
+    const idx = Number(option.dataset.adresseIndex);
+    if (!Number.isNaN(idx) && idx !== activeIndex) {
+      updateHighlight(idx);
+    }
+  });
+
+  list.addEventListener('mousedown', (event) => {
+    const option = event.target.closest('[data-adresse-index]');
+    if (!option) return;
+    event.preventDefault();
+    const idx = Number(option.dataset.adresseIndex);
+    if (!Number.isNaN(idx)) {
+      selectSuggestion(idx);
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!parent.contains(event.target)) {
+      hideSuggestions();
+    }
+  });
+
+  document.addEventListener('els-code-postal-change', () => {
+    window.etat.adresseSuggestion = null;
+    hideSuggestions();
+    lastQuery = '';
+  });
+
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-autocomplete', 'list');
+  input.setAttribute('aria-expanded', 'false');
+  input.setAttribute('aria-controls', list.id);
+}
+
+function notifierPremiereConnexionClient() {
+  if (window.etat?.clientReconnu) {
+    return false;
+  }
+  let sessionActive = false;
+  try {
+    sessionActive = Boolean(localStorage.getItem(CLE_LOCALSTORAGE_CLIENT));
+  } catch (_err) {
+    sessionActive = false;
+  }
+  if (sessionActive) {
+    return false;
+  }
+  let dejaInforme = window.__elsPremiereConnexionNoticeShown === true;
+  if (!dejaInforme) {
+    try {
+      dejaInforme = localStorage.getItem(CLE_NOTICE_PREMIERE_CONNEXION) === '1';
+    } catch (_err) {
+      dejaInforme = false;
+    }
+  }
+  if (dejaInforme) {
+    return false;
+  }
+  const message = "Astuce : après votre première réservation validée, votre espace client se personnalise automatiquement. Vous pouvez déjà vous connecter pour préparer vos informations.";
+  if (typeof afficherNotification === 'function') {
+    afficherNotification(message, 'info');
+  } else if (typeof alert === 'function') {
+    alert(message);
+  }
+  window.__elsPremiereConnexionNoticeShown = true;
+  try {
+    localStorage.setItem(CLE_NOTICE_PREMIERE_CONNEXION, '1');
+  } catch (_err) { /* ignore stockage indisponible */ }
+  return true;
+}
+
+/**
+ * Demande une connexion client via un prompt et pré-remplit les informations.
+ */
+function demanderConnexionClient() {
+  notifierPremiereConnexionClient();
+  const prefill =
+    (window.ui?.champEmailClient && window.ui.champEmailClient.value) ||
+    (window.etat?.clientReconnu && window.etat.clientReconnu.email) ||
+    (window.CLIENT_PARAMS && window.CLIENT_PARAMS.email) ||
+    '';
+  if (toggleConnexionClientModal(true, { prefill })) {
+    return;
+  }
+
+  const email = window.prompt('Entrez votre adresse email pour vous connecter à votre espace client :');
+  if (!email) return;
+  const emailTrim = email.trim();
+  if (!EMAIL_CLIENT_REGEX.test(emailTrim)) {
+    alert('Merci de renseigner une adresse email valide.');
+    return;
+  }
+  preRemplirInfosClient(emailTrim, { prefillEmail: emailTrim });
+}
+
+function getInlinePortalElements() {
+  return {
+    card: document.getElementById('client-espace-inline'),
+    status: document.getElementById('client-espace-inline-status'),
+    wrapper: document.getElementById('client-espace-inline-frame-wrapper'),
+    iframe: document.getElementById('client-espace-inline-frame'),
+    reloadBtn: document.getElementById('btn-recharger-espace-client')
+  };
+}
+
+function construireLienEspaceClientInline(portalUrl, cacheBuster) {
+  if (!portalUrl || portalUrl === '#') return '';
+  try {
+    const urlObj = new URL(portalUrl, window.location.origin);
+    urlObj.searchParams.set('embed', '1');
+    if (cacheBuster) {
+      urlObj.searchParams.set('_ts', cacheBuster);
+    }
+    return urlObj.toString();
+  } catch (_err) {
+    let finalUrl = portalUrl;
+    const separator = finalUrl.includes('?') ? '&' : '?';
+    finalUrl += `${separator}embed=1`;
+    if (cacheBuster) {
+      finalUrl += `&_ts=${cacheBuster}`;
+    }
+    return finalUrl;
+  }
+}
+
+function chargerEspaceClientInline(portalUrl, options = {}) {
+  const { card, wrapper, iframe, status, reloadBtn } = getInlinePortalElements();
+  if (!card || !wrapper || !iframe || !status) return;
+
+  if (!portalUrl || portalUrl === '#') {
+    wrapper.classList.add('hidden');
+    reloadBtn?.classList.add('hidden');
+    iframe.classList.remove('client-portal-error', 'client-portal-loading');
+    if (iframe.__elsPortalLoadTimeout) {
+      clearTimeout(iframe.__elsPortalLoadTimeout);
+      iframe.__elsPortalLoadTimeout = null;
+    }
+    status.classList.remove('is-error');
+    status.textContent = "Votre espace client sera disponible après validation de votre première réservation.";
+    status.classList.remove('hidden');
+    return;
+  }
+
+  const finalUrl = construireLienEspaceClientInline(portalUrl, options.cacheBuster);
+  if (!finalUrl) return;
+
+  wrapper.classList.remove('hidden');
+  reloadBtn?.classList.remove('hidden');
+  status.classList.remove('is-error');
+  status.textContent = options.statusMessage || 'Chargement de votre espace client…';
+  status.classList.remove('hidden');
+
+  if (iframe.__elsPortalLoadHandler) {
+    iframe.removeEventListener('load', iframe.__elsPortalLoadHandler);
+  }
+  if (iframe.__elsPortalLoadTimeout) {
+    clearTimeout(iframe.__elsPortalLoadTimeout);
+    iframe.__elsPortalLoadTimeout = null;
+  }
+  iframe.classList.remove('client-portal-error');
+  iframe.__elsPortalLoadHandler = () => {
+    if (iframe.__elsPortalLoadTimeout) {
+      clearTimeout(iframe.__elsPortalLoadTimeout);
+      iframe.__elsPortalLoadTimeout = null;
+    }
+    iframe.classList.remove('client-portal-loading');
+    status.classList.add('hidden');
+    iframe.__elsPortalLoadHandler = null;
+  };
+  iframe.addEventListener('load', iframe.__elsPortalLoadHandler);
+
+  iframe.dataset.portalBaseUrl = portalUrl;
+  iframe.dataset.email = options.email || '';
+  iframe.classList.add('client-portal-loading');
+  iframe.src = finalUrl;
+  iframe.__elsPortalLoadTimeout = window.setTimeout(() => {
+    if (!iframe.classList.contains('client-portal-loading')) return;
+    iframe.classList.remove('client-portal-loading');
+    iframe.classList.add('client-portal-error');
+    status.textContent = "Impossible d'afficher l'espace client. Cliquez sur « Actualiser » ou utilisez le lien reçu par email.";
+    status.classList.remove('hidden');
+    status.classList.add('is-error');
+  }, 7000);
+}
+
+function mettreAJourCarteEspaceClient(client, portalUrl) {
+  const { card, wrapper, iframe, reloadBtn, status } = getInlinePortalElements();
+  if (!card) return;
+
+  if (!client || !client.email) {
+    card.classList.add('hidden');
+    status?.classList.remove('hidden');
+    if (status) {
+      status.textContent = "Validez votre première réservation puis utilisez « Se connecter » pour activer votre espace client.";
+      status.classList.remove('is-error');
+    }
+    wrapper?.classList.add('hidden');
+    reloadBtn?.classList.add('hidden');
+    if (iframe) {
+      iframe.removeAttribute('src');
+      delete iframe.dataset.portalBaseUrl;
+      delete iframe.dataset.email;
+      iframe.classList.remove('client-portal-error', 'client-portal-loading');
+      if (iframe.__elsPortalLoadTimeout) {
+        clearTimeout(iframe.__elsPortalLoadTimeout);
+        iframe.__elsPortalLoadTimeout = null;
+      }
+      if (iframe.__elsPortalLoadHandler) {
+        iframe.removeEventListener('load', iframe.__elsPortalLoadHandler);
+        iframe.__elsPortalLoadHandler = null;
+      }
+    }
+    return;
+  }
+
+  card.classList.remove('hidden');
+  if (
+    iframe &&
+    iframe.dataset.portalBaseUrl &&
+    iframe.dataset.portalBaseUrl === portalUrl &&
+    portalUrl &&
+    portalUrl !== '#' &&
+    !iframe.classList.contains('client-portal-error')
+  ) {
+    status?.classList.add('hidden');
+    status?.classList.remove('is-error');
+    wrapper?.classList.remove('hidden');
+    reloadBtn?.classList.remove('hidden');
+    return;
+  }
+
+  chargerEspaceClientInline(portalUrl, {
+    email: client.email,
+    statusMessage: 'Chargement de votre espace client…'
+  });
+}
+
+function rechargerEspaceClientInline() {
+  const { iframe } = getInlinePortalElements();
+  if (!iframe || !iframe.dataset.portalBaseUrl) return;
+  chargerEspaceClientInline(iframe.dataset.portalBaseUrl, {
+    email: iframe.dataset.email || '',
+    cacheBuster: Date.now().toString(36),
+    statusMessage: 'Actualisation de votre espace client…'
+  });
+}
+
+/**
+ * Met à jour le lien "Mon Espace Client" selon l'état de connexion.
+ * @param {{email?:string}|null} client
+ */
+function mettreAJourLienEspaceClient(client) {
+  const lien = document.getElementById('btn-espace-client');
+  const btnConnexion = document.getElementById('btn-connecter-client');
+  const baseUrl = (window.configServeur && window.configServeur.appUrl) || '';
+  const defaultHref = baseUrl ? `${baseUrl}?page=gestion` : '#';
+
+  if (!lien) return;
+
+  if (!client || !client.email) {
+    portailClientLienEnCours = null;
+    lien.href = defaultHref;
+    if (lien.dataset) {
+      delete lien.dataset.portalUrl;
+    }
+    btnConnexion?.classList.remove('hidden');
+    mettreAJourCarteEspaceClient(null, null);
+    return;
+  }
+
+  btnConnexion?.classList.add('hidden');
+  portailClientLienEnCours = client.email;
+  const appliquerLien = (url) => {
+    if (!lien) return;
+    const href = url || defaultHref;
+    lien.href = href;
+    if (lien.dataset) {
+      lien.dataset.portalUrl = href;
+    }
+    mettreAJourCarteEspaceClient(client, href);
+  };
+
+  const fallback = () => {
+    if (portailClientLienEnCours !== client.email) return;
+    if (!defaultHref || defaultHref === '#') {
+      appliquerLien('#');
+      return;
+    }
+    const separator = defaultHref.includes('?') ? '&' : '?';
+    appliquerLien(`${defaultHref}${separator}email=${encodeURIComponent(client.email)}`);
+  };
+
+  fallback();
+
+  if (google && google.script && google.script.run && typeof google.script.run.client_getPortalLink === 'function') {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (portailClientLienEnCours !== client.email) return;
+        if (res && res.success && res.url) {
+          appliquerLien(res.url);
+        } else {
+          fallback();
+        }
+      })
+      .withFailureHandler(() => fallback())
+      .client_getPortalLink(client.email);
+  } else {
+    fallback();
+  }
+}
+
+initialiserModaleConnexionClient();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialiserAdresseAutocompleteClient);
+} else {
+  initialiserAdresseAutocompleteClient();
+}
+
+document.addEventListener('els-client-recognized', (event) => {
+  window.etat.adresseSuggestion = null;
+  mettreAJourLienEspaceClient(event?.detail || window.etat?.clientReconnu || null);
+});
+
+document.addEventListener('els-client-cleared', () => {
+  window.etat.adresseSuggestion = null;
+  mettreAJourLienEspaceClient(null);
+});
+
+mettreAJourLienEspaceClient(window.etat?.clientReconnu || null);
+</script>
+
+
+
+

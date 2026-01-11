@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>EL Services Back-Office</title>
+    <?!= include('Styles'); ?>
+    <?!= include('Client_CSS'); ?>
+    <?!= include('Reservation_CSS'); ?>
+    <?!= include('Admin_CSS'); ?>
+  </head>
+  <body>
+    <div id="app-container">
+      <div id="loader">Chargement de l'application...</div>
+    </div>
+
+    <?!= include('App_JS'); ?>
+    <?!= include('Render_JS'); ?>
+    <?!= include('Client_JS'); ?>
+    <?!= include('Reservation_JS_Principal'); ?>
+    <?!= include('Reservation_JS_Panier'); ?>
+    <?!= include('Reservation_JS_Devis'); ?>
+    <?!= include('Reservation_JS_Tournee'); ?>
+    <?!= include('Reservation_JS_UI_Elements'); ?>
+    <?!= include('Reservation_JS_Calendrier'); ?>
+    <?!= include('Admin_JS'); ?>
+    <?!= include('whatsapp_js'); ?>
+    
+    <script>
+      // Initialisation après chargement (si nécessaire)
+      document.addEventListener('DOMContentLoaded', () => {
+        // Logique pour déterminer quelle interface charger (Admin, Client, etc.)
+        // La fonction doGet(e) dans Code.gs doit gérer le rendu initial.
+        const loader = document.getElementById('loader');
+        if (loader) {
+          loader.remove();
+        }
+      });
+    </script>
+  </body>
+</html>
